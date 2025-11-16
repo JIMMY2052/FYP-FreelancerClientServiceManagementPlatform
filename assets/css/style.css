@@ -226,14 +226,13 @@ select.form-control {
     .login-card {
         padding: 30px 20px;
     }
-    
+
     .welcome-text {
         font-size: 20px;
     }
-    
+
     .form-options {
         flex-direction: column;
         align-items: flex-start;
     }
 }
-

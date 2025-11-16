@@ -237,7 +237,7 @@ body.profile-page {
     width: 120px;
     height: 120px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -264,7 +264,7 @@ body.profile-page {
 
 .profile-tagline {
     font-size: 16px;
-    color: #7c3aed;
+    color: #22c55e;
     margin: 0 0 15px 0;
     font-weight: 500;
 }
@@ -285,7 +285,7 @@ body.profile-page {
 
 .edit-profile-btn {
     padding: 8px 16px;
-    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
     color: white;
     text-decoration: none;
     border-radius: 8px;
@@ -297,9 +297,9 @@ body.profile-page {
 }
 
 .edit-profile-btn:hover {
-    background: linear-gradient(135deg, #6d28d9 0%, #5b21b6 100%);
+    background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
     transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(124, 58, 237, 0.3);
+    box-shadow: 0 4px 8px rgba(34, 197, 94, 0.3);
 }
 
 .profile-description {
@@ -335,8 +335,8 @@ body.profile-page {
 .skill-tag {
     display: inline-block;
     padding: 8px 16px;
-    background-color: #ede9fe;
-    color: #7c3aed;
+    background-color: #dbeafe;
+    color: #22c55e;
     border-radius: 20px;
     font-size: 14px;
     font-weight: 500;
@@ -393,7 +393,7 @@ body.profile-page {
 .stat-value {
     font-size: 28px;
     font-weight: 700;
-    color: #7c3aed;
+    color: #22c55e;
     margin-bottom: 5px;
 }
 
@@ -501,7 +501,7 @@ body.profile-page {
 }
 
 .no-projects a {
-    color: #7c3aed;
+    color: #22c55e;
     text-decoration: none;
     font-weight: 500;
 }
@@ -528,7 +528,7 @@ body.profile-page {
 }
 
 .back-btn {
-    color: #7c3aed;
+    color: #22c55e;
     text-decoration: none;
     font-size: 14px;
     font-weight: 500;
@@ -536,7 +536,7 @@ body.profile-page {
 }
 
 .back-btn:hover {
-    color: #6d28d9;
+    color: #16a34a;
     text-decoration: underline;
 }
 
@@ -630,8 +630,8 @@ body.profile-page {
     align-items: center;
     gap: 8px;
     padding: 8px 12px;
-    background-color: #ede9fe;
-    color: #7c3aed;
+    background-color: #dbeafe;
+    color: #22c55e;
     border-radius: 20px;
     font-size: 14px;
     font-weight: 500;
@@ -644,7 +644,7 @@ body.profile-page {
 .skill-remove-btn {
     background: none;
     border: none;
-    color: #7c3aed;
+    color: #22c55e;
     font-size: 20px;
     cursor: pointer;
     padding: 0;
@@ -658,14 +658,14 @@ body.profile-page {
 }
 
 .skill-remove-btn:hover {
-    background-color: rgba(124, 58, 237, 0.1);
+    background-color: rgba(34, 197, 94, 0.1);
 }
 
 .btn-add-skill {
     padding: 10px 20px;
     background-color: white;
-    color: #7c3aed;
-    border: 1px solid #7c3aed;
+    color: #22c55e;
+    border: 1px solid #22c55e;
     border-radius: 20px;
     font-size: 14px;
     font-weight: 500;
@@ -674,7 +674,7 @@ body.profile-page {
 }
 
 .btn-add-skill:hover {
-    background-color: #7c3aed;
+    background-color: #22c55e;
     color: white;
 }
 
@@ -798,7 +798,7 @@ body.profile-page {
 }
 
 .new-skill-item {
-    color: #7c3aed;
+    color: #22c55e;
     font-weight: 500;
     border-top: 2px solid #e5e7eb;
     margin-top: 4px;
@@ -806,7 +806,7 @@ body.profile-page {
 }
 
 .new-skill-icon {
-    color: #7c3aed;
+    color: #22c55e;
     font-weight: 600;
     font-size: 18px;
     width: 20px;
