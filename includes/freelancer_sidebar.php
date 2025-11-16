@@ -2,10 +2,17 @@
 // Get current page for active state
 $current_page = basename($_SERVER['PHP_SELF']);
 ?>
+<style>
+    .logo-img {
+        width: 40px;
+        height: 40px;
+        object-fit: contain;
+    }
+</style>
 <!-- Sidebar -->
 <aside class="sidebar">
     <div class="sidebar-logo">
-        <div class="logo-icon">🔧</div>
+        <img src="../images/logo.png" alt="WorkSnyc Logo" class="logo-img">
         <h1 class="logo-text">WorkSnyc</h1>
     </div>
     <nav class="sidebar-nav">
@@ -25,7 +32,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
             <span class="nav-icon">💬</span>
             <span>Messages</span>
         </a>
-        <a href="agreements.php" class="nav-item <?php echo ($current_page === 'agreement.php') ? 'active' : ''; ?>">
+        <a href="agreement.php" class="nav-item <?php echo ($current_page === 'agreement.php') ? 'active' : ''; ?>">
             <span class="nav-icon">📄</span>
             <span>Agreements</span>
         </a>
