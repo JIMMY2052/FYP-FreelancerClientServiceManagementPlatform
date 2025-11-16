@@ -72,21 +72,23 @@ $conn->close();
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile - WorkSnyc</title>
-    <link rel="stylesheet" href="assets/css/style.css">
-    <link rel="stylesheet" href="assets/css/dashboard.css">
-    <link rel="stylesheet" href="assets/css/profile.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="stylesheet" href="/assets/css/dashboard.css">
+    <link rel="stylesheet" href="/assets/css/profile.css">
 </head>
+
 <body class="profile-page">
     <div class="profile-layout">
-        <?php include 'includes/client_sidebar.php'; ?>
+        <?php include '../includes/client_sidebar.php'; ?>
 
         <!-- Main Content -->
         <main class="main-content">
-            <?php include 'includes/header.php'; ?>
+            <?php include '../includes/header.php'; ?>
 
             <!-- Profile Section -->
             <div class="profile-card">
@@ -161,5 +163,5 @@ $conn->close();
         </main>
     </div>
 </body>
-</html>
 
+</html>

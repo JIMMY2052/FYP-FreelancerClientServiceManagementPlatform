@@ -49,22 +49,24 @@ $conn->close();
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Profile - WorkSnyc</title>
-    <link rel="stylesheet" href="assets/css/style.css">
-    <link rel="stylesheet" href="assets/css/dashboard.css">
-    <link rel="stylesheet" href="assets/css/profile.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="stylesheet" href="/assets/css/dashboard.css">
+    <link rel="stylesheet" href="/assets/css/profile.css">
     <script src="assets/js/add_skill.js" defer></script>
 </head>
+
 <body class="profile-page">
     <div class="profile-layout">
-        <?php include 'includes/freelancer_sidebar.php'; ?>
+        <?php include '../includes/freelancer_sidebar.php'; ?>
 
         <!-- Main Content -->
         <main class="main-content">
-            <?php include 'includes/header.php'; ?>
+            <?php include '../includes/header.php'; ?>
 
             <!-- Edit Profile Form -->
             <div class="profile-card">
@@ -75,87 +77,82 @@ $conn->close();
 
                 <?php if (isset($_SESSION['error'])): ?>
                     <div class="error-message">
-                        <?php 
-                            echo htmlspecialchars($_SESSION['error']);
-                            unset($_SESSION['error']);
+                        <?php
+                        echo htmlspecialchars($_SESSION['error']);
+                        unset($_SESSION['error']);
                         ?>
                     </div>
                 <?php endif; ?>
 
                 <?php if (isset($_SESSION['success'])): ?>
                     <div class="success-message">
-                        <?php 
-                            echo htmlspecialchars($_SESSION['success']);
-                            unset($_SESSION['success']);
+                        <?php
+                        echo htmlspecialchars($_SESSION['success']);
+                        unset($_SESSION['success']);
                         ?>
                     </div>
                 <?php endif; ?>
 
                 <form action="edit_profile_process.php" method="POST" class="edit-profile-form">
                     <input type="hidden" name="user_type" value="freelancer">
-                    
+
                     <!-- Personal Information Section -->
                     <div class="form-section">
                         <h3 class="section-title">Personal Information</h3>
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="first_name">First Name *</label>
-                                <input 
-                                    type="text" 
-                                    id="first_name" 
-                                    name="first_name" 
-                                    class="form-control" 
+                                <input
+                                    type="text"
+                                    id="first_name"
+                                    name="first_name"
+                                    class="form-control"
                                     value="<?php echo htmlspecialchars($freelancer['FirstName'] ?: ''); ?>"
-                                    required
-                                >
+                                    required>
                             </div>
 
                             <div class="form-group">
                                 <label for="last_name">Last Name *</label>
-                                <input 
-                                    type="text" 
-                                    id="last_name" 
-                                    name="last_name" 
-                                    class="form-control" 
+                                <input
+                                    type="text"
+                                    id="last_name"
+                                    name="last_name"
+                                    class="form-control"
                                     value="<?php echo htmlspecialchars($freelancer['LastName'] ?: ''); ?>"
-                                    required
-                                >
+                                    required>
                             </div>
                         </div>
 
                         <div class="form-group">
                             <label for="email">Email Address *</label>
-                            <input 
-                                type="email" 
-                                id="email" 
-                                name="email" 
-                                class="form-control" 
+                            <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                class="form-control"
                                 value="<?php echo htmlspecialchars($freelancer['Email']); ?>"
-                                required
-                            >
+                                required>
                         </div>
 
                         <div class="form-group">
                             <label for="phone">Phone Number</label>
-                            <input 
-                                type="text" 
-                                id="phone" 
-                                name="phone" 
-                                class="form-control" 
+                            <input
+                                type="text"
+                                id="phone"
+                                name="phone"
+                                class="form-control"
                                 value="<?php echo htmlspecialchars($freelancer['PhoneNo'] ?: ''); ?>"
-                                placeholder="e.g., +60 12-345 6789"
-                            >
+                                placeholder="e.g., +60 12-345 6789">
                         </div>
 
                         <div class="form-group">
                             <label for="address">Address</label>
-                            <textarea 
-                                id="address" 
-                                name="address" 
-                                class="form-control" 
+                            <textarea
+                                id="address"
+                                name="address"
+                                class="form-control"
                                 rows="3"
-                                placeholder="Your address"
-                            ><?php echo htmlspecialchars($freelancer['Address'] ?: ''); ?></textarea>
+                                placeholder="Your address"><?php echo htmlspecialchars($freelancer['Address'] ?: ''); ?></textarea>
                         </div>
                     </div>
 
@@ -164,49 +161,45 @@ $conn->close();
                         <h3 class="section-title">Professional Information</h3>
                         <div class="form-group">
                             <label for="bio">Bio / Professional Summary</label>
-                            <textarea 
-                                id="bio" 
-                                name="bio" 
-                                class="form-control" 
+                            <textarea
+                                id="bio"
+                                name="bio"
+                                class="form-control"
                                 rows="4"
-                                placeholder="Tell clients about yourself and your expertise"
-                            ><?php echo htmlspecialchars($freelancer['Bio'] ?: ''); ?></textarea>
+                                placeholder="Tell clients about yourself and your expertise"><?php echo htmlspecialchars($freelancer['Bio'] ?: ''); ?></textarea>
                         </div>
 
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="experience">Experience</label>
-                                <textarea 
-                                    id="experience" 
-                                    name="experience" 
-                                    class="form-control" 
+                                <textarea
+                                    id="experience"
+                                    name="experience"
+                                    class="form-control"
                                     rows="5"
-                                    placeholder="Describe your work experience, previous projects, etc."
-                                ><?php echo htmlspecialchars($freelancer['Experience'] ?: ''); ?></textarea>
+                                    placeholder="Describe your work experience, previous projects, etc."><?php echo htmlspecialchars($freelancer['Experience'] ?: ''); ?></textarea>
                             </div>
 
                             <div class="form-group">
                                 <label for="education">Education</label>
-                                <textarea 
-                                    id="education" 
-                                    name="education" 
-                                    class="form-control" 
+                                <textarea
+                                    id="education"
+                                    name="education"
+                                    class="form-control"
                                     rows="5"
-                                    placeholder="Your educational background, certifications, etc."
-                                ><?php echo htmlspecialchars($freelancer['Education'] ?: ''); ?></textarea>
+                                    placeholder="Your educational background, certifications, etc."><?php echo htmlspecialchars($freelancer['Education'] ?: ''); ?></textarea>
                             </div>
                         </div>
 
                         <div class="form-group">
                             <label for="social_media">Social Media URL</label>
-                            <input 
-                                type="url" 
-                                id="social_media" 
-                                name="social_media" 
-                                class="form-control" 
+                            <input
+                                type="url"
+                                id="social_media"
+                                name="social_media"
+                                class="form-control"
                                 value="<?php echo htmlspecialchars($freelancer['SocialMediaURL'] ?: ''); ?>"
-                                placeholder="https://linkedin.com/in/yourprofile"
-                            >
+                                placeholder="https://linkedin.com/in/yourprofile">
                         </div>
                     </div>
 
@@ -251,13 +244,12 @@ $conn->close();
                     <label for="skill-search">Skill*</label>
                     <div class="skill-search-container">
                         <span class="search-icon">🔍</span>
-                        <input 
-                            type="text" 
-                            id="skill-search" 
-                            class="form-control skill-search-input" 
+                        <input
+                            type="text"
+                            id="skill-search"
+                            class="form-control skill-search-input"
                             placeholder="Skill (ex: Project Management)"
-                            autocomplete="off"
-                        >
+                            autocomplete="off">
                     </div>
                     <div id="skill-search-results" class="skill-search-results"></div>
                 </div>
@@ -274,5 +266,5 @@ $conn->close();
         const currentSkillIds = <?php echo json_encode($current_skill_ids); ?>;
     </script>
 </body>
-</html>
 
+</html>

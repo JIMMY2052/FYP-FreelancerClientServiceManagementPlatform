@@ -84,21 +84,23 @@ $conn->close();
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile - WorkSnyc</title>
-    <link rel="stylesheet" href="assets/css/style.css">
-    <link rel="stylesheet" href="assets/css/dashboard.css">
-    <link rel="stylesheet" href="assets/css/profile.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="stylesheet" href="/assets/css/dashboard.css">
+    <link rel="stylesheet" href="/assets/css/profile.css">
 </head>
+
 <body class="profile-page">
     <div class="profile-layout">
-        <?php include 'includes/freelancer_sidebar.php'; ?>
+        <?php include '../includes/freelancer_sidebar.php'; ?>
 
         <!-- Main Content -->
         <main class="main-content">
-            <?php include 'includes/header.php'; ?>
+            <?php include '../includes/header.php'; ?>
 
             <!-- Profile Section -->
             <div class="profile-card">
@@ -153,7 +155,7 @@ $conn->close();
                             <p><?php echo nl2br(htmlspecialchars($freelancer['Experience'])); ?></p>
                         </div>
                     <?php endif; ?>
-                    
+
                     <?php if ($freelancer['Education']): ?>
                         <div class="info-section">
                             <h4>Education</h4>
@@ -203,5 +205,5 @@ $conn->close();
         </main>
     </div>
 </body>
-</html>
 
+</html>
