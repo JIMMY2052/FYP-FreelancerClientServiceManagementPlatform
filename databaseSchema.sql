@@ -38,6 +38,18 @@ CREATE TABLE
     ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 
 -- ===========================
+-- TABLE: Admin
+-- ===========================
+CREATE TABLE
+    Admin (
+        AdminID INT AUTO_INCREMENT PRIMARY KEY,
+        Email VARCHAR(255) UNIQUE NOT NULL,
+        Password VARCHAR(255) NOT NULL,
+        Status VARCHAR(50) DEFAULT 'active',
+        CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
+
+-- ===========================
 -- TABLE: Skill
 -- ===========================
 CREATE TABLE
