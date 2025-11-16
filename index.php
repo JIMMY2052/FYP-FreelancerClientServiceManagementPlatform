@@ -1,7 +1,7 @@
-<?php 
+<?php
 
 $_title = 'Home - Freelancer Platform';
-include '_head.php'; 
+include '_head.php';
 
 ?>
 
@@ -123,8 +123,8 @@ include '_head.php';
     </div>
 </section>
 
-<?php 
+<?php
 
-include '_foot.php'; 
+include '_foot.php';
 
 ?>
