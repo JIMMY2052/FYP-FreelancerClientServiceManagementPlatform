@@ -1,8 +1,6 @@
-<?php 
-$_title = 'Index';
-include '_head.php'; 
+<?php
+// Redirect to login page
+header('Location: login.php');
+exit();
 ?>
 
-
-
-<?php include '_foot.php'; ?>

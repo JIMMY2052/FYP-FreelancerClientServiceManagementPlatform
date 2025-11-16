@@ -1,9 +1,0 @@
-$(() => {
-    // Initiate GET request
-    $('[data-get]').on('click', e => {
-        e.preventDefault();
-        const url = e.target.dataset.get;
-        location = url || location;
-    });
-
-});
