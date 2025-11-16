@@ -21,21 +21,23 @@ $conn->close();
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Profile - WorkSnyc</title>
-    <link rel="stylesheet" href="assets/css/style.css">
-    <link rel="stylesheet" href="assets/css/dashboard.css">
-    <link rel="stylesheet" href="assets/css/profile.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="stylesheet" href="/assets/css/dashboard.css">
+    <link rel="stylesheet" href="/assets/css/profile.css">
 </head>
+
 <body class="profile-page">
     <div class="profile-layout">
-        <?php include 'includes/client_sidebar.php'; ?>
+        <?php include '../includes/client_sidebar.php'; ?>
 
         <!-- Main Content -->
         <main class="main-content">
-            <?php include 'includes/header.php'; ?>
+            <?php include '../includes/header.php'; ?>
 
             <!-- Edit Profile Form -->
             <div class="profile-card">
@@ -46,49 +48,47 @@ $conn->close();
 
                 <?php if (isset($_SESSION['error'])): ?>
                     <div class="error-message">
-                        <?php 
-                            echo htmlspecialchars($_SESSION['error']);
-                            unset($_SESSION['error']);
+                        <?php
+                        echo htmlspecialchars($_SESSION['error']);
+                        unset($_SESSION['error']);
                         ?>
                     </div>
                 <?php endif; ?>
 
                 <?php if (isset($_SESSION['success'])): ?>
                     <div class="success-message">
-                        <?php 
-                            echo htmlspecialchars($_SESSION['success']);
-                            unset($_SESSION['success']);
+                        <?php
+                        echo htmlspecialchars($_SESSION['success']);
+                        unset($_SESSION['success']);
                         ?>
                     </div>
                 <?php endif; ?>
 
                 <form action="edit_profile_process.php" method="POST" class="edit-profile-form">
                     <input type="hidden" name="user_type" value="client">
-                    
+
                     <!-- Company Information Section -->
                     <div class="form-section">
                         <h3 class="section-title">Company Information</h3>
                         <div class="form-group">
                             <label for="company_name">Company Name *</label>
-                            <input 
-                                type="text" 
-                                id="company_name" 
-                                name="company_name" 
-                                class="form-control" 
+                            <input
+                                type="text"
+                                id="company_name"
+                                name="company_name"
+                                class="form-control"
                                 value="<?php echo htmlspecialchars($client['CompanyName'] ?: ''); ?>"
-                                required
-                            >
+                                required>
                         </div>
 
                         <div class="form-group">
                             <label for="description">Description / Tagline</label>
-                            <textarea 
-                                id="description" 
-                                name="description" 
-                                class="form-control" 
+                            <textarea
+                                id="description"
+                                name="description"
+                                class="form-control"
                                 rows="3"
-                                placeholder="Brief description about your company"
-                            ><?php echo htmlspecialchars($client['Description'] ?: ''); ?></textarea>
+                                placeholder="Brief description about your company"><?php echo htmlspecialchars($client['Description'] ?: ''); ?></textarea>
                         </div>
                     </div>
 
@@ -97,37 +97,34 @@ $conn->close();
                         <h3 class="section-title">Contact Information</h3>
                         <div class="form-group">
                             <label for="email">Email Address *</label>
-                            <input 
-                                type="email" 
-                                id="email" 
-                                name="email" 
-                                class="form-control" 
+                            <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                class="form-control"
                                 value="<?php echo htmlspecialchars($client['Email']); ?>"
-                                required
-                            >
+                                required>
                         </div>
 
                         <div class="form-group">
                             <label for="phone">Phone Number</label>
-                            <input 
-                                type="text" 
-                                id="phone" 
-                                name="phone" 
-                                class="form-control" 
+                            <input
+                                type="text"
+                                id="phone"
+                                name="phone"
+                                class="form-control"
                                 value="<?php echo htmlspecialchars($client['PhoneNo'] ?: ''); ?>"
-                                placeholder="e.g., +60 12-345 6789"
-                            >
+                                placeholder="e.g., +60 12-345 6789">
                         </div>
 
                         <div class="form-group">
                             <label for="address">Address</label>
-                            <textarea 
-                                id="address" 
-                                name="address" 
-                                class="form-control" 
+                            <textarea
+                                id="address"
+                                name="address"
+                                class="form-control"
                                 rows="3"
-                                placeholder="Company address"
-                            ><?php echo htmlspecialchars($client['Address'] ?: ''); ?></textarea>
+                                placeholder="Company address"><?php echo htmlspecialchars($client['Address'] ?: ''); ?></textarea>
                         </div>
                     </div>
 
@@ -140,5 +137,5 @@ $conn->close();
         </main>
     </div>
 </body>
-</html>
 
+</html>
