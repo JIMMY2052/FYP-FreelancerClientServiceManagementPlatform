@@ -60,12 +60,8 @@ CREATE TABLE
     ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 
 -- ===========================
--- ALTER TABLE: Conversation
--- Add DeletedBy column to track soft deletes per user
+-- Add Foreign Key (optional - uncomment if Conversation table exists)
 -- ===========================
-ALTER TABLE Conversation
-ADD COLUMN DeletedBy JSON NULL AFTER Status;
-
--- DeletedBy format: {"user_id": "1", "user_type": "freelancer", "deleted_at": "2025-11-16 21:30:00"}
--- This allows tracking which user deleted the conversation from their list
--- The conversation remains in the database for the other user
+-- ALTER TABLE message 
+-- ADD CONSTRAINT fk_message_conversation 
+-- FOREIGN KEY (ConversationID) REFERENCES Conversation(ConversationID) ON DELETE CASCADE;

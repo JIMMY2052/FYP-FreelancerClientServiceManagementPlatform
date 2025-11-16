@@ -253,96 +253,77 @@ if ($type === 'freelancer') {
         }
 
         .profile-section h2 {
-            font-size: 1.2rem;
-            margin-bottom: 1rem;
-            color: #333;
-            border-bottom: 2px solid #22863a;
-            padding-bottom: 0.5rem;
+            font-size: 1.3rem;
+            margin-bottom: 1.2rem;
+            color: #1a1a1a;
+            font-weight: 600;
         }
 
         .profile-section p {
-            line-height: 1.6;
-            color: #666;
+            line-height: 1.7;
+            color: #555;
+            font-size: 0.95rem;
         }
 
         .skills-grid {
             display: flex;
             flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-
-        .skill-tag {
-            background-color: #f0f6f0;
-            color: #22863a;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            border: 1px solid #22863a;
-        }
-
-        .skill-tag span {
-            margin-left: 0.5rem;
-            font-size: 0.8rem;
-            opacity: 0.8;
-        }
-
-        .contact-info {
-            background-color: #f9f9f9;
-            padding: 1.5rem;
-            border-radius: 6px;
-            margin-top: 1rem;
-        }
-
-        .contact-info p {
-            margin-bottom: 0.75rem;
-            display: flex;
-            align-items: center;
             gap: 0.75rem;
         }
 
-        .contact-info strong {
-            color: #333;
-            min-width: 100px;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 1rem;
-            margin-top: 2rem;
-            padding-top: 2rem;
-            border-top: 1px solid #e0e0e0;
-        }
-
-        .btn {
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
+        .skill-tag {
+            background: linear-gradient(135deg, #e8f5e9, #f1f8f5);
+            color: #22863a;
+            padding: 0.6rem 1.2rem;
+            border-radius: 24px;
+            font-size: 0.9rem;
+            border: 1.5px solid #22863a;
             font-weight: 500;
-            text-decoration: none;
-            display: inline-block;
             transition: all 0.2s ease;
         }
 
-        .btn-primary {
+        .skill-tag:hover {
             background-color: #22863a;
             color: white;
+            transform: translateY(-2px);
         }
 
-        .btn-primary:hover {
-            background-color: #1e6b30;
+        .contact-info {
+            background: linear-gradient(135deg, #f9fafb, #f5f7f6);
+            padding: 1.8rem;
+            border-radius: 10px;
+            margin-top: 1rem;
+            border-left: 4px solid #22863a;
         }
 
-        .btn-secondary {
-            background-color: #e0e0e0;
-            color: #333;
+        .contact-info p {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.95rem;
         }
 
-        .btn-secondary:hover {
-            background-color: #d0d0d0;
+        .contact-info p:last-child {
+            margin-bottom: 0;
         }
 
-        @media (max-width: 600px) {
+        .contact-info strong {
+            color: #1a1a1a;
+            min-width: 100px;
+            font-weight: 600;
+        }
+
+        .contact-info a {
+            color: #22863a;
+            text-decoration: none;
+        }
+
+        .contact-info a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
             .profile-header {
                 flex-direction: column;
                 align-items: center;
@@ -350,24 +331,30 @@ if ($type === 'freelancer') {
             }
 
             .profile-info h1 {
-                font-size: 1.5rem;
+                font-size: 1.8rem;
             }
 
-            .profile-stats {
-                grid-template-columns: repeat(2, 1fr);
+            .profile-meta {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .meta-item {
+                justify-content: center;
+            }
+
+            .profile-grid {
+                grid-template-columns: 1fr;
             }
 
             .profile-card {
                 padding: 1.5rem;
             }
 
-            .action-buttons {
-                flex-direction: column;
-            }
-
-            .btn {
-                width: 100%;
-                text-align: center;
+            .profile-avatar {
+                width: 100px;
+                height: 100px;
+                font-size: 2rem;
             }
         }
     </style>
@@ -394,40 +381,70 @@ if ($type === 'freelancer') {
                 <div class="profile-info">
                     <?php if ($freelancer): ?>
                         <h1><?php echo htmlspecialchars($freelancer['FirstName'] . ' ' . $freelancer['LastName']); ?></h1>
-                        <p>Freelancer</p>
-                        <?php if (!empty($freelancer['RatingAverage'])): ?>
-                            <p>⭐ <?php echo number_format($freelancer['RatingAverage'], 1); ?>/5 Rating</p>
-                        <?php endif; ?>
+                        <div class="profile-subtitle"><?php echo htmlspecialchars($freelancer['Bio'] ?? 'Freelancer'); ?></div>
+                        <div class="profile-meta">
+                            <?php if (!empty($freelancer['Address'])): ?>
+                                <div class="meta-item">
+                                    <span class="meta-icon">📍</span>
+                                    <?php echo htmlspecialchars($freelancer['Address']); ?>
+                                </div>
+                            <?php endif; ?>
+                            <?php if (!empty($freelancer['PhoneNo'])): ?>
+                                <div class="meta-item">
+                                    <span class="meta-icon">📱</span>
+                                    <?php echo htmlspecialchars($freelancer['PhoneNo']); ?>
+                                </div>
+                            <?php endif; ?>
+                            <div class="meta-item">
+                                <span class="meta-icon">✉️</span>
+                                <?php echo htmlspecialchars($freelancer['Email']); ?>
+                            </div>
+                        </div>
                     <?php else: ?>
                         <h1><?php echo htmlspecialchars($client['CompanyName']); ?></h1>
-                        <p>Client</p>
-                        <?php if (!empty($client['Status'])): ?>
-                            <p>Status: <?php echo htmlspecialchars($client['Status']); ?></p>
-                        <?php endif; ?>
+                        <div class="profile-subtitle">Client</div>
+                        <div class="profile-meta">
+                            <?php if (!empty($client['Address'])): ?>
+                                <div class="meta-item">
+                                    <span class="meta-icon">📍</span>
+                                    <?php echo htmlspecialchars($client['Address']); ?>
+                                </div>
+                            <?php endif; ?>
+                            <?php if (!empty($client['PhoneNo'])): ?>
+                                <div class="meta-item">
+                                    <span class="meta-icon">📱</span>
+                                    <?php echo htmlspecialchars($client['PhoneNo']); ?>
+                                </div>
+                            <?php endif; ?>
+                            <div class="meta-item">
+                                <span class="meta-icon">✉️</span>
+                                <?php echo htmlspecialchars($client['Email']); ?>
+                            </div>
+                        </div>
                     <?php endif; ?>
-
-                    <div class="profile-stats">
-                        <?php if ($freelancer): ?>
-                            <div class="stat-item">
-                                <div class="stat-number"><?php echo $completed_count; ?></div>
-                                <div class="stat-label">Completed</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-number">$<?php echo number_format($total_earned, 2); ?></div>
-                                <div class="stat-label">Total Earned</div>
-                            </div>
-                        <?php else: ?>
-                            <div class="stat-item">
-                                <div class="stat-number"><?php echo $project_count; ?></div>
-                                <div class="stat-label">Projects Posted</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-number">$<?php echo number_format($total_spent, 2); ?></div>
-                                <div class="stat-label">Total Spent</div>
-                            </div>
-                        <?php endif; ?>
-                    </div>
                 </div>
+            </div>
+
+            <div class="profile-grid">
+                <?php if ($freelancer): ?>
+                    <div class="profile-stat">
+                        <div class="stat-number">$<?php echo number_format($total_earned, 2); ?></div>
+                        <div class="stat-label">Total Earned</div>
+                    </div>
+                    <div class="profile-stat">
+                        <div class="stat-number"><?php echo $completed_count; ?></div>
+                        <div class="stat-label">Completed Projects</div>
+                    </div>
+                <?php else: ?>
+                    <div class="profile-stat">
+                        <div class="stat-number">$<?php echo number_format($total_spent, 2); ?></div>
+                        <div class="stat-label">Total Spent</div>
+                    </div>
+                    <div class="profile-stat">
+                        <div class="stat-number"><?php echo $project_count; ?></div>
+                        <div class="stat-label">Projects Posted</div>
+                    </div>
+                <?php endif; ?>
             </div>
 
             <?php if ($freelancer): ?>
@@ -472,32 +489,6 @@ if ($type === 'freelancer') {
                     </div>
                 <?php endif; ?>
             <?php endif; ?>
-
-            <div class="profile-section">
-                <h2>Contact Information</h2>
-                <div class="contact-info">
-                    <?php if ($freelancer): ?>
-                        <p><strong>Email:</strong> <?php echo htmlspecialchars($freelancer['Email']); ?></p>
-                        <?php if (!empty($freelancer['PhoneNo'])): ?>
-                            <p><strong>Phone:</strong> <?php echo htmlspecialchars($freelancer['PhoneNo']); ?></p>
-                        <?php endif; ?>
-                        <?php if (!empty($freelancer['Address'])): ?>
-                            <p><strong>Address:</strong> <?php echo htmlspecialchars($freelancer['Address']); ?></p>
-                        <?php endif; ?>
-                        <?php if (!empty($freelancer['SocialMediaURL'])): ?>
-                            <p><strong>Social Media:</strong> <a href="<?php echo htmlspecialchars($freelancer['SocialMediaURL']); ?>" target="_blank"><?php echo htmlspecialchars($freelancer['SocialMediaURL']); ?></a></p>
-                        <?php endif; ?>
-                    <?php else: ?>
-                        <p><strong>Email:</strong> <?php echo htmlspecialchars($client['Email']); ?></p>
-                        <?php if (!empty($client['PhoneNo'])): ?>
-                            <p><strong>Phone:</strong> <?php echo htmlspecialchars($client['PhoneNo']); ?></p>
-                        <?php endif; ?>
-                        <?php if (!empty($client['Address'])): ?>
-                            <p><strong>Address:</strong> <?php echo htmlspecialchars($client['Address']); ?></p>
-                        <?php endif; ?>
-                    <?php endif; ?>
-                </div>
-            </div>
         </div>
     </div>
 </body>
