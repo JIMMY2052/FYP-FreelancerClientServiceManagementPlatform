@@ -6,7 +6,7 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    background: linear-gradient(135deg, #f5f3f7 0%, #e8e4ed 100%);
+    background: linear-gradient(135deg, #f0fde8 0%, #e6fdd5 100%);
     min-height: 100vh;
     display: flex;
     align-items: center;
@@ -36,7 +36,7 @@ body {
 
 .logo-icon {
     font-size: 32px;
-    color: #7c3aed;
+    color: #22c55e;
 }
 
 .logo-text {
@@ -90,9 +90,9 @@ body {
 
 .form-control:focus {
     outline: none;
-    border-color: #7c3aed;
+    border-color: #22c55e;
     background-color: #ffffff;
-    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
 }
 
 .form-control::placeholder {
@@ -130,19 +130,19 @@ select.form-control {
     height: 18px;
     margin-right: 8px;
     cursor: pointer;
-    accent-color: #7c3aed;
+    accent-color: #22c55e;
 }
 
 .forgot-link {
     font-size: 14px;
-    color: #7c3aed;
+    color: #22c55e;
     text-decoration: none;
     font-weight: 500;
     transition: color 0.2s;
 }
 
 .forgot-link:hover {
-    color: #6d28d9;
+    color: #16a34a;
     text-decoration: underline;
 }
 
@@ -152,17 +152,17 @@ select.form-control {
     font-size: 16px;
     font-weight: 600;
     color: #ffffff;
-    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
     border: none;
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s;
-    box-shadow: 0 4px 6px rgba(124, 58, 237, 0.2);
+    box-shadow: 0 4px 6px rgba(34, 197, 94, 0.2);
 }
 
 .btn-signin:hover {
-    background: linear-gradient(135deg, #6d28d9 0%, #5b21b6 100%);
-    box-shadow: 0 6px 12px rgba(124, 58, 237, 0.3);
+    background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+    box-shadow: 0 6px 12px rgba(34, 197, 94, 0.3);
     transform: translateY(-1px);
 }
 
@@ -186,14 +186,14 @@ select.form-control {
 .signup-link {
     display: block;
     font-size: 14px;
-    color: #7c3aed;
+    color: #22c55e;
     text-decoration: none;
     font-weight: 600;
     transition: color 0.2s;
 }
 
 .signup-link:hover {
-    color: #6d28d9;
+    color: #16a34a;
     text-decoration: underline;
 }
 
