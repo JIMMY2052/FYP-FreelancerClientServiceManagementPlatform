@@ -18,15 +18,28 @@ if (empty($chat_id)) {
     exit();
 }
 
-// Parse chat_id
-$parts = explode('_', $chat_id, 2);
-if (count($parts) !== 2) {
+// Parse chat_id to get the other user's type and id
+$other_user_type = null;
+$other_user_id = null;
+
+// Try new compact format: c1, f2
+if (strlen($chat_id) > 1 && ($chat_id[0] === 'c' || $chat_id[0] === 'f')) {
+    $other_user_type = ($chat_id[0] === 'c') ? 'client' : 'freelancer';
+    $other_user_id = intval(substr($chat_id, 1));
+}
+// Try legacy format: client_5, freelancer_3
+else if (strpos($chat_id, '_') !== false) {
+    $parts = explode('_', $chat_id, 2);
+    if (count($parts) === 2) {
+        $other_user_type = $parts[0];
+        $other_user_id = intval($parts[1]);
+    }
+}
+
+if (!$other_user_type || !$other_user_id) {
     echo json_encode([]);
     exit();
 }
-
-$other_user_type = $parts[0];
-$other_user_id = intval($parts[1]);
 
 $conn = getDBConnection();
 
@@ -44,6 +57,12 @@ $result = $stmt->get_result();
 $other_user = $result->fetch_assoc();
 $other_user_name = $other_user['name'] ?? 'Unknown';
 $stmt->close();
+
+// Build composite sender/receiver IDs
+$prefix_current = ($user_type === 'freelancer') ? 'f' : 'c';
+$prefix_other = ($other_user_type === 'freelancer') ? 'f' : 'c';
+$composite_current_id = $prefix_current . $user_id;
+$composite_other_id = $prefix_other . $other_user_id;
 
 // Fetch messages
 $messages_query = "
@@ -65,14 +84,14 @@ $messages_query = "
 ";
 
 $stmt = $conn->prepare($messages_query);
-$stmt->bind_param("iiii", $user_id, $other_user_id, $other_user_id, $user_id);
+$stmt->bind_param("ssss", $composite_current_id, $composite_other_id, $composite_other_id, $composite_current_id);
 $stmt->execute();
 $result = $stmt->get_result();
 
 $messages = [];
 while ($row = $result->fetch_assoc()) {
-    // Determine who sent this message
-    if ($row['SenderID'] === $user_id) {
+    // Determine who sent this message (compare by composite ID)
+    if ($row['SenderID'] === $composite_current_id) {
         $sender_type = $user_type;
         $sender_name = $_SESSION['email'] ?? 'You';
     } else {

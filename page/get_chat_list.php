@@ -47,7 +47,9 @@ if ($user_type === 'freelancer') {
         }
 
         $chats[] = [
-            'id' => 'client_' . $row['user_id'],
+            'id' => 'c' . $row['user_id'],
+            'userId' => $row['user_id'],
+            'userType' => 'client',
             'name' => $row['name'],
             'lastMessage' => $preview ?? 'No messages yet',
             'lastMessageTime' => $row['lastMessageTime'],
@@ -87,7 +89,9 @@ if ($user_type === 'freelancer') {
         }
 
         $chats[] = [
-            'id' => 'freelancer_' . $row['user_id'],
+            'id' => 'f' . $row['user_id'],
+            'userId' => $row['user_id'],
+            'userType' => 'freelancer',
             'name' => $row['name'],
             'lastMessage' => $preview ?? 'No messages yet',
             'lastMessageTime' => $row['lastMessageTime'],

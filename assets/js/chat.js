@@ -8,6 +8,7 @@ class ChatApp {
         this.messageRefreshInterval = null;
         this.maxFileSize = 10 * 1024 * 1024; // 10MB
         this.allowedFileTypes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+        this.lastLoadedChat = null; // Track which chat was last loaded to clear messages on switch
         this.init();
     }
 
@@ -196,7 +197,7 @@ class ChatApp {
                     <div class="chat-item-time">${time}</div>
                 `;
 
-                chatItem.addEventListener('click', () => this.selectChat(chat.id, chat.name));
+                chatItem.addEventListener('click', (e) => this.selectChat(chat.id, chat.name, chat.userId, chat.userType, e));
                 chatList.appendChild(chatItem);
             });
         } catch (error) {
@@ -204,8 +205,29 @@ class ChatApp {
         }
     }
 
-    async selectChat(chatId, chatName) {
+    async selectChat(chatId, chatName, userId, userType, event) {
         this.currentChat = chatId;
+
+        // Store receiver info directly from chat list (now provided as userId and userType)
+        this.currentOtherId = userId || null;
+        this.currentOtherType = userType || null;
+
+        // Fallback: if not provided, parse from new compact format (c1, f2, etc.) or legacy format
+        if (!this.currentOtherId || !this.currentOtherType) {
+            if (typeof chatId === 'string') {
+                // Try new compact format: c1, f2, etc.
+                if (chatId.length > 1 && (chatId[0] === 'c' || chatId[0] === 'f')) {
+                    this.currentOtherType = chatId[0] === 'c' ? 'client' : 'freelancer';
+                    this.currentOtherId = parseInt(chatId.substring(1), 10) || null;
+                }
+                // Try legacy format: client_5, freelancer_3
+                else if (chatId.indexOf('_') !== -1) {
+                    const parts = chatId.split('_', 2);
+                    this.currentOtherType = parts[0];
+                    this.currentOtherId = parseInt(parts[1], 10) || null;
+                }
+            }
+        }
 
         // Update header
         const headerName = document.getElementById('headerName');
@@ -242,8 +264,17 @@ class ChatApp {
             const messages = await response.json();
 
             const container = document.getElementById('messagesContainer');
-            container.innerHTML = '';
 
+            // If we switched to a different chat, clear the container
+            if (this.lastLoadedChat !== this.currentChat) {
+                container.innerHTML = '';
+                this.lastLoadedChat = this.currentChat;
+            }
+
+            // Store current message count to detect new messages
+            const currentMessageCount = container.querySelectorAll('.message-group').length;
+
+            // If no messages, show empty state
             if (messages.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
@@ -255,28 +286,63 @@ class ChatApp {
                 return;
             }
 
-            messages.forEach(msg => {
-                const isSent = msg.senderId === this.currentUser.id && msg.senderType === this.currentUser.type;
-                const messageGroup = document.createElement('div');
-                messageGroup.className = `message-group ${isSent ? 'sent' : 'received'}`;
+            // If this is the first load, render all messages
+            if (currentMessageCount === 0) {
+                container.innerHTML = '';
+                messages.forEach(msg => {
+                    // Build composite ID for current user to compare with senderId
+                    const userPrefix = this.currentUser.type === 'freelancer' ? 'f' : 'c';
+                    const compositeUserId = userPrefix + this.currentUser.id;
+                    const isSent = msg.senderId === compositeUserId;
+                    const messageGroup = document.createElement('div');
+                    messageGroup.className = `message-group ${isSent ? 'sent' : 'received'}`;
 
-                const time = this.formatMessageTime(msg.timestamp);
+                    const time = this.formatMessageTime(msg.timestamp);
 
-                let contentHTML = '';
-                if (msg.content || msg.attachmentPath) {
-                    contentHTML = '<div class="message-bubble">';
-                    if (msg.content) {
-                        contentHTML += `<div class="message-content">${this.escapeHtml(msg.content)}</div>`;
+                    let contentHTML = '';
+                    if (msg.content || msg.attachmentPath) {
+                        contentHTML = '<div class="message-bubble">';
+                        if (msg.content) {
+                            contentHTML += `<div class="message-content">${this.escapeHtml(msg.content)}</div>`;
+                        }
+                        if (msg.attachmentPath) {
+                            contentHTML += this.renderAttachment(msg.attachmentPath, msg.attachmentType, isSent);
+                        }
+                        contentHTML += `<div class="message-time">${time}</div></div>`;
                     }
-                    if (msg.attachmentPath) {
-                        contentHTML += this.renderAttachment(msg.attachmentPath, msg.attachmentType, isSent);
-                    }
-                    contentHTML += `<div class="message-time">${time}</div></div>`;
-                }
 
-                messageGroup.innerHTML = contentHTML;
-                container.appendChild(messageGroup);
-            });
+                    messageGroup.innerHTML = contentHTML;
+                    container.appendChild(messageGroup);
+                });
+            } else if (messages.length > currentMessageCount) {
+                // Only add new messages (avoid re-rendering existing ones)
+                const newMessages = messages.slice(currentMessageCount);
+                newMessages.forEach(msg => {
+                    // Build composite ID for current user to compare with senderId
+                    const userPrefix = this.currentUser.type === 'freelancer' ? 'f' : 'c';
+                    const compositeUserId = userPrefix + this.currentUser.id;
+                    const isSent = msg.senderId === compositeUserId;
+                    const messageGroup = document.createElement('div');
+                    messageGroup.className = `message-group ${isSent ? 'sent' : 'received'}`;
+
+                    const time = this.formatMessageTime(msg.timestamp);
+
+                    let contentHTML = '';
+                    if (msg.content || msg.attachmentPath) {
+                        contentHTML = '<div class="message-bubble">';
+                        if (msg.content) {
+                            contentHTML += `<div class="message-content">${this.escapeHtml(msg.content)}</div>`;
+                        }
+                        if (msg.attachmentPath) {
+                            contentHTML += this.renderAttachment(msg.attachmentPath, msg.attachmentType, isSent);
+                        }
+                        contentHTML += `<div class="message-time">${time}</div></div>`;
+                    }
+
+                    messageGroup.innerHTML = contentHTML;
+                    container.appendChild(messageGroup);
+                });
+            }
 
             // Scroll to bottom
             container.scrollTop = container.scrollHeight;
@@ -330,6 +396,15 @@ class ChatApp {
         try {
             const formData = new FormData();
             formData.append('chatId', this.currentChat);
+            // Send explicit receiver fields to avoid server-side parsing errors
+            if (this.currentOtherId) {
+                formData.append('receiverId', this.currentOtherId);
+            }
+            if (this.currentOtherType) {
+                formData.append('receiverType', this.currentOtherType);
+            }
+            // Debug: log what we're sending
+            console.log('[sendMessage] Sending to chatId=', this.currentChat, 'receiverId=', this.currentOtherId, 'receiverType=', this.currentOtherType);
             formData.append('content', content);
 
             // Add files
@@ -403,11 +478,11 @@ class ChatApp {
         yesterday.setDate(yesterday.getDate() - 1);
 
         if (date.toDateString() === today.toDateString()) {
-            return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+            return date.toLocaleTimeString('en-MY', { hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Kuala_Lumpur' });
         } else if (date.toDateString() === yesterday.toDateString()) {
             return 'Yesterday';
         } else {
-            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            return date.toLocaleDateString('en-MY', { month: 'short', day: 'numeric', timeZone: 'Asia/Kuala_Lumpur' });
         }
     }
 
@@ -415,7 +490,7 @@ class ChatApp {
         if (!dateString) return '';
 
         const date = new Date(dateString);
-        return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        return date.toLocaleTimeString('en-MY', { hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Kuala_Lumpur' });
     }
 
     escapeHtml(text) {

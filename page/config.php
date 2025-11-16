@@ -1,4 +1,7 @@
 <?php
+// Set timezone to Malaysia (UTC+8)
+date_default_timezone_set('Asia/Kuala_Lumpur');
+
 // Database configuration
 define('DB_HOST', 'localhost');
 define('DB_USER', 'root');

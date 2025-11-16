@@ -147,21 +147,42 @@ CREATE TABLE
     ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 
 -- ===========================
+-- TABLE: Conversation
+-- ===========================
+CREATE TABLE
+    Conversation (
+        ConversationID INT AUTO_INCREMENT PRIMARY KEY,
+        User1ID INT NOT NULL,
+        User1Type VARCHAR(50) NOT NULL,
+        User2ID INT NOT NULL,
+        User2Type VARCHAR(50) NOT NULL,
+        CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        LastMessageAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        Status VARCHAR(50) DEFAULT 'active',
+        UNIQUE KEY unique_conversation (User1ID, User1Type, User2ID, User2Type),
+        INDEX idx_user1 (User1ID),
+        INDEX idx_user2 (User2ID)
+    ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
+
+-- ===========================
 -- TABLE: Message
 -- ===========================
 CREATE TABLE
     Message (
         MessageID INT AUTO_INCREMENT PRIMARY KEY,
-        SenderID INT NOT NULL,
-        ReceiverID INT NOT NULL,
+        ConversationID INT,
+        SenderID VARCHAR(20) NOT NULL,
+        ReceiverID VARCHAR(20) NOT NULL,
         Content TEXT,
         AttachmentPath VARCHAR(500),
         AttachmentType VARCHAR(50),
         Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
         Status VARCHAR(50) DEFAULT 'unread',
+        INDEX idx_conversation (ConversationID),
         INDEX idx_sender (SenderID),
         INDEX idx_receiver (ReceiverID),
-        INDEX idx_timestamp (Timestamp)
+        INDEX idx_timestamp (Timestamp),
+        FOREIGN KEY (ConversationID) REFERENCES Conversation (ConversationID) ON DELETE CASCADE
     ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 
 -- ===========================
