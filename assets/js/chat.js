@@ -83,10 +83,17 @@ class ChatApp {
                 }
             });
         }
+
+        // View Profile
+        const viewProfileBtn = document.getElementById('viewProfileBtn');
+        if (viewProfileBtn) {
+            viewProfileBtn.addEventListener('click', () => this.viewProfile());
+        }
     }
 
     handleFileSelect(event) {
         const files = Array.from(event.target.files);
+        const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'pdf', 'doc', 'docx'];
 
         files.forEach(file => {
             // Validate file size
@@ -95,9 +102,15 @@ class ChatApp {
                 return;
             }
 
-            // Validate file type
-            if (!this.allowedFileTypes.includes(file.type)) {
-                alert(`File type not allowed: ${file.type}. Allowed types: images, PDF, Word documents.`);
+            // Get file extension
+            const fileExt = file.name.split('.').pop().toLowerCase();
+
+            // Validate file type - check both MIME type and extension
+            const mimeValid = this.allowedFileTypes.includes(file.type);
+            const extValid = allowedExtensions.includes(fileExt);
+
+            if (!(mimeValid || extValid)) {
+                alert(`File type not allowed: ${file.type}. Allowed: images (jpg, png, gif), PDF, Word documents.`);
                 return;
             }
 
@@ -238,7 +251,7 @@ class ChatApp {
             headerName.textContent = chatName;
         }
         if (headerStatus) {
-            headerStatus.textContent = 'Active';
+            headerStatus.textContent = '';
         }
         if (headerAvatar) {
             headerAvatar.textContent = this.getInitials(chatName);
@@ -408,16 +421,32 @@ class ChatApp {
             formData.append('content', content);
 
             // Add files
-            this.selectedFiles.forEach(file => {
+            this.selectedFiles.forEach((file, index) => {
+                console.log(`[sendMessage] Adding file ${index}: name=${file.name}, type=${file.type}, size=${file.size}`);
                 formData.append('files[]', file);
             });
+
+            console.log('[sendMessage] Total files:', this.selectedFiles.length);
+            console.log('[sendMessage] Sending to:', '../page/send_message.php');
 
             const response = await fetch('../page/send_message.php', {
                 method: 'POST',
                 body: formData
             });
 
-            const result = await response.json();
+            console.log('[sendMessage] Response status:', response.status);
+            let result;
+            try {
+                result = await response.json();
+            } catch (jsonError) {
+                console.error('[sendMessage] Failed to parse JSON response:', jsonError);
+                const text = await response.text();
+                console.error('[sendMessage] Raw response:', text);
+                alert('Server error: Invalid response format');
+                return;
+            }
+
+            console.log('[sendMessage] Response result:', result);
 
             if (result.success) {
                 messageInput.value = '';
@@ -431,11 +460,14 @@ class ChatApp {
                 // Reload chat list
                 await this.loadChatList();
             } else {
-                alert('Error sending message: ' + result.error);
+                const errorMsg = result.error || 'Unknown error';
+                console.error('[sendMessage] Server error:', errorMsg);
+                alert('Error: ' + errorMsg);
             }
         } catch (error) {
             console.error('Error sending message:', error);
-            alert('Error sending message');
+            console.error('Error details:', error.message);
+            alert('Error sending message: ' + (error.message || 'Unknown error'));
         }
     }
 
@@ -497,6 +529,17 @@ class ChatApp {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+
+    viewProfile() {
+        if (!this.currentOtherId || !this.currentOtherType) {
+            alert('Please select a conversation first');
+            return;
+        }
+
+        // Navigate to profile page
+        const profileUrl = `view_profile.php?type=${this.currentOtherType}&id=${this.currentOtherId}`;
+        window.location.href = profileUrl;
     }
 
     destroy() {

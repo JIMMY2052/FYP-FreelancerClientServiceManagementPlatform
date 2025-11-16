@@ -14,36 +14,42 @@ $user_type = $_SESSION['user_type'];
 $conn = getDBConnection();
 
 $chats = [];
+$prefix_user = ($user_type === 'freelancer') ? 'f' : 'c';
+$composite_user_id = $prefix_user . $user_id;
 
 if ($user_type === 'freelancer') {
     // Get conversations with clients
     $query = "
-        SELECT DISTINCT 
+        SELECT 
             c.ClientID as user_id,
             c.CompanyName as name,
-            m.Content as lastMessage,
-            m.AttachmentPath,
-            m.Timestamp as lastMessageTime
+            'client' as user_type,
+            (SELECT m.Content FROM message m 
+             WHERE (m.SenderID = ? AND m.ReceiverID = CONCAT('c', c.ClientID))
+                OR (m.SenderID = CONCAT('c', c.ClientID) AND m.ReceiverID = ?)
+             ORDER BY m.Timestamp DESC LIMIT 1) as lastMessage,
+            (SELECT m.AttachmentPath FROM message m 
+             WHERE (m.SenderID = ? AND m.ReceiverID = CONCAT('c', c.ClientID))
+                OR (m.SenderID = CONCAT('c', c.ClientID) AND m.ReceiverID = ?)
+             ORDER BY m.Timestamp DESC LIMIT 1) as lastAttachmentPath,
+            (SELECT m.Timestamp FROM message m 
+             WHERE (m.SenderID = ? AND m.ReceiverID = CONCAT('c', c.ClientID))
+                OR (m.SenderID = CONCAT('c', c.ClientID) AND m.ReceiverID = ?)
+             ORDER BY m.Timestamp DESC LIMIT 1) as lastMessageTime
         FROM client c
-        LEFT JOIN message m ON (
-            (m.SenderID = ? AND m.ReceiverID = c.ClientID)
-            OR
-            (m.SenderID = c.ClientID AND m.ReceiverID = ?)
-        )
         WHERE c.Status = 'active'
-        GROUP BY c.ClientID
-        ORDER BY m.Timestamp DESC
+        ORDER BY lastMessageTime DESC
     ";
 
     $stmt = $conn->prepare($query);
-    $stmt->bind_param("ii", $user_id, $user_id);
+    $stmt->bind_param("ssssss", $composite_user_id, $composite_user_id, $composite_user_id, $composite_user_id, $composite_user_id, $composite_user_id);
     $stmt->execute();
     $result = $stmt->get_result();
 
     while ($row = $result->fetch_assoc()) {
         $preview = $row['lastMessage'];
-        if ($row['AttachmentPath'] && !$row['lastMessage']) {
-            $preview = '📎 ' . basename($row['AttachmentPath']);
+        if ($row['lastAttachmentPath'] && !$row['lastMessage']) {
+            $preview = '📎 ' . basename($row['lastAttachmentPath']);
         }
 
         $chats[] = [
@@ -60,32 +66,36 @@ if ($user_type === 'freelancer') {
 } else {
     // Get conversations with freelancers
     $query = "
-        SELECT DISTINCT 
+        SELECT 
             f.FreelancerID as user_id,
             CONCAT(f.FirstName, ' ', f.LastName) as name,
-            m.Content as lastMessage,
-            m.AttachmentPath,
-            m.Timestamp as lastMessageTime
+            'freelancer' as user_type,
+            (SELECT m.Content FROM message m 
+             WHERE (m.SenderID = ? AND m.ReceiverID = CONCAT('f', f.FreelancerID))
+                OR (m.SenderID = CONCAT('f', f.FreelancerID) AND m.ReceiverID = ?)
+             ORDER BY m.Timestamp DESC LIMIT 1) as lastMessage,
+            (SELECT m.AttachmentPath FROM message m 
+             WHERE (m.SenderID = ? AND m.ReceiverID = CONCAT('f', f.FreelancerID))
+                OR (m.SenderID = CONCAT('f', f.FreelancerID) AND m.ReceiverID = ?)
+             ORDER BY m.Timestamp DESC LIMIT 1) as lastAttachmentPath,
+            (SELECT m.Timestamp FROM message m 
+             WHERE (m.SenderID = ? AND m.ReceiverID = CONCAT('f', f.FreelancerID))
+                OR (m.SenderID = CONCAT('f', f.FreelancerID) AND m.ReceiverID = ?)
+             ORDER BY m.Timestamp DESC LIMIT 1) as lastMessageTime
         FROM freelancer f
-        LEFT JOIN message m ON (
-            (m.SenderID = ? AND m.ReceiverID = f.FreelancerID)
-            OR
-            (m.SenderID = f.FreelancerID AND m.ReceiverID = ?)
-        )
         WHERE f.Status = 'active'
-        GROUP BY f.FreelancerID
-        ORDER BY m.Timestamp DESC
+        ORDER BY lastMessageTime DESC
     ";
 
     $stmt = $conn->prepare($query);
-    $stmt->bind_param("ii", $user_id, $user_id);
+    $stmt->bind_param("ssssss", $composite_user_id, $composite_user_id, $composite_user_id, $composite_user_id, $composite_user_id, $composite_user_id);
     $stmt->execute();
     $result = $stmt->get_result();
 
     while ($row = $result->fetch_assoc()) {
         $preview = $row['lastMessage'];
-        if ($row['AttachmentPath'] && !$row['lastMessage']) {
-            $preview = '📎 ' . basename($row['AttachmentPath']);
+        if ($row['lastAttachmentPath'] && !$row['lastMessage']) {
+            $preview = '📎 ' . basename($row['lastAttachmentPath']);
         }
 
         $chats[] = [

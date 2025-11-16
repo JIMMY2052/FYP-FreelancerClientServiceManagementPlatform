@@ -159,6 +159,7 @@ CREATE TABLE
         CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         LastMessageAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         Status VARCHAR(50) DEFAULT 'active',
+        DeletedBy JSON NULL,
         UNIQUE KEY unique_conversation (User1ID, User1Type, User2ID, User2Type),
         INDEX idx_user1 (User1ID),
         INDEX idx_user2 (User2ID)

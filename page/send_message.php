@@ -93,8 +93,20 @@ if ($has_files) {
         mkdir($upload_dir, 0755, true);
     }
 
-    // Process only the first file (if multiple were selected, we handle them one at a time)
-    $file = $_FILES['files'];
+    // Handle multiple files uploaded via files[]
+    $file_count = count($_FILES['files']['name']);
+    error_log("[send_message] File upload detected: {$file_count} files");
+
+    // Process the first file
+    $file = [
+        'name' => $_FILES['files']['name'][0],
+        'type' => $_FILES['files']['type'][0],
+        'size' => $_FILES['files']['size'][0],
+        'tmp_name' => $_FILES['files']['tmp_name'][0],
+        'error' => $_FILES['files']['error'][0]
+    ];
+
+    error_log("[send_message] Processing file: name={$file['name']}, type={$file['type']}, size={$file['size']}, error={$file['error']}");
 
     // Allowed file types
     $allowed_types = [
@@ -102,14 +114,25 @@ if ($has_files) {
         'image/png',
         'image/gif',
         'application/pdf',
+        'application/x-pdf',
         'application/msword',
         'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
     ];
 
-    // Validate file
-    if (!in_array($file['type'], $allowed_types)) {
+    // Also check file extension as fallback
+    $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif', 'pdf', 'doc', 'docx'];
+    $file_ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+
+    // Validate file - check both MIME type and extension
+    $mime_valid = in_array($file['type'], $allowed_types);
+    $ext_valid = in_array($file_ext, $allowed_extensions);
+
+    error_log("[send_message] File validation: MIME={$file['type']} (valid={$mime_valid}), EXT={$file_ext} (valid={$ext_valid})");
+
+    if (!($mime_valid || $ext_valid)) {
+        error_log("[send_message] File validation FAILED: MIME={$file['type']}, EXT={$file_ext}");
         http_response_code(400);
-        echo json_encode(['error' => 'File type not allowed']);
+        echo json_encode(['error' => 'File type not allowed. Allowed: images (jpg, png, gif), PDF, Word documents. Got: ' . $file['type']]);
         exit();
     }
 
