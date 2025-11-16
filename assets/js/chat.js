@@ -1,0 +1,437 @@
+// Chat Application JavaScript with File Upload Support
+
+class ChatApp {
+    constructor() {
+        this.currentUser = null;
+        this.currentChat = null;
+        this.selectedFiles = [];
+        this.messageRefreshInterval = null;
+        this.maxFileSize = 10 * 1024 * 1024; // 10MB
+        this.allowedFileTypes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+        this.init();
+    }
+
+    async init() {
+        // Get current user info
+        this.currentUser = window.currentUserData;
+
+        // Initialize event listeners
+        this.setupEventListeners();
+
+        // Load chat list
+        await this.loadChatList();
+
+        // Start auto-refresh
+        this.startMessageRefresh();
+    }
+
+    setupEventListeners() {
+        // Message input
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const attachBtn = document.getElementById('attachBtn');
+        const fileInput = document.getElementById('fileInput');
+
+        if (sendBtn) {
+            sendBtn.addEventListener('click', () => this.sendMessage());
+        }
+
+        if (messageInput) {
+            messageInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    this.sendMessage();
+                }
+            });
+
+            // Auto-resize textarea
+            messageInput.addEventListener('input', () => {
+                messageInput.style.height = 'auto';
+                messageInput.style.height = Math.min(messageInput.scrollHeight, 100) + 'px';
+            });
+        }
+
+        if (attachBtn) {
+            attachBtn.addEventListener('click', () => {
+                fileInput.click();
+            });
+        }
+
+        if (fileInput) {
+            fileInput.addEventListener('change', (e) => this.handleFileSelect(e));
+        }
+
+        // Search
+        const searchInput = document.getElementById('chatSearch');
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => this.filterChats(e.target.value));
+        }
+
+        // Modal close
+        const modal = document.getElementById('imageModal');
+        const modalClose = document.getElementById('modalClose');
+        if (modalClose) {
+            modalClose.addEventListener('click', () => {
+                modal.classList.remove('show');
+            });
+        }
+        if (modal) {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('show');
+                }
+            });
+        }
+    }
+
+    handleFileSelect(event) {
+        const files = Array.from(event.target.files);
+
+        files.forEach(file => {
+            // Validate file size
+            if (file.size > this.maxFileSize) {
+                alert(`File ${file.name} is too large. Maximum size is 10MB.`);
+                return;
+            }
+
+            // Validate file type
+            if (!this.allowedFileTypes.includes(file.type)) {
+                alert(`File type not allowed: ${file.type}. Allowed types: images, PDF, Word documents.`);
+                return;
+            }
+
+            this.selectedFiles.push(file);
+        });
+
+        this.displayFilePreview();
+        event.target.value = ''; // Reset input
+    }
+
+    displayFilePreview() {
+        const previewContainer = document.getElementById('filePreview');
+        previewContainer.innerHTML = '';
+
+        this.selectedFiles.forEach((file, index) => {
+            const preview = document.createElement('div');
+            preview.className = 'file-preview';
+
+            let previewHTML = '';
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.className = 'file-preview-img';
+                    preview.insertBefore(img, preview.firstChild);
+                };
+                reader.readAsDataURL(file);
+            } else {
+                const icon = this.getFileIcon(file.type);
+                preview.innerHTML = `<div class="file-icon">${icon}</div>`;
+            }
+
+            const filename = document.createElement('span');
+            filename.className = 'file-preview-name';
+            filename.textContent = file.name;
+            preview.appendChild(filename);
+
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'file-preview-remove';
+            removeBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
+            removeBtn.type = 'button';
+            removeBtn.addEventListener('click', () => this.removeFile(index));
+            preview.appendChild(removeBtn);
+
+            previewContainer.appendChild(preview);
+        });
+    }
+
+    removeFile(index) {
+        this.selectedFiles.splice(index, 1);
+        this.displayFilePreview();
+    }
+
+    getFileIcon(mimeType) {
+        if (mimeType.startsWith('image/')) {
+            return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>';
+        }
+        if (mimeType.includes('pdf')) {
+            return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><text x="9" y="17" font-size="8" fill="currentColor">PDF</text></svg>';
+        }
+        if (mimeType.includes('word') || mimeType.includes('document')) {
+            return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>';
+        }
+        return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>';
+    }
+
+    async loadChatList() {
+        try {
+            const response = await fetch('../page/get_chat_list.php');
+            const chats = await response.json();
+
+            const chatList = document.getElementById('chatList');
+            chatList.innerHTML = '';
+
+            if (chats.length === 0) {
+                chatList.innerHTML = '<li class="loading-state"><p>No conversations yet</p></li>';
+                return;
+            }
+
+            chats.forEach(chat => {
+                const chatItem = document.createElement('li');
+                chatItem.className = 'chat-item';
+                if (this.currentChat === chat.id) {
+                    chatItem.classList.add('active');
+                }
+
+                const initials = this.getInitials(chat.name);
+                const time = this.formatTime(chat.lastMessageTime);
+
+                chatItem.innerHTML = `
+                    <div class="chat-item-avatar">${initials}</div>
+                    <div class="chat-item-content">
+                        <h3 class="chat-item-name">${this.escapeHtml(chat.name)}</h3>
+                        <p class="chat-item-preview">${this.escapeHtml(chat.lastMessage)}</p>
+                    </div>
+                    <div class="chat-item-time">${time}</div>
+                `;
+
+                chatItem.addEventListener('click', () => this.selectChat(chat.id, chat.name));
+                chatList.appendChild(chatItem);
+            });
+        } catch (error) {
+            console.error('Error loading chat list:', error);
+        }
+    }
+
+    async selectChat(chatId, chatName) {
+        this.currentChat = chatId;
+
+        // Update header
+        const headerName = document.getElementById('headerName');
+        const headerStatus = document.getElementById('headerStatus');
+        const headerAvatar = document.getElementById('headerAvatar');
+
+        if (headerName) {
+            headerName.textContent = chatName;
+        }
+        if (headerStatus) {
+            headerStatus.textContent = 'Active';
+        }
+        if (headerAvatar) {
+            headerAvatar.textContent = this.getInitials(chatName);
+        }
+
+        // Update active state
+        document.querySelectorAll('.chat-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        if (event && event.currentTarget) {
+            event.currentTarget.classList.add('active');
+        }
+
+        // Load messages
+        await this.loadMessages();
+    }
+
+    async loadMessages() {
+        if (!this.currentChat) return;
+
+        try {
+            const response = await fetch(`../page/get_messages.php?chatId=${this.currentChat}`);
+            const messages = await response.json();
+
+            const container = document.getElementById('messagesContainer');
+            container.innerHTML = '';
+
+            if (messages.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">💬</div>
+                        <h3 class="empty-state-title">Start the conversation</h3>
+                        <p class="empty-state-text">Send your first message to begin chatting</p>
+                    </div>
+                `;
+                return;
+            }
+
+            messages.forEach(msg => {
+                const isSent = msg.senderId === this.currentUser.id && msg.senderType === this.currentUser.type;
+                const messageGroup = document.createElement('div');
+                messageGroup.className = `message-group ${isSent ? 'sent' : 'received'}`;
+
+                const time = this.formatMessageTime(msg.timestamp);
+
+                let contentHTML = '';
+                if (msg.content || msg.attachmentPath) {
+                    contentHTML = '<div class="message-bubble">';
+                    if (msg.content) {
+                        contentHTML += `<div class="message-content">${this.escapeHtml(msg.content)}</div>`;
+                    }
+                    if (msg.attachmentPath) {
+                        contentHTML += this.renderAttachment(msg.attachmentPath, msg.attachmentType, isSent);
+                    }
+                    contentHTML += `<div class="message-time">${time}</div></div>`;
+                }
+
+                messageGroup.innerHTML = contentHTML;
+                container.appendChild(messageGroup);
+            });
+
+            // Scroll to bottom
+            container.scrollTop = container.scrollHeight;
+        } catch (error) {
+            console.error('Error loading messages:', error);
+        }
+    }
+
+    renderAttachment(filePath, fileType, isSent) {
+        if (fileType && fileType.startsWith('image/')) {
+            return `
+                <div class="attachment-container">
+                    <img src="${filePath}" class="attachment-image" onclick="window.chatApp.openImageModal('${filePath}')">
+                </div>
+            `;
+        } else {
+            const icon = this.getFileIcon(fileType);
+            const fileName = filePath.split('/').pop();
+            return `
+                <div class="attachment-container">
+                    <a href="${filePath}" download class="attachment-file">
+                        <span class="attachment-icon">${icon}</span>
+                        <span>${this.escapeHtml(fileName)}</span>
+                    </a>
+                </div>
+            `;
+        }
+    }
+
+    openImageModal(imagePath) {
+        const modal = document.getElementById('imageModal');
+        const modalImage = document.getElementById('modalImage');
+        modalImage.src = imagePath;
+        modal.classList.add('active');
+    }
+
+    async sendMessage() {
+        const messageInput = document.getElementById('messageInput');
+        const content = messageInput.value.trim();
+
+        if (!content && this.selectedFiles.length === 0) {
+            alert('Please enter a message or select a file');
+            return;
+        }
+
+        if (!this.currentChat) {
+            alert('Please select a conversation');
+            return;
+        }
+
+        try {
+            const formData = new FormData();
+            formData.append('chatId', this.currentChat);
+            formData.append('content', content);
+
+            // Add files
+            this.selectedFiles.forEach(file => {
+                formData.append('files[]', file);
+            });
+
+            const response = await fetch('../page/send_message.php', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                messageInput.value = '';
+                messageInput.style.height = 'auto';
+                this.selectedFiles = [];
+                this.displayFilePreview();
+
+                // Reload messages
+                await this.loadMessages();
+
+                // Reload chat list
+                await this.loadChatList();
+            } else {
+                alert('Error sending message: ' + result.error);
+            }
+        } catch (error) {
+            console.error('Error sending message:', error);
+            alert('Error sending message');
+        }
+    }
+
+    filterChats(query) {
+        const chatItems = document.querySelectorAll('.chat-item');
+        const lowerQuery = query.toLowerCase();
+
+        chatItems.forEach(item => {
+            const name = item.querySelector('.chat-item-name').textContent.toLowerCase();
+            const preview = item.querySelector('.chat-item-preview').textContent.toLowerCase();
+
+            if (name.includes(lowerQuery) || preview.includes(lowerQuery)) {
+                item.style.display = '';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+
+    startMessageRefresh() {
+        // Auto-refresh messages every 2 seconds
+        this.messageRefreshInterval = setInterval(() => {
+            if (this.currentChat) {
+                this.loadMessages();
+            }
+        }, 2000);
+    }
+
+    getInitials(name) {
+        if (!name) return '?';
+        return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    }
+
+    formatTime(dateString) {
+        if (!dateString) return '';
+
+        const date = new Date(dateString);
+        const today = new Date();
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+
+        if (date.toDateString() === today.toDateString()) {
+            return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        } else if (date.toDateString() === yesterday.toDateString()) {
+            return 'Yesterday';
+        } else {
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        }
+    }
+
+    formatMessageTime(dateString) {
+        if (!dateString) return '';
+
+        const date = new Date(dateString);
+        return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    destroy() {
+        if (this.messageRefreshInterval) {
+            clearInterval(this.messageRefreshInterval);
+        }
+    }
+}
+
+// Initialize chat app when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    window.chatApp = new ChatApp();
+});

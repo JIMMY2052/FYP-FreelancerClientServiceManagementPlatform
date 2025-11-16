@@ -152,13 +152,16 @@ CREATE TABLE
 CREATE TABLE
     Message (
         MessageID INT AUTO_INCREMENT PRIMARY KEY,
-        ReceiverID INT,
-        SenderID INT,
+        SenderID INT NOT NULL,
+        ReceiverID INT NOT NULL,
         Content TEXT,
-        Timestamp DATETIME,
-        Status VARCHAR(50),
-        FOREIGN KEY (ReceiverID) REFERENCES Client (ClientID),
-        FOREIGN KEY (SenderID) REFERENCES Freelancer (FreelancerID)
+        AttachmentPath VARCHAR(500),
+        AttachmentType VARCHAR(50),
+        Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+        Status VARCHAR(50) DEFAULT 'unread',
+        INDEX idx_sender (SenderID),
+        INDEX idx_receiver (ReceiverID),
+        INDEX idx_timestamp (Timestamp)
     ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 
 -- ===========================
