@@ -6,50 +6,54 @@ include '../../_head.php';
 ?>
 
 <?php 
-    $jobTitle = $_POST["jobTitle"];
-    $jobDescription = $_POST["jobDescription"];
-    $jobSalary = $_POST["jobSalary"];
-    $professionalField = $_POST["professionalField"];
-
-    echo "<p>Job Title</p><div>$jobTitle<div>"
+    $jobTitle = $_POST["jobTitle"] ?? '';
+    $jobDescription = $_POST["jobDescription"] ?? '';
+    $jobSalary = $_POST["jobSalary"] ?? '';
+    $professionalField = $_POST["professionalField"] ?? '';
+    $postDate = $_POST["postDate"] ?? '';
+    $postTime = $_POST["postTime"] ?? '';
+    $deliveryPeriod = $_POST["deliveryPeriod"] ?? '';
+    $deliveryPeriodValue = $_POST["deliveryPeriodValue"] ?? '';
 ?>
 
-<p>Job Title</p>
-<input type="text" id="jobTitle" name="jobTitle" placeholder="Enter a job title" disabled>
+<div class="form-container">
+    <form class="create-job-form">
+        <p>Job Title</p>
+        <input type="text" value="<?php echo htmlspecialchars($jobTitle); ?>" disabled>
 
-<p>Job Description</p>
-<input type="text" id="jobTitle" name="jobTitle" placeholder="Enter a description about the job" disabled>
+        <p>Job Description</p>
+        <input type="text" value="<?php echo htmlspecialchars($jobDescription); ?>" disabled>
 
-<p>Salary</p>
-<input type="text" id="jobTitle" name="jobTitle" placeholder="Enter salary" disabled>
+        <p>Salary</p>
+        <input type="text" value="<?php echo htmlspecialchars($jobSalary); ?>" disabled>
 
-<p>Looking At</p>
-<input type="text" id="jobTitle" name="jobTitle" placeholder="Enter professional field" disabled>
+        <p>Looking At</p>
+        <input type="text" value="<?php echo htmlspecialchars($professionalField); ?>" disabled>
 
-<p>Posting Date and Time</p>
-<select name="postDate" id="postDate" disabled>
-    <option value="Date">Date</option>
-</select>
-<select name="postTime" id="postTime" disabled>
-    <option value="Time">Time</option>
-</select>
+        <p>Posting Date and Time</p>
+        <div style="display: flex; gap: 1rem;">
+            <select disabled style="flex: 1;">
+                <option value="<?php echo htmlspecialchars($postDate); ?>" selected><?php echo htmlspecialchars($postDate); ?></option>
+            </select>
+            <select disabled style="flex: 1;">
+                <option value="<?php echo htmlspecialchars($postTime); ?>" selected><?php echo htmlspecialchars($postTime); ?></option>
+            </select>
+        </div>
 
-<p>Delivery Period</p>
-<select name="deliveryPeriod" id="deliveryPeriod" disabled>
-    <option value="days">Days</option>
-    <option value="weeks">weeks</option>
-    <option value="months">Months</option>
-</select>
-<input type="text" id="jobTitle" name="jobTitle" placeholder="Enter a delivery period" disabled>
+        <p>Delivery Period</p>
+        <div style="display: flex; gap: 1rem;">
+            <select disabled style="flex: 1;">
+                <option value="<?php echo htmlspecialchars($deliveryPeriod); ?>" selected><?php echo htmlspecialchars($deliveryPeriod); ?></option>
+            </select>
+            <input type="text" value="<?php echo htmlspecialchars($deliveryPeriodValue); ?>" disabled style="flex: 1;">
+        </div>
 
-<br>
-
-<button onclick="history.back()">Back</button>
-<a href="jobSummary">
-    <button>
-        Post
-    </button>
-</a>
+        <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+            <button type="button" onclick="history.back()" class="back-btn">Back</button>
+            <button type="button" class="submit-btn">Post</button>
+        </div>
+    </form>
+</div>
 
 
 <?php 

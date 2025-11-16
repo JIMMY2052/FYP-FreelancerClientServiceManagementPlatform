@@ -16,6 +16,9 @@
                     <img src="/images/logo.png" alt="Freelancer Platform Logo" class="logo-img">
                 </a>
             </div>
+            <div class="header-search">
+                <input type="text" placeholder="Search for services..." class="search-input">
+            </div>
             <nav class="header-nav">
                 <a href="/login.php" class="btn btn-login">Login</a>
                 <a href="/signup.php" class="btn btn-signup">Sign Up</a>
