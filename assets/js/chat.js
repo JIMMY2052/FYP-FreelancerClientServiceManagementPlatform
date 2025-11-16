@@ -191,9 +191,10 @@ class ChatApp {
                 return;
             }
 
-            chats.forEach(chat => {
+            chats.forEach((chat, index) => {
                 const chatItem = document.createElement('li');
                 chatItem.className = 'chat-item';
+                chatItem.setAttribute('data-chat-id', chat.id);
                 if (this.currentChat === chat.id) {
                     chatItem.classList.add('active');
                 }
@@ -212,6 +213,13 @@ class ChatApp {
 
                 chatItem.addEventListener('click', (e) => this.selectChat(chat.id, chat.name, chat.userId, chat.userType, e));
                 chatList.appendChild(chatItem);
+
+                // Auto-select the first conversation if none is selected
+                if (index === 0 && !this.currentChat) {
+                    setTimeout(() => {
+                        this.selectChat(chat.id, chat.name, chat.userId, chat.userType, null);
+                    }, 100);
+                }
             });
         } catch (error) {
             console.error('Error loading chat list:', error);
@@ -261,8 +269,19 @@ class ChatApp {
         document.querySelectorAll('.chat-item').forEach(item => {
             item.classList.remove('active');
         });
+
+        // Set active based on chatId if event is null, or use event.currentTarget
         if (event && event.currentTarget) {
             event.currentTarget.classList.add('active');
+        } else {
+            // Find and activate the chat item by chat ID
+            const chatItems = document.querySelectorAll('.chat-item');
+            chatItems.forEach(item => {
+                const itemChatId = item.getAttribute('data-chat-id') || item.textContent;
+                if (itemChatId === chatId) {
+                    item.classList.add('active');
+                }
+            });
         }
 
         // Load messages
