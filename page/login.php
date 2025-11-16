@@ -4,9 +4,9 @@ require_once 'config.php';
 // Redirect if already logged in
 if (isset($_SESSION['user_id']) && isset($_SESSION['user_type'])) {
     if ($_SESSION['user_type'] === 'freelancer') {
-        header('Location: freelancer_dashboard.php');
+        header('Location: ../freelancer_home.php');
     } else {
-        header('Location: client_dashboard.php');
+        header('Location: ../client_home.php');
     }
     exit();
 }

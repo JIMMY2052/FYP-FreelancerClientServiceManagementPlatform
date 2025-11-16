@@ -19,25 +19,22 @@ include '../../_head.php';
         <p>Looking At</p>
         <input type="text" id="professionalField" name="professionalField" placeholder="Enter professional field" required>
 
-        <p>Posting Date and Time</p>
-        <div class="form-row">
-            <select name="postDate" id="postDate" required>
-                <option value="Date">Date</option>
-            </select>
-            <select name="postTime" id="postTime" required>
-                <option value="Time">Time</option>
-            </select>
+        <p>Posting Date</p>
+        <label class="checkbox-label">
+            <input type="checkbox" id="postDateNow" name="postDateOption" value="now" checked>
+            <span>Post Now (Use Current Date & Time)</span>
+        </label>
+
+        <div id="postDateTimeFields" class="date-time-fields" style="display: none;">
+            <p>Posting Date</p>
+            <input type="date" id="postDate" name="postDate">
+
+            <p>Posting Time</p>
+            <input type="time" id="postTime" name="postTime">
         </div>
 
-        <p>Delivery Period</p>
-        <div class="form-row">
-            <select name="deliveryPeriod" id="deliveryPeriod" required>
-                <option value="days">Days</option>
-                <option value="weeks">weeks</option>
-                <option value="months">Months</option>
-            </select>
-            <input type="text" id="deliveryPeriodValue" name="deliveryPeriodValue" placeholder="Enter a delivery period" required>
-        </div>
+        <p>Deadline</p>
+        <input type="date" id="deliveryPeriod" name="deliveryPeriod" required>
 
         <div class="form-buttons">
             <button type="reset" class="reset-btn">Reset</button>
@@ -45,6 +42,43 @@ include '../../_head.php';
         </div>
     </form>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const postDateNow = document.getElementById('postDateNow');
+    const postDateTimeFields = document.getElementById('postDateTimeFields');
+    const postDateInput = document.getElementById('postDate');
+    const postTimeInput = document.getElementById('postTime');
+
+    // Toggle visibility based on checkbox state
+    function togglePostDateFields() {
+        if (postDateNow.checked) {
+            // Checked = Post Now
+            postDateTimeFields.style.display = 'none';
+            postDateInput.required = false;
+            postTimeInput.required = false;
+            postDateInput.value = '';
+            postTimeInput.value = '';
+        } else {
+            // Unchecked = Manual
+            postDateTimeFields.style.display = 'block';
+            postDateInput.required = true;
+            postTimeInput.required = true;
+        }
+    }
+
+    postDateNow.addEventListener('change', togglePostDateFields);
+
+    // Set current date and time when form is submitted with checkbox checked
+    document.querySelector('.create-job-form').addEventListener('submit', function(e) {
+        if (postDateNow.checked) {
+            const now = new Date();
+            postDateInput.value = now.toISOString().split('T')[0];
+            postTimeInput.value = now.toTimeString().slice(0, 5);
+        }
+    });
+});
+</script>
 
 <?php 
 

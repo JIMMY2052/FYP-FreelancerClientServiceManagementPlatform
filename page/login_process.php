@@ -56,12 +56,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     setcookie('worksnyc_remember', $cookie_value, time() + (86400 * 30), '/'); // 30 days
                 }
                 
-                // Redirect to appropriate dashboard
-                if ($user_type === 'freelancer') {
-                    header('Location: freelancer_dashboard.php');
-                } else {
-                    header('Location: client_dashboard.php');
-                }
+                // Redirect back to login page
+                $_SESSION['success'] = 'Login successful! Welcome back.';
+                header('Location: login.php');
                 exit();
             } else {
                 $_SESSION['error'] = 'Your account is not active. Please contact support.';
