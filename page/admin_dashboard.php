@@ -22,6 +22,7 @@ $conn->close();
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -29,21 +30,22 @@ $conn->close();
     <link rel="stylesheet" href="../assets/css/style.css">
     <link rel="stylesheet" href="../assets/css/admin.css">
 </head>
+
 <body class="admin-layout">
     <div class="admin-sidebar">
         <?php include '../includes/admin_sidebar.php'; ?>
     </div>
-    
+
     <div class="admin-layout-wrapper">
         <?php include '../includes/admin_header.php'; ?>
-        
+
         <main class="admin-main-content">
             <div class="dashboard-container">
                 <div class="dashboard-header">
                     <h1>Dashboard</h1>
                     <p>Welcome back, Admin! Here's an overview of your platform.</p>
                 </div>
-                
+
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-card-header">
@@ -55,7 +57,7 @@ $conn->close();
                             ↑ Freelancers: <?php echo $freelancer_count; ?> | Clients: <?php echo $client_count; ?>
                         </div>
                     </div>
-                    
+
                     <div class="stat-card">
                         <div class="stat-card-header">
                             <h3 class="stat-card-title">Active Users</h3>
@@ -66,7 +68,7 @@ $conn->close();
                             ↑ Freelancers: <?php echo $active_freelancers; ?> | Clients: <?php echo $active_clients; ?>
                         </div>
                     </div>
-                    
+
                     <div class="stat-card">
                         <div class="stat-card-header">
                             <h3 class="stat-card-title">Inactive Users</h3>
@@ -77,7 +79,7 @@ $conn->close();
                             Freelancers: <?php echo $freelancer_count - $active_freelancers; ?> | Clients: <?php echo $client_count - $active_clients; ?>
                         </div>
                     </div>
-                    
+
                     <div class="stat-card">
                         <div class="stat-card-header">
                             <h3 class="stat-card-title">Platform Health</h3>
@@ -89,7 +91,7 @@ $conn->close();
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="table-container">
                     <div class="table-header">
                         <h2>Recent Users</h2>
@@ -118,4 +120,5 @@ $conn->close();
         </main>
     </div>
 </body>
+
 </html>

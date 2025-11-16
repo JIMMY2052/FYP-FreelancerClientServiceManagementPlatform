@@ -619,7 +619,8 @@ tbody tr:last-child td {
         font-size: 12px;
     }
 
-    th, td {
+    th,
+    td {
         padding: 10px;
     }
 

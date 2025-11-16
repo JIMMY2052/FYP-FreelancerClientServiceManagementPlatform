@@ -13,14 +13,14 @@ $conn = getDBConnection();
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete') {
     $user_id = $_POST['user_id'] ?? '';
     $user_type = $_POST['user_type'] ?? '';
-    
+
     if (!empty($user_id) && in_array($user_type, ['freelancer', 'client'])) {
         $table = $user_type === 'freelancer' ? 'freelancer' : 'client';
         $id_column = $user_type === 'freelancer' ? 'FreelancerID' : 'ClientID';
-        
+
         $stmt = $conn->prepare("DELETE FROM $table WHERE $id_column = ?");
         $stmt->bind_param("i", $user_id);
-        
+
         if ($stmt->execute()) {
             $_SESSION['success'] = 'User deleted successfully!';
         } else {
@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         }
         $stmt->close();
     }
-    
+
     header('Location: admin_manage_users.php');
     exit();
 }
@@ -38,14 +38,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $user_id = $_POST['user_id'] ?? '';
     $user_type = $_POST['user_type'] ?? '';
     $status = $_POST['status'] ?? 'active';
-    
+
     if (!empty($user_id) && in_array($user_type, ['freelancer', 'client']) && in_array($status, ['active', 'inactive', 'suspended'])) {
         $table = $user_type === 'freelancer' ? 'freelancer' : 'client';
         $id_column = $user_type === 'freelancer' ? 'FreelancerID' : 'ClientID';
-        
+
         $stmt = $conn->prepare("UPDATE $table SET Status = ? WHERE $id_column = ?");
         $stmt->bind_param("si", $status, $user_id);
-        
+
         if ($stmt->execute()) {
             $_SESSION['success'] = 'User status updated successfully!';
         } else {
@@ -53,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         }
         $stmt->close();
     }
-    
+
     header('Location: admin_manage_users.php');
     exit();
 }
@@ -81,7 +81,7 @@ if ($filter_type === 'all') {
     // Get both freelancers and clients
     $freelancer_result = $conn->query($freelancer_query);
     $client_result = $conn->query($client_query);
-    
+
     if ($freelancer_result) {
         while ($row = $freelancer_result->fetch_assoc()) {
             $row['type'] = 'freelancer';
@@ -89,7 +89,7 @@ if ($filter_type === 'all') {
             $users[] = $row;
         }
     }
-    
+
     if ($client_result) {
         while ($row = $client_result->fetch_assoc()) {
             $row['type'] = 'client';
@@ -121,6 +121,7 @@ $conn->close();
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -128,63 +129,63 @@ $conn->close();
     <link rel="stylesheet" href="../assets/css/style.css">
     <link rel="stylesheet" href="../assets/css/admin.css">
 </head>
+
 <body class="admin-layout">
     <div class="admin-sidebar">
         <?php include '../includes/admin_sidebar.php'; ?>
     </div>
-    
+
     <div class="admin-layout-wrapper">
         <?php include '../includes/admin_header.php'; ?>
-        
+
         <main class="admin-main-content">
             <div class="dashboard-container">
                 <div class="dashboard-header">
                     <h1>Manage Users</h1>
                     <p>View and manage all platform users (Freelancers & Clients)</p>
                 </div>
-                
+
                 <?php if (isset($_SESSION['success'])): ?>
                     <div class="error-message" style="background-color: #d1fae5; border-color: #6ee7b7; color: #065f46;">
-                        <?php 
-                            echo htmlspecialchars($_SESSION['success']);
-                            unset($_SESSION['success']);
+                        <?php
+                        echo htmlspecialchars($_SESSION['success']);
+                        unset($_SESSION['success']);
                         ?>
                     </div>
                 <?php endif; ?>
-                
+
                 <?php if (isset($_SESSION['error'])): ?>
                     <div class="error-message">
-                        <?php 
-                            echo htmlspecialchars($_SESSION['error']);
-                            unset($_SESSION['error']);
+                        <?php
+                        echo htmlspecialchars($_SESSION['error']);
+                        unset($_SESSION['error']);
                         ?>
                     </div>
                 <?php endif; ?>
-                
+
                 <!-- Filter Section -->
                 <div style="background-color: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; display: flex; gap: 15px; align-items: center;">
                     <form method="GET" action="admin_manage_users.php" style="display: flex; gap: 15px; width: 100%; align-items: center;">
                         <div style="flex: 1;">
-                            <input 
-                                type="text" 
-                                name="search" 
-                                placeholder="Search by name or email..." 
-                                class="form-control" 
+                            <input
+                                type="text"
+                                name="search"
+                                placeholder="Search by name or email..."
+                                class="form-control"
                                 value="<?php echo htmlspecialchars($search_query); ?>"
-                                style="margin: 0;"
-                            >
+                                style="margin: 0;">
                         </div>
-                        
+
                         <select name="type" class="form-control" style="flex: 0 1 150px; margin: 0;">
                             <option value="all" <?php echo $filter_type === 'all' ? 'selected' : ''; ?>>All Users</option>
                             <option value="freelancer" <?php echo $filter_type === 'freelancer' ? 'selected' : ''; ?>>Freelancers</option>
                             <option value="client" <?php echo $filter_type === 'client' ? 'selected' : ''; ?>>Clients</option>
                         </select>
-                        
+
                         <button type="submit" class="btn-signin" style="margin: 0; padding: 12px 20px; flex: 0 0 auto;">Filter</button>
                     </form>
                 </div>
-                
+
                 <!-- Users Table -->
                 <div class="table-container">
                     <div class="table-header">
@@ -251,4 +252,5 @@ $conn->close();
         </main>
     </div>
 </body>
+
 </html>
