@@ -25,7 +25,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
             <span class="nav-icon">💬</span>
             <span>Messages</span>
         </a>
-        <a href="agreements.php" class="nav-item <?php echo ($current_page === 'agreements.php') ? 'active' : ''; ?>">
+        <a href="agreements.php" class="nav-item <?php echo ($current_page === 'agreement.php') ? 'active' : ''; ?>">
             <span class="nav-icon">📄</span>
             <span>Agreements</span>
         </a>
@@ -39,4 +39,3 @@ $current_page = basename($_SERVER['PHP_SELF']);
         </a>
     </nav>
 </aside>
-
