@@ -1,7 +1,6 @@
     <footer>
         <?= date('Y') ?>
     </footer>
-
-    </body>
-
-    </html>
+    
+</body>
+</html>
