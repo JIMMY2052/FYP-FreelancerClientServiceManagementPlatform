@@ -10,6 +10,30 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_type'])) {
     }
     exit();
 }
+
+// Get error and form data from session
+$hasError = isset($_SESSION['error']);
+$error_message = $_SESSION['error'] ?? '';
+$hasSuccess = isset($_SESSION['success']);
+$success_message = $_SESSION['success'] ?? '';
+$form_data = $_SESSION['form_data'] ?? [
+    'user_type' => 'freelancer',
+    'email' => '',
+    'first_name' => '',
+    'last_name' => '',
+    'company_name' => ''
+];
+
+// Clear session variables after retrieving them
+if ($hasError) {
+    unset($_SESSION['error']);
+}
+if ($hasSuccess) {
+    unset($_SESSION['success']);
+}
+if (isset($_SESSION['form_data'])) {
+    unset($_SESSION['form_data']);
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -33,48 +57,44 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_type'])) {
             <p class="subtitle">Sign up to get started</p>
 
             <form action="signup_process.php" method="POST" class="login-form">
-                <?php if (isset($_SESSION['error'])): ?>
+                <?php if ($hasError): ?>
                     <div class="error-message">
-                        <?php
-                        echo htmlspecialchars($_SESSION['error']);
-                        unset($_SESSION['error']);
-                        ?>
+                        <strong>⚠️ Sign Up Failed</strong><br>
+                        <?php echo htmlspecialchars($error_message); ?>
                     </div>
                 <?php endif; ?>
 
-                <?php if (isset($_SESSION['success'])): ?>
+                <?php if ($hasSuccess): ?>
                     <div class="success-message">
-                        <?php
-                        echo htmlspecialchars($_SESSION['success']);
-                        unset($_SESSION['success']);
-                        ?>
+                        <strong>✓ Success!</strong><br>
+                        <?php echo htmlspecialchars($success_message); ?>
                     </div>
                 <?php endif; ?>
 
                 <div class="form-group">
                     <label for="user_type">Sign up as</label>
-                    <select name="user_type" id="user_type" class="form-control" required>
-                        <option value="freelancer" selected>Freelancer</option>
-                        <option value="client">Client</option>
+                    <select name="user_type" id="user_type" class="form-control<?php echo $hasError ? ' error' : ''; ?>" required>
+                        <option value="freelancer" <?php echo $form_data['user_type'] === 'freelancer' ? 'selected' : ''; ?>>Freelancer</option>
+                        <option value="client" <?php echo $form_data['user_type'] === 'client' ? 'selected' : ''; ?>>Client</option>
                     </select>
                 </div>
 
                 <div id="freelancer-fields">
                     <div class="form-group">
                         <label for="first_name">First Name</label>
-                        <input type="text" id="first_name" name="first_name" class="form-control" placeholder="Enter your first name">
+                        <input type="text" id="first_name" name="first_name" class="form-control<?php echo $hasError ? ' error' : ''; ?>" placeholder="Enter your first name" value="<?php echo htmlspecialchars($form_data['first_name']); ?>">
                     </div>
 
                     <div class="form-group">
                         <label for="last_name">Last Name</label>
-                        <input type="text" id="last_name" name="last_name" class="form-control" placeholder="Enter your last name">
+                        <input type="text" id="last_name" name="last_name" class="form-control<?php echo $hasError ? ' error' : ''; ?>" placeholder="Enter your last name" value="<?php echo htmlspecialchars($form_data['last_name']); ?>">
                     </div>
                 </div>
 
                 <div id="client-fields" class="hidden">
                     <div class="form-group">
                         <label for="company_name">Company Name</label>
-                        <input type="text" id="company_name" name="company_name" class="form-control" placeholder="Enter your company name">
+                        <input type="text" id="company_name" name="company_name" class="form-control<?php echo $hasError ? ' error' : ''; ?>" placeholder="Enter your company name" value="<?php echo htmlspecialchars($form_data['company_name']); ?>">
                     </div>
                 </div>
 
@@ -84,21 +104,22 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_type'])) {
                         type="email"
                         id="email"
                         name="email"
-                        class="form-control"
+                        class="form-control<?php echo $hasError ? ' error' : ''; ?>"
                         placeholder="Enter your email"
+                        value="<?php echo htmlspecialchars($form_data['email']); ?>"
                         required>
                 </div>
 
                 <div class="form-group">
                     <label for="password">Password</label>
+                    <small style="color: #6b7280; display: block; margin-bottom: 5px;">Minimum 8 characters, must include at least one special character (!@#$%^&* etc.)</small>
                     <input
                         type="password"
                         id="password"
                         name="password"
-                        class="form-control"
+                        class="form-control<?php echo $hasError ? ' error' : ''; ?>"
                         placeholder="Create a password"
-                        required
-                        minlength="6">
+                        required>
                 </div>
 
                 <div class="form-group">
@@ -107,7 +128,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_type'])) {
                         type="password"
                         id="confirm_password"
                         name="confirm_password"
-                        class="form-control"
+                        class="form-control<?php echo $hasError ? ' error' : ''; ?>"
                         placeholder="Confirm your password"
                         required>
                 </div>
