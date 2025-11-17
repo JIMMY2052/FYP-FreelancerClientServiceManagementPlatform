@@ -1,7 +1,6 @@
 <?php
 require_once 'config.php';
 
-// Redirect if already logged in
 if (isset($_SESSION['user_id']) && isset($_SESSION['user_type'])) {
     if ($_SESSION['user_type'] === 'freelancer') {
         header('Location: ../freelancer_home.php');
@@ -9,6 +8,19 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_type'])) {
         header('Location: ../client_home.php');
     }
     exit();
+}
+
+// Get form data and error from session
+$hasError = isset($_SESSION['error']);
+$error_message = $_SESSION['error'] ?? '';
+$form_data = $_SESSION['form_data'] ?? ['email' => '', 'user_type' => 'freelancer'];
+
+// Clear session variables after retrieving them
+if ($hasError) {
+    unset($_SESSION['error']);
+}
+if (isset($_SESSION['form_data'])) {
+    unset($_SESSION['form_data']);
 }
 ?>
 <!DOCTYPE html>
@@ -32,20 +44,18 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_type'])) {
             <p class="subtitle">Sign in to continue to your dashboard</p>
 
             <form action="login_process.php" method="POST" class="login-form">
-                <?php if (isset($_SESSION['error'])): ?>
+                <?php if ($hasError): ?>
                     <div class="error-message">
-                        <?php
-                        echo htmlspecialchars($_SESSION['error']);
-                        unset($_SESSION['error']);
-                        ?>
+                        <strong>Login Failed</strong><br>
+                        <?php echo htmlspecialchars($error_message); ?>
                     </div>
                 <?php endif; ?>
 
                 <div class="form-group">
                     <label for="user_type">Login as</label>
-                    <select name="user_type" id="user_type" class="form-control" required>
-                        <option value="freelancer" selected>Freelancer</option>
-                        <option value="client">Client</option>
+                    <select name="user_type" id="user_type" class="form-control<?php echo $hasError ? ' error' : ''; ?>" required>
+                        <option value="freelancer" <?php echo $form_data['user_type'] === 'freelancer' ? 'selected' : ''; ?>>Freelancer</option>
+                        <option value="client" <?php echo $form_data['user_type'] === 'client' ? 'selected' : ''; ?>>Client</option>
                     </select>
                 </div>
 
@@ -55,9 +65,9 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_type'])) {
                         type="email"
                         id="email"
                         name="email"
-                        class="form-control"
+                        class="form-control<?php echo $hasError ? ' error' : ''; ?>"
                         placeholder="Enter your email"
-                        value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>"
+                        value="<?php echo htmlspecialchars($form_data['email']); ?>"
                         required>
                 </div>
 
@@ -67,7 +77,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_type'])) {
                         type="password"
                         id="password"
                         name="password"
-                        class="form-control"
+                        class="form-control<?php echo $hasError ? ' error' : ''; ?>"
                         placeholder="Enter your password"
                         required>
                 </div>

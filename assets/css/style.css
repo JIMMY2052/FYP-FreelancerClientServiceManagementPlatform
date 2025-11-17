@@ -212,6 +212,23 @@ select.form-control {
     margin-bottom: 20px;
 }
 
+.form-control.error {
+    border-color: #dc2626;
+    background-color: #fff5f5;
+}
+
+.form-control.error:focus {
+    border-color: #dc2626;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+.error-text {
+    color: #dc2626;
+    font-size: 12px;
+    margin-top: 6px;
+    display: block;
+}
+
 .success-message {
     background-color: #d1fae5;
     border: 1px solid #6ee7b7;

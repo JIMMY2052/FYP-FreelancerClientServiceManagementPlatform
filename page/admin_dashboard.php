@@ -1,7 +1,7 @@
 <?php
 require_once 'config.php';
 
-// Check if admin is logged in
+
 if (!isset($_SESSION['admin_id']) || !isset($_SESSION['is_admin'])) {
     header('Location: admin_login.php');
     exit();
@@ -9,12 +9,12 @@ if (!isset($_SESSION['admin_id']) || !isset($_SESSION['is_admin'])) {
 
 $conn = getDBConnection();
 
-// Get total statistics
+
 $freelancer_count = $conn->query("SELECT COUNT(*) as count FROM freelancer")->fetch_assoc()['count'];
 $client_count = $conn->query("SELECT COUNT(*) as count FROM client")->fetch_assoc()['count'];
 $total_users = $freelancer_count + $client_count;
 
-// Get active users
+
 $active_freelancers = $conn->query("SELECT COUNT(*) as count FROM freelancer WHERE Status = 'active'")->fetch_assoc()['count'];
 $active_clients = $conn->query("SELECT COUNT(*) as count FROM client WHERE Status = 'active'")->fetch_assoc()['count'];
 

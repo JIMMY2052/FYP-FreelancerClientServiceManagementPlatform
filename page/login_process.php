@@ -10,6 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validate input
     if (empty($user_type) || empty($email) || empty($password)) {
         $_SESSION['error'] = 'Please fill in all fields.';
+        $_SESSION['form_data'] = ['email' => $email, 'user_type' => $user_type];
         header('Location: login.php');
         exit();
     }
@@ -17,6 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validate user type
     if (!in_array($user_type, ['freelancer', 'client'])) {
         $_SESSION['error'] = 'Invalid user type.';
+        $_SESSION['form_data'] = ['email' => $email, 'user_type' => $user_type];
         header('Location: login.php');
         exit();
     }
@@ -69,6 +71,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $_SESSION['error'] = 'Invalid email or password.';
     }
+    
+    // Preserve form data for re-display
+    $_SESSION['form_data'] = ['email' => $email, 'user_type' => $user_type];
     
     $stmt->close();
     $conn->close();

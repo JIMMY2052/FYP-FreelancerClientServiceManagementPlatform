@@ -21,8 +21,7 @@ if (isset($_SESSION['admin_id'])) {
     <div class="login-container">
         <div class="login-card">
             <div class="logo-section">
-                <div class="logo-icon">🔐</div>
-                <h1 class="logo-text">WorkSnyc Admin</h1>
+                <img src="../images/logo.png" alt="WorkSnyc Logo" class="logo-icon">
             </div>
 
             <h2 class="welcome-text">Admin Portal</h2>
