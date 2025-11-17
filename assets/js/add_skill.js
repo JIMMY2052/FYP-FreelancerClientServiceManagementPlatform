@@ -8,7 +8,7 @@ function openAddSkillModal() {
     document.body.style.overflow = 'hidden';
     const searchInput = document.getElementById('skill-search');
     searchInput.focus();
-    
+
     // Show initial suggestions (popular skills not yet added)
     showInitialSuggestions();
 }
@@ -16,17 +16,17 @@ function openAddSkillModal() {
 function showInitialSuggestions() {
     const resultsContainer = document.getElementById('skill-search-results');
     resultsContainer.innerHTML = '';
-    
+
     // Get skills not yet added, limit to 8
     const availableSkills = allSkills
         .filter(skill => !currentSkillIds.includes(skill.SkillID))
         .slice(0, 8);
-    
+
     if (availableSkills.length === 0) {
         resultsContainer.style.display = 'none';
         return;
     }
-    
+
     availableSkills.forEach(skill => {
         const item = document.createElement('div');
         item.className = 'skill-result-item';
@@ -40,7 +40,7 @@ function showInitialSuggestions() {
         };
         resultsContainer.appendChild(item);
     });
-    
+
     resultsContainer.style.display = 'block';
 }
 
@@ -60,7 +60,7 @@ function highlightSelectedSkill(skillId) {
     document.querySelectorAll('.skill-result-item').forEach(item => {
         item.classList.remove('selected');
     });
-    
+
     // Highlight selected
     const selectedItem = document.querySelector(`.skill-result-item[data-skill-id="${skillId}"]`);
     if (selectedItem) {
@@ -71,17 +71,17 @@ function highlightSelectedSkill(skillId) {
 function filterSkills(searchTerm) {
     const resultsContainer = document.getElementById('skill-search-results');
     resultsContainer.innerHTML = '';
-    
+
     if (!searchTerm || searchTerm.trim() === '') {
         resultsContainer.style.display = 'none';
         selectedSkillId = null;
         selectedSkillName = null;
         return;
     }
-    
+
     const searchLower = searchTerm.toLowerCase().trim();
     const searchWords = searchLower.split(' ').filter(word => word.length > 0);
-    
+
     // Filter and score skills
     const filtered = allSkills
         .filter(skill => {
@@ -91,7 +91,7 @@ function filterSkills(searchTerm) {
         .map(skill => {
             const skillNameLower = skill.SkillName.toLowerCase();
             let score = 0;
-            
+
             // Exact match gets highest score
             if (skillNameLower === searchLower) {
                 score = 1000;
@@ -108,13 +108,13 @@ function filterSkills(searchTerm) {
             else if (searchWords.some(word => skillNameLower.includes(word))) {
                 score = 50;
             }
-            
+
             return { ...skill, score };
         })
         .filter(skill => skill.score > 0)
         .sort((a, b) => b.score - a.score)
         .slice(0, 10);
-    
+
     if (filtered.length === 0) {
         // Show option to add new skill
         const newSkillItem = document.createElement('div');
@@ -133,13 +133,13 @@ function filterSkills(searchTerm) {
         resultsContainer.style.display = 'block';
         return;
     }
-    
+
     // Show suggestions
     filtered.forEach(skill => {
         const item = document.createElement('div');
         item.className = 'skill-result-item';
         item.setAttribute('data-skill-id', skill.SkillID);
-        
+
         // Highlight matching text
         const skillName = skill.SkillName;
         let highlightedName = skillName;
@@ -147,7 +147,7 @@ function filterSkills(searchTerm) {
             const regex = new RegExp(`(${searchWords.join('|')})`, 'gi');
             highlightedName = skillName.replace(regex, '<strong>$1</strong>');
         }
-        
+
         item.innerHTML = `<span>${highlightedName}</span>`;
         item.onclick = () => {
             selectedSkillId = skill.SkillID;
@@ -157,7 +157,7 @@ function filterSkills(searchTerm) {
         };
         resultsContainer.appendChild(item);
     });
-    
+
     // Add option to create new skill if search doesn't match exactly
     const exactMatch = filtered.find(s => s.SkillName.toLowerCase() === searchLower);
     if (!exactMatch && searchTerm.trim().length > 0) {
@@ -175,7 +175,7 @@ function filterSkills(searchTerm) {
         };
         resultsContainer.appendChild(newSkillItem);
     }
-    
+
     resultsContainer.style.display = 'block';
 }
 
@@ -184,22 +184,22 @@ function saveSkill() {
         alert('Please select or enter a skill name.');
         return;
     }
-    
+
     // Check if skill already exists in current skills
     const currentContainer = document.getElementById('current-skills-container');
     const existingSkill = Array.from(currentContainer.querySelectorAll('.skill-tag-item')).find(item => {
         return item.querySelector('.skill-tag-name').textContent === selectedSkillName;
     });
-    
+
     if (existingSkill) {
         alert('This skill is already added.');
         return;
     }
-    
+
     // If skill doesn't exist in database, we'll need to create it
     // For now, we'll use the skill ID if it exists, or create a placeholder
     let skillId = selectedSkillId;
-    
+
     // Create skill tag element
     const skillTag = document.createElement('div');
     skillTag.className = 'skill-tag-item';
@@ -210,8 +210,14 @@ function saveSkill() {
         <input type="hidden" name="skills[]" value="${skillId || selectedSkillName}">
         <input type="hidden" name="proficiency[${skillId || selectedSkillName}]" value="Intermediate">
     `;
-    
+
     currentContainer.appendChild(skillTag);
+
+    // Update currentSkillIds if this is a database skill
+    if (selectedSkillId) {
+        currentSkillIds.push(selectedSkillId);
+    }
+
     closeAddSkillModal();
 }
 
@@ -219,34 +225,42 @@ function removeSkill(skillId) {
     const skillTag = document.querySelector(`.skill-tag-item[data-skill-id="${skillId}"]`);
     if (skillTag) {
         skillTag.remove();
+
+        // Remove from currentSkillIds if it's a database skill
+        if (skillId !== 'new' && !isNaN(skillId)) {
+            const index = currentSkillIds.indexOf(parseInt(skillId));
+            if (index > -1) {
+                currentSkillIds.splice(index, 1);
+            }
+        }
     }
 }
 
 // Search input event listener
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const searchInput = document.getElementById('skill-search');
     if (searchInput) {
         let debounceTimer;
-        
+
         // Debounced input for better performance
-        searchInput.addEventListener('input', function(e) {
+        searchInput.addEventListener('input', function (e) {
             clearTimeout(debounceTimer);
             debounceTimer = setTimeout(() => {
                 filterSkills(e.target.value);
             }, 150);
         });
-        
+
         // Show suggestions on focus
-        searchInput.addEventListener('focus', function(e) {
+        searchInput.addEventListener('focus', function (e) {
             if (e.target.value.trim()) {
                 filterSkills(e.target.value);
             } else {
                 showInitialSuggestions();
             }
         });
-        
+
         // Hide suggestions when clicking outside
-        document.addEventListener('click', function(e) {
+        document.addEventListener('click', function (e) {
             const searchContainer = document.querySelector('.skill-search-container');
             const results = document.getElementById('skill-search-results');
             if (searchContainer && results && !searchContainer.contains(e.target) && e.target !== searchInput) {
@@ -256,12 +270,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         });
-        
+
         // Handle keyboard navigation
         let selectedIndex = -1;
-        searchInput.addEventListener('keydown', function(e) {
+        searchInput.addEventListener('keydown', function (e) {
             const results = document.querySelectorAll('.skill-result-item');
-            
+
             if (e.key === 'ArrowDown') {
                 e.preventDefault();
                 selectedIndex = Math.min(selectedIndex + 1, results.length - 1);
@@ -281,7 +295,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('skill-search-results').style.display = 'none';
             }
         });
-        
+
         function updateSelection(results, index) {
             results.forEach((item, i) => {
                 if (i === index) {
@@ -293,11 +307,11 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     }
-    
+
     // Close modal when clicking outside
     const modal = document.getElementById('add-skill-modal');
     if (modal) {
-        modal.addEventListener('click', function(e) {
+        modal.addEventListener('click', function (e) {
             if (e.target === modal) {
                 closeAddSkillModal();
             }

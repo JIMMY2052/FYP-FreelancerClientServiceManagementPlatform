@@ -57,7 +57,7 @@ $conn->close();
     <link rel="stylesheet" href="/assets/css/style.css">
     <link rel="stylesheet" href="/assets/css/dashboard.css">
     <link rel="stylesheet" href="/assets/css/profile.css">
-    <script src="assets/js/add_skill.js" defer></script>
+    <script src="/assets/js/add_skill.js" defer></script>
 </head>
 
 <body class="profile-page">
