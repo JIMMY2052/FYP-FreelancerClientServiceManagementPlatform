@@ -41,7 +41,7 @@
                     <ul class="footer-links">
                         <li><a href="#">About Us</a></li>
                         <li><a href="#">How It Works</a></li>
-                        <li><a href="#">Contact Us</a></li>
+                        <li><a href="/page/contact_us.php">Contact Us</a></li>
                         <li><a href="#">Careers</a></li>
                     </ul>
                 </div>

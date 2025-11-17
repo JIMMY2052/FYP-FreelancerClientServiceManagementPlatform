@@ -16,7 +16,17 @@ require_once __DIR__ . '/page/config.php';
     <header class="main-header">
         <div class="header-container">
             <div class="header-logo">
-                <a href="/index.php">
+                <a href="<?php 
+                    if (isset($_SESSION['user_id']) && isset($_SESSION['user_type'])) {
+                        if ($_SESSION['user_type'] === 'freelancer') {
+                            echo '/freelancer_home.php';
+                        } else {
+                            echo '/client_home.php';
+                        }
+                    } else {
+                        echo '/index.php';
+                    }
+                ?>">
                     <img src="/images/logo.png" alt="Freelancer Platform Logo" class="logo-img">
                 </a>
             </div>
