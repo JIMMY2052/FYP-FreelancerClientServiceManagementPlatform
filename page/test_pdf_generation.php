@@ -103,7 +103,12 @@ if ($conn) {
                 echo "<td>" . htmlspecialchars($row['ProjectTitle']) . "</td>";
                 echo "<td>RM " . number_format($row['PaymentAmount'], 2) . "</td>";
                 echo "<td>" . ucfirst($row['Status']) . "</td>";
-                echo "<td><a href='agreement_pdf.php?id=" . $row['AgreementID'] . "' target='_blank' style='color: #1ab394; text-decoration: none;'>Download PDF</a></td>";
+                echo "<td>";
+                echo "<form method='POST' action='agreement_pdf.php' style='display:inline;'>";
+                echo "<input type='hidden' name='agreement_id' value='" . $row['AgreementID'] . "'>";
+                echo "<button type='submit' style='color: #1ab394; text-decoration: none; background: none; border: none; cursor: pointer; padding: 0;'>Download PDF</button>";
+                echo "</form>";
+                echo "</td>";
                 echo "</tr>";
             }
             echo "</table>";

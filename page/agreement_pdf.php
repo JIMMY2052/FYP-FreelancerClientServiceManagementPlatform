@@ -7,12 +7,24 @@ if (session_status() === PHP_SESSION_NONE) {
 // Include database configuration
 include 'config.php';
 
+// Only allow POST requests for security
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    die("Invalid request method. PDF download requires form submission.");
+}
+
+// Verify user is logged in
+if (!isset($_SESSION['user_type'])) {
+    $_SESSION['error'] = "You must be logged in to create an agreement.";
+    header("Location: login.php");
+    exit();
+}
+
 // Check if agreement ID is provided
-if (!isset($_GET['id'])) {
+if (!isset($_POST['agreement_id'])) {
     die("Agreement ID is required.");
 }
 
-$agreement_id = intval($_GET['id']);
+$agreement_id = intval($_POST['agreement_id']);
 
 // Get database connection
 $conn = getDBConnection();

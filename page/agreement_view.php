@@ -4,69 +4,27 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Include database configuration
-include 'config.php';
-
-// Check if agreement ID is provided
-if (!isset($_GET['id'])) {
+// Check if agreement data is in session
+if (!isset($_SESSION['agreement'])) {
+    $_SESSION['error'] = "No agreement data found. Please create a new agreement.";
     header("Location: agreement.php");
     exit();
 }
 
-$agreement_id = intval($_GET['id']);
-$conn = getDBConnection();
-
-// Fetch agreement data
-$sql = "SELECT * FROM agreement WHERE AgreementID = ?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param('i', $agreement_id);
-$stmt->execute();
-$result = $stmt->get_result();
-
-if ($result->num_rows === 0) {
-    $_SESSION['error'] = "Agreement not found.";
-    header("Location: agreement.php");
-    exit();
-}
-
-$agreement = $result->fetch_assoc();
-$stmt->close();
-$conn->close();
+// Get agreement data from session
+$agreement = $_SESSION['agreement'];
+$agreement_id = isset($agreement['agreement_id']) ? $agreement['agreement_id'] : uniqid('AGR-');
 
 // Get freelancer and client names for display
 $freelancer_name = "Freelancer Name";
 $client_name = "Client Name";
 
 if (isset($_SESSION['freelancer_id'])) {
-    $conn = getDBConnection();
-    $freelancer_id = $_SESSION['freelancer_id'];
-    $sql = "SELECT FirstName, LastName FROM freelancer WHERE FreelancerID = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param('i', $freelancer_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    if ($result->num_rows > 0) {
-        $freelancer = $result->fetch_assoc();
-        $freelancer_name = $freelancer['FirstName'] . ' ' . $freelancer['LastName'];
-    }
-    $stmt->close();
-    $conn->close();
+    $freelancer_name = $_SESSION['freelancer_name'] ?? "Freelancer Name";
 }
 
 if (isset($_SESSION['client_id'])) {
-    $conn = getDBConnection();
-    $client_id = $_SESSION['client_id'];
-    $sql = "SELECT CompanyName FROM client WHERE ClientID = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param('i', $client_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    if ($result->num_rows > 0) {
-        $client = $result->fetch_assoc();
-        $client_name = $client['CompanyName'];
-    }
-    $stmt->close();
-    $conn->close();
+    $client_name = $_SESSION['client_name'] ?? "Client Name";
 }
 
 // Get success message from redirect
@@ -315,9 +273,10 @@ $showSuccess = isset($_GET['status']) && $_GET['status'] === 'created';
     <div class="container">
 
         <div class="button-group">
-            <a href="agreement_pdf.php?id=<?php echo $agreement_id; ?>" class="btn btn-primary" target="_blank">
-                📥 Download as PDF
-            </a>
+            <form method="POST" action="agreement_pdf.php" style="display: inline;">
+                <input type="hidden" name="agreement_id" value="<?php echo $agreement_id; ?>">
+                <button type="submit" class="btn btn-primary">📥 Download as PDF</button>
+            </form>
             <a href="agreement.php" class="btn btn-secondary">
                 ← Back to Create Agreement
             </a>
@@ -326,8 +285,8 @@ $showSuccess = isset($_GET['status']) && $_GET['status'] === 'created';
         <!-- PREVIEW SECTION -->
         <div class="preview-header">
             <div class="preview-header-left">
-                <h3><?php echo htmlspecialchars($agreement['ProjectTitle']); ?></h3>
-                <p><?php echo htmlspecialchars($agreement['ProjectDetail']); ?></p>
+                <h3><?php echo htmlspecialchars($agreement['project_title']); ?></h3>
+                <p><?php echo htmlspecialchars($agreement['project_detail']); ?></p>
             </div>
             <div class="preview-header-right">
                 <span class="label">Offer from:</span>
@@ -335,7 +294,7 @@ $showSuccess = isset($_GET['status']) && $_GET['status'] === 'created';
                 <span class="label" style="margin-top: 12px;">To:</span>
                 <span class="value"><?php echo htmlspecialchars($client_name); ?></span>
                 <span class="label" style="margin-top: 12px;">Date:</span>
-                <span class="value"><?php echo date('F j, Y', strtotime($agreement['SignedDate'])); ?></span>
+                <span class="value"><?php echo date('F j, Y', strtotime($agreement['created_date'])); ?></span>
             </div>
         </div>
 
@@ -346,7 +305,7 @@ $showSuccess = isset($_GET['status']) && $_GET['status'] === 'created';
                 <div class="section-title">Scope of Work</div>
             </div>
             <div class="section-content">
-                <?php echo htmlspecialchars($agreement['Scope']); ?>
+                <?php echo htmlspecialchars($agreement['scope']); ?>
             </div>
         </div>
 
@@ -357,7 +316,7 @@ $showSuccess = isset($_GET['status']) && $_GET['status'] === 'created';
                 <div class="section-title">Deliverables & Timeline</div>
             </div>
             <div class="section-content">
-                <?php echo htmlspecialchars($agreement['Deliverables']); ?>
+                <?php echo htmlspecialchars($agreement['deliverables']); ?>
             </div>
         </div>
 
@@ -371,7 +330,7 @@ $showSuccess = isset($_GET['status']) && $_GET['status'] === 'created';
                 <div class="payment-box">
                     <div class="payment-total">
                         <span class="payment-label">Total Project Price:</span>
-                        <span class="payment-amount">RM <?php echo number_format($agreement['PaymentAmount'], 2); ?></span>
+                        <span class="payment-amount">RM <?php echo number_format($agreement['payment'], 2); ?></span>
                     </div>
                     <p style="color: #5a6b7d; font-size: 0.95rem;">Payment will be released in milestones upon completion of deliverables.</p>
                 </div>
@@ -385,7 +344,7 @@ $showSuccess = isset($_GET['status']) && $_GET['status'] === 'created';
                 <div class="section-title">Terms & Conditions</div>
             </div>
             <div class="section-content">
-                <?php echo htmlspecialchars($agreement['Terms']); ?>
+                <?php echo htmlspecialchars($agreement['terms']); ?>
             </div>
         </div>
 
@@ -393,8 +352,8 @@ $showSuccess = isset($_GET['status']) && $_GET['status'] === 'created';
         <div style="margin-top: 40px; padding-top: 24px; border-top: 1px solid #e5e7eb; text-align: center;">
             <p style="color: #999; font-size: 0.9rem;">
                 Agreement ID: <strong><?php echo $agreement_id; ?></strong> |
-                Status: <strong><?php echo ucfirst($agreement['Status']); ?></strong> |
-                Created: <strong><?php echo date('F j, Y', strtotime($agreement['SignedDate'])); ?></strong>
+                Status: <strong>Created</strong> |
+                Created: <strong><?php echo date('F j, Y', strtotime($agreement['created_date'])); ?></strong>
             </p>
         </div>
 

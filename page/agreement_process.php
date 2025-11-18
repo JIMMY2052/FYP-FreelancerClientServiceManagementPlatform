@@ -8,7 +8,7 @@ if (session_status() === PHP_SESSION_NONE) {
 include 'config.php';
 
 // Check if user is logged in
-if (!isset($_SESSION['user_type']) && !isset($_SESSION['user_type'])) {
+if (!isset($_SESSION['user_type'])) {
     $_SESSION['error'] = "You must be logged in to create an agreement.";
     header("Location: login.php");
     exit();
@@ -20,10 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit();
 }
 
-// Get database connection
-$conn = getDBConnection();
-
-// Validate and sanitize input
+// Get POST data
 $project_title = isset($_POST['project_title']) ? trim($_POST['project_title']) : '';
 $project_detail = isset($_POST['project_detail']) ? trim($_POST['project_detail']) : '';
 $scope = isset($_POST['scope']) ? trim($_POST['scope']) : '';
@@ -65,7 +62,10 @@ if (!empty($errors)) {
     exit();
 }
 
-// Prepare SQL statement for inserting agreement
+// Get database connection
+$conn = getDBConnection();
+
+// Insert agreement into database
 $sql = "INSERT INTO agreement (ProjectTitle, ProjectDetail, Scope, Deliverables, PaymentAmount, Terms, Status, SignedDate) 
         VALUES (?, ?, ?, ?, ?, ?, ?, NOW())";
 
@@ -78,7 +78,7 @@ if (!$stmt) {
 }
 
 // Bind parameters
-$status = 'pending'; // Default status
+$status = 'pending';
 $stmt->bind_param(
     'ssssdss',
     $project_title,
@@ -95,10 +95,23 @@ if ($stmt->execute()) {
     // Get the ID of the newly inserted agreement
     $agreement_id = $stmt->insert_id;
 
+    // Store agreement data in session
+    $_SESSION['agreement'] = array(
+        'agreement_id' => $agreement_id,
+        'project_title' => $project_title,
+        'project_detail' => $project_detail,
+        'scope' => $scope,
+        'deliverables' => $deliverables,
+        'payment' => $payment,
+        'terms' => $terms,
+        'created_date' => date('Y-m-d H:i:s'),
+        'status' => 'pending'
+    );
+
     $_SESSION['success'] = "Agreement created successfully with ID: " . $agreement_id;
 
     // Redirect to view the created agreement
-    header("Location: agreement_view.php?id=" . $agreement_id . "&status=created");
+    header("Location: agreement_view.php?status=created");
     exit();
 } else {
     $_SESSION['error'] = "Error creating agreement: " . $stmt->error;

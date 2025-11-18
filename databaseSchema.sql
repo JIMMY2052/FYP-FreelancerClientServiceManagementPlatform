@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 18, 2025 at 08:59 AM
+-- Generation Time: Nov 18, 2025 at 12:35 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 SET
@@ -50,10 +50,10 @@ CREATE TABLE
         `SignedDate` date DEFAULT NULL,
         `Status` varchar(50) DEFAULT NULL,
         `ProjectTitle` varchar(255) DEFAULT NULL,
-        `ProjectDetail` text DEFAULT NULL,
         `Scope` text DEFAULT NULL,
         `Deliverables` text DEFAULT NULL,
-        `PaymentAmount` decimal(10, 2) DEFAULT NULL
+        `PaymentAmount` decimal(10, 2) DEFAULT NULL,
+        `ProjectDetail` text DEFAULT NULL
     ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -792,8 +792,7 @@ ADD UNIQUE KEY `Email` (`Email`);
 --
 -- Indexes for table `agreement`
 --
-ALTER TABLE `agreement` ADD PRIMARY KEY (`AgreementID`),
-ADD KEY `ApplicationID` (`ApplicationID`);
+ALTER TABLE `agreement` ADD PRIMARY KEY (`AgreementID`);
 
 --
 -- Indexes for table `client`
@@ -826,7 +825,6 @@ ADD KEY `SkillID` (`SkillID`);
 -- Indexes for table `history`
 --
 ALTER TABLE `history` ADD PRIMARY KEY (`HistoryID`),
-ADD KEY `ApplicationID` (`ApplicationID`),
 ADD KEY `FreelancerID` (`FreelancerID`),
 ADD KEY `ClientID` (`ClientID`);
 
@@ -855,8 +853,7 @@ ADD KEY `idx_agreement` (`AgreementID`);
 --
 -- Indexes for table `payment`
 --
-ALTER TABLE `payment` ADD PRIMARY KEY (`PaymentID`),
-ADD KEY `ApplicationID` (`ApplicationID`);
+ALTER TABLE `payment` ADD PRIMARY KEY (`PaymentID`);
 
 --
 -- Indexes for table `review`
@@ -953,11 +950,6 @@ AUTO_INCREMENT = 4;
 -- Constraints for dumped tables
 --
 --
--- Constraints for table `agreement`
---
-ALTER TABLE `agreement` ADD CONSTRAINT `agreement_ibfk_1` FOREIGN KEY (`ApplicationID`) REFERENCES `application` (`ApplicationID`) ON DELETE CASCADE;
-
---
 -- Constraints for table `freelancerskill`
 --
 ALTER TABLE `freelancerskill` ADD CONSTRAINT `freelancerskill_ibfk_1` FOREIGN KEY (`FreelancerID`) REFERENCES `freelancer` (`FreelancerID`) ON DELETE CASCADE,
@@ -966,8 +958,7 @@ ADD CONSTRAINT `freelancerskill_ibfk_2` FOREIGN KEY (`SkillID`) REFERENCES `skil
 --
 -- Constraints for table `history`
 --
-ALTER TABLE `history` ADD CONSTRAINT `history_ibfk_1` FOREIGN KEY (`ApplicationID`) REFERENCES `application` (`ApplicationID`) ON DELETE CASCADE,
-ADD CONSTRAINT `history_ibfk_2` FOREIGN KEY (`FreelancerID`) REFERENCES `freelancer` (`FreelancerID`),
+ALTER TABLE `history` ADD CONSTRAINT `history_ibfk_2` FOREIGN KEY (`FreelancerID`) REFERENCES `freelancer` (`FreelancerID`),
 ADD CONSTRAINT `history_ibfk_3` FOREIGN KEY (`ClientID`) REFERENCES `client` (`ClientID`);
 
 --
@@ -984,11 +975,6 @@ ALTER TABLE `message` ADD CONSTRAINT `message_ibfk_3` FOREIGN KEY (`Conversation
 -- Constraints for table `milestone`
 --
 ALTER TABLE `milestone` ADD CONSTRAINT `milestone_ibfk_1` FOREIGN KEY (`AgreementID`) REFERENCES `agreement` (`AgreementID`) ON DELETE CASCADE;
-
---
--- Constraints for table `payment`
---
-ALTER TABLE `payment` ADD CONSTRAINT `payment_ibfk_1` FOREIGN KEY (`ApplicationID`) REFERENCES `application` (`ApplicationID`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `review`
