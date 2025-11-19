@@ -64,13 +64,13 @@ $search_query = $_GET['search'] ?? '';
 $sort_by = $_GET['sort'] ?? 'date_desc';
 
 // Build freelancer query
-$freelancer_query = "SELECT FreelancerID, Name, Email, Status, CreatedAt FROM freelancer";
+$freelancer_query = "SELECT FreelancerID, Name, Email, Status, CreatedAt, ProfilePicture FROM freelancer";
 if (!empty($search_query)) {
     $freelancer_query .= " WHERE Name LIKE '%$search_query%' OR Email LIKE '%$search_query%'";
 }
 
 // Build client query
-$client_query = "SELECT ClientID, CompanyName as Name, Email, Status, CreatedAt FROM client";
+$client_query = "SELECT ClientID, CompanyName as Name, Email, Status, CreatedAt, CompanyLogo as ProfilePicture FROM client";
 if (!empty($search_query)) {
     $client_query .= " WHERE CompanyName LIKE '%$search_query%' OR Email LIKE '%$search_query%'";
 }
@@ -140,9 +140,12 @@ $conn->close();
 
         <main class="admin-main-content">
             <div class="dashboard-container">
-                <div class="dashboard-header">
-                    <h1>Manage Users</h1>
-                    <p>View and manage all platform users (Freelancers & Clients)</p>
+                <div class="dashboard-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h1>User Management</h1>
+                        <p>Manage access and roles for platform users</p>
+                    </div>
+                    <a href="add_user.php" class="btn-signin" style="padding: 12px 24px; text-decoration: none; display: inline-block; border-radius: 8px; margin: 0;">+ Add User</a>
                 </div>
 
                 <?php if (isset($_SESSION['success'])): ?>
@@ -206,7 +209,16 @@ $conn->close();
                             <?php if (count($users) > 0): ?>
                                 <?php foreach ($users as $user): ?>
                                     <tr>
-                                        <td><?php echo htmlspecialchars($user['Name'] ?? ''); ?></td>
+                                        <td>
+                                            <div style="display: flex; align-items: center; gap: 12px;">
+                                                <img src="<?php echo !empty($user['ProfilePicture']) ? htmlspecialchars($user['ProfilePicture']) : '../images/default-avatar.png'; ?>" 
+                                                     alt="<?php echo htmlspecialchars($user['Name'] ?? ''); ?>" 
+                                                     style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                                                <div>
+                                                    <div style="font-weight: 600;"><?php echo htmlspecialchars($user['Name'] ?? ''); ?></div>
+                                                </div>
+                                            </div>
+                                        </td>
                                         <td><?php echo htmlspecialchars($user['Email'] ?? ''); ?></td>
                                         <td>
                                             <span class="badge <?php echo $user['type'] === 'freelancer' ? 'badge-freelancer' : 'badge-client'; ?>">
@@ -218,16 +230,17 @@ $conn->close();
                                                 <input type="hidden" name="action" value="update_status">
                                                 <input type="hidden" name="user_id" value="<?php echo $user[$user['type'] === 'freelancer' ? 'FreelancerID' : 'ClientID']; ?>">
                                                 <input type="hidden" name="user_type" value="<?php echo $user['type']; ?>">
-                                                <select name="status" class="form-control" onchange="this.form.submit();" style="padding: 6px 8px; font-size: 12px;">
+                                                <select name="status" class="form-control" onchange="this.form.submit();" style="padding: 6px 8px; font-size: 12px; border-radius: 6px; border: 1px solid var(--border-color);">
                                                     <option value="active" <?php echo ($user['Status'] ?? '') === 'active' ? 'selected' : ''; ?>>Active</option>
                                                     <option value="inactive" <?php echo ($user['Status'] ?? '') === 'inactive' ? 'selected' : ''; ?>>Inactive</option>
                                                     <option value="suspended" <?php echo ($user['Status'] ?? '') === 'suspended' ? 'selected' : ''; ?>>Suspended</option>
                                                 </select>
                                             </form>
                                         </td>
-                                        <td><?php echo date('M d, Y', strtotime($user['created'] ?? 'now')); ?></td>
+                                        <td><?php echo date('Y-m-d', strtotime($user['created'] ?? 'now')); ?></td>
                                         <td>
                                             <div class="action-buttons">
+                                                <a href="edit_user.php?id=<?php echo $user[$user['type'] === 'freelancer' ? 'FreelancerID' : 'ClientID']; ?>&type=<?php echo $user['type']; ?>" class="btn-sm" style="background-color: #3b82f6; color: white; text-decoration: none; padding: 6px 12px; border-radius: 6px;">Edit</a>
                                                 <form method="POST" action="admin_manage_users.php" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this user?');">
                                                     <input type="hidden" name="action" value="delete">
                                                     <input type="hidden" name="user_id" value="<?php echo $user[$user['type'] === 'freelancer' ? 'FreelancerID' : 'ClientID']; ?>">
