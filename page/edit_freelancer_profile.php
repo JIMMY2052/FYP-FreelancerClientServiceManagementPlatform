@@ -96,7 +96,6 @@ $conn->close();
                 <form action="edit_profile_process.php" method="POST" class="edit-profile-form">
                     <input type="hidden" name="user_type" value="freelancer">
 
-                    <!-- Personal Information Section -->
                     <div class="form-section">
                         <h3 class="section-title">Personal Information</h3>
                         <div class="form-row">
