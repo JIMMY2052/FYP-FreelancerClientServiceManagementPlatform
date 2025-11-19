@@ -11,7 +11,24 @@ $_title = 'My Services';
 include '../../_head.php';
 require_once '../config.php';
 
-$conn = getDBConnection();
+if (!function_exists('getPDOConnection')) {
+    function getPDOConnection(): PDO
+    {
+        $dsn = 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=utf8mb4';
+        $options = [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES => false,
+        ];
+        try {
+            return new PDO($dsn, DB_USER, DB_PASS, $options);
+        } catch (PDOException $e) {
+            die('Database connection error: ' . $e->getMessage());
+        }
+    }
+}
+
+$pdo = getPDOConnection();
 
 // Handle delete service (soft delete - change status to deleted)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delete') {
@@ -19,32 +36,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delet
     $freelancerID = $_SESSION['user_id'];
 
     if ($serviceID > 0) {
-        $stmt = $conn->prepare("UPDATE service SET Status = 'deleted' WHERE ServiceID = ? AND FreelancerID = ?");
-        if ($stmt) {
-            $stmt->bind_param("ii", $serviceID, $freelancerID);
-            if ($stmt->execute()) {
+        try {
+            $stmt = $pdo->prepare("UPDATE service SET Status = 'deleted' WHERE ServiceID = :service_id AND FreelancerID = :freelancer_id");
+            $stmt->execute([
+                ':service_id' => $serviceID,
+                ':freelancer_id' => $freelancerID
+            ]);
+            if ($stmt->rowCount() > 0) {
                 $_SESSION['success'] = 'Service deleted successfully.';
-                $stmt->close();
                 header('Location: /page/freelancer/my_service.php');
                 exit();
             } else {
                 $_SESSION['error'] = 'Failed to delete service.';
-                $stmt->close();
             }
-        } else {
+        } catch (PDOException $e) {
             $_SESSION['error'] = 'Database error.';
+            error_log('[my_gig] Delete failed: ' . $e->getMessage());
         }
     }
 }
 
 // Fetch freelancer services (only active status)
 $freelancerID = $_SESSION['user_id'];
-$stmt = $conn->prepare("SELECT ServiceID, Title, Description, Price, DeliveryTime, CreatedAt FROM service WHERE FreelancerID = ? AND Status = 'active' ORDER BY CreatedAt DESC");
-$stmt->bind_param("i", $freelancerID);
-$stmt->execute();
-$result = $stmt->get_result();
-$services = $result->fetch_all(MYSQLI_ASSOC);
-$stmt->close();
+try {
+    $stmt = $pdo->prepare("SELECT ServiceID, Title, Description, MinPrice, MaxPrice, DeliveryTime, CreatedAt FROM service WHERE FreelancerID = :freelancer_id AND Status = 'active' ORDER BY CreatedAt DESC");
+    $stmt->execute([':freelancer_id' => $freelancerID]);
+    $services = $stmt->fetchAll();
+} catch (PDOException $e) {
+    $services = [];
+    $_SESSION['error'] = 'Failed to load your gigs.';
+    error_log('[my_gig] Fetch failed: ' . $e->getMessage());
+}
 ?>
 
 <div class="container">
@@ -72,7 +94,13 @@ $stmt->close();
                     <div class="service-card">
                         <div class="card-header">
                             <h3><?php echo htmlspecialchars($service['Title']); ?></h3>
-                            <span class="service-price">MYR <?php echo number_format($service['Price'], 2); ?></span>
+                            <span class="service-price">
+                                <?php
+                                $minPrice = isset($service['MinPrice']) ? number_format($service['MinPrice'], 0) : '0';
+                                $maxPrice = isset($service['MaxPrice']) ? number_format($service['MaxPrice'], 0) : $minPrice;
+                                echo $minPrice === $maxPrice ? "MYR {$minPrice}" : "MYR {$minPrice} - MYR {$maxPrice}";
+                                ?>
+                            </span>
                         </div>
                         
                         <p class="service-description"><?php echo nl2br(htmlspecialchars(mb_strimwidth($service['Description'], 0, 200, '...'))); ?></p>
@@ -104,13 +132,13 @@ $stmt->close();
             <div class="empty-icon">📋</div>
             <h2>No Services Yet</h2>
             <p>You haven't added any services yet. Create your first service to start offering your skills to clients.</p>
-            <a href="/page/freelancer/add_service.php" class="btn-add-first">Add Your First Service</a>
+            <a href="/page/gig/create_gig.php" class="btn-add-first">Add Your First Service</a>
         </div>
     <?php endif; ?>
 </div>
 
 <?php
-$conn->close();
+$pdo = null;
 include '../../_foot.php';
 ?>
 

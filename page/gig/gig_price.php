@@ -373,23 +373,14 @@ include '../../_head.php';
             <div class="milestone-step" data-step="description">
                 <div class="milestone-circle">3</div>
                 <div class="milestone-label-wrapper">
-                    <div class="milestone-label">Description & FAQ</div>
-                </div>
-            </div>
-
-            <div class="milestone-separator">›</div>
-
-            <div class="milestone-step" data-step="requirements">
-                <div class="milestone-circle">4</div>
-                <div class="milestone-label-wrapper">
-                    <div class="milestone-label">Requirements</div>
+                    <div class="milestone-label">Description</div>
                 </div>
             </div>
 
             <div class="milestone-separator">›</div>
 
             <div class="milestone-step" data-step="gallery">
-                <div class="milestone-circle">5</div>
+                <div class="milestone-circle">4</div>
                 <div class="milestone-label-wrapper">
                     <div class="milestone-label">Gallery</div>
                 </div>
@@ -398,7 +389,7 @@ include '../../_head.php';
             <div class="milestone-separator">›</div>
 
             <div class="milestone-step" data-step="publish">
-                <div class="milestone-circle">6</div>
+                <div class="milestone-circle">5</div>
                 <div class="milestone-label-wrapper">
                     <div class="milestone-label">Publish</div>
                 </div>
@@ -417,14 +408,14 @@ include '../../_head.php';
                 <div class="form-row">
                     <div class="form-group">
                         <label for="minPrice">Minimum Price (MYR) *</label>
-                        <input type="number" id="minPrice" name="minPrice" placeholder="e.g., 50" min="5" step="0.01" required>
-                        <div class="form-description">Minimum price is MYR 5</div>
+                        <input type="number" id="minPrice" name="minPrice" placeholder="e.g., 50" min="5" step="1" required>
+                        <div class="form-description">Enter whole numbers only (minimum MYR 5)</div>
                     </div>
 
                     <div class="form-group">
                         <label for="maxPrice">Maximum Price (MYR) *</label>
-                        <input type="number" id="maxPrice" name="maxPrice" placeholder="e.g., 500" min="5" step="0.01" required>
-                        <div class="form-description">Maximum recommended price</div>
+                        <input type="number" id="maxPrice" name="maxPrice" placeholder="e.g., 500" min="5" step="1" required>
+                        <div class="form-description">Whole numbers only</div>
                     </div>
                 </div>
 
@@ -495,8 +486,8 @@ include '../../_head.php';
 
                     <div class="form-group">
                         <label for="additionalRevisionPrice">Price per Additional Revision (MYR)</label>
-                        <input type="number" id="additionalRevisionPrice" name="additionalRevisionPrice" placeholder="e.g., 10" min="0" step="0.01">
-                        <div class="form-description">Optional: Price for revisions beyond the included amount</div>
+                        <input type="number" id="additionalRevisionPrice" name="additionalRevisionPrice" placeholder="e.g., 10" min="0" step="1">
+                        <div class="form-description">Optional, whole numbers only</div>
                     </div>
                 </div>
             </div>
@@ -536,12 +527,11 @@ include '../../_head.php';
 </div>
 
 <script>
-    // Step pages mapping
+    // Step pages mapping (requirements removed)
     const stepPages = {
         'overview': 'create_gig.php',
         'pricing': 'gig_price.php',
         'description': 'gig_description.php',
-        'requirements': 'gig_requirements.php',
         'gallery': 'gig_gallery.php',
         'publish': 'gig_publish.php'
     };
@@ -589,22 +579,24 @@ include '../../_head.php';
     }
 
     function updateSummary() {
-        const minPrice = parseFloat(document.getElementById('minPrice').value) || 0;
-        const maxPrice = parseFloat(document.getElementById('maxPrice').value) || 0;
+        const minPrice = parseInt(document.getElementById('minPrice').value, 10) || 0;
+        const maxPrice = parseInt(document.getElementById('maxPrice').value, 10) || 0;
         const deliveryDays = document.getElementById('deliveryDays').value || '-';
         const standardDays = document.getElementById('standardDays').value || '-';
         const rushDeliveryDays = document.getElementById('rushDeliveryDays').value || '-';
         const revisions = document.getElementById('revisions').value || '-';
+        const additionalRevision = parseInt(document.getElementById('additionalRevisionPrice').value, 10) || 0;
 
         // Update price range display
-        document.getElementById('displayMinPrice').textContent = 'MYR ' + minPrice.toFixed(2);
-        document.getElementById('displayMaxPrice').textContent = 'MYR ' + maxPrice.toFixed(2);
+        document.getElementById('displayMinPrice').textContent = 'MYR ' + minPrice;
+        document.getElementById('displayMaxPrice').textContent = 'MYR ' + maxPrice;
 
         // Update summary
-        document.getElementById('summaryPrice').textContent = `MYR ${minPrice.toFixed(2)} - MYR ${maxPrice.toFixed(2)}`;
+        document.getElementById('summaryPrice').textContent = `MYR ${minPrice} - MYR ${maxPrice}`;
         document.getElementById('summaryDelivery').textContent = standardDays === '-' ? '-' : standardDays;
         document.getElementById('summaryRevisions').textContent = revisions === '-' ? '-' : (revisions === 'unlimited' ? 'Unlimited' : revisions);
         document.getElementById('summaryRush').textContent = rushDeliveryDays === '-' ? 'Not available' : rushDeliveryDays;
+        document.getElementById('summaryAdditionalRevision').textContent = additionalRevision ? `MYR ${additionalRevision}` : 'Not set';
     }
 
     function addMilestoneClickHandlers() {
@@ -633,18 +625,21 @@ include '../../_head.php';
         localStorage.setItem('gigPricingData', JSON.stringify(pricingData));
     }
 
+    function goToPreviousStep() {
+        savePricingData();
+        window.location.href = 'create_gig.php';
+    }
+
     function validateAndContinue() {
         const form = document.getElementById('pricingForm');
-        
         if (!form.checkValidity()) {
             alert('Please fill in all required fields');
             form.reportValidity();
             return;
         }
 
-        const minPrice = parseFloat(document.getElementById('minPrice').value);
-        const maxPrice = parseFloat(document.getElementById('maxPrice').value);
-
+        const minPrice = parseInt(document.getElementById('minPrice').value, 10);
+        const maxPrice = parseInt(document.getElementById('maxPrice').value, 10);
         if (minPrice >= maxPrice) {
             alert('Maximum price must be greater than minimum price');
             return;
@@ -652,23 +647,15 @@ include '../../_head.php';
 
         savePricingData();
 
-        // Mark pricing as completed
+        // Mark pricing as completed, move to description
         const pricingStep = document.querySelector('[data-step="pricing"]');
         pricingStep.classList.remove('active');
         pricingStep.classList.add('completed');
 
-        // Mark description as active
         const descriptionStep = document.querySelector('[data-step="description"]');
         descriptionStep.classList.add('active');
 
-        // Redirect to description page
         window.location.href = 'gig_description.php';
     }
-
-    function goToPreviousStep() {
-        savePricingData();
-        window.location.href = 'create_gig.php';
-    }
 </script>
-
 <?php include '../../_foot.php'; ?>

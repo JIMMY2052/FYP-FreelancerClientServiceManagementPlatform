@@ -266,104 +266,6 @@ include '../../_head.php';
         color: #f44336;
     }
 
-    /* FAQ Items */
-    .faq-items-container {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 20px;
-    }
-
-    .faq-item {
-        background: #f8f9fa;
-        padding: 20px;
-        border-radius: 12px;
-        border: 1px solid #e9ecef;
-    }
-
-    .faq-item-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 15px;
-        gap: 10px;
-    }
-
-    .faq-item-label {
-        font-weight: 600;
-        color: #2c3e50;
-        font-size: 0.95rem;
-    }
-
-    .faq-item-count {
-        background: #e9ecef;
-        color: #666;
-        padding: 4px 10px;
-        border-radius: 20px;
-        font-size: 0.8rem;
-        font-weight: 600;
-    }
-
-    .faq-item-remove {
-        background: #f44336;
-        color: white;
-        border: none;
-        padding: 6px 12px;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 0.8rem;
-        font-weight: 600;
-        transition: all 0.3s ease;
-    }
-
-    .faq-item-remove:hover {
-        background: #d32f2f;
-    }
-
-    .faq-item-inputs {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 12px;
-    }
-
-    .faq-item-inputs input,
-    .faq-item-inputs textarea {
-        padding: 10px 12px;
-        border-radius: 8px;
-        border: 1px solid #ddd;
-        font-size: 0.9rem;
-        font-family: inherit;
-    }
-
-    .faq-item-inputs textarea {
-        min-height: 80px;
-        resize: vertical;
-    }
-
-    .faq-item-inputs input:focus,
-    .faq-item-inputs textarea:focus {
-        outline: none;
-        border-color: rgb(159, 232, 112);
-        box-shadow: 0 0 0 3px rgba(159, 232, 112, 0.1);
-    }
-
-    .add-faq-btn {
-        background: rgb(159, 232, 112);
-        color: #333;
-        border: none;
-        padding: 12px 28px;
-        border-radius: 20px;
-        font-weight: 700;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        font-size: 0.95rem;
-        align-self: flex-start;
-    }
-
-    .add-faq-btn:hover {
-        background: rgb(140, 210, 90);
-        box-shadow: 0 4px 12px rgba(159, 232, 112, 0.3);
-    }
-
     /* Form Actions */
     .form-actions {
         display: flex;
@@ -422,10 +324,6 @@ include '../../_head.php';
             grid-template-columns: 1fr;
         }
 
-        .faq-item-header {
-            flex-wrap: wrap;
-        }
-
         .form-actions {
             flex-direction: column;
         }
@@ -461,16 +359,7 @@ include '../../_head.php';
             <div class="milestone-step active" data-step="description">
                 <div class="milestone-circle">3</div>
                 <div class="milestone-label-wrapper">
-                    <div class="milestone-label">Description & FAQ</div>
-                </div>
-            </div>
-
-            <div class="milestone-separator">›</div>
-
-            <div class="milestone-step" data-step="requirements">
-                <div class="milestone-circle">4</div>
-                <div class="milestone-label-wrapper">
-                    <div class="milestone-label">Requirements</div>
+                    <div class="milestone-label">Description</div>
                 </div>
             </div>
 
@@ -515,39 +404,24 @@ include '../../_head.php';
                 </div>
             </div>
 
-            <!-- FAQ Section -->
-            <div class="gig-form-section">
-                <h3>❓ FAQ (Frequently Asked Questions)</h3>
-                <p class="form-description">Add FAQ items to help answer common buyer questions about your gig.</p>
-                
-                <div class="faq-items-container" id="faqContainer">
-                    <!-- FAQ items will be added here -->
-                </div>
-
-                <button type="button" class="add-faq-btn" onclick="addFAQItem();">+ Add FAQ Item</button>
-            </div>
-
             <!-- Form Actions -->
             <div class="form-actions">
                 <button type="button" class="btn btn-secondary" onclick="goToPreviousStep();">Back to Pricing</button>
-                <button type="button" class="btn btn-primary" onclick="validateAndContinue();">Continue to Requirements</button>
+                <button type="button" class="btn btn-primary" onclick="validateAndContinue();">Continue to Gallery</button>
             </div>
         </form>
     </div>
 </div>
 
 <script>
-    // Step pages mapping
+    // Step pages mapping (requirements removed)
     const stepPages = {
         'overview': 'create_gig.php',
         'pricing': 'gig_price.php',
         'description': 'gig_description.php',
-        'requirements': 'gig_requirements.php',
         'gallery': 'gig_gallery.php',
         'publish': 'gig_publish.php'
     };
-
-    let faqCount = 0;
 
     // Initialize page
     document.addEventListener('DOMContentLoaded', function() {
@@ -563,13 +437,6 @@ include '../../_head.php';
                 const data = JSON.parse(savedData);
                 document.getElementById('gigDescription').value = data.description || '';
                 updateCharCounter();
-                
-                // Load FAQ items
-                if (data.faqs && Array.isArray(data.faqs)) {
-                    data.faqs.forEach(faq => {
-                        addFAQItem(faq.question, faq.answer);
-                    });
-                }
             } catch (e) {
                 console.log('No saved description data');
             }
@@ -601,35 +468,6 @@ include '../../_head.php';
         }
     }
 
-    function addFAQItem(question = '', answer = '') {
-        const container = document.getElementById('faqContainer');
-        const itemId = `faq-${faqCount}`;
-        faqCount++;
-
-        const faqItem = document.createElement('div');
-        faqItem.className = 'faq-item';
-        faqItem.id = itemId;
-        faqItem.innerHTML = `
-            <div class="faq-item-header">
-                <div class="faq-item-label">FAQ Item #${faqCount}</div>
-                <button type="button" class="faq-item-remove" onclick="removeFAQItem('${itemId}');">Remove</button>
-            </div>
-            <div class="faq-item-inputs">
-                <input type="text" class="faq-question" placeholder="Question" value="${question}" maxlength="200">
-                <textarea class="faq-answer" placeholder="Answer" maxlength="500">${answer}</textarea>
-            </div>
-        `;
-
-        container.appendChild(faqItem);
-    }
-
-    function removeFAQItem(itemId) {
-        const item = document.getElementById(itemId);
-        if (item) {
-            item.remove();
-        }
-    }
-
     function addMilestoneClickHandlers() {
         const completedSteps = document.querySelectorAll('.milestone-step.completed.clickable');
         completedSteps.forEach(step => {
@@ -644,21 +482,8 @@ include '../../_head.php';
     }
 
     function saveDescriptionData() {
-        const faqs = [];
-        const faqItems = document.querySelectorAll('.faq-item');
-        
-        faqItems.forEach(item => {
-            const question = item.querySelector('.faq-question').value;
-            const answer = item.querySelector('.faq-answer').value;
-            
-            if (question || answer) {
-                faqs.push({ question, answer });
-            }
-        });
-
         const descriptionData = {
-            description: document.getElementById('gigDescription').value,
-            faqs: faqs
+            description: document.getElementById('gigDescription').value
         };
         
         localStorage.setItem('gigDescriptionData', JSON.stringify(descriptionData));
@@ -666,7 +491,6 @@ include '../../_head.php';
 
     function validateAndContinue() {
         const form = document.getElementById('descriptionForm');
-        
         if (!form.checkValidity()) {
             alert('Please fill in the required fields');
             form.reportValidity();
@@ -681,17 +505,15 @@ include '../../_head.php';
 
         saveDescriptionData();
 
-        // Mark description as completed
+        // Mark description as completed and go to Gallery (requirements removed)
         const descriptionStep = document.querySelector('[data-step="description"]');
         descriptionStep.classList.remove('active');
         descriptionStep.classList.add('completed');
 
-        // Mark requirements as active
-        const requirementsStep = document.querySelector('[data-step="requirements"]');
-        requirementsStep.classList.add('active');
+        const galleryStep = document.querySelector('[data-step="gallery"]');
+        galleryStep.classList.add('active');
 
-        // Redirect to requirements page
-        window.location.href = 'gig_requirements.php';
+        window.location.href = 'gig_gallery.php';
     }
 
     function goToPreviousStep() {

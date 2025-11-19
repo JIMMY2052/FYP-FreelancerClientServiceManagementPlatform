@@ -570,59 +570,40 @@ $categoryData = [
 </style>
 
 <div class="create-gig-container">
-    <!-- Milestone Stepper -->
+    <!-- Milestone Stepper (requirements removed) -->
     <div class="milestone-container">
         <div class="milestone-stepper">
             <div class="milestone-step active" data-step="overview">
                 <div class="milestone-circle">1</div>
-                <div class="milestone-label-wrapper">
-                    <div class="milestone-label">Overview</div>
-                </div>
+                <div class="milestone-label-wrapper"><div class="milestone-label">Overview</div></div>
             </div>
 
             <div class="milestone-separator">›</div>
 
             <div class="milestone-step" data-step="pricing">
                 <div class="milestone-circle">2</div>
-                <div class="milestone-label-wrapper">
-                    <div class="milestone-label">Pricing</div>
-                </div>
+                <div class="milestone-label-wrapper"><div class="milestone-label">Pricing</div></div>
             </div>
 
             <div class="milestone-separator">›</div>
 
             <div class="milestone-step" data-step="description">
                 <div class="milestone-circle">3</div>
-                <div class="milestone-label-wrapper">
-                    <div class="milestone-label">Description & FAQ</div>
-                </div>
-            </div>
-
-            <div class="milestone-separator">›</div>
-
-            <div class="milestone-step" data-step="requirements">
-                <div class="milestone-circle">4</div>
-                <div class="milestone-label-wrapper">
-                    <div class="milestone-label">Requirements</div>
-                </div>
+                <div class="milestone-label-wrapper"><div class="milestone-label">Description</div></div>
             </div>
 
             <div class="milestone-separator">›</div>
 
             <div class="milestone-step" data-step="gallery">
-                <div class="milestone-circle">5</div>
-                <div class="milestone-label-wrapper">
-                    <div class="milestone-label">Gallery</div>
-                </div>
+                <div class="milestone-circle">4</div>
+                <div class="milestone-label-wrapper"><div class="milestone-label">Gallery</div></div>
             </div>
 
             <div class="milestone-separator">›</div>
 
             <div class="milestone-step" data-step="publish">
-                <div class="milestone-circle">6</div>
-                <div class="milestone-label-wrapper">
-                    <div class="milestone-label">Publish</div>
-                </div>
+                <div class="milestone-circle">5</div>
+                <div class="milestone-label-wrapper"><div class="milestone-label">Publish</div></div>
             </div>
         </div>
     </div>
@@ -701,7 +682,6 @@ $categoryData = [
         'overview': 'create_gig.php',
         'pricing': 'gig_price.php',
         'description': 'gig_description.php',
-        'requirements': 'gig_requirements.php',
         'gallery': 'gig_gallery.php',
         'publish': 'gig_summary.php'
     };
