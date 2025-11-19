@@ -1,8 +1,6 @@
 <?php
-
 $_title = 'Home - WorkSnyc Freelancer Platform';
 include '_head.php';
-
 ?>
 
 <!-- Hero Section -->

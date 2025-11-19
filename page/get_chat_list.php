@@ -18,31 +18,30 @@ $prefix_user = ($user_type === 'freelancer') ? 'f' : 'c';
 $composite_user_id = $prefix_user . $user_id;
 
 if ($user_type === 'freelancer') {
-    // Get conversations with clients
+    // Get conversations for freelancer - only conversations they're part of
     $query = "
         SELECT 
             c.ClientID as user_id,
             c.CompanyName as name,
             'client' as user_type,
+            conv.ConversationID as conversation_id,
             (SELECT m.Content FROM message m 
-             WHERE (m.SenderID = ? AND m.ReceiverID = CONCAT('c', c.ClientID))
-                OR (m.SenderID = CONCAT('c', c.ClientID) AND m.ReceiverID = ?)
+             WHERE m.ConversationID = conv.ConversationID
              ORDER BY m.Timestamp DESC LIMIT 1) as lastMessage,
             (SELECT m.AttachmentPath FROM message m 
-             WHERE (m.SenderID = ? AND m.ReceiverID = CONCAT('c', c.ClientID))
-                OR (m.SenderID = CONCAT('c', c.ClientID) AND m.ReceiverID = ?)
+             WHERE m.ConversationID = conv.ConversationID
              ORDER BY m.Timestamp DESC LIMIT 1) as lastAttachmentPath,
             (SELECT m.Timestamp FROM message m 
-             WHERE (m.SenderID = ? AND m.ReceiverID = CONCAT('c', c.ClientID))
-                OR (m.SenderID = CONCAT('c', c.ClientID) AND m.ReceiverID = ?)
+             WHERE m.ConversationID = conv.ConversationID
              ORDER BY m.Timestamp DESC LIMIT 1) as lastMessageTime
-        FROM client c
-        WHERE c.Status = 'active'
+        FROM conversation conv
+        INNER JOIN client c ON c.ClientID = conv.User2ID AND conv.User2Type = 'client'
+        WHERE conv.User1ID = ? AND conv.User1Type = 'freelancer' AND conv.Status = 'active'
         ORDER BY lastMessageTime DESC
     ";
 
     $stmt = $conn->prepare($query);
-    $stmt->bind_param("ssssss", $composite_user_id, $composite_user_id, $composite_user_id, $composite_user_id, $composite_user_id, $composite_user_id);
+    $stmt->bind_param("i", $user_id);
     $stmt->execute();
     $result = $stmt->get_result();
 
@@ -64,31 +63,30 @@ if ($user_type === 'freelancer') {
     }
     $stmt->close();
 } else {
-    // Get conversations with freelancers
+    // Get conversations for client - only conversations they're part of
     $query = "
         SELECT 
             f.FreelancerID as user_id,
             CONCAT(f.FirstName, ' ', f.LastName) as name,
             'freelancer' as user_type,
+            conv.ConversationID as conversation_id,
             (SELECT m.Content FROM message m 
-             WHERE (m.SenderID = ? AND m.ReceiverID = CONCAT('f', f.FreelancerID))
-                OR (m.SenderID = CONCAT('f', f.FreelancerID) AND m.ReceiverID = ?)
+             WHERE m.ConversationID = conv.ConversationID
              ORDER BY m.Timestamp DESC LIMIT 1) as lastMessage,
             (SELECT m.AttachmentPath FROM message m 
-             WHERE (m.SenderID = ? AND m.ReceiverID = CONCAT('f', f.FreelancerID))
-                OR (m.SenderID = CONCAT('f', f.FreelancerID) AND m.ReceiverID = ?)
+             WHERE m.ConversationID = conv.ConversationID
              ORDER BY m.Timestamp DESC LIMIT 1) as lastAttachmentPath,
             (SELECT m.Timestamp FROM message m 
-             WHERE (m.SenderID = ? AND m.ReceiverID = CONCAT('f', f.FreelancerID))
-                OR (m.SenderID = CONCAT('f', f.FreelancerID) AND m.ReceiverID = ?)
+             WHERE m.ConversationID = conv.ConversationID
              ORDER BY m.Timestamp DESC LIMIT 1) as lastMessageTime
-        FROM freelancer f
-        WHERE f.Status = 'active'
+        FROM conversation conv
+        INNER JOIN freelancer f ON f.FreelancerID = conv.User1ID AND conv.User1Type = 'freelancer'
+        WHERE conv.User2ID = ? AND conv.User2Type = 'client' AND conv.Status = 'active'
         ORDER BY lastMessageTime DESC
     ";
 
     $stmt = $conn->prepare($query);
-    $stmt->bind_param("ssssss", $composite_user_id, $composite_user_id, $composite_user_id, $composite_user_id, $composite_user_id, $composite_user_id);
+    $stmt->bind_param("i", $user_id);
     $stmt->execute();
     $result = $stmt->get_result();
 

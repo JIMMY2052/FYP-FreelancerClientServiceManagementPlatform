@@ -10,6 +10,46 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_type'])) {
 $user_id = $_SESSION['user_id'];
 $user_type = $_SESSION['user_type'];
 $user_email = $_SESSION['email'] ?? '';
+
+// Check if client_id is passed (from Contact Me button)
+$target_client_id = isset($_GET['client_id']) ? intval($_GET['client_id']) : null;
+
+// If a client_id is provided and user is a freelancer, create/open conversation with that client
+if ($target_client_id && $user_type === 'freelancer') {
+    $conn = getDBConnection();
+
+    // Check if conversation already exists
+    $sql = "SELECT ConversationID FROM conversation 
+            WHERE (User1ID = ? AND User1Type = 'freelancer' AND User2ID = ? AND User2Type = 'client')
+            OR (User1ID = ? AND User1Type = 'client' AND User2ID = ? AND User2Type = 'freelancer')";
+
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('iiii', $user_id, $target_client_id, $target_client_id, $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        // Conversation exists, get its ID
+        $row = $result->fetch_assoc();
+        $conversation_id = $row['ConversationID'];
+    } else {
+        // Create new conversation
+        $insert_sql = "INSERT INTO conversation (User1ID, User1Type, User2ID, User2Type, CreatedAt) 
+                       VALUES (?, 'freelancer', ?, 'client', NOW())";
+        $insert_stmt = $conn->prepare($insert_sql);
+        $insert_stmt->bind_param('ii', $user_id, $target_client_id);
+        $insert_stmt->execute();
+        $conversation_id = $insert_stmt->insert_id;
+        $insert_stmt->close();
+    }
+
+    $stmt->close();
+    $conn->close();
+
+    // Store the target conversation ID in session
+    $_SESSION['target_conversation_id'] = $conversation_id;
+    $_SESSION['target_client_id'] = $target_client_id;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -194,6 +234,12 @@ $user_email = $_SESSION['email'] ?? '';
             type: '<?php echo $user_type; ?>',
             email: '<?php echo $user_email; ?>'
         };
+
+        // If targeting a specific client from Contact Me button
+        <?php if (isset($_SESSION['target_conversation_id'])): ?>
+            window.targetConversationId = <?php echo $_SESSION['target_conversation_id']; ?>;
+            window.targetClientId = <?php echo $_SESSION['target_client_id']; ?>;
+        <?php endif; ?>
     </script>
 
     <script src="../assets/js/chat.js"></script>
