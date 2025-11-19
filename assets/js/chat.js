@@ -6,6 +6,8 @@ class ChatApp {
         this.currentChat = null;
         this.selectedFiles = [];
         this.messageRefreshInterval = null;
+        this.lastMessageSentTime = 0; // Track last message send time
+        this.messageDelay = 2000; // 2 second delay between messages
         this.maxFileSize = 10 * 1024 * 1024; // 10MB
         this.allowedFileTypes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
         this.lastLoadedChat = null; // Track which chat was last loaded to clear messages on switch
@@ -425,6 +427,16 @@ class ChatApp {
             return;
         }
 
+        // Check if enough time has passed since last message
+        const now = Date.now();
+        const timeSinceLastMessage = now - this.lastMessageSentTime;
+
+        if (timeSinceLastMessage < this.messageDelay) {
+            const waitTime = Math.ceil((this.messageDelay - timeSinceLastMessage) / 1000);
+            alert(`Please wait ${waitTime} second(s) before sending another message`);
+            return;
+        }
+
         try {
             const formData = new FormData();
             formData.append('chatId', this.currentChat);
@@ -468,6 +480,9 @@ class ChatApp {
             console.log('[sendMessage] Response result:', result);
 
             if (result.success) {
+                // Record when message was sent
+                this.lastMessageSentTime = Date.now();
+
                 messageInput.value = '';
                 messageInput.style.height = 'auto';
                 this.selectedFiles = [];
