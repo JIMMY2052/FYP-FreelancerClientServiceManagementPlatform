@@ -23,8 +23,8 @@ include '_head.php';
                 <h1 class="hero-title">Work Your Way</h1>
                 <p class="hero-subtitle">Find your next opportunity and grow your freelance career</p>
                 <div class="hero-buttons">
-                    <a href="/page/browse_projects.php" class="btn-hero btn-hero-primary">Browse Projects</a>
-                    <a href="/page/my_projects.php" class="btn-hero btn-hero-secondary">My Services</a>
+                    <a href="/page/job/browse_job.php" class="btn-hero btn-hero-primary">Browse Projects</a>
+                    <a href="/page/gig/my_gig.php" class="btn-hero btn-hero-secondary">My Gigs</a>
                 </div>
             </div>
             <div class="hero-image-wrapper">

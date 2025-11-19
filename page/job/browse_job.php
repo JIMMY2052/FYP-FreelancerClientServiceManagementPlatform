@@ -8,8 +8,8 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'freelancer') {
 }
 
 $_title = 'Browse Projects';
-include '../_head.php';
-require_once 'config.php';
+include '../../_head.php';
+require_once '../config.php';
 
 $conn = getDBConnection();
 
@@ -19,7 +19,7 @@ $min_budget = isset($_GET['min_budget']) && $_GET['min_budget'] !== '' ? floatva
 $max_budget = isset($_GET['max_budget']) && $_GET['max_budget'] !== '' ? floatval($_GET['max_budget']) : null;
 $sort = $_GET['sort'] ?? 'newest';
 
-// build query
+// build query - only show active jobs
 $sql = "SELECT JobID, Title, Description, Budget, Deadline, Status, PostDate
         FROM job
         WHERE Status = 'active'";
@@ -88,7 +88,7 @@ $jobs = $result->fetch_all(MYSQLI_ASSOC);
             <option value="highest" <?php if ($sort === 'highest') echo 'selected'; ?>>Highest Budget</option>
         </select>
         <button type="submit" class="filter-search">Search</button>
-        <a href="/page/browse_projects.php" class="filter-reset">Reset</a>
+        <a href="/page/job/browse_job.php" class="filter-reset">Reset</a>
     </form>
 
     <p class="results-count"><?php echo count($jobs); ?> result(s)</p>
@@ -114,8 +114,8 @@ $jobs = $result->fetch_all(MYSQLI_ASSOC);
                     </div>
 
                     <div class="project-actions">
-                        <a href="/job/view/jobDetails.php?id=<?php echo $job['JobID']; ?>" class="btn-small">View</a>
-                        <a href="/job/apply/applyJob.php?id=<?php echo $job['JobID']; ?>" class="btn-small">Apply</a>
+                        <a href="/page/job/view/jobDetails.php?id=<?php echo $job['JobID']; ?>" class="btn-small">View</a>
+                        <a href="/page/job/apply/applyJob.php?id=<?php echo $job['JobID']; ?>" class="btn-small">Apply</a>
                     </div>
                 </div>
             <?php endforeach; ?>
@@ -307,6 +307,9 @@ $jobs = $result->fetch_all(MYSQLI_ASSOC);
     background: rgb(159, 232, 112);
     color: #333;
     border: none;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
 }
 
 .project-actions .btn-small:hover {
@@ -409,5 +412,5 @@ $jobs = $result->fetch_all(MYSQLI_ASSOC);
 <?php
 $stmt->close();
 $conn->close();
-include '../_foot.php';
+include '../../_foot.php';
 ?>
