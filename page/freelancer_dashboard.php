@@ -11,7 +11,7 @@ $conn = getDBConnection();
 $freelancer_id = $_SESSION['user_id'];
 
 // Get freelancer information
-$stmt = $conn->prepare("SELECT FirstName, LastName, Email, Status, RatingAverage FROM freelancer WHERE FreelancerID = ?");
+$stmt = $conn->prepare("SELECT FirstName, LastName, Email, Status, Rating FROM freelancer WHERE FreelancerID = ?");
 $stmt->bind_param("i", $freelancer_id);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -42,8 +42,8 @@ $conn->close();
             <div class="profile-card">
                 <h1 class="welcome-message">Welcome, <?php echo htmlspecialchars($freelancer['FirstName'] . ' ' . $freelancer['LastName']); ?>!</h1>
                 <p>Email: <?php echo htmlspecialchars($freelancer['Email']); ?></p>
-                <?php if ($freelancer['RatingAverage']): ?>
-                    <p>Rating: <?php echo number_format($freelancer['RatingAverage'], 2); ?>/5.00</p>
+                <?php if ($freelancer['Rating']): ?>
+                    <p>Rating: <?php echo number_format($freelancer['Rating'], 2); ?>/5.00</p>
                 <?php endif; ?>
                 <h2>Freelancer Dashboard</h2>
                 <p>This is your dashboard. More features coming soon!</p>

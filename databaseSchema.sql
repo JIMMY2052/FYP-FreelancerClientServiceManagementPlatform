@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 21, 2025 at 08:19 AM
+-- Generation Time: Nov 21, 2025 at 02:14 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 SET
@@ -474,19 +474,19 @@ CREATE TABLE
     `Title` varchar(150) NOT NULL,
     `Category` varchar(100) NOT NULL,
     `Subcategory` varchar(100) NOT NULL,
+    `SearchTags` varchar(100) NOT NULL,
     `Description` text NOT NULL,
     `MinPrice` int (11) NOT NULL,
     `MaxPrice` int (11) NOT NULL,
     `DeliveryTime` int (11) NOT NULL,
+    `RushDelivery` int (11) DEFAULT NULL,
+    `AdditionalRevision` int (11) DEFAULT NULL,
     `RevisionCount` int (11) NOT NULL,
-    `ThumnailUrl` varchar(255) NOT NULL,
+    `ThumnailUrl` varchar(255) DEFAULT NULL,
     `GalleryUrl` text NOT NULL,
     `Status` enum ('active', 'paused', 'deleted') NOT NULL,
-    `Visibility` enum ('public', 'private') NOT NULL,
-    `Rating` decimal(3, 2) NOT NULL,
-    `RatingCount` int (11) NOT NULL,
     `CreatedAt` datetime NOT NULL,
-    `UpdatedAt` datetime NOT NULL
+    `UpdatedAt` datetime DEFAULT NULL
   ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
 
 -- --------------------------------------------------------

@@ -11,7 +11,7 @@ $conn = getDBConnection();
 $freelancer_id = $_SESSION['user_id'];
 
 // Get freelancer information
-$stmt = $conn->prepare("SELECT FreelancerID, FirstName, LastName, Email, PhoneNo, Address, Experience, Education, Bio, RatingAverage, SocialMediaURL FROM freelancer WHERE FreelancerID = ?");
+$stmt = $conn->prepare("SELECT FreelancerID, FirstName, LastName, Email, PhoneNo, Address, Experience, Education, Bio, Rating, TotalEarned, SocialMediaURL FROM freelancer WHERE FreelancerID = ?");
 $stmt->bind_param("i", $freelancer_id);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -35,49 +35,29 @@ while ($row = $skills_result->fetch_assoc()) {
 $stmt->close();
 
 // Get total earned from Freelancer table
-$stmt = $conn->prepare("SELECT TotalEarned FROM freelancer WHERE FreelancerID = ?");
-$stmt->bind_param("i", $freelancer_id);
-$stmt->execute();
-$total_earned_result = $stmt->get_result();
-$total_earned = $total_earned_result->fetch_assoc()['TotalEarned'] ?? 0.00;
-$stmt->close();
+$total_earned = $freelancer['TotalEarned'] ?? 0.00;
 
-// Get completed projects count
-$stmt = $conn->prepare("
-    SELECT COUNT(*) as completed_count 
-    FROM application 
-    WHERE FreelancerID = ? AND Status = 'completed'
-");
-$stmt->bind_param("i", $freelancer_id);
-$stmt->execute();
-$completed_count_result = $stmt->get_result();
-$completed_count = $completed_count_result->fetch_assoc()['completed_count'];
-$stmt->close();
-
-// Get project history
+// Get gigs created by this freelancer
 $stmt = $conn->prepare("
     SELECT 
-        j.JobID,
-        j.Title,
-        j.Description,
-        a.ProposedBudget,
-        a.Status as ApplicationStatus,
-        a.ApplicationDate,
-        c.CompanyName,
-        c.ClientID
-    FROM application a
-    INNER JOIN job j ON a.JobID = j.JobID
-    INNER JOIN client c ON j.ClientID = c.ClientID
-    WHERE a.FreelancerID = ?
-    ORDER BY a.ApplicationDate DESC
+        GigID,
+        Title,
+        Category,
+        MinPrice,
+        MaxPrice,
+        Status,
+        CreatedAt
+    FROM gig
+    WHERE FreelancerID = ?
+    ORDER BY CreatedAt DESC
     LIMIT 10
 ");
 $stmt->bind_param("i", $freelancer_id);
 $stmt->execute();
-$projects_result = $stmt->get_result();
-$projects = [];
-while ($row = $projects_result->fetch_assoc()) {
-    $projects[] = $row;
+$gigs_result = $stmt->get_result();
+$gigs = [];
+while ($row = $gigs_result->fetch_assoc()) {
+    $gigs[] = $row;
 }
 $stmt->close();
 $conn->close();
@@ -122,8 +102,8 @@ $conn->close();
                                 <span class="detail-item">📞 Phone: <?php echo htmlspecialchars($freelancer['PhoneNo']); ?></span>
                             <?php endif; ?>
                             <span class="detail-item">✉️ Email: <?php echo htmlspecialchars($freelancer['Email']); ?></span>
-                            <?php if ($freelancer['RatingAverage']): ?>
-                                <span class="detail-item">⭐ Rating: <?php echo number_format($freelancer['RatingAverage'], 2); ?>/5.00</span>
+                            <?php if ($freelancer['Rating']): ?>
+                                <span class="detail-item">⭐ Rating: <?php echo number_format($freelancer['Rating'], 2); ?>/5.00</span>
                             <?php endif; ?>
                         </div>
                     </div>
@@ -170,29 +150,29 @@ $conn->close();
                         <div class="stat-label">Total Earned</div>
                     </div>
                     <div class="stat-box">
-                        <div class="stat-value"><?php echo $completed_count; ?></div>
-                        <div class="stat-label">Completed Projects</div>
+                        <div class="stat-value"><?php echo count($gigs); ?></div>
+                        <div class="stat-label">Active Gigs</div>
                     </div>
                 </div>
             </div>
 
             <!-- Project History Section -->
             <div class="project-history-card">
-                <h2 class="section-title">Project History</h2>
+                <h2 class="section-title">My Gigs</h2>
                 <div class="project-list">
-                    <?php if (empty($projects)): ?>
-                        <p class="no-projects">No applications yet. <a href="browse_jobs.php">Browse available jobs</a>!</p>
+                    <?php if (empty($gigs)): ?>
+                        <p class="no-projects">No gigs created yet. <a href="create_gig.php">Create your first gig</a>!</p>
                     <?php else: ?>
-                        <?php foreach ($projects as $project): ?>
+                        <?php foreach ($gigs as $gig): ?>
                             <div class="project-item">
                                 <div class="project-info">
-                                    <h3 class="project-title"><?php echo htmlspecialchars($project['Title']); ?></h3>
-                                    <p class="project-freelancer">Client: <?php echo htmlspecialchars($project['CompanyName']); ?></p>
-                                    <p class="project-budget">Budget: RM<?php echo number_format($project['ProposedBudget'], 2); ?></p>
+                                    <h3 class="project-title"><?php echo htmlspecialchars($gig['Title']); ?></h3>
+                                    <p class="project-freelancer">Category: <?php echo htmlspecialchars($gig['Category']); ?></p>
+                                    <p class="project-budget">Price Range: RM<?php echo number_format($gig['MinPrice'], 2); ?> - RM<?php echo number_format($gig['MaxPrice'], 2); ?></p>
                                 </div>
                                 <div class="project-status">
                                     <?php
-                                    $status = $project['ApplicationStatus'];
+                                    $status = $gig['Status'];
                                     $status_class = strtolower(str_replace(' ', '-', $status));
                                     ?>
                                     <span class="status-badge status-<?php echo $status_class; ?>"><?php echo htmlspecialchars($status); ?></span>
