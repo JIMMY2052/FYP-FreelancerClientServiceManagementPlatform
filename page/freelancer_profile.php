@@ -10,8 +10,58 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'freelancer') {
 $conn = getDBConnection();
 $freelancer_id = $_SESSION['user_id'];
 
+// Handle profile picture upload
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['profile_picture'])) {
+    $file = $_FILES['profile_picture'];
+    $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
+    $max_size = 5 * 1024 * 1024; // 5MB
+
+    if ($file['size'] > 0 && $file['size'] <= $max_size && in_array($file['type'], $allowed_types)) {
+        $upload_dir = '../uploads/profile_pictures/';
+        
+        // Create directory if it doesn't exist
+        if (!is_dir($upload_dir)) {
+            mkdir($upload_dir, 0755, true);
+        }
+
+        $file_ext = pathinfo($file['name'], PATHINFO_EXTENSION);
+        $new_filename = 'freelancer_' . $freelancer_id . '_' . time() . '.' . $file_ext;
+        $upload_path = $upload_dir . $new_filename;
+
+        if (move_uploaded_file($file['tmp_name'], $upload_path)) {
+            // Get old picture path to delete if exists
+            $stmt = $conn->prepare("SELECT ProfilePicture FROM freelancer WHERE FreelancerID = ?");
+            $stmt->bind_param("i", $freelancer_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $old_picture = $result->fetch_assoc()['ProfilePicture'];
+            $stmt->close();
+
+            // Delete old picture if exists
+            if ($old_picture && file_exists('../' . $old_picture)) {
+                unlink('../' . $old_picture);
+            }
+
+            // Update database with new picture path
+            $relative_path = 'uploads/profile_pictures/' . $new_filename;
+            $stmt = $conn->prepare("UPDATE freelancer SET ProfilePicture = ? WHERE FreelancerID = ?");
+            $stmt->bind_param("si", $relative_path, $freelancer_id);
+            $stmt->execute();
+            $stmt->close();
+
+            $_SESSION['success'] = 'Profile picture updated successfully!';
+            header('Location: freelancer_profile.php');
+            exit();
+        } else {
+            $_SESSION['error'] = 'Failed to upload profile picture.';
+        }
+    } else {
+        $_SESSION['error'] = 'Invalid file. Please upload an image (JPG, PNG, GIF) under 5MB.';
+    }
+}
+
 // Get freelancer information
-$stmt = $conn->prepare("SELECT FreelancerID, FirstName, LastName, Email, PhoneNo, Address, Experience, Education, Bio, Rating, TotalEarned, SocialMediaURL FROM freelancer WHERE FreelancerID = ?");
+$stmt = $conn->prepare("SELECT FreelancerID, FirstName, LastName, Email, PhoneNo, Address, Experience, Education, Bio, Rating, TotalEarned, SocialMediaURL, ProfilePicture FROM freelancer WHERE FreelancerID = ?");
 $stmt->bind_param("i", $freelancer_id);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -82,11 +132,36 @@ $conn->close();
         <main class="main-content">
             <?php include '../includes/header.php'; ?>
 
+            <!-- Success/Error Messages -->
+            <?php if (isset($_SESSION['success'])): ?>
+                <div class="alert alert-success">
+                    <?php echo htmlspecialchars($_SESSION['success']); unset($_SESSION['success']); ?>
+                </div>
+            <?php endif; ?>
+            <?php if (isset($_SESSION['error'])): ?>
+                <div class="alert alert-error">
+                    <?php echo htmlspecialchars($_SESSION['error']); unset($_SESSION['error']); ?>
+                </div>
+            <?php endif; ?>
+
             <!-- Profile Section -->
             <div class="profile-card">
                 <div class="profile-header-section">
-                    <div class="profile-image">
-                        <div class="avatar-large"><?php echo strtoupper(substr($freelancer['FirstName'] ?: 'F', 0, 1) . substr($freelancer['LastName'] ?: 'L', 0, 1)); ?></div>
+                    <div class="profile-image-container">
+                        <?php if ($freelancer['ProfilePicture'] && file_exists('../' . $freelancer['ProfilePicture'])): ?>
+                            <img src="/<?php echo htmlspecialchars($freelancer['ProfilePicture']); ?>" alt="Profile Picture" class="profile-picture">
+                        <?php else: ?>
+                            <div class="avatar-large"><?php echo strtoupper(substr($freelancer['FirstName'] ?: 'F', 0, 1) . substr($freelancer['LastName'] ?: 'L', 0, 1)); ?></div>
+                        <?php endif; ?>
+                        
+                        <!-- Upload Button with Pencil Icon -->
+                        <label for="profile_picture_input" class="upload-icon-button" title="Upload profile picture">
+                            <svg class="pencil-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                            </svg>
+                        </label>
+                        <input type="file" id="profile_picture_input" name="profile_picture" accept="image/*" style="display: none;">
                     </div>
                     <div class="profile-info">
                         <h1 class="profile-name">
@@ -184,6 +259,49 @@ $conn->close();
             </div>
         </main>
     </div>
+
+    <script>
+        // Handle profile picture upload
+        document.getElementById('profile_picture_input').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            
+            if (file) {
+                const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+                const maxSize = 5 * 1024 * 1024; // 5MB
+
+                if (!allowedTypes.includes(file.type)) {
+                    alert('Invalid file type. Please upload JPG, PNG, or GIF.');
+                    return;
+                }
+
+                if (file.size > maxSize) {
+                    alert('File is too large. Maximum size is 5MB.');
+                    return;
+                }
+
+                // Create FormData and submit
+                const formData = new FormData();
+                formData.append('profile_picture', file);
+
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', 'freelancer_profile.php', true);
+                
+                xhr.onload = function() {
+                    if (xhr.status === 200) {
+                        location.reload();
+                    } else {
+                        alert('Error uploading file. Please try again.');
+                    }
+                };
+
+                xhr.onerror = function() {
+                    alert('Error uploading file. Please try again.');
+                };
+
+                xhr.send(formData);
+            }
+        });
+    </script>
 </body>
 
 </html>
