@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 20, 2025 at 04:16 PM
+-- Generation Time: Nov 21, 2025 at 08:19 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 SET
@@ -203,6 +203,7 @@ CREATE TABLE
     `Email` varchar(255) DEFAULT NULL,
     `Password` varchar(255) DEFAULT NULL,
     `PhoneNo` varchar(50) DEFAULT NULL,
+    `ProfilePicture` varchar(500) DEFAULT NULL,
     `Status` varchar(50) DEFAULT NULL,
     `Address` text DEFAULT NULL,
     `JoinedDate` timestamp NOT NULL DEFAULT current_timestamp(),
@@ -220,6 +221,7 @@ INSERT INTO
     `Email`,
     `Password`,
     `PhoneNo`,
+    `ProfilePicture`,
     `Status`,
     `Address`,
     `JoinedDate`,
@@ -233,6 +235,7 @@ VALUES
     'jimmyckl-wm22@student.tarc.edu.my',
     '$2y$10$BxSAHpJnrutlLgnTkuFehOACPPqYFQ/vXaEgjahq2cei0u4A/irUO',
     NULL,
+    NULL,
     'active',
     NULL,
     '2025-11-20 15:15:48',
@@ -245,6 +248,7 @@ VALUES
     'genting@gmail.com',
     '$2y$10$D1ON60Z0DruTc8tASwybi.VX6wu0nIPxZURmUDSrFEf6ZWb9c7Gv6',
     NULL,
+    NULL,
     'active',
     NULL,
     '2025-11-20 15:15:48',
@@ -256,6 +260,7 @@ VALUES
     NULL,
     'lucifa@gmail.com',
     '$2y$10$yP7JQYBtyuUYIsBkQI1T.uCp0HLAiTO.TWORqXF1bX5nJLA4deq8C',
+    NULL,
     NULL,
     'active',
     NULL,
@@ -322,13 +327,14 @@ CREATE TABLE
     `Email` varchar(255) DEFAULT NULL,
     `Password` varchar(255) DEFAULT NULL,
     `PhoneNo` varchar(50) DEFAULT NULL,
+    `ProfilePicture` varchar(500) DEFAULT NULL,
     `Status` varchar(50) DEFAULT NULL,
     `Address` text DEFAULT NULL,
     `Experience` text DEFAULT NULL,
     `Education` text DEFAULT NULL,
     `SocialMediaURL` varchar(255) DEFAULT NULL,
     `Bio` text DEFAULT NULL,
-    `RatingAverage` decimal(3, 2) DEFAULT NULL,
+    `Rating` decimal(3, 2) DEFAULT NULL,
     `TotalEarned` decimal(10, 2) DEFAULT NULL,
     `JoinedDate` timestamp NOT NULL DEFAULT current_timestamp(),
     `isDelete` tinyint (1) DEFAULT 0
@@ -345,13 +351,14 @@ INSERT INTO
     `Email`,
     `Password`,
     `PhoneNo`,
+    `ProfilePicture`,
     `Status`,
     `Address`,
     `Experience`,
     `Education`,
     `SocialMediaURL`,
     `Bio`,
-    `RatingAverage`,
+    `Rating`,
     `TotalEarned`,
     `JoinedDate`,
     `isDelete`
@@ -364,7 +371,8 @@ VALUES
     'jimmychankahlok66@gmail.com',
     '$2y$10$jZYJ20FbflriS3ibKasx7O9faf9bJmmaU6U2tuTi9wyHdVSpyGnCu',
     '0185709586',
-    'active',
+    NULL,
+    'inactive',
     'NO 5, Lorong masria 3, taman bunga raya',
     '3 Years Experience in Web Development',
     'Bachelor Degree in Software Engineering',
@@ -381,6 +389,7 @@ VALUES
     'wer',
     'jc@gmail.com',
     '$2y$10$E/ktmWMUMTAD2uieh9uJ0eib0JfBZpGpzGG83b8/8JbNUH1httt2q',
+    NULL,
     NULL,
     'active',
     NULL,
@@ -400,6 +409,7 @@ VALUES
     'hc@gmail.com',
     '$2y$10$ZOgz2kiWcxShvnSqc2P7dejfEqak/MncYY2EukVaLiuhGggJXaCPG',
     NULL,
+    NULL,
     'active',
     NULL,
     NULL,
@@ -418,6 +428,7 @@ VALUES
     'john@gmail.com',
     '$2y$10$9yQ0dOnB/3KlF50FluBsceeKYovo88cNqPR.BHPn8jfMh67Un4UgC',
     '0185709586',
+    NULL,
     'active',
     'NO 341, JALAN ZAMRUD 2, BATU LIMA',
     '3 Year experience in web developement',
@@ -454,6 +465,32 @@ VALUES
 
 -- --------------------------------------------------------
 --
+-- Table structure for table `gig`
+--
+CREATE TABLE
+  `gig` (
+    `GigID` int (11) NOT NULL,
+    `FreelancerID` int (11) NOT NULL,
+    `Title` varchar(150) NOT NULL,
+    `Category` varchar(100) NOT NULL,
+    `Subcategory` varchar(100) NOT NULL,
+    `Description` text NOT NULL,
+    `MinPrice` int (11) NOT NULL,
+    `MaxPrice` int (11) NOT NULL,
+    `DeliveryTime` int (11) NOT NULL,
+    `RevisionCount` int (11) NOT NULL,
+    `ThumnailUrl` varchar(255) NOT NULL,
+    `GalleryUrl` text NOT NULL,
+    `Status` enum ('active', 'paused', 'deleted') NOT NULL,
+    `Visibility` enum ('public', 'private') NOT NULL,
+    `Rating` decimal(3, 2) NOT NULL,
+    `RatingCount` int (11) NOT NULL,
+    `CreatedAt` datetime NOT NULL,
+    `UpdatedAt` datetime NOT NULL
+  ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+--
 -- Table structure for table `job`
 --
 CREATE TABLE
@@ -464,7 +501,7 @@ CREATE TABLE
     `Description` text DEFAULT NULL,
     `Budget` decimal(10, 2) DEFAULT NULL,
     `Deadline` date DEFAULT NULL,
-    `Status` varchar(50) DEFAULT NULL,
+    `Status` enum ('available', 'deleted', 'complete', 'processing') NOT NULL DEFAULT 'available',
     `PostDate` date DEFAULT NULL
   ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
 
@@ -490,7 +527,7 @@ VALUES
     'asdf',
     12.00,
     '2025-11-14',
-    'active',
+    '',
     '2025-11-19'
   ),
   (
@@ -500,7 +537,7 @@ VALUES
     'asdf',
     888.00,
     '2025-11-15',
-    'active',
+    '',
     '2025-11-19'
   );
 
@@ -620,32 +657,6 @@ CREATE TABLE
 
 -- --------------------------------------------------------
 --
--- Table structure for table `service`
---
-CREATE TABLE
-  `service` (
-    `ServiceID` int (11) NOT NULL,
-    `FreelancerID` int (11) NOT NULL,
-    `Title` varchar(150) NOT NULL,
-    `Category` varchar(100) NOT NULL,
-    `Subcategory` varchar(100) NOT NULL,
-    `Description` text NOT NULL,
-    `MinPrice` int (11) NOT NULL,
-    `MaxPrice` int (11) NOT NULL,
-    `DeliveryTime` int (11) NOT NULL,
-    `RevisionCount` int (11) NOT NULL,
-    `ThumnailUrl` varchar(255) NOT NULL,
-    `GalleryUrl` text NOT NULL,
-    `Status` enum ('active', 'paused', 'deleted') NOT NULL,
-    `Visibility` enum ('public', 'private') NOT NULL,
-    `Rating` decimal(3, 2) NOT NULL,
-    `RatingCount` int (11) NOT NULL,
-    `CreatedAt` datetime NOT NULL,
-    `UpdatedAt` datetime NOT NULL
-  ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
-
--- --------------------------------------------------------
---
 -- Table structure for table `skill`
 --
 CREATE TABLE
@@ -706,6 +717,12 @@ ALTER TABLE `freelancerskill` ADD PRIMARY KEY (`FreelancerID`, `SkillID`),
 ADD KEY `SkillID` (`SkillID`);
 
 --
+-- Indexes for table `gig`
+--
+ALTER TABLE `gig` ADD PRIMARY KEY (`GigID`),
+ADD KEY `FreelancerID` (`FreelancerID`);
+
+--
 -- Indexes for table `job`
 --
 ALTER TABLE `job` ADD PRIMARY KEY (`JobID`),
@@ -742,12 +759,6 @@ ALTER TABLE `payment` ADD PRIMARY KEY (`PaymentID`);
 ALTER TABLE `review` ADD PRIMARY KEY (`ReviewID`),
 ADD KEY `FreelancerID` (`FreelancerID`),
 ADD KEY `ClientID` (`ClientID`);
-
---
--- Indexes for table `service`
---
-ALTER TABLE `service` ADD PRIMARY KEY (`ServiceID`),
-ADD KEY `FreelancerID` (`FreelancerID`);
 
 --
 -- Indexes for table `skill`
@@ -788,6 +799,11 @@ ALTER TABLE `freelancer` MODIFY `FreelancerID` int (11) NOT NULL AUTO_INCREMENT,
 AUTO_INCREMENT = 5;
 
 --
+-- AUTO_INCREMENT for table `gig`
+--
+ALTER TABLE `gig` MODIFY `GigID` int (11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `job`
 --
 ALTER TABLE `job` MODIFY `JobID` int (11) NOT NULL AUTO_INCREMENT,
@@ -816,11 +832,6 @@ ALTER TABLE `payment` MODIFY `PaymentID` int (11) NOT NULL AUTO_INCREMENT;
 ALTER TABLE `review` MODIFY `ReviewID` int (11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `service`
---
-ALTER TABLE `service` MODIFY `ServiceID` int (11) NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT for table `skill`
 --
 ALTER TABLE `skill` MODIFY `SkillID` int (11) NOT NULL AUTO_INCREMENT,
@@ -834,6 +845,11 @@ AUTO_INCREMENT = 4;
 --
 ALTER TABLE `freelancerskill` ADD CONSTRAINT `freelancerskill_ibfk_1` FOREIGN KEY (`FreelancerID`) REFERENCES `freelancer` (`FreelancerID`) ON DELETE CASCADE,
 ADD CONSTRAINT `freelancerskill_ibfk_2` FOREIGN KEY (`SkillID`) REFERENCES `skill` (`SkillID`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `gig`
+--
+ALTER TABLE `gig` ADD CONSTRAINT `gig_ibfk_1` FOREIGN KEY (`FreelancerID`) REFERENCES `freelancer` (`FreelancerID`);
 
 --
 -- Constraints for table `job`
@@ -850,11 +866,6 @@ ALTER TABLE `message` ADD CONSTRAINT `message_ibfk_3` FOREIGN KEY (`Conversation
 --
 ALTER TABLE `review` ADD CONSTRAINT `review_ibfk_1` FOREIGN KEY (`FreelancerID`) REFERENCES `freelancer` (`FreelancerID`) ON DELETE CASCADE,
 ADD CONSTRAINT `review_ibfk_2` FOREIGN KEY (`ClientID`) REFERENCES `client` (`ClientID`) ON DELETE CASCADE;
-
---
--- Constraints for table `service`
---
-ALTER TABLE `service` ADD CONSTRAINT `service_ibfk_1` FOREIGN KEY (`FreelancerID`) REFERENCES `freelancer` (`FreelancerID`);
 
 COMMIT;
 
