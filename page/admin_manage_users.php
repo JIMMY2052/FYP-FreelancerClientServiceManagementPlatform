@@ -64,13 +64,13 @@ $search_query = $_GET['search'] ?? '';
 $sort_by = $_GET['sort'] ?? 'date_desc';
 
 // Build freelancer query
-$freelancer_query = "SELECT FreelancerID, Name, Email, Status, CreatedAt, ProfilePicture FROM freelancer";
+$freelancer_query = "SELECT FreelancerID, FirstName, LastName, Email, Status, JoinedDate FROM freelancer";
 if (!empty($search_query)) {
-    $freelancer_query .= " WHERE Name LIKE '%$search_query%' OR Email LIKE '%$search_query%'";
+    $freelancer_query .= " WHERE FirstName LIKE '%$search_query%' OR LastName LIKE '%$search_query%' OR Email LIKE '%$search_query%'";
 }
 
 // Build client query
-$client_query = "SELECT ClientID, CompanyName as Name, Email, Status, CreatedAt, CompanyLogo as ProfilePicture FROM client";
+$client_query = "SELECT ClientID, CompanyName as Name, Email, Status, JoinedDate FROM client";
 if (!empty($search_query)) {
     $client_query .= " WHERE CompanyName LIKE '%$search_query%' OR Email LIKE '%$search_query%'";
 }
@@ -85,7 +85,8 @@ if ($filter_type === 'all') {
     if ($freelancer_result) {
         while ($row = $freelancer_result->fetch_assoc()) {
             $row['type'] = 'freelancer';
-            $row['created'] = $row['CreatedAt'];
+            $row['created'] = date('Y-m-d', strtotime($row['JoinedDate']));
+            $row['Name'] = $row['FirstName'] . ' ' . $row['LastName'];
             $users[] = $row;
         }
     }
@@ -93,7 +94,7 @@ if ($filter_type === 'all') {
     if ($client_result) {
         while ($row = $client_result->fetch_assoc()) {
             $row['type'] = 'client';
-            $row['created'] = $row['CreatedAt'];
+            $row['created'] = date('Y-m-d', strtotime($row['JoinedDate']));
             $users[] = $row;
         }
     }
@@ -102,7 +103,8 @@ if ($filter_type === 'all') {
     if ($result) {
         while ($row = $result->fetch_assoc()) {
             $row['type'] = 'freelancer';
-            $row['created'] = $row['CreatedAt'];
+            $row['created'] = date('Y-m-d', strtotime($row['JoinedDate']));
+            $row['Name'] = $row['FirstName'] . ' ' . $row['LastName'];
             $users[] = $row;
         }
     }
@@ -111,7 +113,7 @@ if ($filter_type === 'all') {
     if ($result) {
         while ($row = $result->fetch_assoc()) {
             $row['type'] = 'client';
-            $row['created'] = $row['CreatedAt'];
+            $row['created'] = date('Y-m-d', strtotime($row['JoinedDate']));
             $users[] = $row;
         }
     }
@@ -126,7 +128,6 @@ $conn->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Users - WorkSnyc Admin</title>
-    <link rel="stylesheet" href="../assets/css/style.css">
     <link rel="stylesheet" href="../assets/css/admin.css">
 </head>
 
@@ -211,9 +212,9 @@ $conn->close();
                                     <tr>
                                         <td>
                                             <div style="display: flex; align-items: center; gap: 12px;">
-                                                <img src="<?php echo !empty($user['ProfilePicture']) ? htmlspecialchars($user['ProfilePicture']) : '../images/default-avatar.png'; ?>" 
-                                                     alt="<?php echo htmlspecialchars($user['Name'] ?? ''); ?>" 
-                                                     style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                                                <div style="width: 40px; height: 40px; border-radius: 50%; background-color: #e5e7eb; display: flex; align-items: center; justify-content: center; color: #6b7280; font-weight: 600;">
+                                                    <?php echo substr($user['Name'] ?? '', 0, 1); ?>
+                                                </div>
                                                 <div>
                                                     <div style="font-weight: 600;"><?php echo htmlspecialchars($user['Name'] ?? ''); ?></div>
                                                 </div>

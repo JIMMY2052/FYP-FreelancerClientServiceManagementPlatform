@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 19, 2025 at 06:52 AM
+-- Generation Time: Nov 20, 2025 at 04:16 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 SET
@@ -37,6 +37,26 @@ CREATE TABLE
     `Status` varchar(50) DEFAULT 'active',
     `CreatedAt` timestamp NOT NULL DEFAULT current_timestamp()
   ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
+
+--
+-- Dumping data for table `admin`
+--
+INSERT INTO
+  `admin` (
+    `AdminID`,
+    `Email`,
+    `Password`,
+    `Status`,
+    `CreatedAt`
+  )
+VALUES
+  (
+    1,
+    'jimmychankahlok@gmail.com',
+    '$2y$10$BdoF5Lx6GUYgEASR5uJAUuYhOs0gldiguXd6VmG2X3Pv/I.WRZH3e',
+    'active',
+    '2025-11-19 13:13:06'
+  );
 
 -- --------------------------------------------------------
 --
@@ -184,7 +204,9 @@ CREATE TABLE
     `Password` varchar(255) DEFAULT NULL,
     `PhoneNo` varchar(50) DEFAULT NULL,
     `Status` varchar(50) DEFAULT NULL,
-    `Address` text DEFAULT NULL
+    `Address` text DEFAULT NULL,
+    `JoinedDate` timestamp NOT NULL DEFAULT current_timestamp(),
+    `isDelete` tinyint (1) DEFAULT 0
   ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
 
 --
@@ -199,7 +221,9 @@ INSERT INTO
     `Password`,
     `PhoneNo`,
     `Status`,
-    `Address`
+    `Address`,
+    `JoinedDate`,
+    `isDelete`
   )
 VALUES
   (
@@ -210,7 +234,9 @@ VALUES
     '$2y$10$BxSAHpJnrutlLgnTkuFehOACPPqYFQ/vXaEgjahq2cei0u4A/irUO',
     NULL,
     'active',
-    NULL
+    NULL,
+    '2025-11-20 15:15:48',
+    0
   ),
   (
     2,
@@ -220,7 +246,21 @@ VALUES
     '$2y$10$D1ON60Z0DruTc8tASwybi.VX6wu0nIPxZURmUDSrFEf6ZWb9c7Gv6',
     NULL,
     'active',
-    NULL
+    NULL,
+    '2025-11-20 15:15:48',
+    0
+  ),
+  (
+    3,
+    'Google',
+    NULL,
+    'lucifa@gmail.com',
+    '$2y$10$yP7JQYBtyuUYIsBkQI1T.uCp0HLAiTO.TWORqXF1bX5nJLA4deq8C',
+    NULL,
+    'active',
+    NULL,
+    '2025-11-20 15:15:48',
+    0
   );
 
 -- --------------------------------------------------------
@@ -259,68 +299,13 @@ INSERT INTO
   )
 VALUES
   (
-    2,
+    11,
     1,
     'freelancer',
-    1,
-    'client',
-    '2025-11-16 12:44:52',
-    '2025-11-17 03:31:59',
-    'active',
-    '{\"user_id\": \"1\", \"user_type\": \"client\", \"deleted_at\": \"2025-11-16 22:22:09\"}'
-  ),
-  (
     3,
-    2,
-    'freelancer',
-    1,
     'client',
-    '2025-11-16 12:48:54',
-    '2025-11-16 14:31:33',
-    'active',
-    '{\"user_id\": \"1\", \"user_type\": \"client\", \"deleted_at\": \"2025-11-16 22:22:03\"}'
-  ),
-  (
-    4,
-    3,
-    'freelancer',
-    1,
-    'client',
-    '2025-11-16 15:01:15',
-    '2025-11-16 15:52:01',
-    'active',
-    NULL
-  ),
-  (
-    5,
-    2,
-    'client',
-    1,
-    'freelancer',
-    '2025-11-16 15:51:18',
-    '2025-11-16 15:51:18',
-    'active',
-    NULL
-  ),
-  (
-    6,
-    2,
-    'client',
-    3,
-    'freelancer',
-    '2025-11-16 15:52:37',
-    '2025-11-16 15:52:44',
-    'active',
-    NULL
-  ),
-  (
-    7,
-    4,
-    'freelancer',
-    1,
-    'client',
-    '2025-11-17 03:35:39',
-    '2025-11-17 08:13:56',
+    '2025-11-19 07:29:22',
+    '2025-11-19 07:29:31',
     'active',
     NULL
   );
@@ -344,7 +329,9 @@ CREATE TABLE
     `SocialMediaURL` varchar(255) DEFAULT NULL,
     `Bio` text DEFAULT NULL,
     `RatingAverage` decimal(3, 2) DEFAULT NULL,
-    `TotalEarned` decimal(10, 2) DEFAULT NULL
+    `TotalEarned` decimal(10, 2) DEFAULT NULL,
+    `JoinedDate` timestamp NOT NULL DEFAULT current_timestamp(),
+    `isDelete` tinyint (1) DEFAULT 0
   ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
 
 --
@@ -365,7 +352,9 @@ INSERT INTO
     `SocialMediaURL`,
     `Bio`,
     `RatingAverage`,
-    `TotalEarned`
+    `TotalEarned`,
+    `JoinedDate`,
+    `isDelete`
   )
 VALUES
   (
@@ -382,7 +371,9 @@ VALUES
     'https://linked.in',
     'asdf',
     NULL,
-    0.00
+    0.00,
+    '2025-11-20 15:15:48',
+    0
   ),
   (
     2,
@@ -398,7 +389,9 @@ VALUES
     NULL,
     NULL,
     NULL,
-    0.00
+    0.00,
+    '2025-11-20 15:15:48',
+    0
   ),
   (
     3,
@@ -414,7 +407,9 @@ VALUES
     NULL,
     NULL,
     NULL,
-    NULL
+    NULL,
+    '2025-11-20 15:15:48',
+    0
   ),
   (
     4,
@@ -430,7 +425,9 @@ VALUES
     'https://linked.in',
     'Professional Web Developer',
     NULL,
-    NULL
+    NULL,
+    '2025-11-20 15:15:48',
+    0
   );
 
 -- --------------------------------------------------------
@@ -495,6 +492,16 @@ VALUES
     '2025-11-14',
     'active',
     '2025-11-19'
+  ),
+  (
+    2,
+    3,
+    'Google',
+    'asdf',
+    888.00,
+    '2025-11-15',
+    'active',
+    '2025-11-19'
   );
 
 -- --------------------------------------------------------
@@ -531,290 +538,57 @@ INSERT INTO
   )
 VALUES
   (
-    26,
-    NULL,
-    '1',
-    '1',
-    'asdfasd',
-    NULL,
-    NULL,
-    '2025-11-16 20:35:32',
-    'unread'
-  ),
-  (
-    27,
-    2,
-    '1',
-    '1',
-    'asdfsadf',
-    NULL,
-    NULL,
-    '2025-11-16 20:44:52',
-    'unread'
-  ),
-  (
-    28,
-    2,
-    '1',
-    '1',
-    'asdf',
-    NULL,
-    NULL,
-    '2025-11-16 20:46:31',
-    'unread'
-  ),
-  (
-    29,
-    3,
-    '1',
-    '2',
+    97,
+    11,
+    'c3',
+    'f1',
     'hi',
     NULL,
     NULL,
-    '2025-11-16 20:48:54',
+    '2025-11-19 15:29:31',
     'unread'
-  ),
+  );
+
+-- --------------------------------------------------------
+--
+-- Table structure for table `message_notification`
+--
+CREATE TABLE
+  `message_notification` (
+    `NotificationID` int (11) NOT NULL,
+    `ReceiverID` int (11) NOT NULL,
+    `ReceiverType` varchar(20) NOT NULL,
+    `SenderID` int (11) NOT NULL,
+    `SenderType` varchar(20) NOT NULL,
+    `ConversationID` varchar(50) DEFAULT NULL,
+    `CreatedAt` timestamp NOT NULL DEFAULT current_timestamp(),
+    `IsRead` tinyint (1) DEFAULT 0
+  ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
+
+--
+-- Dumping data for table `message_notification`
+--
+INSERT INTO
+  `message_notification` (
+    `NotificationID`,
+    `ReceiverID`,
+    `ReceiverType`,
+    `SenderID`,
+    `SenderType`,
+    `ConversationID`,
+    `CreatedAt`,
+    `IsRead`
+  )
+VALUES
   (
-    33,
-    2,
-    '1',
-    '1',
-    'asdf',
-    NULL,
-    NULL,
-    '2025-11-16 20:49:18',
-    'unread'
-  ),
-  (
-    48,
-    2,
-    'f1',
-    'c1',
-    'hi again',
-    NULL,
-    NULL,
-    '2025-11-16 22:08:23',
-    'unread'
-  ),
-  (
-    49,
-    2,
-    'c1',
-    'f1',
-    'yo',
-    NULL,
-    NULL,
-    '2025-11-16 22:29:25',
-    'unread'
-  ),
-  (
-    50,
-    2,
-    'c1',
-    'f1',
-    NULL,
-    '/uploads/messages/1763303379_f2fb852a.pdf',
-    'application/pdf',
-    '2025-11-16 22:29:39',
-    'unread'
-  ),
-  (
-    51,
-    2,
-    'f1',
-    'c1',
-    'he',
-    NULL,
-    NULL,
-    '2025-11-16 22:29:45',
-    'unread'
-  ),
-  (
-    52,
+    1,
     3,
-    'c1',
-    'f2',
-    'asdf',
-    NULL,
-    NULL,
-    '2025-11-16 22:31:27',
-    'unread'
-  ),
-  (
-    53,
-    3,
-    'f2',
-    'c1',
-    'asdf',
-    NULL,
-    NULL,
-    '2025-11-16 22:31:33',
-    'unread'
-  ),
-  (
-    54,
-    4,
-    'c1',
-    'f3',
-    'df',
-    NULL,
-    NULL,
-    '2025-11-16 23:01:15',
-    'unread'
-  ),
-  (
-    55,
-    5,
-    'f1',
-    'c2',
-    'hi',
-    NULL,
-    NULL,
-    '2025-11-16 23:51:18',
-    'unread'
-  ),
-  (
-    56,
-    4,
-    'c1',
-    'f3',
-    'das',
-    NULL,
-    NULL,
-    '2025-11-16 23:51:42',
-    'unread'
-  ),
-  (
-    57,
-    4,
-    'c1',
-    'f3',
-    'asdf',
-    NULL,
-    NULL,
-    '2025-11-16 23:52:01',
-    'unread'
-  ),
-  (
-    58,
-    6,
-    'f3',
-    'c2',
-    'asdf',
-    NULL,
-    NULL,
-    '2025-11-16 23:52:37',
-    'unread'
-  ),
-  (
-    59,
-    6,
-    'c2',
-    'f3',
-    'dfg',
-    NULL,
-    NULL,
-    '2025-11-16 23:52:44',
-    'unread'
-  ),
-  (
-    60,
-    2,
-    'c1',
-    'f1',
-    'testing',
-    NULL,
-    NULL,
-    '2025-11-17 11:31:50',
-    'unread'
-  ),
-  (
-    61,
-    2,
-    'f1',
-    'c1',
-    'testing',
-    NULL,
-    NULL,
-    '2025-11-17 11:31:59',
-    'unread'
-  ),
-  (
-    62,
-    7,
-    'c1',
-    'f4',
-    'hello',
-    NULL,
-    NULL,
-    '2025-11-17 11:35:39',
-    'unread'
-  ),
-  (
-    63,
-    7,
-    'f4',
-    'c1',
-    'I am SiteCore',
-    NULL,
-    NULL,
-    '2025-11-17 11:35:50',
-    'unread'
-  ),
-  (
-    64,
-    7,
-    'c1',
-    'f4',
-    'Hi I am John Lee',
-    NULL,
-    NULL,
-    '2025-11-17 16:01:58',
-    'unread'
-  ),
-  (
-    65,
-    7,
-    'f4',
-    'c1',
-    'Hi',
-    NULL,
-    NULL,
-    '2025-11-17 16:02:10',
-    'unread'
-  ),
-  (
-    66,
-    7,
-    'c1',
-    'f4',
-    'zxcv',
-    NULL,
-    NULL,
-    '2025-11-17 16:04:00',
-    'unread'
-  ),
-  (
-    67,
-    7,
-    'c1',
-    'f4',
-    'hi',
-    NULL,
-    NULL,
-    '2025-11-17 16:12:59',
-    'unread'
-  ),
-  (
-    68,
-    7,
-    'c1',
-    'f4',
-    'jj',
-    NULL,
-    NULL,
-    '2025-11-17 16:13:56',
-    'unread'
+    'client',
+    1,
+    'freelancer',
+    'c3',
+    '2025-11-19 06:55:46',
+    1
   );
 
 -- --------------------------------------------------------
@@ -947,6 +721,17 @@ ADD KEY `idx_timestamp` (`Timestamp`),
 ADD KEY `idx_conversation` (`ConversationID`);
 
 --
+-- Indexes for table `message_notification`
+--
+ALTER TABLE `message_notification` ADD PRIMARY KEY (`NotificationID`),
+ADD UNIQUE KEY `unique_notification` (
+  `ReceiverID`,
+  `ReceiverType`,
+  `SenderID`,
+  `SenderType`
+);
+
+--
 -- Indexes for table `payment`
 --
 ALTER TABLE `payment` ADD PRIMARY KEY (`PaymentID`);
@@ -975,7 +760,8 @@ ALTER TABLE `skill` ADD PRIMARY KEY (`SkillID`);
 --
 -- AUTO_INCREMENT for table `admin`
 --
-ALTER TABLE `admin` MODIFY `AdminID` int (11) NOT NULL AUTO_INCREMENT;
+ALTER TABLE `admin` MODIFY `AdminID` int (11) NOT NULL AUTO_INCREMENT,
+AUTO_INCREMENT = 2;
 
 --
 -- AUTO_INCREMENT for table `agreement`
@@ -987,13 +773,13 @@ AUTO_INCREMENT = 10;
 -- AUTO_INCREMENT for table `client`
 --
 ALTER TABLE `client` MODIFY `ClientID` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 3;
+AUTO_INCREMENT = 4;
 
 --
 -- AUTO_INCREMENT for table `conversation`
 --
 ALTER TABLE `conversation` MODIFY `ConversationID` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 8;
+AUTO_INCREMENT = 12;
 
 --
 -- AUTO_INCREMENT for table `freelancer`
@@ -1005,13 +791,19 @@ AUTO_INCREMENT = 5;
 -- AUTO_INCREMENT for table `job`
 --
 ALTER TABLE `job` MODIFY `JobID` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 2;
+AUTO_INCREMENT = 3;
 
 --
 -- AUTO_INCREMENT for table `message`
 --
 ALTER TABLE `message` MODIFY `MessageID` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 69;
+AUTO_INCREMENT = 98;
+
+--
+-- AUTO_INCREMENT for table `message_notification`
+--
+ALTER TABLE `message_notification` MODIFY `NotificationID` int (11) NOT NULL AUTO_INCREMENT,
+AUTO_INCREMENT = 8;
 
 --
 -- AUTO_INCREMENT for table `payment`
