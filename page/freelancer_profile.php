@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['profile_picture'])) 
 
     if ($file['size'] > 0 && $file['size'] <= $max_size && in_array($file['type'], $allowed_types)) {
         $upload_dir = '../uploads/profile_pictures/';
-        
+
         // Create directory if it doesn't exist
         if (!is_dir($upload_dir)) {
             mkdir($upload_dir, 0755, true);
@@ -135,12 +135,14 @@ $conn->close();
             <!-- Success/Error Messages -->
             <?php if (isset($_SESSION['success'])): ?>
                 <div class="alert alert-success">
-                    <?php echo htmlspecialchars($_SESSION['success']); unset($_SESSION['success']); ?>
+                    <?php echo htmlspecialchars($_SESSION['success']);
+                    unset($_SESSION['success']); ?>
                 </div>
             <?php endif; ?>
             <?php if (isset($_SESSION['error'])): ?>
                 <div class="alert alert-error">
-                    <?php echo htmlspecialchars($_SESSION['error']); unset($_SESSION['error']); ?>
+                    <?php echo htmlspecialchars($_SESSION['error']);
+                    unset($_SESSION['error']); ?>
                 </div>
             <?php endif; ?>
 
@@ -153,7 +155,7 @@ $conn->close();
                         <?php else: ?>
                             <div class="avatar-large"><?php echo strtoupper(substr($freelancer['FirstName'] ?: 'F', 0, 1) . substr($freelancer['LastName'] ?: 'L', 0, 1)); ?></div>
                         <?php endif; ?>
-                        
+
                         <!-- Upload Button with Pencil Icon -->
                         <label for="profile_picture_input" class="upload-icon-button" title="Upload profile picture">
                             <svg class="pencil-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -261,10 +263,30 @@ $conn->close();
     </div>
 
     <script>
+        // Auto-dismiss success/error messages after 3 seconds with animation
+        document.addEventListener('DOMContentLoaded', function() {
+            const successAlert = document.querySelector('.alert');
+
+            if (successAlert) {
+                // Show message initially
+                successAlert.classList.add('message-show');
+
+                // Auto-dismiss after 3 seconds
+                setTimeout(function() {
+                    successAlert.classList.add('message-hide');
+
+                    // Remove from DOM after animation completes
+                    setTimeout(function() {
+                        successAlert.remove();
+                    }, 500);
+                }, 3000);
+            }
+        });
+
         // Handle profile picture upload
         document.getElementById('profile_picture_input').addEventListener('change', function(e) {
             const file = e.target.files[0];
-            
+
             if (file) {
                 const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
                 const maxSize = 5 * 1024 * 1024; // 5MB
@@ -285,7 +307,7 @@ $conn->close();
 
                 const xhr = new XMLHttpRequest();
                 xhr.open('POST', 'freelancer_profile.php', true);
-                
+
                 xhr.onload = function() {
                     if (xhr.status === 200) {
                         location.reload();
