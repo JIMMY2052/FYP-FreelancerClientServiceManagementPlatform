@@ -27,6 +27,8 @@ $scope = isset($_POST['scope']) ? trim($_POST['scope']) : '';
 $deliverables = isset($_POST['deliverables']) ? trim($_POST['deliverables']) : '';
 $payment = isset($_POST['payment']) ? floatval($_POST['payment']) : 0;
 $terms = isset($_POST['terms']) ? trim($_POST['terms']) : '';
+$freelancer_name = isset($_POST['freelancer_name']) ? trim($_POST['freelancer_name']) : '';
+$signature_data = isset($_POST['signature_data']) ? $_POST['signature_data'] : '';
 
 // Validate required fields
 $errors = [];
@@ -55,6 +57,14 @@ if (empty($terms)) {
     $errors[] = "Terms & conditions are required.";
 }
 
+if (empty($freelancer_name)) {
+    $errors[] = "Freelancer name is required.";
+}
+
+if (empty($signature_data)) {
+    $errors[] = "Digital signature is required.";
+}
+
 // If there are validation errors, redirect back with error message
 if (!empty($errors)) {
     $_SESSION['error'] = implode(' ', $errors);
@@ -65,9 +75,29 @@ if (!empty($errors)) {
 // Get database connection
 $conn = getDBConnection();
 
+// Save signature image to file
+$uploads_dir = '../uploads/signatures/';
+if (!is_dir($uploads_dir)) {
+    mkdir($uploads_dir, 0755, true);
+}
+
+// Extract base64 data and save to file
+$signature_filename = null;
+if ($signature_data) {
+    // Remove data:image/png;base64, prefix
+    $signature_data_clean = str_replace('data:image/png;base64,', '', $signature_data);
+    $signature_data_clean = base64_decode($signature_data_clean);
+    
+    // Generate unique filename
+    $signature_filename = 'signature_' . time() . '_' . uniqid() . '.png';
+    $signature_path = $uploads_dir . $signature_filename;
+    
+    file_put_contents($signature_path, $signature_data_clean);
+}
+
 // Insert agreement into database
-$sql = "INSERT INTO agreement (ProjectTitle, ProjectDetail, Scope, Deliverables, PaymentAmount, Terms, Status, SignedDate) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, NOW())";
+$sql = "INSERT INTO agreement (ProjectTitle, ProjectDetail, Scope, Deliverables, PaymentAmount, Terms, FreelancerName, SignaturePath, Status, SignedDate) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
 
 $stmt = $conn->prepare($sql);
 
@@ -80,13 +110,15 @@ if (!$stmt) {
 // Bind parameters
 $status = 'pending';
 $stmt->bind_param(
-    'ssssdss',
+    'ssssdsss',
     $project_title,
     $project_detail,
     $scope,
     $deliverables,
     $payment,
     $terms,
+    $freelancer_name,
+    $signature_filename,
     $status
 );
 
@@ -104,6 +136,8 @@ if ($stmt->execute()) {
         'deliverables' => $deliverables,
         'payment' => $payment,
         'terms' => $terms,
+        'freelancer_name' => $freelancer_name,
+        'signature_filename' => $signature_filename,
         'created_date' => date('Y-m-d H:i:s'),
         'status' => 'pending'
     );

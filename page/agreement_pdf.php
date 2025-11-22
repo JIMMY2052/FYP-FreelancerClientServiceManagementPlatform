@@ -211,6 +211,72 @@ $pdf->SetFont('Helvetica', '', 11);
 $pdf->SetTextColor(90, 107, 125);
 $pdf->MultiCell(0, 6, $agreement['Terms'], 0, 'L');
 
+// ===== SECTION 5: DIGITAL SIGNATURE =====
+$pdf->Ln(10);
+$pdf->SetFont('Helvetica', 'B', 12);
+$pdf->SetTextColor(26, 26, 26);
+$pdf->Cell(10, 10, '5', 0, 0, 'C');
+$pdf->Cell(0, 10, 'Freelancer Signature', 0, 1, 'L');
+
+$pdf->Ln(5);
+
+// Add signature image if it exists
+$signaturePath = null;
+if (!empty($agreement['SignaturePath'])) {
+    $signaturePath = __DIR__ . '/../uploads/signatures/' . $agreement['SignaturePath'];
+}
+
+if ($signaturePath && file_exists($signaturePath)) {
+    // Center the signature
+    $pdf->SetY($pdf->GetY());
+    
+    // Signature box
+    $pdf->SetDrawColor(26, 26, 26);
+    $pdf->SetFillColor(255, 255, 255);
+    $boxWidth = 80;
+    $boxHeight = 50;
+    
+    // Calculate center position
+    $pageWidth = $pdf->GetPageWidth();
+    $centerX = ($pageWidth - $boxWidth) / 2;
+    
+    // Draw signature image
+    $pdf->Image($signaturePath, $centerX, $pdf->GetY(), $boxWidth, $boxHeight);
+    $pdf->SetY($pdf->GetY() + $boxHeight);
+    
+    $pdf->Ln(3);
+}
+
+// Signature line and name
+$pdf->SetFont('Helvetica', '', 10);
+$pdf->SetTextColor(90, 107, 125);
+
+// Draw signature line
+$lineY = $pdf->GetY();
+$pageWidth = $pdf->GetPageWidth();
+$lineStartX = ($pageWidth - 100) / 2;
+$lineEndX = $lineStartX + 100;
+
+// Set position and draw line
+$pdf->SetXY($lineStartX, $lineY);
+$pdf->SetDrawColor(26, 26, 26);
+$pdf->Line($lineStartX, $lineY, $lineEndX, $lineY);
+
+$pdf->SetY($lineY + 3);
+
+// Freelancer name
+$pdf->SetFont('Helvetica', '', 10);
+$pdf->SetTextColor(26, 26, 26);
+$freelancerSignatureName = !empty($agreement['FreelancerName']) ? $agreement['FreelancerName'] : 'Freelancer';
+$pdf->SetX($lineStartX);
+$pdf->Cell(100, 8, 'Freelancer Signature: ' . $freelancerSignatureName, 0, 1, 'C');
+
+// Signature date
+$pdf->SetFont('Helvetica', '', 9);
+$pdf->SetTextColor(123, 143, 163);
+$pdf->SetX($lineStartX);
+$pdf->Cell(100, 6, 'Signed on: ' . date('F j, Y', strtotime($agreement['SignedDate'])), 0, 1, 'C');
+
 // Add footer
 $pdf->Ln(10);
 $pdf->SetFont('Helvetica', '', 9);

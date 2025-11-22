@@ -327,6 +327,135 @@
                 margin-top: 16px;
             }
         }
+
+        /* SIGNATURE PAD STYLES */
+        .signature-section {
+            margin-top: 40px;
+            padding-top: 24px;
+            border-top: 2px solid #e5e7eb;
+        }
+
+        .signature-section h3 {
+            font-size: 1.1rem;
+            color: #1a1a1a;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+
+        .signature-container {
+            border: 2px dashed #ddd;
+            border-radius: 6px;
+            background: #f9fafb;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        #signaturePad {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            cursor: crosshair;
+            display: block;
+            width: 100%;
+            height: 200px;
+        }
+
+        .signature-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .signature-buttons button {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            background: white;
+            color: #333;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-top: 0;
+        }
+
+        .signature-buttons button:hover {
+            background: #f3f4f6;
+            border-color: #999;
+        }
+
+        .signature-buttons .sign-submit {
+            background: #1ab394;
+            color: white;
+            border-color: #1ab394;
+        }
+
+        .signature-buttons .sign-submit:hover {
+            background: #158a74;
+            border-color: #158a74;
+        }
+
+        .signature-name-field {
+            margin-top: 16px;
+        }
+
+        .signature-name-field label {
+            margin-top: 0;
+        }
+
+        .signature-note {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 12px;
+            padding: 12px;
+            background: #f0fdf4;
+            border-left: 4px solid #1ab394;
+            border-radius: 4px;
+        }
+
+        /* PREVIEW SIGNATURE SECTION */
+        .preview-signature-section {
+            margin-top: 40px;
+            padding-top: 24px;
+            border-top: 2px solid #e5e7eb;
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-end;
+        }
+
+        .signature-block {
+            text-align: center;
+        }
+
+        .signature-line {
+            width: 200px;
+            height: 80px;
+            border-bottom: 1px solid #1a1a1a;
+            margin-bottom: 8px;
+            background: white;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .signature-line img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .signature-label {
+            font-size: 0.9rem;
+            color: #5a6b7d;
+            font-weight: 600;
+        }
+
+        .signature-name {
+            font-size: 0.95rem;
+            color: #1a1a1a;
+            font-weight: 600;
+            margin-top: 4px;
+        }
     </style>
 
 </head>
@@ -409,6 +538,17 @@
                     <div id="pTerms" class="empty">Define the terms...</div>
                 </div>
             </div>
+
+            <!-- SECTION 5: SIGNATURES -->
+            <div class="preview-signature-section">
+                <div class="signature-block">
+                    <div class="signature-line">
+                        <img id="pSignatureImage" style="display: none;" />
+                    </div>
+                    <div class="signature-label">Freelancer Signature</div>
+                    <div class="signature-name" id="pSignatureName">___________________</div>
+                </div>
+            </div>
         </div>
 
 
@@ -439,13 +579,40 @@
                 <label for="terms">Terms & Conditions *</label>
                 <textarea name="terms" rows="4" id="terms" placeholder="Define the agreement terms..." required></textarea>
 
+                <!-- SIGNATURE SECTION -->
+                <div class="signature-section">
+                    <h3>Digital Signature</h3>
+                    <p style="color: #666; font-size: 0.95rem; margin-bottom: 16px;">Sign below to electronically sign this agreement</p>
+                    
+                    <div class="signature-container">
+                        <canvas id="signaturePad"></canvas>
+                    </div>
+
+                    <div class="signature-buttons">
+                        <button type="button" id="clearSignature">Clear</button>
+                        <button type="button" class="sign-submit" id="confirmSignature">Confirm Signature</button>
+                    </div>
+
+                    <div class="signature-name-field">
+                        <label for="freelancerName">Your Full Name (for signature) *</label>
+                        <input type="text" name="freelancer_name" id="freelancerName" placeholder="Enter your full name" required>
+                    </div>
+
+                    <div class="signature-note">
+                        ✓ Your signature will be included in the final PDF agreement
+                    </div>
+
+                    <input type="hidden" name="signature_data" id="signatureData">
+                </div>
+
                 <button type="submit">✓ Create Agreement</button>
             </form>
         </div>
 
     </div>
 
-
+    <!-- Signature Pad Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/signature_pad/1.5.3/signature_pad.min.js"></script>
 
     <script>
         // SMOOTH LIVE PREVIEW UPDATES
@@ -548,6 +715,67 @@
             document.getElementById("pDate").textContent = getCurrentDate();
         });
 
+        // ===== SIGNATURE PAD INITIALIZATION =====
+        let signaturePad;
+        let isSignatureSigned = false;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const canvas = document.getElementById("signaturePad");
+            
+            // Set canvas size
+            const container = canvas.parentElement;
+            canvas.width = container.offsetWidth - 32;
+            canvas.height = 200;
+
+            // Initialize Signature Pad
+            signaturePad = new SignaturePad(canvas, {
+                backgroundColor: 'rgb(255, 255, 255)'
+            });
+
+            // Clear button
+            document.getElementById("clearSignature").addEventListener("click", function() {
+                signaturePad.clear();
+                isSignatureSigned = false;
+                document.getElementById("signatureData").value = "";
+                document.getElementById("pSignatureImage").style.display = "none";
+                document.getElementById("pSignatureName").textContent = "___________________";
+            });
+
+            // Confirm signature button
+            document.getElementById("confirmSignature").addEventListener("click", function() {
+                if (signaturePad.isEmpty()) {
+                    alert("Please sign before confirming.");
+                    return;
+                }
+
+                const fullName = document.getElementById("freelancerName").value.trim();
+                if (!fullName) {
+                    alert("Please enter your full name.");
+                    return;
+                }
+
+                // Get signature as data URL
+                const signatureDataURL = signaturePad.toDataURL("image/png");
+                document.getElementById("signatureData").value = signatureDataURL;
+                isSignatureSigned = true;
+
+                // Update preview
+                const img = document.getElementById("pSignatureImage");
+                img.src = signatureDataURL;
+                img.style.display = "block";
+                document.getElementById("pSignatureName").textContent = fullName;
+
+                alert("Signature confirmed! Your signature will be included in the agreement.");
+            });
+
+            // Update freelancer name in preview as typing
+            document.getElementById("freelancerName").addEventListener("input", function() {
+                if (isSignatureSigned) {
+                    document.getElementById("pSignatureName").textContent = this.value.trim() || "___________________";
+                }
+            });
+        });
+
         // FORM VALIDATION
         document.getElementById("agreementForm").addEventListener("submit", function(e) {
             const title = document.getElementById("title").value.trim();
@@ -556,6 +784,8 @@
             const deliverables = document.getElementById("deliverables").value.trim();
             const payment = document.getElementById("payment").value.trim();
             const terms = document.getElementById("terms").value.trim();
+            const freelancerName = document.getElementById("freelancerName").value.trim();
+            const signatureData = document.getElementById("signatureData").value;
 
             if (!title) {
                 alert("Project title cannot be empty.");
@@ -589,6 +819,18 @@
 
             if (!terms) {
                 alert("Terms & conditions cannot be empty.");
+                e.preventDefault();
+                return;
+            }
+
+            if (!freelancerName) {
+                alert("Please enter your full name for signature.");
+                e.preventDefault();
+                return;
+            }
+
+            if (!signatureData) {
+                alert("Please sign the agreement and confirm your signature.");
                 e.preventDefault();
                 return;
             }
