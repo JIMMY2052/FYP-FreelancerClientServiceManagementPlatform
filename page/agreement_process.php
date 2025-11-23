@@ -110,7 +110,7 @@ if (!$stmt) {
 // Bind parameters
 $status = 'pending';
 $stmt->bind_param(
-    'ssssdsss',
+    'ssssdssss',
     $project_title,
     $project_detail,
     $scope,
