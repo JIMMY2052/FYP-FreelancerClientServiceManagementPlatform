@@ -49,6 +49,7 @@ require_once __DIR__ . '/page/config.php';
                                 <a href="/page/client_profile.php" class="dropdown-item">View Profile</a>
                                 <a href="/page/client_dashboard.php" class="dropdown-item">Dashboard</a>
                             <?php endif; ?>
+                            <a href="/page/payment/wallet.php" class="dropdown-item">Wallet</a>
                             <a href="/page/logout.php" class="dropdown-item">Logout</a>
                         </div>
                     </div>

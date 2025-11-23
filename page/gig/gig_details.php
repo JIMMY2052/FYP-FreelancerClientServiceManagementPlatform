@@ -359,7 +359,7 @@ $categoryData = [
             line-height: 1.2;
         }
 
-        .contact-btn {
+        .order-btn {
             width: 100%;
             padding: 14px 20px;
             background: rgb(159, 232, 112);
@@ -374,10 +374,34 @@ $categoryData = [
             align-items: center;
             justify-content: center;
             gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .order-btn:hover {
+            background: rgb(140, 210, 90);
+            box-shadow: 0 4px 12px rgba(159, 232, 112, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .contact-btn {
+            width: 100%;
+            padding: 14px 20px;
+            background: white;
+            color: #2c3e50;
+            border: 2px solid rgb(159, 232, 112);
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
         .contact-btn:hover {
-            background: rgb(140, 210, 90);
+            background: #f8f9fa;
             box-shadow: 0 4px 12px rgba(159, 232, 112, 0.3);
             transform: translateY(-2px);
         }
@@ -609,6 +633,10 @@ $categoryData = [
                     <div class="price-range">
                         RM<?= number_format($gig['MinPrice'], 2) ?> - RM<?= number_format($gig['MaxPrice'], 2) ?>
                     </div>
+                    <button class="order-btn" onclick="orderGig(<?= $gig['GigID'] ?>)">
+                        <i class="fas fa-shopping-cart"></i>
+                        Order Now
+                    </button>
                     <button class="contact-btn" onclick="contactFreelancer(<?= $gig['FreelancerID'] ?>)">
                         <i class="fas fa-comment-dots"></i>
                         Contact Me
@@ -688,6 +716,19 @@ $categoryData = [
             <?php else: ?>
                 // Redirect to login
                 alert('Please log in as a client to contact this freelancer.');
+                window.location.href = '../login.php?redirect=' + encodeURIComponent(window.location.href);
+            <?php endif; ?>
+        }
+
+        // Order gig (placeholder function)
+        function orderGig(gigId) {
+            <?php if (isset($_SESSION['user_id']) && $_SESSION['user_type'] === 'client'): ?>
+                // Placeholder: Redirect to order/checkout page
+                alert('Order functionality will be implemented soon.\nGig ID: ' + gigId);
+                // window.location.href = '../payment/checkout.php?gig_id=' + gigId;
+            <?php else: ?>
+                // Redirect to login
+                alert('Please log in as a client to order this gig.');
                 window.location.href = '../login.php?redirect=' + encodeURIComponent(window.location.href);
             <?php endif; ?>
         }
