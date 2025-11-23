@@ -82,15 +82,17 @@ if (isset($_SESSION['client_id'])) {
 
 $conn->close();
 
-// Check if TCPDF is installed via Composer
-if (!file_exists(__DIR__ . '/../vendor/autoload.php')) {
+// Check if TCPDF is installed
+$tcpdf_path = __DIR__ . '/../vendor/tecnickcom/tcpdf/tcpdf.php';
+if (!file_exists($tcpdf_path)) {
     die("TCPDF library not found. Please run: composer require tecnickcom/tcpdf");
 }
 
-require_once __DIR__ . '/../vendor/autoload.php';
+// Include TCPDF directly
+require_once $tcpdf_path;
 
 // Create PDF object using TCPDF
-$pdf = new \TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
+$pdf = new TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
 
 // Set document properties
 $pdf->SetCreator('Freelancer Client Service Management Platform');

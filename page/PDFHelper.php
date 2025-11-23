@@ -1,5 +1,11 @@
 <?php
 
+// Include TCPDF library directly
+$tcpdf_path = __DIR__ . '/../vendor/tecnickcom/tcpdf/tcpdf.php';
+if (file_exists($tcpdf_path)) {
+    require_once $tcpdf_path;
+}
+
 /**
  * PDF Helper Class
  * Simplifies common PDF generation tasks
@@ -21,16 +27,16 @@ class PDFHelper
      * 
      * @param string $title Document title
      * @param string $author Document author
-     * @return \TCPDF PDF object
+     * @return TCPDF PDF object
      */
     public function createPDF($title = 'Document', $author = 'FYP Platform')
     {
         // Check if TCPDF is available
-        if (!class_exists('\TCPDF')) {
+        if (!class_exists('TCPDF')) {
             throw new Exception('TCPDF library not found. Please install via Composer.');
         }
 
-        $this->pdf = new \TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
+        $this->pdf = new TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
         $this->pdf->SetCreator('Freelancer Client Service Management Platform');
         $this->pdf->SetAuthor($author);
         $this->pdf->SetTitle($title);

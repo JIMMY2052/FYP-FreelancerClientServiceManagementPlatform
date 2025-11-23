@@ -318,93 +318,19 @@ if ($target_client_id && $user_type === 'freelancer') {
             }
 
             if (sendJobQuoteBtn) {
-                sendJobQuoteBtn.addEventListener('click', async function() {
-                    if (!window.chatApp || !window.chatApp.currentChat) {
+                sendJobQuoteBtn.addEventListener('click', function() {
+                    const jobTitle = document.querySelector('.job-quote-title');
+                    const jobBudget = document.querySelector('.job-quote-budget');
+
+                    if (window.chatApp && window.chatApp.currentChat) {
+                        const messageInput = document.getElementById('messageInput');
+                        const quoteMessage = `I am interested in your project: "${jobTitle ? jobTitle.parentElement.parentElement.querySelector('.job-quote-value:nth-child(2)').textContent : 'Project'}". I would like to discuss more about this opportunity.`;
+                        messageInput.value = quoteMessage;
+                        messageInput.focus();
+                        messageInput.style.height = 'auto';
+                        messageInput.style.height = Math.min(messageInput.scrollHeight, 100) + 'px';
+                    } else {
                         alert('Please select a conversation first');
-                        return;
-                    }
-
-                    // Get job quote data from the DOM
-                    const jobQuoteItems = document.querySelectorAll('.job-quote-item');
-                    let jobTitle = '';
-                    let jobBudget = '';
-                    let jobDeadline = '';
-                    let jobDescription = '';
-
-                    // Extract data from quote container
-                    const quoteContainer = document.querySelector('.job-quote-container');
-                    if (quoteContainer) {
-                        const items = quoteContainer.querySelectorAll('.job-quote-item');
-                        items.forEach(item => {
-                            const label = item.querySelector('.job-quote-label');
-                            const value = item.querySelector('.job-quote-value');
-                            if (label && value) {
-                                const labelText = label.textContent.trim();
-                                const valueText = value.textContent.trim();
-                                if (labelText.includes('Title')) jobTitle = valueText;
-                                if (labelText.includes('Budget')) jobBudget = valueText;
-                                if (labelText.includes('Deadline')) jobDeadline = valueText;
-                            }
-                        });
-                        const descItem = quoteContainer.querySelector('.job-quote-description');
-                        if (descItem) {
-                            const descText = descItem.querySelector('.job-quote-text');
-                            if (descText) jobDescription = descText.textContent.trim();
-                        }
-                    }
-
-                    // Get job ID from session (passed via window variable)
-                    const jobId = <?php echo isset($_SESSION['target_job_id']) ? $_SESSION['target_job_id'] : 'null'; ?>;
-
-                    if (!jobId) {
-                        alert('Job ID not found');
-                        return;
-                    }
-
-                    // Disable button and show loading state
-                    sendJobQuoteBtn.disabled = true;
-                    const originalText = sendJobQuoteBtn.textContent;
-                    sendJobQuoteBtn.textContent = 'Sending...';
-
-                    try {
-                        const formData = new FormData();
-                        formData.append('chatId', window.chatApp.currentChat);
-                        formData.append('jobId', jobId);
-                        formData.append('jobTitle', jobTitle);
-                        formData.append('jobBudget', jobBudget);
-                        formData.append('jobDeadline', jobDeadline);
-                        formData.append('jobDescription', jobDescription);
-                        formData.append('receiverId', window.chatApp.currentOtherId);
-                        formData.append('receiverType', window.chatApp.currentOtherType);
-
-                        const response = await fetch('../page/send_quote_message.php', {
-                            method: 'POST',
-                            body: formData
-                        });
-
-                        const result = await response.json();
-
-                        if (result.success) {
-                            console.log('Quote sent successfully');
-                            // Hide the quote container
-                            const jobQuoteContainer = document.querySelector('.job-quote-container');
-                            if (jobQuoteContainer) {
-                                jobQuoteContainer.style.display = 'none';
-                            }
-                            // Reload messages to display the new quote
-                            setTimeout(() => {
-                                window.chatApp.loadMessages();
-                                window.chatApp.loadChatList();
-                            }, 500);
-                        } else {
-                            alert('Error sending quote: ' + (result.error || 'Unknown error'));
-                        }
-                    } catch (error) {
-                        console.error('Error:', error);
-                        alert('Error sending quote: ' + error.message);
-                    } finally {
-                        sendJobQuoteBtn.disabled = false;
-                        sendJobQuoteBtn.textContent = originalText;
                     }
                 });
             }
