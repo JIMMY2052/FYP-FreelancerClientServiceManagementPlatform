@@ -66,7 +66,9 @@ if ($target_client_id && $user_type === 'freelancer') {
     <!-- Top Right Navigation -->
     <div class="chat-top-nav">
         <div class="logo-section">
-            <img src="../images/logo.png" alt="WorkSnyc Logo" class="top-logo">
+            <a href="<?php echo $user_type === 'freelancer' ? '../freelancer_home.php' : '../client_home.php'; ?>">
+                <img src="../images/logo.png" alt="WorkSnyc Logo" class="top-logo">
+            </a>
         </div>
         <div class="nav-actions">
             <svg class="notification-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

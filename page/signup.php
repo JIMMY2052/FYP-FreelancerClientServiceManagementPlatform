@@ -43,6 +43,56 @@ if (isset($_SESSION['form_data'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up - WorkSnyc</title>
     <link rel="stylesheet" href="/assets/css/style.css">
+    <style>
+        .role-selection {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            justify-content: center;
+        }
+
+        .role-option {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .role-input {
+            display: none;
+        }
+
+        .role-button {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px 40px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            background-color: #ffffff;
+            transition: all 0.3s ease;
+            min-width: 150px;
+            gap: 10px;
+        }
+
+        .role-input:checked+.role-button {
+            border-color: #22c55e;
+            background-color: #f0fde8;
+            box-shadow: 0 4px 15px rgba(34, 197, 94, 0.2);
+        }
+
+        .role-option:hover .role-button {
+            border-color: #16a34a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .role-label {
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 16px;
+        }
+    </style>
     <script src="/assets/js/signup.js" defer></script>
 </head>
 
@@ -71,13 +121,23 @@ if (isset($_SESSION['form_data'])) {
                     </div>
                 <?php endif; ?>
 
-                <div class="form-group">
-                    <label for="user_type">Sign up as</label>
-                    <select name="user_type" id="user_type" class="form-control<?php echo $hasError ? ' error' : ''; ?>" required>
-                        <option value="freelancer" <?php echo $form_data['user_type'] === 'freelancer' ? 'selected' : ''; ?>>Freelancer</option>
-                        <option value="client" <?php echo $form_data['user_type'] === 'client' ? 'selected' : ''; ?>>Client</option>
-                    </select>
+                <!-- Role Selection Buttons -->
+                <div class="role-selection">
+                    <label class="role-option">
+                        <input type="radio" name="user_type" value="freelancer" <?php echo $form_data['user_type'] === 'freelancer' ? 'checked' : ''; ?> class="role-input" required>
+                        <span class="role-button">
+                            <span class="role-label">Freelancer</span>
+                        </span>
+                    </label>
+                    <label class="role-option">
+                        <input type="radio" name="user_type" value="client" <?php echo $form_data['user_type'] === 'client' ? 'checked' : ''; ?> class="role-input" required>
+                        <span class="role-button">
+                            <span class="role-label">Client</span>
+                        </span>
+                    </label>
                 </div>
+
+                <input type="hidden" id="user_type_hidden" name="user_type_hidden" value="<?php echo htmlspecialchars($form_data['user_type']); ?>">
 
                 <div id="freelancer-fields">
                     <div class="form-group">
@@ -142,6 +202,34 @@ if (isset($_SESSION['form_data'])) {
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const roleInputs = document.querySelectorAll('input[name="user_type"]');
+            const freelancerFields = document.getElementById('freelancer-fields');
+            const clientFields = document.getElementById('client-fields');
+
+            function updateFormFields() {
+                const selectedRole = document.querySelector('input[name="user_type"]:checked').value;
+
+                if (selectedRole === 'freelancer') {
+                    freelancerFields.classList.remove('hidden');
+                    clientFields.classList.add('hidden');
+                } else {
+                    freelancerFields.classList.add('hidden');
+                    clientFields.classList.remove('hidden');
+                }
+            }
+
+            // Initialize form on page load
+            updateFormFields();
+
+            // Listen for role changes
+            roleInputs.forEach(input => {
+                input.addEventListener('change', updateFormFields);
+            });
+        });
+    </script>
 </body>
 
 </html>

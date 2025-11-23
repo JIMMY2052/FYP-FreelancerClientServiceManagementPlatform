@@ -23,6 +23,10 @@
             'pretty_version' => 'v19.0.0',
             'version' => '19.0.0.0',
             'reference' => '8f868a7825d2680e917f89839e4b67851dad96e2',
+        'tecnickcom/tcpdf' => array(
+            'pretty_version' => '6.10.1',
+            'version' => '6.10.1.0',
+            'reference' => '7a2701251e5d52fc3d508fd71704683eb54f5939',
             'type' => 'library',
             'install_path' => __DIR__ . '/../stripe/stripe-php',
             'aliases' => array(),

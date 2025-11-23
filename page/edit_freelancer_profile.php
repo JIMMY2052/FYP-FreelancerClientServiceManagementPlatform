@@ -263,6 +263,42 @@ $conn->close();
     <script>
         const allSkills = <?php echo json_encode($all_skills); ?>;
         const currentSkillIds = <?php echo json_encode($current_skill_ids); ?>;
+
+        // Auto-dismiss success message after 3 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            const successMessage = document.querySelector('.success-message');
+            const errorMessage = document.querySelector('.error-message');
+
+            if (successMessage) {
+                // Add animation class
+                successMessage.classList.add('message-enter');
+
+                // Auto-dismiss after 3 seconds
+                setTimeout(function() {
+                    successMessage.classList.add('message-exit');
+
+                    // Remove from DOM after animation completes
+                    setTimeout(function() {
+                        successMessage.remove();
+                    }, 300);
+                }, 3000);
+            }
+
+            if (errorMessage) {
+                // Add animation class
+                errorMessage.classList.add('message-enter');
+
+                // Auto-dismiss after 5 seconds (longer for errors)
+                setTimeout(function() {
+                    errorMessage.classList.add('message-exit');
+
+                    // Remove from DOM after animation completes
+                    setTimeout(function() {
+                        errorMessage.remove();
+                    }, 300);
+                }, 5000);
+            }
+        });
     </script>
 </body>
 
