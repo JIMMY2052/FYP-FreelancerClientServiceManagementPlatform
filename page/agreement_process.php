@@ -87,11 +87,11 @@ if ($signature_data) {
     // Remove data:image/png;base64, prefix
     $signature_data_clean = str_replace('data:image/png;base64,', '', $signature_data);
     $signature_data_clean = base64_decode($signature_data_clean);
-    
+
     // Generate unique filename
     $signature_filename = 'signature_' . time() . '_' . uniqid() . '.png';
     $signature_path = $uploads_dir . $signature_filename;
-    
+
     file_put_contents($signature_path, $signature_data_clean);
 }
 

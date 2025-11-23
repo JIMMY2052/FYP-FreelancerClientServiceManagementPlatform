@@ -583,7 +583,7 @@
                 <div class="signature-section">
                     <h3>Digital Signature</h3>
                     <p style="color: #666; font-size: 0.95rem; margin-bottom: 16px;">Sign below to electronically sign this agreement</p>
-                    
+
                     <div class="signature-container">
                         <canvas id="signaturePad"></canvas>
                     </div>
@@ -721,7 +721,7 @@
 
         document.addEventListener('DOMContentLoaded', function() {
             const canvas = document.getElementById("signaturePad");
-            
+
             // Set canvas size
             const container = canvas.parentElement;
             canvas.width = container.offsetWidth - 32;

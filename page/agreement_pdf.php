@@ -229,21 +229,21 @@ if (!empty($agreement['SignaturePath'])) {
 if ($signaturePath && file_exists($signaturePath)) {
     // Center the signature
     $pdf->SetY($pdf->GetY());
-    
+
     // Signature box
     $pdf->SetDrawColor(26, 26, 26);
     $pdf->SetFillColor(255, 255, 255);
     $boxWidth = 80;
     $boxHeight = 50;
-    
+
     // Calculate center position
     $pageWidth = $pdf->GetPageWidth();
     $centerX = ($pageWidth - $boxWidth) / 2;
-    
+
     // Draw signature image
     $pdf->Image($signaturePath, $centerX, $pdf->GetY(), $boxWidth, $boxHeight);
     $pdf->SetY($pdf->GetY() + $boxHeight);
-    
+
     $pdf->Ln(3);
 }
 
