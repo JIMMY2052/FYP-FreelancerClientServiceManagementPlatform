@@ -22,7 +22,7 @@ include '_head.php';
                 <p class="hero-subtitle">Find talented freelancers and manage your projects efficiently</p>
                 <div class="hero-buttons">
                     <a href="/page/job/createJob.php" class="btn-hero btn-hero-primary">Post a Project</a>
-                    <a href="/page/browse_freelancers.php" class="btn-hero btn-hero-secondary">Browse Freelancers</a>
+                    <a href="/page/gig/browse_gigs.php" class="btn-hero btn-hero-secondary">Browse Gigs</a>
                 </div>
             </div>
             <div class="hero-image-wrapper">
@@ -80,37 +80,37 @@ include '_head.php';
                 <div class="category-icon">🎨</div>
                 <h3 class="category-title">Graphic & Design</h3>
                 <p class="category-description">Logo design, branding, UI/UX, illustrations</p>
-                <a href="/page/browse_freelancers.php?category=design" class="category-link">Browse Freelancers →</a>
+                <a href="/page/gig/browse_gigs.php?category=design" class="category-link">Browse Freelancers →</a>
             </div>
             <div class="category-card">
                 <div class="category-icon">💻</div>
                 <h3 class="category-title">Programming & Tech</h3>
                 <p class="category-description">Web development, mobile apps, software engineering</p>
-                <a href="/page/browse_freelancers.php?category=tech" class="category-link">Browse Freelancers →</a>
+                <a href="/page/gig/browse_gigs.php?category=tech" class="category-link">Browse Gigs →</a>
             </div>
             <div class="category-card">
                 <div class="category-icon">📝</div>
                 <h3 class="category-title">Writing & Translation</h3>
                 <p class="category-description">Content writing, copywriting, translation services</p>
-                <a href="/page/browse_freelancers.php?category=writing" class="category-link">Browse Freelancers →</a>
+                <a href="/page/gig/browse_gigs.php?category=writing" class="category-link">Browse Gigs →</a>
             </div>
             <div class="category-card">
                 <div class="category-icon">📱</div>
                 <h3 class="category-title">Digital Marketing</h3>
                 <p class="category-description">SEO, social media, email marketing, PPC campaigns</p>
-                <a href="/page/browse_freelancers.php?category=marketing" class="category-link">Browse Freelancers →</a>
+                <a href="/page/gig/browse_gigs.php?category=marketing" class="category-link">Browse Gigs →</a>
             </div>
             <div class="category-card">
                 <div class="category-icon">📹</div>
                 <h3 class="category-title">Video & Animation</h3>
                 <p class="category-description">Video editing, animation, motion graphics, VFX</p>
-                <a href="/page/browse_freelancers.php?category=video" class="category-link">Browse Freelancers →</a>
+                <a href="/page/gig/browse_gigs.php?category=video" class="category-link">Browse Gigs →</a>
             </div>
             <div class="category-card">
                 <div class="category-icon">🎵</div>
                 <h3 class="category-title">Music & Audio</h3>
                 <p class="category-description">Music production, voice-over, audio editing</p>
-                <a href="/page/browse_freelancers.php?category=audio" class="category-link">Browse Freelancers →</a>
+                <a href="/page/gig/browse_gigs.php?category=audio" class="category-link">Browse Gigs →</a>
             </div>
         </div>
     </div>

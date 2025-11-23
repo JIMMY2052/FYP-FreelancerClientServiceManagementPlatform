@@ -19,10 +19,10 @@ $min_budget = isset($_GET['min_budget']) && $_GET['min_budget'] !== '' ? floatva
 $max_budget = isset($_GET['max_budget']) && $_GET['max_budget'] !== '' ? floatval($_GET['max_budget']) : null;
 $sort = $_GET['sort'] ?? 'newest';
 
-// build query - only show active jobs
+// build query - only show available jobs
 $sql = "SELECT JobID, ClientID, Title, Description, Budget, Deadline, Status, PostDate
         FROM job
-        WHERE Status = 'active'";
+        WHERE Status = 'available'";
 
 $params = [];
 $types = '';

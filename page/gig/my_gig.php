@@ -7,7 +7,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'freelancer') {
     exit();
 }
 
-$_title = 'My Services';
+$_title = 'My Gigs';
 include '../../_head.php';
 require_once '../config.php';
 
@@ -32,22 +32,22 @@ $pdo = getPDOConnection();
 
 // Handle delete service (soft delete - change status to deleted)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delete') {
-    $serviceID = intval($_POST['service_id'] ?? 0);
+    $gigID = intval($_POST['gig_id'] ?? 0);
     $freelancerID = $_SESSION['user_id'];
 
-    if ($serviceID > 0) {
+    if ($gigID > 0) {
         try {
-            $stmt = $pdo->prepare("UPDATE service SET Status = 'deleted' WHERE ServiceID = :service_id AND FreelancerID = :freelancer_id");
+            $stmt = $pdo->prepare("UPDATE gig SET Status = 'deleted' WHERE GigID = :gig_id AND FreelancerID = :freelancer_id");
             $stmt->execute([
-                ':service_id' => $serviceID,
+                ':gig_id' => $gigID,
                 ':freelancer_id' => $freelancerID
             ]);
             if ($stmt->rowCount() > 0) {
                 $_SESSION['success'] = 'Service deleted successfully.';
-                header('Location: /page/freelancer/my_service.php');
+                header('Location: /page/gig/my_gig.php');
                 exit();
             } else {
-                $_SESSION['error'] = 'Failed to delete service.';
+                $_SESSION['error'] = 'Failed to delete gig.';
             }
         } catch (PDOException $e) {
             $_SESSION['error'] = 'Database error.';
@@ -59,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delet
 // Fetch freelancer services (only active status)
 $freelancerID = $_SESSION['user_id'];
 try {
-    $stmt = $pdo->prepare("SELECT ServiceID, Title, Description, MinPrice, MaxPrice, DeliveryTime, CreatedAt FROM service WHERE FreelancerID = :freelancer_id AND Status = 'active' ORDER BY CreatedAt DESC");
+    $stmt = $pdo->prepare("SELECT GigID, Title, Description, MinPrice, MaxPrice, DeliveryTime, CreatedAt FROM gig WHERE FreelancerID = :freelancer_id AND Status = 'active' ORDER BY CreatedAt DESC");
     $stmt->execute([':freelancer_id' => $freelancerID]);
     $services = $stmt->fetchAll();
 } catch (PDOException $e) {
@@ -115,10 +115,10 @@ try {
                         </div>
 
                         <div class="card-actions">
-                            <a href="/page/freelancer/edit_service.php?id=<?php echo $service['ServiceID']; ?>" class="btn-small btn-edit">Edit</a>
+                            <a href="/page/freelancer/edit_service.php?id=<?php echo $service['GigID']; ?>" class="btn-small btn-edit">Edit</a>
                             <form method="post" style="flex: 1;">
                                 <input type="hidden" name="action" value="delete">
-                                <input type="hidden" name="service_id" value="<?php echo $service['ServiceID']; ?>">
+                                <input type="hidden" name="gig_id" value="<?php echo $service['GigID']; ?>">
                                 <button type="submit" class="btn-small btn-delete" onclick="return confirm('Delete this service?');">Delete</button>
                             </form>
                         </div>
@@ -130,9 +130,9 @@ try {
         <!-- Empty State -->
         <div class="empty-state">
             <div class="empty-icon">📋</div>
-            <h2>No Services Yet</h2>
-            <p>You haven't added any services yet. Create your first service to start offering your skills to clients.</p>
-            <a href="/page/gig/create_gig.php" class="btn-add-first">Add Your First Service</a>
+            <h2>No Gigs Yet</h2>
+            <p>You haven't added any gigs yet. Create your first gig to start offering your skills to clients.</p>
+            <a href="/page/gig/create_gig.php" class="btn-add-first">Add Your First Gig</a>
         </div>
     <?php endif; ?>
 </div>

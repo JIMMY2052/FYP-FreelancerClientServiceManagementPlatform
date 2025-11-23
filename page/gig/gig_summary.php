@@ -76,9 +76,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $freelancerID = intval($_SESSION['user_id']);
         $deliveryTime = $deliveryDays > 0 ? intval($deliveryDays) : intval($standardDays);
         $revisionCount = ($revisions === 'unlimited') ? null : intval($revisions);
-        $thumbnailUrl = $galleryVideo['path'] ?? null;
-        $galleryPaths = array_column($galleryImages, 'path');
-        $galleryJson = json_encode($galleryPaths);
+        
+        // Extract individual image paths (up to 3)
+        $image1Path = isset($galleryImages[0]['path']) ? $galleryImages[0]['path'] : null;
+        $image2Path = isset($galleryImages[1]['path']) ? $galleryImages[1]['path'] : null;
+        $image3Path = isset($galleryImages[2]['path']) ? $galleryImages[2]['path'] : null;
+        $videoPath = isset($galleryVideo['path']) ? $galleryVideo['path'] : null;
+        
         $status = 'active';
         $createdAt = date('Y-m-d H:i:s');
         $rushDeliveryValue = ($rushDeliveryDays !== '') ? intval($rushDeliveryDays) : null;
@@ -87,7 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $maxPriceValue = intval($maxPrice);
 
         try {
-            $stmt = $pdo->prepare("INSERT INTO service (FreelancerID, Title, Category, Subcategory, SearchTags, Description, MinPrice, MaxPrice, DeliveryTime, RushDelivery, AdditionalRevision, RevisionCount, ThumnailUrl, GalleryUrl, Status, CreatedAt, UpdatedAt) VALUES (:freelancer_id, :title, :category, :subcategory, :search_tags, :description, :min_price, :max_price, :delivery_time, :rush_delivery, :additional_revision, :revision_count, :thumbnail_url, :gallery_url, :status, :created_at, :updated_at)");
+            $stmt = $pdo->prepare("INSERT INTO gig (FreelancerID, Title, Category, Subcategory, SearchTags, Description, MinPrice, MaxPrice, DeliveryTime, RushDelivery, AdditionalRevision, RevisionCount, Image1Path, Image2Path, Image3Path, VideoPath, Status, CreatedAt, UpdatedAt) VALUES (:freelancer_id, :title, :category, :subcategory, :search_tags, :description, :min_price, :max_price, :delivery_time, :rush_delivery, :additional_revision, :revision_count, :image1_path, :image2_path, :image3_path, :video_path, :status, :created_at, :updated_at)");
             $stmt->execute([
                 ':freelancer_id' => $freelancerID,
                 ':title' => $gigTitle,
@@ -101,8 +105,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':rush_delivery' => $rushDeliveryValue,
                 ':additional_revision' => $additionalRevisionValue,
                 ':revision_count' => $revisionCount,
-                ':thumbnail_url' => $thumbnailUrl,
-                ':gallery_url' => $galleryJson,
+                ':image1_path' => $image1Path,
+                ':image2_path' => $image2Path,
+                ':image3_path' => $image3Path,
+                ':video_path' => $videoPath,
                 ':status' => $status,
                 ':created_at' => $createdAt,
                 ':updated_at' => null

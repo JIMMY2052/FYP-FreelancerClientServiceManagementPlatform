@@ -36,18 +36,21 @@ $videoMimeMap = [
 $imagesErrorMessage = '';
 $videoErrorMessage = '';
 
-$uploadsRoot = realpath(__DIR__ . '/../../uploads');
-if ($uploadsRoot === false) {
-    $uploadsRoot = __DIR__ . '/../../uploads';
-    if (!is_dir($uploadsRoot)) {
-        mkdir($uploadsRoot, 0755, true);
+// Use /images folder instead of /uploads
+$imagesRoot = realpath(__DIR__ . '/../../images');
+if ($imagesRoot === false) {
+    $imagesRoot = __DIR__ . '/../../images';
+    if (!is_dir($imagesRoot)) {
+        mkdir($imagesRoot, 0755, true);
     }
 }
-$galleryUploadDir = rtrim($uploadsRoot, '/\\') . DIRECTORY_SEPARATOR . 'gig_media' . DIRECTORY_SEPARATOR;
+
+// Create gig_media subdirectory inside images
+$galleryUploadDir = rtrim($imagesRoot, '/\\') . DIRECTORY_SEPARATOR . 'gig_media' . DIRECTORY_SEPARATOR;
 if (!is_dir($galleryUploadDir)) {
     mkdir($galleryUploadDir, 0755, true);
 }
-$publicGalleryPath = '/uploads/gig_media/';
+$publicGalleryPath = '/images/gig_media/';
 
 if (!function_exists('gigGalleryNormalizeUploads')) {
     function gigGalleryNormalizeUploads(?array $field): array
