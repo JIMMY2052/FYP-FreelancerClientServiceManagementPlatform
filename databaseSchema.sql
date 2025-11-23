@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 21, 2025 at 02:14 PM
+-- Generation Time: Nov 23, 2025 at 02:31 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 SET
@@ -72,7 +72,9 @@ CREATE TABLE
     `Scope` text DEFAULT NULL,
     `Deliverables` text DEFAULT NULL,
     `PaymentAmount` decimal(10, 2) DEFAULT NULL,
-    `ProjectDetail` text DEFAULT NULL
+    `ProjectDetail` text DEFAULT NULL,
+    `FreelancerName` varchar(255) DEFAULT NULL,
+    `SignaturePath` varchar(255) DEFAULT NULL
   ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
 
 --
@@ -88,7 +90,9 @@ INSERT INTO
     `Scope`,
     `Deliverables`,
     `PaymentAmount`,
-    `ProjectDetail`
+    `ProjectDetail`,
+    `FreelancerName`,
+    `SignaturePath`
   )
 VALUES
   (
@@ -100,7 +104,9 @@ VALUES
     'asdf',
     'asdf',
     1.00,
-    'asdf'
+    'asdf',
+    NULL,
+    NULL
   ),
   (
     2,
@@ -111,7 +117,9 @@ VALUES
     'asdf',
     'asdf',
     12.00,
-    'asdf'
+    'asdf',
+    NULL,
+    NULL
   ),
   (
     3,
@@ -122,7 +130,9 @@ VALUES
     'One page of landing Page with good design',
     '31/11/2025 should finish it',
     1000.00,
-    'The landing Page'
+    'The landing Page',
+    NULL,
+    NULL
   ),
   (
     4,
@@ -133,7 +143,9 @@ VALUES
     'asdf',
     'asdfasdf',
     11111.00,
-    'asdf'
+    'asdf',
+    NULL,
+    NULL
   ),
   (
     5,
@@ -144,7 +156,9 @@ VALUES
     'sdfasdf',
     'dafasd',
     12.00,
-    'asdfa'
+    'asdfa',
+    NULL,
+    NULL
   ),
   (
     6,
@@ -155,7 +169,9 @@ VALUES
     'asdfasdf',
     'asdf',
     1.00,
-    'asdfasdf'
+    'asdfasdf',
+    NULL,
+    NULL
   ),
   (
     7,
@@ -166,7 +182,9 @@ VALUES
     'as',
     'asf',
     222.00,
-    'dfasdf'
+    'dfasdf',
+    NULL,
+    NULL
   ),
   (
     8,
@@ -177,7 +195,9 @@ VALUES
     'asdf',
     'asdf',
     111.00,
-    'af'
+    'af',
+    NULL,
+    NULL
   ),
   (
     9,
@@ -188,7 +208,22 @@ VALUES
     '阿斯顿法国红酒看来',
     '阿斯蒂芬',
     555.00,
-    '阿斯顿法国红酒看来'
+    '阿斯顿法国红酒看来',
+    NULL,
+    NULL
+  ),
+  (
+    10,
+    'ASDF',
+    '2025-11-21',
+    'pending',
+    'SDF',
+    'ASDF',
+    'ASDF',
+    12.00,
+    'ASDF',
+    NULL,
+    NULL
   );
 
 -- --------------------------------------------------------
@@ -233,7 +268,7 @@ VALUES
     'Sitecore',
     NULL,
     'jimmyckl-wm22@student.tarc.edu.my',
-    '$2y$10$BxSAHpJnrutlLgnTkuFehOACPPqYFQ/vXaEgjahq2cei0u4A/irUO',
+    '$2y$10$Hj1o9ccV03Fk5BjT6Db/CeGGIDyartvNIkUw.cqNYnu0t9QN5axge',
     NULL,
     NULL,
     'active',
@@ -244,13 +279,13 @@ VALUES
   (
     2,
     'Genting',
-    NULL,
+    '',
     'genting@gmail.com',
     '$2y$10$D1ON60Z0DruTc8tASwybi.VX6wu0nIPxZURmUDSrFEf6ZWb9c7Gv6',
-    NULL,
+    '',
     NULL,
     'active',
-    NULL,
+    '',
     '2025-11-20 15:15:48',
     0
   ),
@@ -310,7 +345,7 @@ VALUES
     3,
     'client',
     '2025-11-19 07:29:22',
-    '2025-11-19 07:29:31',
+    '2025-11-21 17:06:04',
     'active',
     NULL
   );
@@ -371,8 +406,8 @@ VALUES
     'jimmychankahlok66@gmail.com',
     '$2y$10$jZYJ20FbflriS3ibKasx7O9faf9bJmmaU6U2tuTi9wyHdVSpyGnCu',
     '0185709586',
-    NULL,
-    'inactive',
+    'uploads/profile_pictures/freelancer_1_1763744805.png',
+    'active',
     'NO 5, Lorong masria 3, taman bunga raya',
     '3 Years Experience in Web Development',
     'Bachelor Degree in Software Engineering',
@@ -461,6 +496,7 @@ VALUES
   (1, 1, 'Intermediate'),
   (1, 2, 'Intermediate'),
   (1, 3, 'Intermediate'),
+  (1, 4, 'Intermediate'),
   (4, 3, 'Intermediate');
 
 -- --------------------------------------------------------
@@ -584,6 +620,28 @@ VALUES
     NULL,
     '2025-11-19 15:29:31',
     'unread'
+  ),
+  (
+    98,
+    11,
+    'f1',
+    'c3',
+    'hi JIMMY',
+    NULL,
+    NULL,
+    '2025-11-22 01:05:59',
+    'unread'
+  ),
+  (
+    99,
+    11,
+    'c3',
+    'f1',
+    'Ya Hi Google',
+    NULL,
+    NULL,
+    '2025-11-22 01:06:04',
+    'unread'
   );
 
 -- --------------------------------------------------------
@@ -626,6 +684,162 @@ VALUES
     'c3',
     '2025-11-19 06:55:46',
     1
+  );
+
+-- --------------------------------------------------------
+--
+-- Table structure for table `password_reset`
+--
+CREATE TABLE
+  `password_reset` (
+    `ResetID` int (11) NOT NULL,
+    `Email` varchar(255) NOT NULL,
+    `UserType` enum ('freelancer', 'client') NOT NULL,
+    `OTP` varchar(6) NOT NULL,
+    `IsUsed` tinyint (1) DEFAULT 0,
+    `CreatedAt` timestamp NOT NULL DEFAULT current_timestamp(),
+    `ExpiresAt` timestamp NOT NULL DEFAULT current_timestamp()
+  ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
+
+--
+-- Dumping data for table `password_reset`
+--
+INSERT INTO
+  `password_reset` (
+    `ResetID`,
+    `Email`,
+    `UserType`,
+    `OTP`,
+    `IsUsed`,
+    `CreatedAt`,
+    `ExpiresAt`
+  )
+VALUES
+  (
+    1,
+    'jimmychankahlok66@gmail.com',
+    'freelancer',
+    '006705',
+    0,
+    '2025-11-21 14:01:51',
+    '2025-11-21 14:16:51'
+  ),
+  (
+    2,
+    'jimmckl-wm22@student.tarc.edu.my',
+    'client',
+    '572138',
+    0,
+    '2025-11-21 14:06:08',
+    '2025-11-21 14:21:08'
+  ),
+  (
+    3,
+    'jimmyckl-wm22@student.tarc.edu.my',
+    'client',
+    '922350',
+    0,
+    '2025-11-21 14:15:39',
+    '2025-11-21 14:30:39'
+  ),
+  (
+    4,
+    'jc636094@gmail.com',
+    'client',
+    '431403',
+    0,
+    '2025-11-21 14:19:10',
+    '2025-11-21 14:34:10'
+  ),
+  (
+    5,
+    'jimmyckl-wm22@student.tarc.edu.my',
+    'client',
+    '341262',
+    0,
+    '2025-11-21 14:20:50',
+    '2025-11-21 14:35:50'
+  ),
+  (
+    6,
+    'jimmyckl-wm22@student.tarc.edu.my',
+    'client',
+    '398954',
+    0,
+    '2025-11-21 14:34:26',
+    '2025-11-21 14:49:26'
+  ),
+  (
+    7,
+    'jimmyckl-wm22@student.tarc.edu.my',
+    'client',
+    '851045',
+    0,
+    '2025-11-21 14:43:02',
+    '2025-11-21 14:58:02'
+  ),
+  (
+    8,
+    'jimmyckl-wm22@student.tarc.edu.my',
+    'client',
+    '374651',
+    0,
+    '2025-11-21 14:43:10',
+    '2025-11-21 14:58:10'
+  ),
+  (
+    9,
+    'jimmyckl-wm22@student.tarc.edu.my',
+    'client',
+    '586047',
+    0,
+    '2025-11-21 14:45:57',
+    '2025-11-21 15:00:57'
+  ),
+  (
+    10,
+    'jimmyckl-wm22@student.tarc.edu.my',
+    'client',
+    '486703',
+    0,
+    '2025-11-21 15:10:17',
+    '2025-11-21 15:25:17'
+  ),
+  (
+    11,
+    'jimmyckl-wm22@student.tarc.edu.my',
+    'client',
+    '927736',
+    0,
+    '2025-11-21 15:10:21',
+    '2025-11-21 15:25:21'
+  ),
+  (
+    12,
+    'jimmyckl-wm22@student.tarc.edu.my',
+    'client',
+    '618723',
+    0,
+    '2025-11-21 15:14:24',
+    '2025-11-21 15:29:24'
+  ),
+  (
+    13,
+    'jimmyckl-wm22@student.tarc.edu.my',
+    'client',
+    '652139',
+    0,
+    '2025-11-21 15:14:28',
+    '2025-11-21 15:29:28'
+  ),
+  (
+    14,
+    'jimmyckl-wm22@student.tarc.edu.my',
+    'client',
+    '727507',
+    1,
+    '2025-11-21 15:14:55',
+    '2025-11-21 15:29:55'
   );
 
 -- --------------------------------------------------------
@@ -673,7 +887,8 @@ INSERT INTO
 VALUES
   (1, 'web'),
   (2, 'aws'),
-  (3, 'networking');
+  (3, 'networking'),
+  (4, 'adfasd');
 
 --
 -- Indexes for dumped tables
@@ -749,6 +964,13 @@ ADD UNIQUE KEY `unique_notification` (
 );
 
 --
+-- Indexes for table `password_reset`
+--
+ALTER TABLE `password_reset` ADD PRIMARY KEY (`ResetID`),
+ADD KEY `idx_email` (`Email`),
+ADD KEY `idx_expires` (`ExpiresAt`);
+
+--
 -- Indexes for table `payment`
 --
 ALTER TABLE `payment` ADD PRIMARY KEY (`PaymentID`);
@@ -778,7 +1000,7 @@ AUTO_INCREMENT = 2;
 -- AUTO_INCREMENT for table `agreement`
 --
 ALTER TABLE `agreement` MODIFY `AgreementID` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 10;
+AUTO_INCREMENT = 11;
 
 --
 -- AUTO_INCREMENT for table `client`
@@ -796,7 +1018,7 @@ AUTO_INCREMENT = 12;
 -- AUTO_INCREMENT for table `freelancer`
 --
 ALTER TABLE `freelancer` MODIFY `FreelancerID` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 5;
+AUTO_INCREMENT = 6;
 
 --
 -- AUTO_INCREMENT for table `gig`
@@ -813,13 +1035,19 @@ AUTO_INCREMENT = 3;
 -- AUTO_INCREMENT for table `message`
 --
 ALTER TABLE `message` MODIFY `MessageID` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 98;
+AUTO_INCREMENT = 100;
 
 --
 -- AUTO_INCREMENT for table `message_notification`
 --
 ALTER TABLE `message_notification` MODIFY `NotificationID` int (11) NOT NULL AUTO_INCREMENT,
 AUTO_INCREMENT = 8;
+
+--
+-- AUTO_INCREMENT for table `password_reset`
+--
+ALTER TABLE `password_reset` MODIFY `ResetID` int (11) NOT NULL AUTO_INCREMENT,
+AUTO_INCREMENT = 15;
 
 --
 -- AUTO_INCREMENT for table `payment`
@@ -835,7 +1063,7 @@ ALTER TABLE `review` MODIFY `ReviewID` int (11) NOT NULL AUTO_INCREMENT;
 -- AUTO_INCREMENT for table `skill`
 --
 ALTER TABLE `skill` MODIFY `SkillID` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 4;
+AUTO_INCREMENT = 5;
 
 --
 -- Constraints for dumped tables

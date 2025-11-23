@@ -29,3 +29,14 @@ function getDBConnection()
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+
+// ===== SYSTEM INITIALIZATION & MAINTENANCE =====
+// Include system initialization for automatic database cleanup
+require_once __DIR__ . '/SystemInit.php';
+
+// Store database connection in globals for maintenance access
+$conn = getDBConnection();
+$GLOBALS['conn'] = $conn;
+
+// Run system initialization (database cleanup, etc.)
+runSystemInitialization();
