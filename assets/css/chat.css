@@ -864,6 +864,82 @@
 }
 
 /* ===========================
+   ATTACHMENT MENU - WhatsApp Style
+   =========================== */
+.attachment-menu-wrapper {
+    position: relative;
+}
+
+.plus-btn {
+    font-weight: bold;
+}
+
+.attachment-menu {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    background-color: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: var(--shadow-md), 0 8px 16px rgba(0, 0, 0, 0.1);
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px;
+    min-width: 180px;
+    margin-bottom: 8px;
+    animation: slideUp 0.2s ease-out;
+    z-index: 100;
+}
+
+.attachment-menu.show {
+    display: flex;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.attachment-option {
+    background-color: var(--bg-light);
+    border: none;
+    border-radius: 8px;
+    padding: 12px 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    text-align: left;
+}
+
+.attachment-option:hover {
+    background-color: var(--light-green);
+    color: var(--dark-green);
+}
+
+.attachment-option svg {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+}
+
+.attachment-option span {
+    flex: 1;
+}
+
+/* ===========================
    IMAGE MODAL
    =========================== */
 .modal {

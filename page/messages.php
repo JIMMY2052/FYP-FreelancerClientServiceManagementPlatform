@@ -15,6 +15,7 @@ $user_email = $_SESSION['email'] ?? '';
 $target_client_id = isset($_GET['client_id']) ? intval($_GET['client_id']) : null;
 $target_job_id = isset($_GET['job_id']) ? intval($_GET['job_id']) : null;
 $job_quote = null;
+$show_quote = false; // Only show quote for the specific client conversation
 
 // If a client_id is provided and user is a freelancer, create/open conversation with that client
 if ($target_client_id && $user_type === 'freelancer') {
@@ -54,6 +55,7 @@ if ($target_client_id && $user_type === 'freelancer') {
         $job_result = $job_stmt->get_result();
         if ($job_result->num_rows > 0) {
             $job_quote = $job_result->fetch_assoc();
+            $show_quote = true; // Show quote only when coming from Contact Me with a job
         }
         $job_stmt->close();
     }
@@ -64,6 +66,7 @@ if ($target_client_id && $user_type === 'freelancer') {
     // Store the target conversation ID in session
     $_SESSION['target_conversation_id'] = $conversation_id;
     $_SESSION['target_client_id'] = $target_client_id;
+    $_SESSION['target_quote_client_id'] = $target_client_id; // Track which client this quote is for
     if ($target_job_id) {
         $_SESSION['target_job_id'] = $target_job_id;
         $_SESSION['target_job_quote'] = $job_quote;
@@ -187,8 +190,8 @@ if ($target_client_id && $user_type === 'freelancer') {
                 </div>
             </div>
 
-            <!-- Job Quote Display (if coming from Contact Me) -->
-            <?php if ($job_quote): ?>
+            <!-- Job Quote Display (if coming from Contact Me with specific job) -->
+            <?php if ($show_quote && $job_quote): ?>
                 <div class="job-quote-container">
                     <div class="job-quote-header">
                         <h3 class="job-quote-title">Project Quote</h3>
@@ -242,18 +245,53 @@ if ($target_client_id && $user_type === 'freelancer') {
 
                 <div class="input-row">
                     <div class="input-wrapper">
-                        <button type="button" class="input-action-btn" id="attachBtn" title="Attach files">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-                                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
-                            </svg>
-                        </button>
+                        <!-- Plus Button with Popup Menu -->
+                        <div class="attachment-menu-wrapper">
+                            <button type="button" class="input-action-btn plus-btn" id="attachMenuBtn" title="Add attachment">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                            </button>
+                            <div class="attachment-menu" id="attachmentMenu">
+                                <button type="button" class="attachment-option" id="uploadPhotoBtn" title="Upload photo">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                        <polyline points="21 15 16 10 5 21"></polyline>
+                                    </svg>
+                                    <span>Photos</span>
+                                </button>
+                                <button type="button" class="attachment-option" id="uploadFileBtn" title="Upload file">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                        <polyline points="14 2 14 8 20 8"></polyline>
+                                    </svg>
+                                    <span>Files</span>
+                                </button>
+                                <button type="button" class="attachment-option" id="agreementBtn" title="Create agreement">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                        <path d="M9 9h2"></path>
+                                        <path d="M9 13h6"></path>
+                                        <path d="M9 17h6"></path>
+                                    </svg>
+                                    <span>Agreement</span>
+                                </button>
+                            </div>
+                        </div>
                         <input
                             type="file"
                             id="fileInput"
                             class="file-input-hidden"
                             multiple
                             accept="image/*,.pdf,.doc,.docx">
+                        <input
+                            type="file"
+                            id="photoInput"
+                            class="file-input-hidden"
+                            multiple
+                            accept="image/*">
                         <textarea
                             id="messageInput"
                             class="message-input"
@@ -292,6 +330,14 @@ if ($target_client_id && $user_type === 'freelancer') {
             email: '<?php echo $user_email; ?>'
         };
 
+        // Store quote settings - only show quote for specific client
+        <?php if ($show_quote && isset($_SESSION['target_quote_client_id'])): ?>
+            window.quoteClientId = <?php echo $_SESSION['target_quote_client_id']; ?>;
+            window.showJobQuote = true;
+        <?php else: ?>
+            window.showJobQuote = false;
+        <?php endif; ?>
+
         // If targeting a specific client from Contact Me button
         <?php if (isset($_SESSION['target_conversation_id'])): ?>
             window.targetConversationId = <?php echo $_SESSION['target_conversation_id']; ?>;
@@ -303,14 +349,14 @@ if ($target_client_id && $user_type === 'freelancer') {
     <script src="../assets/js/chat.js"></script>
 
     <script>
-        // Job Quote functionality
+        // Job Quote functionality - only show for specific client
         document.addEventListener('DOMContentLoaded', function() {
             const jobQuoteClose = document.getElementById('jobQuoteClose');
             const sendJobQuoteBtn = document.getElementById('sendJobQuoteBtn');
+            const jobQuoteContainer = document.querySelector('.job-quote-container');
 
             if (jobQuoteClose) {
                 jobQuoteClose.addEventListener('click', function() {
-                    const jobQuoteContainer = document.querySelector('.job-quote-container');
                     if (jobQuoteContainer) {
                         jobQuoteContainer.style.display = 'none';
                     }
@@ -333,6 +379,38 @@ if ($target_client_id && $user_type === 'freelancer') {
                         alert('Please select a conversation first');
                     }
                 });
+            }
+
+            // Monitor conversation changes and hide quote if switching to different client
+            if (window.showJobQuote && jobQuoteContainer) {
+                // Store original visibility method
+                const originalShowQuote = function() {
+                    if (window.chatApp && window.chatApp.currentOtherId === window.quoteClientId) {
+                        jobQuoteContainer.style.display = 'block';
+                    } else {
+                        jobQuoteContainer.style.display = 'none';
+                    }
+                };
+
+                // Check visibility whenever chat is selected
+                const observer = new MutationObserver(function() {
+                    if (window.chatApp && window.chatApp.currentOtherId !== undefined) {
+                        originalShowQuote();
+                    }
+                });
+
+                // Listen to header name changes (indicates conversation switch)
+                const headerName = document.getElementById('headerName');
+                if (headerName) {
+                    observer.observe(headerName, {
+                        childList: true,
+                        subtree: true,
+                        characterData: true
+                    });
+                }
+
+                // Initial check
+                originalShowQuote();
             }
         });
 

@@ -1,3 +1,44 @@
+<?php
+// Handle parameters from messaging page
+$freelancer_name = isset($_GET['freelancer_name']) ? htmlspecialchars($_GET['freelancer_name']) : '';
+$client_id = isset($_GET['client_id']) ? intval($_GET['client_id']) : null;
+$freelancer_id = isset($_GET['freelancer_id']) ? intval($_GET['freelancer_id']) : null;
+
+// Fetch client name if client_id is provided
+$client_name = '';
+if ($client_id) {
+    require_once 'config.php';
+    $conn = getDBConnection();
+    $sql = "SELECT CompanyName FROM client WHERE ClientID = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('i', $client_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        $client_name = $row['CompanyName'];
+    }
+    $stmt->close();
+    $conn->close();
+}
+
+// Fetch freelancer name if freelancer_id is provided
+if ($freelancer_id && !$freelancer_name) {
+    require_once 'config.php';
+    $conn = getDBConnection();
+    $sql = "SELECT CONCAT(FirstName, ' ', LastName) as FullName FROM freelancer WHERE FreelancerID = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('i', $freelancer_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        $freelancer_name = $row['FullName'];
+    }
+    $stmt->close();
+    $conn->close();
+}
+?>
 <!DOCTYPE html>
 <html>
 
@@ -141,8 +182,16 @@
 
                     <div class="signature-name-field">
                         <label for="freelancerName">Your Full Name (for signature) *</label>
-                        <input type="text" name="freelancer_name" id="freelancerName" placeholder="Enter your full name" required>
+                        <input type="text" name="freelancer_name" id="freelancerName" placeholder="Enter your full name" value="<?php echo $freelancer_name; ?>" required>
                     </div>
+
+                    <?php if ($client_name): ?>
+                        <div class="signature-name-field">
+                            <label for="clientName">Client Name</label>
+                            <input type="text" name="client_name" id="clientName" placeholder="Client name" value="<?php echo $client_name; ?>" readonly>
+                        </div>
+                        <input type="hidden" name="client_id" value="<?php echo $client_id; ?>">
+                    <?php endif; ?>
 
                     <div class="signature-note">
                         ✓ Your signature will be included in the final PDF agreement
@@ -255,9 +304,36 @@
             return new Date().toLocaleDateString('en-US', options);
         }
 
-        // INITIALIZE DATE
+        // INITIALIZE DATE AND NAMES
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById("pDate").textContent = getCurrentDate();
+
+            // Update freelancer name in preview
+            const freelancerInput = document.getElementById("freelancerName");
+            if (freelancerInput) {
+                const freelancerName = freelancerInput.value.trim();
+                if (freelancerName) {
+                    document.getElementById("pOfferer").textContent = freelancerName;
+                }
+                // Update preview when freelancer name changes
+                freelancerInput.addEventListener("input", function() {
+                    const name = this.value.trim();
+                    if (name) {
+                        document.getElementById("pOfferer").textContent = name;
+                    } else {
+                        document.getElementById("pOfferer").textContent = "Freelancer Name";
+                    }
+                });
+            }
+
+            // Update client name in preview
+            const clientInput = document.getElementById("clientName");
+            if (clientInput) {
+                const clientName = clientInput.value.trim();
+                if (clientName) {
+                    document.getElementById("pClient").textContent = clientName;
+                }
+            }
         });
 
         // ===== SIGNATURE PAD INITIALIZATION =====

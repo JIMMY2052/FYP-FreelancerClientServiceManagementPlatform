@@ -32,8 +32,12 @@ class ChatApp {
         // Message input
         const messageInput = document.getElementById('messageInput');
         const sendBtn = document.getElementById('sendBtn');
-        const attachBtn = document.getElementById('attachBtn');
+        const attachMenuBtn = document.getElementById('attachMenuBtn');
+        const attachmentMenu = document.getElementById('attachmentMenu');
+        const uploadPhotoBtn = document.getElementById('uploadPhotoBtn');
+        const uploadFileBtn = document.getElementById('uploadFileBtn');
         const fileInput = document.getElementById('fileInput');
+        const photoInput = document.getElementById('photoInput');
 
         if (sendBtn) {
             sendBtn.addEventListener('click', () => this.sendMessage());
@@ -54,15 +58,84 @@ class ChatApp {
             });
         }
 
-        if (attachBtn) {
-            attachBtn.addEventListener('click', () => {
-                fileInput.click();
+        // Attachment menu toggle
+        if (attachMenuBtn) {
+            attachMenuBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (attachmentMenu) {
+                    attachmentMenu.classList.toggle('show');
+                }
             });
         }
 
+        // Upload photo option
+        if (uploadPhotoBtn) {
+            uploadPhotoBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (photoInput) {
+                    photoInput.click();
+                    attachmentMenu?.classList.remove('show');
+                }
+            });
+        }
+
+        // Upload file option
+        if (uploadFileBtn) {
+            uploadFileBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (fileInput) {
+                    fileInput.click();
+                    attachmentMenu?.classList.remove('show');
+                }
+            });
+        }
+
+        // Agreement option
+        const agreementBtn = document.getElementById('agreementBtn');
+        if (agreementBtn) {
+            agreementBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (this.currentChat) {
+                    // Get the other user's name from the header
+                    const otherUserName = document.getElementById('headerName')?.textContent || '';
+                    const otherUserId = this.currentOtherId;
+
+                    // Build agreement URL with freelancer name and client ID
+                    const currentUserType = window.currentUserData.type;
+                    let agreementUrl = 'agreement.php?';
+
+                    if (currentUserType === 'freelancer') {
+                        // Freelancer creating agreement - pass client ID
+                        agreementUrl += `freelancer_name=${encodeURIComponent(window.currentUserData.email || '')}&client_id=${otherUserId}`;
+                    } else {
+                        // Client creating agreement - pass freelancer name and freelancer ID
+                        agreementUrl += `client_id=${window.currentUserData.id}&freelancer_name=${encodeURIComponent(otherUserName)}&freelancer_id=${otherUserId}`;
+                    }
+
+                    window.location.href = agreementUrl;
+                    attachmentMenu?.classList.remove('show');
+                } else {
+                    alert('Please select a conversation first');
+                }
+            });
+        }
+
+        // Handle photo input
+        if (photoInput) {
+            photoInput.addEventListener('change', (e) => this.handleFileSelect(e));
+        }
+
+        // Handle file input
         if (fileInput) {
             fileInput.addEventListener('change', (e) => this.handleFileSelect(e));
         }
+
+        // Close menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (attachmentMenu && !attachmentMenu.contains(e.target) && !attachMenuBtn?.contains(e.target)) {
+                attachmentMenu.classList.remove('show');
+            }
+        });
 
         // Search
         const searchInput = document.getElementById('chatSearch');
