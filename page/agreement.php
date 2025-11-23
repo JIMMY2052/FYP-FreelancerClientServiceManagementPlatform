@@ -1,30 +1,13 @@
 <?php
 // Handle parameters from messaging page
-$freelancer_name = isset($_GET['freelancer_name']) ? htmlspecialchars($_GET['freelancer_name']) : '';
+$freelancer_name = '';
 $client_id = isset($_GET['client_id']) ? intval($_GET['client_id']) : null;
 $freelancer_id = isset($_GET['freelancer_id']) ? intval($_GET['freelancer_id']) : null;
 
-// Fetch client name if client_id is provided
-$client_name = '';
-if ($client_id) {
-    require_once 'config.php';
-    $conn = getDBConnection();
-    $sql = "SELECT CompanyName FROM client WHERE ClientID = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param('i', $client_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    if ($result->num_rows > 0) {
-        $row = $result->fetch_assoc();
-        $client_name = $row['CompanyName'];
-    }
-    $stmt->close();
-    $conn->close();
-}
+require_once 'config.php';
 
 // Fetch freelancer name if freelancer_id is provided
-if ($freelancer_id && !$freelancer_name) {
-    require_once 'config.php';
+if ($freelancer_id) {
     $conn = getDBConnection();
     $sql = "SELECT CONCAT(FirstName, ' ', LastName) as FullName FROM freelancer WHERE FreelancerID = ?";
     $stmt = $conn->prepare($sql);
@@ -34,6 +17,23 @@ if ($freelancer_id && !$freelancer_name) {
     if ($result->num_rows > 0) {
         $row = $result->fetch_assoc();
         $freelancer_name = $row['FullName'];
+    }
+    $stmt->close();
+    $conn->close();
+}
+
+// Fetch client name if client_id is provided
+$client_name = '';
+if ($client_id) {
+    $conn = getDBConnection();
+    $sql = "SELECT CompanyName FROM client WHERE ClientID = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('i', $client_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        $client_name = $row['CompanyName'];
     }
     $stmt->close();
     $conn->close();
@@ -49,16 +49,24 @@ if ($freelancer_id && !$freelancer_name) {
 
 <body>
 
+    <button type="button" onclick="window.history.back()" class="header-back-btn">
+        ← Back to Messages
+    </button>
+
     <div class="header">
-        <h1>Create Project Agreement</h1>
-        <p>Fill in the details and preview your agreement in real-time</p>
+        <div>
+            <div>
+                <h1>📋 Project Agreement</h1>
+                <p>Create a professional agreement with real-time preview and digital signature</p>
+            </div>
+        </div>
     </div>
 
     <div class="container">
 
         <!-- LIVE PREVIEW SECTION (Left) -->
         <div class="preview-box">
-            <h2>📋 Live Preview</h2>
+            <h2>👁️ Live Preview</h2>
 
             <!-- HEADER -->
             <div class="preview-header">
@@ -68,9 +76,9 @@ if ($freelancer_id && !$freelancer_name) {
                 </div>
                 <div class="preview-header-right">
                     <span class="label">Offer from:</span>
-                    <span class="value" id="pOfferer">Freelancer Name</span>
+                    <span class="value" id="pOfferer"><?php echo $freelancer_name ? htmlspecialchars($freelancer_name) : 'Freelancer Name'; ?></span>
                     <span class="label" style="margin-top: 12px;">To:</span>
-                    <span class="value" id="pClient">Client Name</span>
+                    <span class="value" id="pClient"><?php echo $client_name ? htmlspecialchars($client_name) : 'Client Name'; ?></span>
                     <span class="label" style="margin-top: 12px;">Date:</span>
                     <span class="value" id="pDate" style="color: #6b7280;">Today</span>
                 </div>
@@ -141,7 +149,7 @@ if ($freelancer_id && !$freelancer_name) {
 
         <!-- FORM SECTION (Right) -->
         <div class="form-box">
-            <h2>✏️ Agreement Details</h2>
+            <h2>✏️ Fill Agreement Details</h2>
 
             <form id="agreementForm" action="agreement_process.php" method="POST">
 
@@ -168,8 +176,8 @@ if ($freelancer_id && !$freelancer_name) {
 
                 <!-- SIGNATURE SECTION -->
                 <div class="signature-section">
-                    <h3>Digital Signature</h3>
-                    <p style="color: #666; font-size: 0.95rem; margin-bottom: 16px;">Sign below to electronically sign this agreement</p>
+                    <h3>🖊️ Digital Signature</h3>
+                    <p>Draw your signature below to electronically sign this agreement</p>
 
                     <div class="signature-container">
                         <canvas id="signaturePad"></canvas>

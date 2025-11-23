@@ -105,11 +105,11 @@ class ChatApp {
                     let agreementUrl = 'agreement.php?';
 
                     if (currentUserType === 'freelancer') {
-                        // Freelancer creating agreement - pass client ID
-                        agreementUrl += `freelancer_name=${encodeURIComponent(window.currentUserData.email || '')}&client_id=${otherUserId}`;
+                        // Freelancer creating agreement - pass freelancer ID and client ID
+                        agreementUrl += `freelancer_id=${window.currentUserData.id}&client_id=${otherUserId}`;
                     } else {
-                        // Client creating agreement - pass freelancer name and freelancer ID
-                        agreementUrl += `client_id=${window.currentUserData.id}&freelancer_name=${encodeURIComponent(otherUserName)}&freelancer_id=${otherUserId}`;
+                        // Client creating agreement - pass client ID and freelancer ID
+                        agreementUrl += `client_id=${window.currentUserData.id}&freelancer_id=${otherUserId}`;
                     }
 
                     window.location.href = agreementUrl;
