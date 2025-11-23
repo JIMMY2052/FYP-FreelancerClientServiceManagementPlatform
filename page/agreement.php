@@ -22,7 +22,7 @@
             <!-- HEADER -->
             <div class="preview-header">
                 <div class="preview-header-left">
-                    <h3 id="pTitleHeader">Project Agreement</h3>
+                    <h3 id="pTitle">Project Agreement</h3>
                     <p id="pProjectLabel"><span class="empty">Project details...</span></p>
                 </div>
                 <div class="preview-header-right">
@@ -192,8 +192,7 @@
         // UPDATE PROJECT TITLE HEADER
         function updateTitleHeader() {
             const title = document.getElementById("title").value.trim();
-            const titleEl = document.getElementById("pTitleHeader");
-            const projectLabel = document.getElementById("pProjectLabel");
+            const titleEl = document.getElementById("pTitle");
 
             if (title) {
                 titleEl.textContent = title;
