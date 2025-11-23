@@ -197,6 +197,8 @@ class ChatApp {
                 const chatItem = document.createElement('li');
                 chatItem.className = 'chat-item';
                 chatItem.setAttribute('data-chat-id', chat.id);
+                chatItem.setAttribute('data-conversation-id', chat.conversationId);
+                chatItem.setAttribute('data-user-id', chat.userId);
                 if (this.currentChat === chat.id) {
                     chatItem.classList.add('active');
                 }

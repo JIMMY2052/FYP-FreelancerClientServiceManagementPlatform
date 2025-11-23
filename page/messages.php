@@ -13,6 +13,8 @@ $user_email = $_SESSION['email'] ?? '';
 
 // Check if client_id is passed (from Contact Me button)
 $target_client_id = isset($_GET['client_id']) ? intval($_GET['client_id']) : null;
+$target_job_id = isset($_GET['job_id']) ? intval($_GET['job_id']) : null;
+$job_quote = null;
 
 // If a client_id is provided and user is a freelancer, create/open conversation with that client
 if ($target_client_id && $user_type === 'freelancer') {
@@ -43,12 +45,29 @@ if ($target_client_id && $user_type === 'freelancer') {
         $insert_stmt->close();
     }
 
+    // If job_id is provided, fetch job details
+    if ($target_job_id) {
+        $job_sql = "SELECT JobID, Title, Description, Budget, Deadline FROM job WHERE JobID = ? AND ClientID = ?";
+        $job_stmt = $conn->prepare($job_sql);
+        $job_stmt->bind_param('ii', $target_job_id, $target_client_id);
+        $job_stmt->execute();
+        $job_result = $job_stmt->get_result();
+        if ($job_result->num_rows > 0) {
+            $job_quote = $job_result->fetch_assoc();
+        }
+        $job_stmt->close();
+    }
+
     $stmt->close();
     $conn->close();
 
     // Store the target conversation ID in session
     $_SESSION['target_conversation_id'] = $conversation_id;
     $_SESSION['target_client_id'] = $target_client_id;
+    if ($target_job_id) {
+        $_SESSION['target_job_id'] = $target_job_id;
+        $_SESSION['target_job_quote'] = $job_quote;
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -168,6 +187,42 @@ if ($target_client_id && $user_type === 'freelancer') {
                 </div>
             </div>
 
+            <!-- Job Quote Display (if coming from Contact Me) -->
+            <?php if ($job_quote): ?>
+                <div class="job-quote-container">
+                    <div class="job-quote-header">
+                        <h3 class="job-quote-title">Project Quote</h3>
+                        <button class="job-quote-close" id="jobQuoteClose" type="button">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="job-quote-content">
+                        <div class="job-quote-item">
+                            <span class="job-quote-label">Project Title:</span>
+                            <span class="job-quote-value"><?php echo htmlspecialchars($job_quote['Title']); ?></span>
+                        </div>
+                        <div class="job-quote-item">
+                            <span class="job-quote-label">Budget:</span>
+                            <span class="job-quote-value job-quote-budget">$<?php echo number_format($job_quote['Budget'], 2); ?></span>
+                        </div>
+                        <div class="job-quote-item">
+                            <span class="job-quote-label">Deadline:</span>
+                            <span class="job-quote-value"><?php echo date('M d, Y', strtotime($job_quote['Deadline'])); ?></span>
+                        </div>
+                        <div class="job-quote-description">
+                            <span class="job-quote-label">Description:</span>
+                            <p class="job-quote-text"><?php echo nl2br(htmlspecialchars(mb_strimwidth($job_quote['Description'], 0, 150, '...'))); ?></p>
+                        </div>
+                        <div class="job-quote-actions">
+                            <button class="job-quote-btn job-quote-send" id="sendJobQuoteBtn" type="button">Send Quote to Client</button>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
+
             <!-- Messages Area -->
             <div class="messages-container" id="messagesContainer">
                 <div class="empty-state">
@@ -241,10 +296,297 @@ if ($target_client_id && $user_type === 'freelancer') {
         <?php if (isset($_SESSION['target_conversation_id'])): ?>
             window.targetConversationId = <?php echo $_SESSION['target_conversation_id']; ?>;
             window.targetClientId = <?php echo $_SESSION['target_client_id']; ?>;
+            window.autoLoadConversation = true;
         <?php endif; ?>
     </script>
 
     <script src="../assets/js/chat.js"></script>
+
+    <script>
+        // Job Quote functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const jobQuoteClose = document.getElementById('jobQuoteClose');
+            const sendJobQuoteBtn = document.getElementById('sendJobQuoteBtn');
+
+            if (jobQuoteClose) {
+                jobQuoteClose.addEventListener('click', function() {
+                    const jobQuoteContainer = document.querySelector('.job-quote-container');
+                    if (jobQuoteContainer) {
+                        jobQuoteContainer.style.display = 'none';
+                    }
+                });
+            }
+
+            if (sendJobQuoteBtn) {
+                sendJobQuoteBtn.addEventListener('click', async function() {
+                    if (!window.chatApp || !window.chatApp.currentChat) {
+                        alert('Please select a conversation first');
+                        return;
+                    }
+
+                    // Get job quote data from the DOM
+                    const jobQuoteItems = document.querySelectorAll('.job-quote-item');
+                    let jobTitle = '';
+                    let jobBudget = '';
+                    let jobDeadline = '';
+                    let jobDescription = '';
+
+                    // Extract data from quote container
+                    const quoteContainer = document.querySelector('.job-quote-container');
+                    if (quoteContainer) {
+                        const items = quoteContainer.querySelectorAll('.job-quote-item');
+                        items.forEach(item => {
+                            const label = item.querySelector('.job-quote-label');
+                            const value = item.querySelector('.job-quote-value');
+                            if (label && value) {
+                                const labelText = label.textContent.trim();
+                                const valueText = value.textContent.trim();
+                                if (labelText.includes('Title')) jobTitle = valueText;
+                                if (labelText.includes('Budget')) jobBudget = valueText;
+                                if (labelText.includes('Deadline')) jobDeadline = valueText;
+                            }
+                        });
+                        const descItem = quoteContainer.querySelector('.job-quote-description');
+                        if (descItem) {
+                            const descText = descItem.querySelector('.job-quote-text');
+                            if (descText) jobDescription = descText.textContent.trim();
+                        }
+                    }
+
+                    // Get job ID from session (passed via window variable)
+                    const jobId = <?php echo isset($_SESSION['target_job_id']) ? $_SESSION['target_job_id'] : 'null'; ?>;
+
+                    if (!jobId) {
+                        alert('Job ID not found');
+                        return;
+                    }
+
+                    // Disable button and show loading state
+                    sendJobQuoteBtn.disabled = true;
+                    const originalText = sendJobQuoteBtn.textContent;
+                    sendJobQuoteBtn.textContent = 'Sending...';
+
+                    try {
+                        const formData = new FormData();
+                        formData.append('chatId', window.chatApp.currentChat);
+                        formData.append('jobId', jobId);
+                        formData.append('jobTitle', jobTitle);
+                        formData.append('jobBudget', jobBudget);
+                        formData.append('jobDeadline', jobDeadline);
+                        formData.append('jobDescription', jobDescription);
+                        formData.append('receiverId', window.chatApp.currentOtherId);
+                        formData.append('receiverType', window.chatApp.currentOtherType);
+
+                        const response = await fetch('../page/send_quote_message.php', {
+                            method: 'POST',
+                            body: formData
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            console.log('Quote sent successfully');
+                            // Hide the quote container
+                            const jobQuoteContainer = document.querySelector('.job-quote-container');
+                            if (jobQuoteContainer) {
+                                jobQuoteContainer.style.display = 'none';
+                            }
+                            // Reload messages to display the new quote
+                            setTimeout(() => {
+                                window.chatApp.loadMessages();
+                                window.chatApp.loadChatList();
+                            }, 500);
+                        } else {
+                            alert('Error sending quote: ' + (result.error || 'Unknown error'));
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert('Error sending quote: ' + error.message);
+                    } finally {
+                        sendJobQuoteBtn.disabled = false;
+                        sendJobQuoteBtn.textContent = originalText;
+                    }
+                });
+            }
+        });
+
+        // Auto-load conversation if coming from "Contact Me" button
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.autoLoadConversation && window.targetClientId) {
+                // Wait for chat list to load, then find and click the target conversation
+                const maxAttempts = 20; // Try for up to 10 seconds (20 * 500ms)
+                let attempts = 0;
+
+                const autoLoadInterval = setInterval(function() {
+                    attempts++;
+
+                    // Try to find by user ID (more reliable)
+                    const conversationItem = document.querySelector(`[data-user-id="${window.targetClientId}"]`);
+
+                    if (conversationItem) {
+                        clearInterval(autoLoadInterval);
+                        conversationItem.click();
+                        conversationItem.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'center'
+                        });
+                        console.log('Auto-loaded conversation with client ID:', window.targetClientId);
+                    } else if (attempts >= maxAttempts) {
+                        clearInterval(autoLoadInterval);
+                        console.log('Could not find conversation with client ID:', window.targetClientId);
+                    }
+                }, 500);
+            }
+        });
+    </script>
+
+    <style>
+        /* Job Quote Styling */
+        .job-quote-container {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+            border-left: 4px solid #1ab394;
+            margin: 0;
+            padding: 20px;
+            border-radius: 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .job-quote-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .job-quote-title {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .job-quote-close {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #999;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.3s ease;
+        }
+
+        .job-quote-close:hover {
+            color: #333;
+        }
+
+        .job-quote-content {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .job-quote-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.9rem;
+        }
+
+        .job-quote-label {
+            font-weight: 600;
+            color: #555;
+            min-width: 110px;
+        }
+
+        .job-quote-value {
+            color: #2c3e50;
+            flex: 1;
+        }
+
+        .job-quote-budget {
+            background: rgb(159, 232, 112);
+            color: #333;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-weight: 700;
+            display: inline-block;
+            width: fit-content;
+        }
+
+        .job-quote-description {
+            margin-top: 8px;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+
+        .job-quote-description .job-quote-label {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .job-quote-text {
+            margin: 0;
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .job-quote-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .job-quote-btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .job-quote-send {
+            background: #1ab394;
+            color: white;
+            flex: 1;
+        }
+
+        .job-quote-send:hover {
+            background: #158a74;
+            box-shadow: 0 2px 8px rgba(26, 179, 148, 0.3);
+        }
+
+        .job-quote-send:active {
+            transform: scale(0.98);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .job-quote-container {
+                padding: 15px;
+            }
+
+            .job-quote-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 6px;
+            }
+
+            .job-quote-label {
+                min-width: auto;
+            }
+        }
+    </style>
 </body>
 
 </html>
