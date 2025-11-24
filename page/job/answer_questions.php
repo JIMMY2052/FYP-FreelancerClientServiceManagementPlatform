@@ -69,16 +69,18 @@ try {
     $questions = $stmt->fetchAll();
     
     // Fetch options for each question
-    foreach ($questions as &$question) {
-        if ($question['QuestionType'] === 'multiple_choice') {
+    for ($i = 0; $i < count($questions); $i++) {
+        if ($questions[$i]['QuestionType'] === 'multiple_choice') {
             $sqlOpt = "SELECT OptionID, OptionText 
                        FROM job_question_option 
                        WHERE QuestionID = :questionID 
                        ORDER BY DisplayOrder ASC";
             
             $stmtOpt = $pdo->prepare($sqlOpt);
-            $stmtOpt->execute([':questionID' => $question['QuestionID']]);
-            $question['options'] = $stmtOpt->fetchAll();
+            $stmtOpt->execute([':questionID' => $questions[$i]['QuestionID']]);
+            $questions[$i]['options'] = $stmtOpt->fetchAll();
+        } else {
+            $questions[$i]['options'] = [];
         }
     }
     
@@ -115,8 +117,18 @@ include '../../_head.php';
     </div>
 
     <?php if (!empty($questions)): ?>
-    <form method="POST" action="/page/job/apply/applyJob.php" class="answers-form" id="answersForm">
+    <form method="POST" action="applyJob.php" class="answers-form" id="answersForm">
         <input type="hidden" name="job_id" value="<?= $jobID ?>">
+        
+        <?php if (!empty($questions)): ?>
+        <!-- Screening Questions Section -->
+        <div class="screening-questions-section">
+            <h3 class="section-title">
+                <i class="fas fa-clipboard-question"></i>
+                Screening Questions
+            </h3>
+        </div>
+        <?php endif; ?>
         
         <div class="questions-container">
             <?php foreach ($questions as $index => $question): ?>
@@ -171,7 +183,10 @@ include '../../_head.php';
         </div>
 
         <div class="form-buttons">
-            <a href="job_details.php?id=<?= $jobID ?>" class="back-btn">Back to Job</a>
+            <a href="job_details.php?job_id=<?= $jobID ?>" class="back-btn">
+                <i class="fas fa-arrow-left"></i>
+                Back
+            </a>
             <button type="submit" class="submit-btn">
                 <i class="fas fa-paper-plane"></i>
                 Submit Application
@@ -179,18 +194,26 @@ include '../../_head.php';
         </div>
     </form>
     <?php else: ?>
-    <!-- No questions, redirect directly to apply -->
-    <div class="no-questions-message">
-        <i class="fas fa-info-circle"></i>
-        <p>This job has no screening questions.</p>
-        <a href="/page/job/apply/applyJob.php?id=<?= $jobID ?>" class="apply-direct-btn">
-            <i class="fas fa-paper-plane"></i>
-            Proceed to Apply
-        </a>
-    </div>
-    <div class="form-buttons">
-        <a href="job_details.php?id=<?= $jobID ?>" class="back-btn">Back to Job</a>
-    </div>
+    <!-- No questions, show application form only -->
+    <form method="POST" action="applyJob.php" class="answers-form" id="answersForm">
+        <input type="hidden" name="job_id" value="<?= $jobID ?>">
+        
+        <div class="no-questions-message">
+            <i class="fas fa-info-circle"></i>
+            <p>This job has no screening questions.</p>
+        </div>
+        
+        <div class="form-buttons">
+            <a href="job_details.php?job_id=<?= $jobID ?>" class="back-btn">
+                <i class="fas fa-arrow-left"></i>
+                Back
+            </a>
+            <button type="submit" class="submit-btn">
+                <i class="fas fa-paper-plane"></i>
+                Submit Application
+            </button>
+        </div>
+    </form>
     <?php endif; ?>
 </div>
 
@@ -246,6 +269,86 @@ include '../../_head.php';
         border-radius: 16px;
         padding: 30px;
         box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    /* Application Details Section */
+    .application-details-section,
+    .screening-questions-section {
+        margin-bottom: 30px;
+    }
+
+    .section-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin: 0 0 20px 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .section-title i {
+        color: rgb(159, 232, 112);
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-label {
+        display: block;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+    }
+
+    .required-star {
+        color: #dc3545;
+    }
+
+    .form-textarea,
+    .form-input {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        font-family: inherit;
+        transition: all 0.3s ease;
+        background: #f8fafc;
+    }
+
+    .form-textarea:focus,
+    .form-input:focus {
+        outline: none;
+        border-color: rgb(159, 232, 112);
+        background: white;
+        box-shadow: 0 0 0 3px rgba(159, 232, 112, 0.1);
+    }
+
+    .form-textarea {
+        resize: vertical;
+        min-height: 120px;
+    }
+
+    .form-hint {
+        display: block;
+        color: #6c757d;
+        font-size: 0.85rem;
+        margin-top: 6px;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    @media (max-width: 768px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
     }
 
     .questions-container {
@@ -461,15 +564,18 @@ include '../../_head.php';
 <script>
 // Form validation
 document.getElementById('answersForm')?.addEventListener('submit', function(e) {
+    // Validate required screening questions
     const requiredQuestions = document.querySelectorAll('.question-card:has(.required-badge)');
-    let allAnswered = true;
+    let isValid = true;
+    let errorMessage = '';
     
     requiredQuestions.forEach(questionCard => {
         const radios = questionCard.querySelectorAll('input[type="radio"]');
         const isAnswered = Array.from(radios).some(radio => radio.checked);
         
         if (!isAnswered) {
-            allAnswered = false;
+            isValid = false;
+            errorMessage += 'Please answer all required screening questions.\\n';
             questionCard.style.borderColor = '#dc3545';
             setTimeout(() => {
                 questionCard.style.borderColor = '#e9ecef';
@@ -477,9 +583,9 @@ document.getElementById('answersForm')?.addEventListener('submit', function(e) {
         }
     });
     
-    if (!allAnswered) {
+    if (!isValid) {
         e.preventDefault();
-        alert('Please answer all required questions before submitting.');
+        alert(errorMessage);
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 });

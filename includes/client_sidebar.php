@@ -28,6 +28,10 @@ $current_page = basename($_SERVER['PHP_SELF']);
             <span class="nav-icon">📁</span>
             <span>My Projects</span>
         </a>
+        <a href="my_applications.php" class="nav-item <?php echo ($current_page === 'my_applications.php') ? 'active' : ''; ?>">
+            <span class="nav-icon">📋</span>
+            <span>Applications</span>
+        </a>
         <a href="messages.php" class="nav-item <?php echo ($current_page === 'messages.php') ? 'active' : ''; ?>">
             <span class="nav-icon">💬</span>
             <span>Messages</span>
