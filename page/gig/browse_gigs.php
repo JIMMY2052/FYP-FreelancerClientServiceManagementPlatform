@@ -131,7 +131,7 @@ $gigs = [];
 
 try {
     $sql = "SELECT g.GigID, g.Title, g.Description, g.Category, g.Subcategory, 
-                   g.MinPrice, g.MaxPrice, g.DeliveryTime, g.Image1Path, g.Status, g.CreatedAt,
+                   g.Price, g.DeliveryTime, g.RushDelivery, g.RushDeliveryPrice, g.Image1Path, g.Status, g.CreatedAt,
                    f.FirstName, f.LastName, f.ProfilePicture
             FROM gig g
             INNER JOIN freelancer f ON g.FreelancerID = f.FreelancerID
@@ -651,11 +651,7 @@ include '../../_head.php';
                         
                         <div class="gig-footer">
                             <div class="gig-price">
-                                <?php
-                                $minPrice = number_format($gig['MinPrice'], 0);
-                                $maxPrice = number_format($gig['MaxPrice'], 0);
-                                echo $minPrice === $maxPrice ? "MYR {$minPrice}" : "MYR {$minPrice} - MYR {$maxPrice}";
-                                ?>
+                                MYR <?php echo number_format($gig['Price'], 0); ?>
                             </div>
                             <a href="/page/gig/gig_details.php?id=<?php echo intval($gig['GigID']); ?>" class="gig-view-btn">View Details</a>
                         </div>

@@ -59,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delet
 // Fetch freelancer services (only active status)
 $freelancerID = $_SESSION['user_id'];
 try {
-    $stmt = $pdo->prepare("SELECT GigID, Title, Description, MinPrice, MaxPrice, DeliveryTime, CreatedAt FROM gig WHERE FreelancerID = :freelancer_id AND Status = 'active' ORDER BY CreatedAt DESC");
+    $stmt = $pdo->prepare("SELECT GigID, Title, Description, Price, DeliveryTime, RushDelivery, RushDeliveryPrice, CreatedAt FROM gig WHERE FreelancerID = :freelancer_id AND Status = 'active' ORDER BY CreatedAt DESC");
     $stmt->execute([':freelancer_id' => $freelancerID]);
     $services = $stmt->fetchAll();
 } catch (PDOException $e) {
@@ -95,11 +95,7 @@ try {
                         <div class="card-header">
                             <h3><?php echo htmlspecialchars($service['Title']); ?></h3>
                             <span class="service-price">
-                                <?php
-                                $minPrice = isset($service['MinPrice']) ? number_format($service['MinPrice'], 0) : '0';
-                                $maxPrice = isset($service['MaxPrice']) ? number_format($service['MaxPrice'], 0) : $minPrice;
-                                echo $minPrice === $maxPrice ? "MYR {$minPrice}" : "MYR {$minPrice} - MYR {$maxPrice}";
-                                ?>
+                                MYR <?php echo number_format($service['Price'], 0); ?>
                             </span>
                         </div>
                         
@@ -109,6 +105,14 @@ try {
                             <span class="meta-item">
                                 <strong>Delivery:</strong> <?php echo intval($service['DeliveryTime']); ?> day(s)
                             </span>
+                            <?php if (!empty($service['RushDelivery']) && $service['RushDelivery'] > 0): ?>
+                                <span class="meta-item">
+                                    <strong>Rush Delivery:</strong> <?php echo intval($service['RushDelivery']); ?> day(s) 
+                                    <?php if (!empty($service['RushDeliveryPrice']) && $service['RushDeliveryPrice'] > 0): ?>
+                                        <span style="color: rgb(159, 232, 112); font-weight: 700;">(+RM<?php echo number_format($service['RushDeliveryPrice'], 0); ?>)</span>
+                                    <?php endif; ?>
+                                </span>
+                            <?php endif; ?>
                             <span class="meta-item">
                                 <strong>Added:</strong> <?php echo date('M d, Y', strtotime($service['CreatedAt'])); ?>
                             </span>

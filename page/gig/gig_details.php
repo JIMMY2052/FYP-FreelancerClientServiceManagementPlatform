@@ -475,6 +475,227 @@ $categoryData = [
             line-height: 1.6;
         }
 
+        /* Order Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background-color: #fff;
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            padding: 25px 30px;
+            border-bottom: 1px solid #e9ecef;
+            position: relative;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: #2c3e50;
+            font-weight: 700;
+        }
+
+        .close-modal {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            font-size: 28px;
+            font-weight: bold;
+            color: #999;
+            cursor: pointer;
+            transition: color 0.2s;
+            background: none;
+            border: none;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-modal:hover {
+            color: #333;
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .order-summary {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+        }
+
+        .order-summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 0.95rem;
+        }
+
+        .order-summary-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .order-summary-label {
+            color: #666;
+        }
+
+        .order-summary-value {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .order-total {
+            border-top: 2px solid #e9ecef;
+            padding-top: 12px;
+            margin-top: 12px;
+            font-size: 1.1rem;
+        }
+
+        .order-total .order-summary-value {
+            color: rgb(159, 232, 112);
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .rush-delivery-option {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .rush-delivery-option:hover {
+            border-color: rgb(159, 232, 112);
+            background: #f8fef5;
+        }
+
+        .rush-delivery-option.selected {
+            border-color: rgb(159, 232, 112);
+            background: #f0fce8;
+        }
+
+        .rush-delivery-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+        }
+
+        .rush-delivery-checkbox input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: rgb(159, 232, 112);
+        }
+
+        .rush-delivery-label {
+            flex: 1;
+        }
+
+        .rush-delivery-title {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .rush-delivery-title i {
+            color: rgb(159, 232, 112);
+        }
+
+        .rush-delivery-desc {
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .rush-delivery-price {
+            font-weight: 700;
+            color: rgb(159, 232, 112);
+            font-size: 1.1rem;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 14px 20px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .modal-btn-primary {
+            background: rgb(159, 232, 112);
+            color: #2c3e50;
+        }
+
+        .modal-btn-primary:hover {
+            background: rgb(140, 210, 90);
+            box-shadow: 0 4px 12px rgba(159, 232, 112, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .modal-btn-secondary {
+            background: #f8fafc;
+            color: #2c3e50;
+            border: 2px solid #e9ecef;
+        }
+
+        .modal-btn-secondary:hover {
+            background: #fff;
+            border-color: #ddd;
+        }
+
         @media (max-width: 1024px) {
             .gig-layout {
                 grid-template-columns: 1fr;
@@ -631,9 +852,9 @@ $categoryData = [
                 <!-- Pricing Card -->
                 <div class="pricing-card">
                     <div class="price-range">
-                        RM<?= number_format($gig['MinPrice'], 2) ?> - RM<?= number_format($gig['MaxPrice'], 2) ?>
+                        RM<?= number_format($gig['Price'], 2) ?>
                     </div>
-                    <button class="order-btn" onclick="orderGig(<?= $gig['GigID'] ?>)">
+                    <button class="order-btn" onclick="openOrderModal()">
                         <i class="fas fa-shopping-cart"></i>
                         Order Now
                     </button>
@@ -681,9 +902,121 @@ $categoryData = [
         </div>
     </div>
 
+    <!-- Order Modal -->
+    <div id="orderModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Order Gig</h2>
+                <button class="close-modal" onclick="closeOrderModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="order-summary">
+                    <div class="order-summary-item">
+                        <span class="order-summary-label">Gig Price</span>
+                        <span class="order-summary-value">RM<?= number_format($gig['Price'], 2) ?></span>
+                    </div>
+                    <div class="order-summary-item">
+                        <span class="order-summary-label">Delivery Time</span>
+                        <span class="order-summary-value"><?= htmlspecialchars($gig['DeliveryTime']) ?> days</span>
+                    </div>
+                    <div id="rushDeliverySummary" style="display: none;" class="order-summary-item">
+                        <span class="order-summary-label">Rush Delivery Fee</span>
+                        <span class="order-summary-value" id="rushDeliveryFeeDisplay">+RM0.00</span>
+                    </div>
+                    <div class="order-summary-item order-total">
+                        <span class="order-summary-label">Total Amount</span>
+                        <span class="order-summary-value" id="totalAmount">RM<?= number_format($gig['Price'], 2) ?></span>
+                    </div>
+                </div>
+
+                <?php if (!empty($gig['RushDelivery']) && $gig['RushDelivery'] > 0): ?>
+                <div class="rush-delivery-option" id="rushDeliveryOption">
+                    <label class="rush-delivery-checkbox" for="rushDeliveryCheckbox">
+                        <input type="checkbox" id="rushDeliveryCheckbox" onchange="toggleRushDelivery()">
+                        <div class="rush-delivery-label">
+                            <div class="rush-delivery-title">
+                                <i class="fas fa-bolt"></i>
+                                Rush Delivery
+                            </div>
+                            <div class="rush-delivery-desc">
+                                Get your order in <?= htmlspecialchars($gig['RushDelivery']) ?> days instead of <?= htmlspecialchars($gig['DeliveryTime']) ?> days
+                            </div>
+                        </div>
+                        <div class="rush-delivery-price">
+                            +RM<?= number_format($gig['RushDeliveryPrice'] ?? 0, 2) ?>
+                        </div>
+                    </label>
+                </div>
+                <?php endif; ?>
+
+                <div class="modal-actions">
+                    <button class="modal-btn modal-btn-secondary" onclick="closeOrderModal()">Cancel</button>
+                    <button class="modal-btn modal-btn-primary" onclick="confirmOrder()">Confirm Order</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <?php require_once '../../_foot.php'; ?>
 
     <script>
+        const gigPrice = <?= $gig['Price'] ?>;
+        const rushDeliveryPrice = <?= !empty($gig['RushDeliveryPrice']) ? $gig['RushDeliveryPrice'] : 0 ?>;
+        const rushDeliveryDays = <?= !empty($gig['RushDelivery']) ? $gig['RushDelivery'] : 0 ?>;
+
+        // Modal functions
+        function openOrderModal() {
+            <?php if (isset($_SESSION['user_id']) && $_SESSION['user_type'] === 'client'): ?>
+                document.getElementById('orderModal').style.display = 'block';
+                document.body.style.overflow = 'hidden';
+            <?php else: ?>
+                alert('Please log in as a client to order this gig.');
+                window.location.href = '../login.php?redirect=' + encodeURIComponent(window.location.href);
+            <?php endif; ?>
+        }
+
+        function closeOrderModal() {
+            document.getElementById('orderModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('orderModal');
+            if (event.target === modal) {
+                closeOrderModal();
+            }
+        }
+
+        // Toggle rush delivery
+        function toggleRushDelivery() {
+            const checkbox = document.getElementById('rushDeliveryCheckbox');
+            const option = document.getElementById('rushDeliveryOption');
+            const rushSummary = document.getElementById('rushDeliverySummary');
+            const totalAmountEl = document.getElementById('totalAmount');
+            const rushFeeDisplay = document.getElementById('rushDeliveryFeeDisplay');
+            
+            if (checkbox.checked) {
+                option.classList.add('selected');
+                rushSummary.style.display = 'flex';
+                rushFeeDisplay.textContent = '+RM' + rushDeliveryPrice.toFixed(2);
+                const total = gigPrice + rushDeliveryPrice;
+                totalAmountEl.textContent = 'RM' + total.toFixed(2);
+            } else {
+                option.classList.remove('selected');
+                rushSummary.style.display = 'none';
+                totalAmountEl.textContent = 'RM' + gigPrice.toFixed(2);
+            }
+        }
+
+        // Confirm order
+        function confirmOrder() {
+            const rushDeliveryEnabled = document.getElementById('rushDeliveryCheckbox')?.checked || false;
+            
+            // Redirect to payment details page
+            window.location.href = '../payment/payment_details.php?gig_id=<?= $gig['GigID'] ?>&rush=' + (rushDeliveryEnabled ? '1' : '0');
+        }
+
         // Gallery navigation
         function showImage(imageSrc, thumbnail) {
             const mainDisplay = document.getElementById('mainGalleryDisplay');
@@ -716,19 +1049,6 @@ $categoryData = [
             <?php else: ?>
                 // Redirect to login
                 alert('Please log in as a client to contact this freelancer.');
-                window.location.href = '../login.php?redirect=' + encodeURIComponent(window.location.href);
-            <?php endif; ?>
-        }
-
-        // Order gig (placeholder function)
-        function orderGig(gigId) {
-            <?php if (isset($_SESSION['user_id']) && $_SESSION['user_type'] === 'client'): ?>
-                // Placeholder: Redirect to order/checkout page
-                alert('Order functionality will be implemented soon.\nGig ID: ' + gigId);
-                // window.location.href = '../payment/checkout.php?gig_id=' + gigId;
-            <?php else: ?>
-                // Redirect to login
-                alert('Please log in as a client to order this gig.');
                 window.location.href = '../login.php?redirect=' + encodeURIComponent(window.location.href);
             <?php endif; ?>
         }

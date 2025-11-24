@@ -6,7 +6,7 @@ include '../../_head.php';
 ?>
 
 <div class="form-container">
-    <form action="jobSummary.php" method="post" name="create-job-form" class="create-job-form">
+    <form action="job_questions.php" method="post" name="create-job-form" class="create-job-form">
         <p>Job Title</p>
         <input type="text" id="jobTitle" name="jobTitle" placeholder="Enter a job title" required>
 
@@ -38,7 +38,7 @@ include '../../_head.php';
 
         <div class="form-buttons">
             <button type="reset" class="reset-btn">Reset</button>
-            <input type="submit" value="Submit" class="submit-btn">
+            <input type="submit" value="Continue" class="submit-btn">
         </div>
     </form>
 </div>

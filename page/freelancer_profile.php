@@ -93,8 +93,7 @@ $stmt = $conn->prepare("
         GigID,
         Title,
         Category,
-        MinPrice,
-        MaxPrice,
+        Price,
         Status,
         CreatedAt
     FROM gig

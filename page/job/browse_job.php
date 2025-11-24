@@ -114,9 +114,8 @@ $jobs = $result->fetch_all(MYSQLI_ASSOC);
                     </div>
 
                     <div class="project-actions">
-                        <a href="/page/job/view/jobDetails.php?id=<?php echo $job['JobID']; ?>" class="btn-small">View</a>
+                        <a href="job_details.php?id=<?php echo $job['JobID']; ?>" class="btn-small">View Details</a>
                         <a href="/page/job/apply/applyJob.php?id=<?php echo $job['JobID']; ?>" class="btn-small">Apply</a>
-                        <a href="../messages.php?client_id=<?php echo $job['ClientID']; ?>&job_id=<?php echo $job['JobID']; ?>" class="btn-small btn-contact">Contact Me</a>
                     </div>
                 </div>
             <?php endforeach; ?>

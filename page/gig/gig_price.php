@@ -400,28 +400,22 @@ include '../../_head.php';
     <!-- Form -->
     <div class="gig-form-container">
         <form id="pricingForm" method="POST" action="">
-            <!-- Price Range Section -->
+            <!-- Price Section -->
             <div class="gig-form-section">
-                <h3>💰 Price Range</h3>
-                <p class="form-description">Set the minimum and maximum price for your gig. Buyers can choose any price within this range.</p>
+                <h3>💰 Gig Price</h3>
+                <p class="form-description">Set the price for your gig service.</p>
                 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="minPrice">Minimum Price (MYR) *</label>
-                        <input type="number" id="minPrice" name="minPrice" placeholder="e.g., 50" min="5" step="1" required>
+                        <label for="price">Price (MYR) *</label>
+                        <input type="number" id="price" name="price" placeholder="e.g., 50" min="5" step="1" required>
                         <div class="form-description">Enter whole numbers only (minimum MYR 5)</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="maxPrice">Maximum Price (MYR) *</label>
-                        <input type="number" id="maxPrice" name="maxPrice" placeholder="e.g., 500" min="5" step="1" required>
-                        <div class="form-description">Whole numbers only</div>
                     </div>
                 </div>
 
                 <div class="price-range-display">
                     <div class="price-range-text">
-                        Price Range: <span id="displayMinPrice">MYR 0</span> - <span id="displayMaxPrice">MYR 0</span>
+                        Gig Price: <span id="displayPrice">MYR 0</span>
                     </div>
                 </div>
             </div>
@@ -431,23 +425,11 @@ include '../../_head.php';
                 <h3>📅 Delivery Time</h3>
                 <p class="form-description">How many days will it take you to complete the gig?</p>
                 
-                <div class="form-row-3">
+                <div class="form-row">
                     <div class="form-group">
                         <label for="deliveryDays">Days to Deliver *</label>
                         <input type="number" id="deliveryDays" name="deliveryDays" placeholder="e.g., 3" min="1" max="90" required>
                         <div class="form-description">Between 1-90 days</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="standardDays">Standard Delivery (Days) *</label>
-                        <select id="standardDays" name="standardDays" required>
-                            <option value="" disabled selected hidden>Select</option>
-                            <option value="1">1 Day</option>
-                            <option value="3">3 Days</option>
-                            <option value="7">7 Days</option>
-                            <option value="14">14 Days</option>
-                            <option value="30">30 Days</option>
-                        </select>
                     </div>
 
                     <div class="form-group">
@@ -460,7 +442,15 @@ include '../../_head.php';
                             <option value="5">5 Days</option>
                             <option value="7">7 Days</option>
                         </select>
-                        <div class="form-description">Faster delivery with additional cost</div>
+                        <div class="form-description">Faster delivery option</div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="rushDeliveryPrice">Rush Delivery Price (MYR)</label>
+                        <input type="number" id="rushDeliveryPrice" name="rushDeliveryPrice" placeholder="e.g., 20" min="0" step="1">
+                        <div class="form-description">Additional cost for rush delivery (whole numbers only)</div>
                     </div>
                 </div>
             </div>
@@ -498,8 +488,8 @@ include '../../_head.php';
                 <div class="price-range-display">
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; font-size: 0.95rem;">
                         <div>
-                            <strong>Base Price Range:</strong><br>
-                            <span id="summaryPrice">MYR 0 - MYR 0</span>
+                            <strong>Gig Price:</strong><br>
+                            <span id="summaryPrice">MYR 0</span>
                         </div>
                         <div>
                             <strong>Delivery Time:</strong><br>
@@ -548,11 +538,10 @@ include '../../_head.php';
         if (savedData) {
             try {
                 const data = JSON.parse(savedData);
-                document.getElementById('minPrice').value = data.minPrice || '';
-                document.getElementById('maxPrice').value = data.maxPrice || '';
+                document.getElementById('price').value = data.price || '';
                 document.getElementById('deliveryDays').value = data.deliveryDays || '';
-                document.getElementById('standardDays').value = data.standardDays || '';
                 document.getElementById('rushDeliveryDays').value = data.rushDeliveryDays || '';
+                document.getElementById('rushDeliveryPrice').value = data.rushDeliveryPrice || '';
                 document.getElementById('revisions').value = data.revisions || '';
                 document.getElementById('additionalRevisionPrice').value = data.additionalRevisionPrice || '';
                 updateSummary();
@@ -563,40 +552,41 @@ include '../../_head.php';
     }
 
     function setupEventListeners() {
-        const minPriceInput = document.getElementById('minPrice');
-        const maxPriceInput = document.getElementById('maxPrice');
+        const priceInput = document.getElementById('price');
         const deliveryDaysInput = document.getElementById('deliveryDays');
-        const standardDaysSelect = document.getElementById('standardDays');
         const rushDeliverySelect = document.getElementById('rushDeliveryDays');
+        const rushDeliveryPriceInput = document.getElementById('rushDeliveryPrice');
         const revisionsSelect = document.getElementById('revisions');
 
-        minPriceInput.addEventListener('input', updateSummary);
-        maxPriceInput.addEventListener('input', updateSummary);
+        priceInput.addEventListener('input', updateSummary);
         deliveryDaysInput.addEventListener('input', updateSummary);
-        standardDaysSelect.addEventListener('change', updateSummary);
         rushDeliverySelect.addEventListener('change', updateSummary);
+        rushDeliveryPriceInput.addEventListener('input', updateSummary);
         revisionsSelect.addEventListener('change', updateSummary);
     }
 
     function updateSummary() {
-        const minPrice = parseInt(document.getElementById('minPrice').value, 10) || 0;
-        const maxPrice = parseInt(document.getElementById('maxPrice').value, 10) || 0;
+        const price = parseInt(document.getElementById('price').value, 10) || 0;
         const deliveryDays = document.getElementById('deliveryDays').value || '-';
-        const standardDays = document.getElementById('standardDays').value || '-';
         const rushDeliveryDays = document.getElementById('rushDeliveryDays').value || '-';
+        const rushDeliveryPrice = parseInt(document.getElementById('rushDeliveryPrice').value, 10) || 0;
         const revisions = document.getElementById('revisions').value || '-';
-        const additionalRevision = parseInt(document.getElementById('additionalRevisionPrice').value, 10) || 0;
 
-        // Update price range display
-        document.getElementById('displayMinPrice').textContent = 'MYR ' + minPrice;
-        document.getElementById('displayMaxPrice').textContent = 'MYR ' + maxPrice;
+        // Update price display
+        document.getElementById('displayPrice').textContent = 'MYR ' + price;
 
         // Update summary
-        document.getElementById('summaryPrice').textContent = `MYR ${minPrice} - MYR ${maxPrice}`;
-        document.getElementById('summaryDelivery').textContent = standardDays === '-' ? '-' : standardDays;
+        document.getElementById('summaryPrice').textContent = `MYR ${price}`;
+        document.getElementById('summaryDelivery').textContent = deliveryDays === '-' ? '-' : `${deliveryDays} day(s)`;
         document.getElementById('summaryRevisions').textContent = revisions === '-' ? '-' : (revisions === 'unlimited' ? 'Unlimited' : revisions);
-        document.getElementById('summaryRush').textContent = rushDeliveryDays === '-' ? 'Not available' : rushDeliveryDays;
-        document.getElementById('summaryAdditionalRevision').textContent = additionalRevision ? `MYR ${additionalRevision}` : 'Not set';
+        
+        if (rushDeliveryDays !== '-' && rushDeliveryPrice > 0) {
+            document.getElementById('summaryRush').textContent = `${rushDeliveryDays} day(s) (+MYR ${rushDeliveryPrice})`;
+        } else if (rushDeliveryDays !== '-') {
+            document.getElementById('summaryRush').textContent = `${rushDeliveryDays} day(s)`;
+        } else {
+            document.getElementById('summaryRush').textContent = 'Not available';
+        }
     }
 
     function addMilestoneClickHandlers() {
@@ -614,11 +604,10 @@ include '../../_head.php';
 
     function savePricingData() {
         const pricingData = {
-            minPrice: document.getElementById('minPrice').value,
-            maxPrice: document.getElementById('maxPrice').value,
+            price: document.getElementById('price').value,
             deliveryDays: document.getElementById('deliveryDays').value,
-            standardDays: document.getElementById('standardDays').value,
             rushDeliveryDays: document.getElementById('rushDeliveryDays').value,
+            rushDeliveryPrice: document.getElementById('rushDeliveryPrice').value,
             revisions: document.getElementById('revisions').value,
             additionalRevisionPrice: document.getElementById('additionalRevisionPrice').value
         };
@@ -638,10 +627,9 @@ include '../../_head.php';
             return;
         }
 
-        const minPrice = parseInt(document.getElementById('minPrice').value, 10);
-        const maxPrice = parseInt(document.getElementById('maxPrice').value, 10);
-        if (minPrice >= maxPrice) {
-            alert('Maximum price must be greater than minimum price');
+        const price = parseInt(document.getElementById('price').value, 10);
+        if (price < 5) {
+            alert('Minimum price must be at least MYR 5');
             return;
         }
 

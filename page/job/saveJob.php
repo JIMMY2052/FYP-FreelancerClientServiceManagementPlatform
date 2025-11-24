@@ -18,6 +18,7 @@ $budget = isset($_POST['budget']) ? floatval($_POST['budget']) : 0;
 $postDate = isset($_POST['postDate']) ? trim($_POST['postDate']) : '';
 $postTime = isset($_POST['postTime']) ? trim($_POST['postTime']) : '';
 $deadline = isset($_POST['deadline']) ? trim($_POST['deadline']) : '';
+$questions = isset($_POST['questions']) ? $_POST['questions'] : [];
 
 // Combine postDate and postTime into a single datetime
 $postDateTime = $postDate . ' ' . $postTime;
@@ -34,7 +35,7 @@ try {
     
     // Insert job into database
     $clientID = $_SESSION['user_id'];
-    $status = 'active'; // Default status when job is created
+    $status = 'available'; // Default status when job is created
     
     $stmt = $conn->prepare("INSERT INTO job (ClientID, Title, Description, Budget, Deadline, Status, PostDate) 
                             VALUES (?, ?, ?, ?, ?, ?, ?)");
@@ -42,9 +43,47 @@ try {
     
     if ($stmt->execute()) {
         $jobID = $stmt->insert_id;
+        $stmt->close();
+        
+        // Save screening questions if any
+        if (!empty($questions)) {
+            foreach ($questions as $question) {
+                if (empty($question['text'])) continue;
+                
+                $questionText = trim($question['text']);
+                $questionType = $question['type'] ?? 'multiple_choice';
+                $isRequired = isset($question['required']) ? 1 : 0;
+                
+                // Insert question
+                $stmtQ = $conn->prepare("INSERT INTO job_question (JobID, QuestionText, QuestionType, IsRequired) 
+                                         VALUES (?, ?, ?, ?)");
+                $stmtQ->bind_param("issi", $jobID, $questionText, $questionType, $isRequired);
+                
+                if ($stmtQ->execute()) {
+                    $questionID = $stmtQ->insert_id;
+                    $stmtQ->close();
+                    
+                    // Insert options for multiple choice questions
+                    if ($questionType === 'multiple_choice' && !empty($question['options'])) {
+                        $displayOrder = 0;
+                        foreach ($question['options'] as $optionText) {
+                            if (empty($optionText)) continue;
+                            
+                            $optionText = trim($optionText);
+                            $stmtO = $conn->prepare("INSERT INTO job_question_option (QuestionID, OptionText, DisplayOrder) 
+                                                     VALUES (?, ?, ?)");
+                            $stmtO->bind_param("isi", $questionID, $optionText, $displayOrder);
+                            $stmtO->execute();
+                            $stmtO->close();
+                            $displayOrder++;
+                        }
+                    }
+                }
+            }
+        }
+        
         $_SESSION['success'] = 'Job posted successfully!';
         $_SESSION['new_job_id'] = $jobID;
-        $stmt->close();
         $conn->close();
         
         // Redirect to my jobs page
