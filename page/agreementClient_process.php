@@ -117,7 +117,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // ===== ESCROW FUND LOCKING =====
     // Lock the job budget in client's wallet and create escrow record
     $conn->begin_transaction();
-    
+
     try {
         // Get client's wallet
         $wallet_sql = "SELECT WalletID, Balance FROM wallet WHERE UserID = ?";
@@ -126,41 +126,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $wallet_stmt->bind_param('s', $client_id_str);
         $wallet_stmt->execute();
         $wallet_result = $wallet_stmt->get_result();
-        
+
         if ($wallet_result->num_rows === 0) {
             throw new Exception("Client wallet not found. Please set up your wallet first.");
         }
-        
+
         $wallet = $wallet_result->fetch_assoc();
         $wallet_id = $wallet['WalletID'];
         $current_balance = floatval($wallet['Balance']);
-        
+
         // Check if client has enough balance
         if ($current_balance < $job_budget) {
             throw new Exception("Insufficient wallet balance. You need RM " . number_format($job_budget, 2) . " but only have RM " . number_format($current_balance, 2) . ". Please top up your wallet.");
         }
-        
+
         // Deduct amount from client's available balance and add to locked balance
         $update_wallet_sql = "UPDATE wallet SET Balance = Balance - ?, LockedBalance = LockedBalance + ? WHERE WalletID = ?";
         $update_wallet_stmt = $conn->prepare($update_wallet_sql);
         $update_wallet_stmt->bind_param('ddi', $job_budget, $job_budget, $wallet_id);
-        
+
         if (!$update_wallet_stmt->execute()) {
             throw new Exception("Failed to lock funds in wallet.");
         }
-        
+
         // Create escrow record
         $escrow_sql = "INSERT INTO escrow (OrderID, PayerID, PayeeID, Amount, Status, CreatedAt) VALUES (?, ?, ?, ?, 'hold', NOW())";
         $escrow_stmt = $conn->prepare($escrow_sql);
         $escrow_stmt->bind_param('iiid', $agreement_id, $client_id, $freelancer_id, $job_budget);
-        
+
         if (!$escrow_stmt->execute()) {
             throw new Exception("Failed to create escrow record.");
         }
-        
+
         $escrow_id = $conn->insert_id;
         error_log("Escrow created with ID: " . $escrow_id . " - Amount: RM " . $job_budget);
-        
+
         // Create wallet transaction record for transparency
         $transaction_sql = "INSERT INTO wallet_transactions (WalletID, Type, Amount, Status, Description, ReferenceID, CreatedAt) 
                            VALUES (?, 'payment', ?, 'completed', ?, ?, NOW())";
@@ -169,22 +169,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $escrow_ref = "ESCROW-" . $escrow_id;
         $transaction_stmt->bind_param('idss', $wallet_id, $job_budget, $transaction_desc, $escrow_ref);
         $transaction_stmt->execute();
-        
+
         // Update job application status to 'accepted'
         $update_app_sql = "UPDATE job_application SET Status = 'accepted', UpdatedAt = NOW() WHERE ApplicationID = ?";
         $update_app_stmt = $conn->prepare($update_app_sql);
         $update_app_stmt->bind_param('i', $application_id);
-        
+
         if (!$update_app_stmt->execute()) {
             throw new Exception("Failed to update application status.");
         }
-        
+
         error_log("Job application ID " . $application_id . " status updated to 'accepted'");
-        
+
         // Commit transaction
         $conn->commit();
         error_log("Funds successfully locked in escrow. Client balance reduced by RM " . $job_budget);
-        
     } catch (Exception $e) {
         $conn->rollback();
         $_SESSION['error'] = "Escrow Error: " . $e->getMessage();

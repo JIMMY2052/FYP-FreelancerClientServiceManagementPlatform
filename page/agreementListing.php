@@ -24,6 +24,7 @@ if (!in_array($status_filter, $valid_statuses)) {
 // Build query based on user type
 $conn = getDBConnection();
 
+// FETCH ALL AGREEMENTS (NO STATUS FILTER IN QUERY)
 if ($user_type === 'client') {
     // Client view - agreements where they are the client
     $sql = "SELECT 
@@ -43,13 +44,8 @@ if ($user_type === 'client') {
             FROM agreement a
             JOIN freelancer f ON a.FreelancerID = f.FreelancerID
             JOIN client c ON a.ClientID = c.ClientID
-            WHERE a.ClientID = ?";
-
-    if ($status_filter !== 'all') {
-        $sql .= " AND a.Status = ?";
-    }
-
-    $sql .= " ORDER BY a.CreatedDate DESC";
+            WHERE a.ClientID = ?
+            ORDER BY a.CreatedDate DESC";
 } else {
     // Freelancer view - agreements where they are the freelancer
     $sql = "SELECT 
@@ -69,33 +65,43 @@ if ($user_type === 'client') {
             FROM agreement a
             JOIN freelancer f ON a.FreelancerID = f.FreelancerID
             JOIN client c ON a.ClientID = c.ClientID
-            WHERE a.FreelancerID = ?";
-
-    if ($status_filter !== 'all') {
-        $sql .= " AND a.Status = ?";
-    }
-
-    $sql .= " ORDER BY a.CreatedDate DESC";
+            WHERE a.FreelancerID = ?
+            ORDER BY a.CreatedDate DESC";
 }
 
 $stmt = $conn->prepare($sql);
-
-if ($status_filter !== 'all') {
-    $stmt->bind_param('is', $user_id, $status_filter);
-} else {
-    $stmt->bind_param('i', $user_id);
-}
-
+$stmt->bind_param('i', $user_id);
 $stmt->execute();
 $result = $stmt->get_result();
-$agreements = [];
+$all_agreements = [];
 
 while ($row = $result->fetch_assoc()) {
-    $agreements[] = $row;
+    $all_agreements[] = $row;
 }
 
 $stmt->close();
 $conn->close();
+
+// COUNT ALL STATUSES FROM COMPLETE SET
+$counts = ['all' => 0, 'to_accept' => 0, 'ongoing' => 0, 'completed' => 0, 'declined' => 0, 'cancelled' => 0, 'disputed' => 0];
+foreach ($all_agreements as $agreement) {
+    $counts['all']++;
+    if (isset($counts[$agreement['Status']])) {
+        $counts[$agreement['Status']]++;
+    }
+}
+
+// FILTER FOR DISPLAY AFTER COUNTING
+$agreements = [];
+if ($status_filter === 'all') {
+    $agreements = $all_agreements;
+} else {
+    foreach ($all_agreements as $agreement) {
+        if ($agreement['Status'] === $status_filter) {
+            $agreements[] = $agreement;
+        }
+    }
+}
 
 // Function to get status badge class
 function getStatusClass($status)
@@ -136,15 +142,6 @@ function getStatusLabel($status)
             return 'Disputed';
         default:
             return 'Unknown';
-    }
-}
-
-// Count agreements by status
-$counts = ['all' => 0, 'to_accept' => 0, 'ongoing' => 0, 'completed' => 0, 'declined' => 0, 'cancelled' => 0, 'disputed' => 0];
-foreach ($agreements as $agreement) {
-    $counts['all']++;
-    if (isset($counts[$agreement['Status']])) {
-        $counts[$agreement['Status']]++;
     }
 }
 
