@@ -359,6 +359,36 @@ $chat_id = isset($_GET['chat_id']) ? $_GET['chat_id'] : (isset($_SESSION['curren
             </div>
         </div>
 
+        <!-- SECTION 5: SIGNATURES -->
+        <div class="preview-signature-section" style="margin-top: 40px; padding-top: 24px; border-top: 1px solid #e5e7eb;">
+            <h3 style="text-align: center; margin-bottom: 20px; font-size: 1.1rem;">SIGNATURES</h3>
+            <div style="display: flex; gap: 30px; justify-content: space-between;">
+                <!-- Freelancer/Contractor Signature -->
+                <div class="signature-block" style="flex: 1;">
+                    <div class="signature-line" style="height: 80px; border: 1px solid #ddd; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #fafafa; margin-bottom: 10px;">
+                        <?php if (!empty($agreement['signature_filename'])): ?>
+                            <img src="/uploads/signatures/<?php echo htmlspecialchars($agreement['signature_filename']); ?>" style="max-width: 100%; max-height: 100%; object-fit: contain;" />
+                        <?php else: ?>
+                            <span style="color: #999; font-size: 0.9rem;">[Signature]</span>
+                        <?php endif; ?>
+                    </div>
+                    <div class="signature-label" style="text-align: center; font-weight: 600; margin-top: 10px;">Contractor Signature</div>
+                    <div style="text-align: center; margin-top: 5px; font-size: 0.95rem; color: #1a1a1a;"><?php echo htmlspecialchars($agreement['freelancer_name'] ?? '___________________'); ?></div>
+                    <div style="text-align: center; font-size: 0.9rem; color: #666; margin-top: 8px;">Date: <?php echo date('M d, Y', strtotime($agreement['created_date'])); ?></div>
+                </div>
+
+                <!-- Client Signature -->
+                <div class="signature-block" style="flex: 1;">
+                    <div class="signature-line" style="height: 80px; border: 1px dashed #ccc; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #fafafa; margin-bottom: 10px;">
+                        <span style="color: #999; font-size: 0.9rem;">[Client to Sign Here]</span>
+                    </div>
+                    <div class="signature-label" style="text-align: center; font-weight: 600; margin-top: 10px;">Client Signature</div>
+                    <div style="text-align: center; margin-top: 5px; font-size: 0.95rem; color: #1a1a1a;">___________________</div>
+                    <div style="text-align: center; font-size: 0.9rem; color: #666; margin-top: 8px;">Date: ___________</div>
+                </div>
+            </div>
+        </div>
+
         <!-- AGREEMENT INFO -->
         <div style="margin-top: 40px; padding-top: 24px; border-top: 1px solid #e5e7eb; text-align: center;">
             <p style="color: #999; font-size: 0.9rem;">

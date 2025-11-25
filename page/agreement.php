@@ -53,6 +53,12 @@ if ($client_id) {
     <link rel="stylesheet" href="/assets/css/freelancer.css">
     <link rel="stylesheet" href="/assets/css/client.css">
     <link rel="stylesheet" href="../assets/css/agreement.css">
+    <style>
+        .form-error {
+            border: 2px solid #dc3545 !important;
+            background-color: #fff5f5;
+        }
+    </style>
 </head>
 
 <body>
@@ -135,6 +141,13 @@ if ($client_id) {
                 </div>
             </div>
 
+            <!-- INTRODUCTORY PARAGRAPH -->
+            <div class="preview-section" style="background: #f9f9f9; border-left: 4px solid #1ab394; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
+                <p style="margin: 0; line-height: 1.6; color: #333; font-size: 0.95rem;">
+                    This Services Agreement shall become effective on date (the "Execution Date") and is subject to the terms and conditions stated below between <strong id="pIntroFreelancer">Freelancer Name</strong> (the "Service Provider") and <strong id="pIntroClient">Client Name</strong> (the "Client"), collectively referred to as the "Parties".
+                </p>
+            </div>
+
             <!-- SECTION 1: SCOPE OF WORK -->
             <div class="preview-section">
                 <div class="section-number">
@@ -187,12 +200,27 @@ if ($client_id) {
 
             <!-- SECTION 5: SIGNATURES -->
             <div class="preview-signature-section">
-                <div class="signature-block">
-                    <div class="signature-line">
-                        <img id="pSignatureImage" style="display: none;" />
+                <h3 style="text-align: center; margin-bottom: 20px; font-size: 1.1rem;">SIGNATURES</h3>
+                <div style="display: flex; gap: 30px; justify-content: space-between;">
+                    <!-- Freelancer/Contractor Signature -->
+                    <div class="signature-block" style="flex: 1;">
+                        <div class="signature-line">
+                            <img id="pSignatureImage" style="display: none; max-width: 100%; height: auto;" />
+                        </div>
+                        <div class="signature-label" style="text-align: center; font-weight: 600; margin-top: 10px;">Contractor Signature</div>
+                        <div class="signature-name" id="pSignatureName" style="text-align: center; margin-top: 5px;">___________________</div>
+                        <div style="text-align: center; font-size: 0.9rem; color: #666; margin-top: 8px;">Date: ___________</div>
                     </div>
-                    <div class="signature-label">Freelancer Signature</div>
-                    <div class="signature-name" id="pSignatureName">___________________</div>
+
+                    <!-- Client Signature -->
+                    <div class="signature-block" style="flex: 1;">
+                        <div class="signature-line" style="height: 80px; border: 1px dashed #ccc; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #fafafa;">
+                            <span style="color: #999; font-size: 0.9rem;">[Client to Sign Here]</span>
+                        </div>
+                        <div class="signature-label" style="text-align: center; font-weight: 600; margin-top: 10px;">Client Signature</div>
+                        <div style="text-align: center; margin-top: 5px;">___________________</div>
+                        <div style="text-align: center; font-size: 0.9rem; color: #666; margin-top: 8px;">Date: ___________</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -373,14 +401,17 @@ if ($client_id) {
                 const freelancerName = freelancerInput.value.trim();
                 if (freelancerName) {
                     document.getElementById("pOfferer").textContent = freelancerName;
+                    document.getElementById("pIntroFreelancer").textContent = freelancerName;
                 }
                 // Update preview when freelancer name changes
                 freelancerInput.addEventListener("input", function() {
                     const name = this.value.trim();
                     if (name) {
                         document.getElementById("pOfferer").textContent = name;
+                        document.getElementById("pIntroFreelancer").textContent = name;
                     } else {
                         document.getElementById("pOfferer").textContent = "Freelancer Name";
+                        document.getElementById("pIntroFreelancer").textContent = "Freelancer Name";
                     }
                 });
             }
@@ -391,6 +422,7 @@ if ($client_id) {
                 const clientName = clientInput.value.trim();
                 if (clientName) {
                     document.getElementById("pClient").textContent = clientName;
+                    document.getElementById("pIntroClient").textContent = clientName;
                 }
             }
         });
@@ -444,8 +476,6 @@ if ($client_id) {
                 img.src = signatureDataURL;
                 img.style.display = "block";
                 document.getElementById("pSignatureName").textContent = fullName;
-
-                alert("Signature confirmed! Your signature will be included in the agreement.");
             });
 
             // Update freelancer name in preview as typing
@@ -458,6 +488,13 @@ if ($client_id) {
 
         // FORM VALIDATION
         document.getElementById("agreementForm").addEventListener("submit", function(e) {
+            e.preventDefault();
+            
+            // Clear previous error highlighting
+            document.querySelectorAll(".form-error").forEach(el => {
+                el.classList.remove("form-error");
+            });
+            
             const title = document.getElementById("title").value.trim();
             const projectDetail = document.getElementById("projectDetail").value.trim();
             const scope = document.getElementById("scope").value.trim();
@@ -467,54 +504,156 @@ if ($client_id) {
             const freelancerName = document.getElementById("freelancerName").value.trim();
             const signatureData = document.getElementById("signatureData").value;
 
+            let hasErrors = false;
+
             if (!title) {
-                alert("Project title cannot be empty.");
-                e.preventDefault();
-                return;
+                document.getElementById("title").classList.add("form-error");
+                hasErrors = true;
             }
 
             if (!projectDetail) {
-                alert("Project details cannot be empty.");
-                e.preventDefault();
-                return;
+                document.getElementById("projectDetail").classList.add("form-error");
+                hasErrors = true;
             }
 
             if (!scope) {
-                alert("Scope of work cannot be empty.");
-                e.preventDefault();
-                return;
+                document.getElementById("scope").classList.add("form-error");
+                hasErrors = true;
             }
 
             if (!deliverables) {
-                alert("Deliverables & timeline cannot be empty.");
-                e.preventDefault();
-                return;
+                document.getElementById("deliverables").classList.add("form-error");
+                hasErrors = true;
             }
 
             if (!payment) {
-                alert("Payment amount cannot be empty.");
-                e.preventDefault();
-                return;
+                document.getElementById("payment").classList.add("form-error");
+                hasErrors = true;
             }
 
             if (!terms) {
-                alert("Terms & conditions cannot be empty.");
-                e.preventDefault();
-                return;
+                document.getElementById("terms").classList.add("form-error");
+                hasErrors = true;
             }
 
             if (!freelancerName) {
-                alert("Please enter your full name for signature.");
-                e.preventDefault();
-                return;
+                document.getElementById("freelancerName").classList.add("form-error");
+                hasErrors = true;
             }
 
             if (!signatureData) {
-                alert("Please sign the agreement and confirm your signature.");
-                e.preventDefault();
+                document.getElementById("signaturePadContainer").classList.add("form-error");
+                hasErrors = true;
+            }
+
+            if (hasErrors) {
+                alert("Please fill in all required fields (highlighted in red) and provide a signature.");
                 return;
             }
+
+            // Show confirmation dialog
+            showConfirmationDialog(this);
         });
+
+        // Confirmation Dialog
+        function showConfirmationDialog(form) {
+            const confirmOverlay = document.createElement('div');
+            confirmOverlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+            `;
+
+            const confirmBox = document.createElement('div');
+            confirmBox.style.cssText = `
+                background: white;
+                border-radius: 12px;
+                padding: 40px;
+                max-width: 450px;
+                width: 90%;
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+                animation: slideUp 0.3s ease-out;
+            `;
+
+            confirmBox.innerHTML = `
+                <style>
+                    @keyframes slideUp {
+                        from {
+                            opacity: 0;
+                            transform: translateY(20px);
+                        }
+                        to {
+                            opacity: 1;
+                            transform: translateY(0);
+                        }
+                    }
+                </style>
+                <div style="text-align: center;">
+                    <div style="font-size: 3rem; margin-bottom: 16px;">📋</div>
+                    <h2 style="font-size: 1.5rem; color: #1a1a1a; margin-bottom: 12px; font-weight: 700;">Create Agreement?</h2>
+                    <p style="color: #666; font-size: 1rem; line-height: 1.6; margin-bottom: 30px;">
+                        Are you sure you want to create this agreement? This action will save the agreement and you can review, download, or send it to the other party.
+                    </p>
+                    <div style="display: flex; gap: 12px; justify-content: center;">
+                        <button id="confirmCancel" type="button" style="
+                            padding: 12px 28px;
+                            border-radius: 6px;
+                            border: 1px solid #ddd;
+                            background: #f0f1f3;
+                            color: #333;
+                            cursor: pointer;
+                            font-size: 15px;
+                            font-weight: 600;
+                            transition: all 0.3s ease;
+                        " onmouseover="this.style.background='#e0e2e8'" onmouseout="this.style.background='#f0f1f3'">
+                            ✕ Cancel
+                        </button>
+                        <button id="confirmSubmit" type="button" style="
+                            padding: 12px 28px;
+                            border-radius: 6px;
+                            border: none;
+                            background: #1ab394;
+                            color: white;
+                            cursor: pointer;
+                            font-size: 15px;
+                            font-weight: 600;
+                            transition: all 0.3s ease;
+                            box-shadow: 0 2px 8px rgba(26, 179, 148, 0.2);
+                        " onmouseover="this.style.background='#158a74'; this.style.boxShadow='0 4px 12px rgba(26, 179, 148, 0.3)'" onmouseout="this.style.background='#1ab394'; this.style.boxShadow='0 2px 8px rgba(26, 179, 148, 0.2)'">
+                            ✓ Create Agreement
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            confirmOverlay.appendChild(confirmBox);
+            document.body.appendChild(confirmOverlay);
+
+            // Cancel button
+            document.getElementById("confirmCancel").addEventListener("click", function() {
+                confirmOverlay.remove();
+            });
+
+            // Confirm button
+            document.getElementById("confirmSubmit").addEventListener("click", function() {
+                confirmOverlay.remove();
+                form.submit();
+            });
+
+            // Close on overlay click
+            confirmOverlay.addEventListener("click", function(e) {
+                if (e.target === confirmOverlay) {
+                    confirmOverlay.remove();
+                }
+            });
+        }
     </script>
 
 </body>

@@ -187,6 +187,20 @@ if (!empty($agreement['ProjectDetail'])) {
     $pdf->Ln(4);
 }
 
+// ===== INTRODUCTORY PARAGRAPH =====
+$pdf->SetFont('times', '', 10);
+$pdf->SetTextColor(50, 50, 50);
+$pdf->SetFillColor(249, 249, 249);
+$pdf->SetDrawColor(26, 179, 148);
+$pdf->SetLineWidth(0.5);
+
+$introText = 'This Services Agreement shall become effective on date (the "Execution Date") and is subject to the terms and conditions stated below between ' . $freelancer_name . ' (the "Service Provider") and ' . $client_name . ' (the "Client"), collectively referred to as the "Parties".';
+
+// Add border box around intro paragraph
+$pdf->SetXY(15, $pdf->GetY());
+$pdf->MultiCell(0, 5, $introText, 'LRB', 'L', true);
+$pdf->Ln(6);
+
 // ===== CONTENT SECTIONS WITH MODERN STYLING =====
 $sectionColor = array(45, 85, 255); // Modern blue
 $textColor = array(30, 30, 30);
