@@ -269,7 +269,7 @@ include '../_head.php';
                         <a href="view_freelancer_profile.php?id=<?= $app['FreelancerID'] ?>" class="btn-small">
                             <i class="fas fa-user"></i> View Profile
                         </a>
-                        <a href="messages.php?freelancer_id=<?= $app['FreelancerID'] ?>" class="btn-small">
+                        <a href="messages.php?freelancer_id=<?= $app['FreelancerID'] ?>&job_id=<?= $app['JobID'] ?>" class="btn-small">
                             <i class="fas fa-comment"></i> Message
                         </a>
 

@@ -47,6 +47,9 @@ if ($application_id) {
 
     if ($result->num_rows > 0) {
         $job_data = $result->fetch_assoc();
+        // Store freelancer and client IDs in session for process file
+        $_SESSION['agreement_freelancer_id'] = $job_data['FreelancerID'];
+        $_SESSION['agreement_client_id'] = $client_id;
     } else {
         $error = "Application not found or you don't have permission to access it.";
     }
@@ -307,9 +310,7 @@ if ($application_id) {
                         </div>
 
                         <input type="hidden" name="freelancer_name" value="<?= htmlspecialchars($job_data['FreelancerName']) ?>">
-                        <input type="hidden" name="client_id" value="<?= $client_id ?>">
                         <input type="hidden" name="application_id" value="<?= $application_id ?>">
-                        <input type="hidden" name="freelancer_id" value="<?= htmlspecialchars($job_data['FreelancerID']) ?>">
                         <input type="hidden" name="job_id" value="<?= htmlspecialchars($job_data['JobID']) ?>">
                         <input type="hidden" name="signature" id="signatureData">
 

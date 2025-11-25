@@ -21,7 +21,7 @@ $conn = getDBConnection();
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Get form data
     $application_id = isset($_POST['application_id']) ? intval($_POST['application_id']) : null;
-    $freelancer_id = isset($_POST['freelancer_id']) ? intval($_POST['freelancer_id']) : null;
+    $freelancer_id = isset($_SESSION['agreement_freelancer_id']) ? intval($_SESSION['agreement_freelancer_id']) : null;
     $job_id = isset($_POST['job_id']) ? intval($_POST['job_id']) : null;
     $client_signature = isset($_POST['signature']) ? $_POST['signature'] : null;
 
@@ -68,14 +68,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Create agreement record in database
     $status = 'signed_by_client';
-    $signed_date = date('Y-m-d');
+    $client_signed_date = date('Y-m-d H:i:s');
     $terms = "• Both parties agree to the terms outlined above.\n• Payment will be processed upon project completion and mutual agreement.\n• Either party may terminate this agreement with written notice.\n• Both parties agree to maintain confidentiality of project details.\n• Any disputes will be resolved through communication or mediation.";
     $scope = $job_desc;
     $deliverables = "To be completed upon milestone deliveries as agreed.";
     $signature_path = 'signature_client_' . $application_id . '_' . time();
 
-    $agreement_sql = "INSERT INTO agreement (ClientName, FreelancerName, ProjectTitle, ProjectDetail, PaymentAmount, Status, SignedDate, Terms, Scope, Deliverables, SignaturePath) 
-                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    $agreement_sql = "INSERT INTO agreement (FreelancerID, ClientID, ClientName, FreelancerName, ProjectTitle, ProjectDetail, PaymentAmount, Status, ClientSignedDate, Terms, Scope, Deliverables, SignaturePath) 
+                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     $agreement_stmt = $conn->prepare($agreement_sql);
 
@@ -86,13 +86,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 
-    $agreement_stmt->bind_param('ssssdssssss', $client_name, $freelancer_name, $job_title, $job_desc, $job_budget, $status, $signed_date, $terms, $scope, $deliverables, $signature_path);
+    $agreement_stmt->bind_param('iissssdssssss', $freelancer_id, $client_id, $client_name, $freelancer_name, $job_title, $job_desc, $job_budget, $status, $client_signed_date, $terms, $scope, $deliverables, $signature_path);
 
     if (!$agreement_stmt->execute()) {
         $_SESSION['error'] = "Error creating agreement record: " . $agreement_stmt->error;
         error_log("Agreement execute error: " . $agreement_stmt->error);
         error_log("SQL: " . $agreement_sql);
-        error_log("Params: $client_name, $freelancer_name, $job_title, $job_desc, $job_budget, $status, $signed_date");
+        error_log("Params: $freelancer_id, $client_id, $client_name, $freelancer_name, $job_title, $job_desc, $job_budget, $status, $client_signed_date");
         header("Location: agreementClient.php?application_id=" . $application_id);
         exit();
     }
@@ -358,19 +358,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $pdf->Cell($signatureBoxWidth, 4, 'Date: ' . date('M d, Y'), 0, 1, 'C');
 
     // Save PDF to server
-    $uploads_dir = '../uploads/agreements/';
+    $base_dir = dirname(dirname(__FILE__));
+    $uploads_dir = $base_dir . '/uploads/agreements/';
+
     if (!is_dir($uploads_dir)) {
         mkdir($uploads_dir, 0755, true);
     }
 
     $pdf_filename = 'agreement_' . $application_id . '_' . time() . '.pdf';
     $pdf_path = $uploads_dir . $pdf_filename;
-    $pdf->Output($pdf_path, 'F');
+
+    try {
+        $pdf->Output($pdf_path, 'F');
+    } catch (Exception $e) {
+        $_SESSION['error'] = "Error creating PDF: " . $e->getMessage();
+        error_log("PDF creation error: " . $e->getMessage());
+        header("Location: agreementClient.php?application_id=" . $application_id);
+        exit();
+    }
 
     // Find or create conversation between client and freelancer
-    $conv_sql = "SELECT ConversationID FROM conversation WHERE ClientID = ? AND FreelancerID = ?";
+    $conv_sql = "SELECT ConversationID FROM conversation WHERE 
+                 (User1ID = ? AND User1Type = 'client' AND User2ID = ? AND User2Type = 'freelancer') OR
+                 (User1ID = ? AND User1Type = 'freelancer' AND User2ID = ? AND User2Type = 'client')";
     $conv_stmt = $conn->prepare($conv_sql);
-    $conv_stmt->bind_param('ii', $client_id, $freelancer_id);
+    $conv_stmt->bind_param('iiii', $client_id, $freelancer_id, $freelancer_id, $client_id);
     $conv_stmt->execute();
     $conv_result = $conv_stmt->get_result();
 
@@ -381,12 +393,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $conversation_id = $conv_data['ConversationID'];
     } else {
         // Create new conversation
-        $create_conv_sql = "INSERT INTO conversation (ClientID, FreelancerID, CreatedAt) VALUES (?, ?, NOW())";
+        $create_conv_sql = "INSERT INTO conversation (User1ID, User1Type, User2ID, User2Type, CreatedAt) VALUES (?, 'client', ?, 'freelancer', NOW())";
         $create_conv_stmt = $conn->prepare($create_conv_sql);
+
+        if (!$create_conv_stmt) {
+            $_SESSION['error'] = "Database prepare error for conversation: " . $conn->error;
+            error_log("Conversation prepare error: " . $conn->error);
+            header("Location: agreementClient.php?application_id=" . $application_id);
+            exit();
+        }
+
         $create_conv_stmt->bind_param('ii', $client_id, $freelancer_id);
 
         if ($create_conv_stmt->execute()) {
             $conversation_id = $conn->insert_id;
+            error_log("New conversation created with ID: " . $conversation_id);
+        } else {
+            $_SESSION['error'] = "Error creating conversation: " . $create_conv_stmt->error;
+            error_log("Conversation execute error: " . $create_conv_stmt->error);
+            header("Location: agreementClient.php?application_id=" . $application_id);
+            exit();
         }
     }
 
@@ -394,14 +420,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($conversation_id) {
         $message_text = "I have signed the agreement for the project \"" . $job_title . "\". Please review and sign to proceed. The agreement is attached below.\n\n";
         $message_text .= "Agreement Link: " . $_SERVER['HTTP_HOST'] . "/page/freelancer_agreement_approval.php?agreement_id=" . $agreement_id;
-        $attachment_path = $pdf_filename;
-        $attachment_type = 'agreement';
+        $attachment_path = '/agreement/' . $pdf_filename;
+        $attachment_type = 'application/pdf';
 
-        $msg_sql = "INSERT INTO message (ConversationID, SenderID, MessageText, AttachmentPath, AttachmentType, Timestamp) 
-                    VALUES (?, ?, ?, ?, ?, NOW())";
+        $msg_sql = "INSERT INTO message (ConversationID, SenderID, ReceiverID, Content, AttachmentPath, AttachmentType, Timestamp, Status) 
+                    VALUES (?, ?, ?, ?, ?, ?, NOW(), 'unread')";
 
         $msg_stmt = $conn->prepare($msg_sql);
-        $msg_stmt->bind_param('iisss', $conversation_id, $client_id, $message_text, $attachment_path, $attachment_type);
+        $sender_id = 'c' . $client_id;  // Client sender: c{client_id}
+        $receiver_id = 'f' . $freelancer_id;  // Freelancer receiver: f{freelancer_id}
+        $msg_stmt->bind_param('isssss', $conversation_id, $sender_id, $receiver_id, $message_text, $attachment_path, $attachment_type);
 
         if ($msg_stmt->execute()) {
             $conn->close();
