@@ -443,7 +443,7 @@ class ChatApp {
                             }
                         }
                         if (msg.attachmentPath) {
-                            contentHTML += this.renderAttachment(msg.attachmentPath, msg.attachmentType, isSent);
+                            contentHTML += this.renderAttachment(msg.attachmentPath, msg.attachmentType, isSent, msg.status);
                         }
                         contentHTML += `<div class="message-time">${time}</div></div>`;
                     }
@@ -499,7 +499,7 @@ class ChatApp {
                             }
                         }
                         if (msg.attachmentPath) {
-                            contentHTML += this.renderAttachment(msg.attachmentPath, msg.attachmentType, isSent);
+                            contentHTML += this.renderAttachment(msg.attachmentPath, msg.attachmentType, isSent, msg.status);
                         }
                         contentHTML += `<div class="message-time">${time}</div></div>`;
                     }
@@ -516,7 +516,7 @@ class ChatApp {
         }
     }
 
-    renderAttachment(filePath, fileType, isSent) {
+    renderAttachment(filePath, fileType, isSent, status = null) {
         if (fileType && fileType.startsWith('image/')) {
             return `
                 <div class="attachment-container">
@@ -526,14 +526,33 @@ class ChatApp {
         } else {
             const icon = this.getFileIcon(fileType);
             const fileName = filePath.split('/').pop();
-            return `
-                <div class="attachment-container">
-                    <a href="${filePath}" download class="attachment-file">
-                        <span class="attachment-icon">${icon}</span>
-                        <span>${this.escapeHtml(fileName)}</span>
-                    </a>
-                </div>
-            `;
+
+            // If status is 'to_accept' and it's a PDF (agreement), show with action buttons
+            if (status === 'to_accept' && fileType === 'application/pdf' && !isSent) {
+                return `
+                    <div class="attachment-container">
+                        <div class="agreement-actions">
+                            <a href="${filePath}" download class="attachment-file">
+                                <span class="attachment-icon">${icon}</span>
+                                <span>${this.escapeHtml(fileName)}</span>
+                            </a>
+                            <div class="agreement-buttons">
+                                <a href="../page/freelancer_agreement_approval.php?agreement_id=" class="btn-accept-sign">✓ Accept & Sign</a>
+                                <button type="button" class="btn-decline" onclick="alert('Agreement declined')">✕ Decline</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                return `
+                    <div class="attachment-container">
+                        <a href="${filePath}" download class="attachment-file">
+                            <span class="attachment-icon">${icon}</span>
+                            <span>${this.escapeHtml(fileName)}</span>
+                        </a>
+                    </div>
+                `;
+            }
         }
     }
 
