@@ -30,6 +30,9 @@ if (!function_exists('getPDOConnection')) {
 $clientID = $_SESSION['user_id'];
 $pdo = getPDOConnection();
 
+// Debug: Log the client ID
+error_log('[my_applications] Client ID: ' . $clientID);
+
 // Get filter parameters
 $jobFilter = isset($_GET['job_id']) ? intval($_GET['job_id']) : null;
 $statusFilter = isset($_GET['status']) ? $_GET['status'] : null;
@@ -40,7 +43,9 @@ try {
     $stmtJobs = $pdo->prepare($sqlJobs);
     $stmtJobs->execute([':clientID' => $clientID]);
     $clientJobs = $stmtJobs->fetchAll();
+    error_log('[my_applications] Client has ' . count($clientJobs) . ' jobs');
 } catch (PDOException $e) {
+    error_log('[my_applications] Failed to fetch client jobs: ' . $e->getMessage());
     $clientJobs = [];
 }
 
@@ -71,10 +76,20 @@ if ($statusFilter && in_array($statusFilter, ['pending', 'accepted', 'rejected',
 
 $sql .= " ORDER BY ja.AppliedAt DESC";
 
+// Debug: Log the SQL query and parameters
+error_log('[my_applications] SQL: ' . $sql);
+error_log('[my_applications] Params: ' . print_r($params, true));
+
 try {
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
     $applications = $stmt->fetchAll();
+    
+    // Debug: Log the applications fetched
+    error_log('[my_applications] Total applications fetched: ' . count($applications));
+    foreach ($applications as $app) {
+        error_log('[my_applications] AppID: ' . $app['ApplicationID'] . ', JobID: ' . $app['JobID'] . ', FreelancerID: ' . $app['FreelancerID'] . ', Status: ' . $app['Status']);
+    }
 } catch (PDOException $e) {
     error_log('[my_applications] Fetch failed: ' . $e->getMessage());
     $applications = [];
@@ -178,6 +193,7 @@ include '../_head.php';
                             <div class="freelancer-details">
                                 <h3 class="freelancer-name">
                                     <?= htmlspecialchars($app['FirstName'] . ' ' . $app['LastName']) ?>
+                                    <small style="font-size: 0.7rem; color: #999; font-weight: normal;">(App #<?= $app['ApplicationID'] ?>)</small>
                                 </h3>
                                 <p class="freelancer-email"><?= htmlspecialchars($app['FreelancerEmail']) ?></p>
                                 <div class="freelancer-stats">
@@ -280,6 +296,10 @@ include '../_head.php';
                             <button class="btn-small btn-danger" onclick="updateApplicationStatus(<?= $app['ApplicationID'] ?>, 'rejected')">
                                 <i class="fas fa-times"></i> Reject
                             </button>
+                        <?php elseif ($app['Status'] === 'accepted'): ?>
+                            <span class="acceptance-note">
+                                <i class="fas fa-check-circle"></i> Application accepted - Agreement in progress
+                            </span>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -699,6 +719,22 @@ include '../_head.php';
 
     .btn-small.btn-danger:hover {
         background: #c82333;
+    }
+
+    .acceptance-note {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 16px;
+        background: #d4edda;
+        color: #155724;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .acceptance-note i {
+        color: #28a745;
     }
 
     /* No Applications */

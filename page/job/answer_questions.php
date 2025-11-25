@@ -95,6 +95,21 @@ include '../../_head.php';
 <div class="form-container">
     <div class="page-header">
         <h1>Screening Questions</h1>
+        
+        <?php if (isset($_SESSION['error'])): ?>
+        <div class="alert alert-error">
+            <i class="fas fa-exclamation-circle"></i>
+            <?= htmlspecialchars($_SESSION['error']) ?>
+        </div>
+        <?php unset($_SESSION['error']); endif; ?>
+        
+        <?php if (isset($_SESSION['success'])): ?>
+        <div class="alert alert-success">
+            <i class="fas fa-check-circle"></i>
+            <?= htmlspecialchars($_SESSION['success']) ?>
+        </div>
+        <?php unset($_SESSION['success']); endif; ?>
+        
         <div class="job-info-banner">
             <div class="job-info-item">
                 <i class="fas fa-briefcase"></i>
@@ -222,6 +237,32 @@ include '../../_head.php';
         max-width: 900px;
         margin: 40px auto;
         padding: 0 20px;
+    }
+
+    .alert {
+        padding: 15px 20px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 600;
+    }
+
+    .alert-error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .alert-success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .alert i {
+        font-size: 1.2rem;
     }
 
     .page-header {

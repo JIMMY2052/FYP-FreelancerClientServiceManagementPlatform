@@ -23,8 +23,13 @@ $proposedBudget = null;
 $estimatedDuration = null;
 $answers = isset($_POST['answers']) ? $_POST['answers'] : [];
 
+// Debug logging
+error_log('[applyJob] JobID: ' . $jobID . ', FreelancerID: ' . $freelancerID);
+error_log('[applyJob] Answers: ' . print_r($answers, true));
+
 // Validate required fields
 if (!$jobID) {
+    error_log('[applyJob] Error: Invalid job ID');
     $_SESSION['error'] = 'Invalid job ID.';
     header('Location: browse_job.php');
     exit();
@@ -163,6 +168,8 @@ try {
     // Commit transaction
     $pdo->commit();
     
+    error_log('[applyJob] Success: Application submitted for JobID: ' . $jobID . ', ApplicationID: ' . $applicationID);
+    
     // Set success message
     $_SESSION['success'] = 'Your application has been submitted successfully!';
     
@@ -173,6 +180,9 @@ try {
 } catch (Exception $e) {
     // Rollback transaction on error
     $pdo->rollBack();
+    
+    error_log('[applyJob] Error: ' . $e->getMessage());
+    error_log('[applyJob] Stack trace: ' . $e->getTraceAsString());
     
     $_SESSION['error'] = $e->getMessage();
     header("Location: answer_questions.php?job_id=$jobID");
