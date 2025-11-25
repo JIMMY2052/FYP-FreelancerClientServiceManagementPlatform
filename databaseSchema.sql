@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 25, 2025 at 06:45 AM
+-- Generation Time: Nov 25, 2025 at 01:09 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 SET
@@ -101,288 +101,93 @@ INSERT INTO
 VALUES
   (
     1,
-    'sdfasdf',
-    '2025-11-18',
-    'pending',
     'asdf',
-    'asdf',
-    'asdf',
-    1.00,
-    'asdf',
-    NULL,
-    NULL,
-    NULL,
-    NULL
-  ),
-  (
-    2,
-    'sdf',
-    '2025-11-18',
+    '2025-11-25',
     'pending',
     'asdf',
     'asdf',
     'asdf',
     12.00,
     'asdf',
+    'JIMMY CHAN LOK',
+    'Genting',
     NULL,
+    'signature_1764058768_6925669090fe2.png'
+  ),
+  (
+    2,
+    'asdf',
+    '2025-11-25',
+    'pending',
+    'asdf',
+    'asdf',
+    'asdf',
+    12.00,
+    'asdf',
+    'JIMMY CHAN LOK',
+    'Genting',
     NULL,
-    NULL,
-    NULL
+    'signature_1764058874_692566fa82d5c.png'
   ),
   (
     3,
-    'If cannot finish at 31/11/2025. The service will be FREE',
-    '2025-11-18',
+    'asdf',
+    '2025-11-25',
     'pending',
-    'Web Design',
-    'One page of landing Page with good design',
-    '31/11/2025 should finish it',
-    1000.00,
-    'The landing Page',
+    'asdf',
+    'asdf',
+    'asdf',
+    444.00,
+    'asdf',
+    'JIMMY CHAN LOK',
+    'Genting',
     NULL,
-    NULL,
-    NULL,
-    NULL
+    'signature_1764059036_6925679c1738b.png'
   ),
   (
     4,
     'asdf',
-    '2025-11-18',
+    '2025-11-25',
     'pending',
     'asdf',
+    'asdf12',
+    '12',
+    34.00,
     'asdf',
-    'asdfasdf',
-    11111.00,
-    'asdf',
+    'JIMMY CHAN LOK',
+    'Genting',
     NULL,
-    NULL,
-    NULL,
-    NULL
+    'signature_1764059090_692567d258bcb.png'
   ),
   (
     5,
-    'adf',
-    '2025-11-18',
+    'asdf',
+    '2025-11-25',
     'pending',
-    'asfdf',
-    'sdfasdf',
-    'dafasd',
-    12.00,
-    'asdfa',
+    'asdf',
+    'asdf',
+    'asdf',
+    21.00,
+    'asdf',
+    'JIMMY CHAN LOK',
+    'Genting',
     NULL,
-    NULL,
-    NULL,
-    NULL
+    'signature_1764059217_69256851cc5e4.png'
   ),
   (
     6,
     'asdf',
-    '2025-11-18',
-    'pending',
-    'asdfasdf',
-    'asdfasdf',
-    'asdf',
-    1.00,
-    'asdfasdf',
-    NULL,
-    NULL,
-    NULL,
-    NULL
-  ),
-  (
-    7,
-    'asdfasdf',
-    '2025-11-18',
-    'pending',
-    'asdfas',
-    'as',
-    'asf',
-    222.00,
-    'dfasdf',
-    NULL,
-    NULL,
-    NULL,
-    NULL
-  ),
-  (
-    8,
-    'sdfasdf',
-    '2025-11-18',
-    'pending',
-    'asdfasdf',
-    'asdf',
-    'asdf',
-    111.00,
-    'af',
-    NULL,
-    NULL,
-    NULL,
-    NULL
-  ),
-  (
-    9,
-    '阿斯蒂芬',
-    '2025-11-18',
-    'pending',
-    'asdf',
-    '阿斯顿法国红酒看来',
-    '阿斯蒂芬',
-    555.00,
-    '阿斯顿法国红酒看来',
-    NULL,
-    NULL,
-    NULL,
-    NULL
-  ),
-  (
-    10,
-    'ASDF',
-    '2025-11-21',
-    'pending',
-    'SDF',
-    'ASDF',
-    'ASDF',
-    12.00,
-    'ASDF',
-    NULL,
-    NULL,
-    NULL,
-    NULL
-  ),
-  (
-    11,
-    'asdf',
-    '2025-11-23',
-    'pending',
-    'asdf',
-    'asdf',
-    'asdf',
-    111.00,
-    'asdf',
-    'JIMMY CHAN KAH LOK',
-    NULL,
-    NULL,
-    'signature_1763868278_69227e766c312.png'
-  ),
-  (
-    12,
-    'asdf',
-    '2025-11-23',
-    'pending',
-    'asdf',
-    'asdfa',
-    'asdf',
-    12.00,
-    'asdf',
-    'asdf',
-    NULL,
-    NULL,
-    'signature_1763881238_6922b116571c4.png'
-  ),
-  (
-    13,
-    'asdf',
-    '2025-11-24',
-    'pending',
-    'asdf',
-    'asdf',
-    'asdf',
-    12.35,
-    'asdf',
-    'JIMMY CHAN LOK',
-    NULL,
-    NULL,
-    'signature_1763988455_692453e7f3eab.png'
-  ),
-  (
-    14,
-    'dsf',
-    '2025-11-24',
-    'pending',
-    'asdf',
-    'asdf',
-    'asdf',
-    12.00,
-    'asdf',
-    'JIMMY CHAN LOK',
-    NULL,
-    NULL,
-    'signature_1763989102_6924566e4fc47.png'
-  ),
-  (
-    15,
-    'adsf',
     '2025-11-25',
     'pending',
+    'asdfasd',
+    'fasdf',
     'asdf',
-    'asdf',
-    'asdf',
-    123.00,
-    'asdf',
+    121.00,
+    'asdfasdf',
     'JIMMY CHAN LOK',
+    'Genting',
     NULL,
-    NULL,
-    'signature_1764048741_69253f6509d6b.png'
-  ),
-  (
-    16,
-    'adsf',
-    '2025-11-25',
-    'pending',
-    'asdf',
-    'asdf',
-    'asdf',
-    123.00,
-    'asdf',
-    'JIMMY CHAN LOK',
-    NULL,
-    NULL,
-    'signature_1764048824_69253fb8af2a3.png'
-  ),
-  (
-    17,
-    'asdf',
-    '2025-11-25',
-    'pending',
-    'asdf',
-    'asdf',
-    'asdf',
-    112.00,
-    'asdf',
-    'asdf',
-    NULL,
-    NULL,
-    'signature_1764048853_69253fd51ef65.png'
-  ),
-  (
-    18,
-    'asdf',
-    '2025-11-25',
-    'pending',
-    'asdf',
-    'asdfa',
-    'sdf',
-    12.00,
-    'asdf',
-    'asdf',
-    NULL,
-    NULL,
-    'signature_1764048995_692540630583a.png'
-  ),
-  (
-    19,
-    'asdf',
-    '2025-11-25',
-    'pending',
-    'asdf',
-    'asdf',
-    'asdf',
-    12.00,
-    'asdf',
-    'JIMMY CHAN LOK',
-    NULL,
-    NULL,
-    'signature_1764049197_6925412de8dd8.png'
+    'signature_1764059331_692568c3507d9.png'
   );
 
 -- --------------------------------------------------------
@@ -498,35 +303,13 @@ INSERT INTO
   )
 VALUES
   (
-    11,
-    1,
-    'freelancer',
-    3,
-    'client',
-    '2025-11-19 07:29:22',
-    '2025-11-21 17:06:04',
-    'active',
-    NULL
-  ),
-  (
-    12,
+    14,
     1,
     'freelancer',
     2,
     'client',
-    '2025-11-23 06:10:41',
-    '2025-11-23 06:34:33',
-    'active',
-    NULL
-  ),
-  (
-    13,
-    1,
-    'freelancer',
-    1,
-    'client',
-    '2025-11-23 06:21:39',
-    '2025-11-23 06:25:09',
+    '2025-11-25 06:51:07',
+    '2025-11-25 08:27:00',
     'active',
     NULL
   );
@@ -741,34 +524,197 @@ INSERT INTO
 VALUES
   (
     1,
-    1,
+    2,
+    'Google',
+    'asdf',
+    12.00,
+    '2025-11-29',
+    'available',
+    '2025-11-25'
+  ),
+  (
+    2,
+    2,
+    'Google',
+    'asdf',
+    12.00,
+    '2025-11-29',
+    'available',
+    '2025-11-25'
+  ),
+  (
+    3,
+    2,
+    'ttt',
+    'adf',
+    1000.00,
+    '2025-11-29',
+    'available',
+    '2025-11-25'
+  ),
+  (
+    4,
+    2,
     'asdf',
     'asdf',
     12.00,
-    '2025-11-14',
+    '2025-11-29',
     'available',
-    '2025-11-19'
+    '2025-11-25'
   ),
   (
-    2,
-    3,
-    'Google',
-    'asdf',
-    888.00,
-    '2025-11-15',
-    'available',
-    '2025-11-19'
-  ),
-  (
-    3,
+    5,
     2,
     'asdf',
     'asdf',
-    123.00,
-    '2025-11-24',
+    666.00,
+    '2025-11-29',
     'available',
-    '2025-11-23'
+    '2025-11-25'
   );
+
+-- --------------------------------------------------------
+--
+-- Table structure for table `job_application`
+--
+CREATE TABLE
+  `job_application` (
+    `ApplicationID` int (11) NOT NULL,
+    `JobID` int (11) NOT NULL,
+    `FreelancerID` int (11) NOT NULL,
+    `CoverLetter` text DEFAULT NULL,
+    `ProposedBudget` decimal(10, 2) DEFAULT NULL,
+    `EstimatedDuration` varchar(100) DEFAULT NULL,
+    `Status` enum ('pending', 'accepted', 'rejected', 'withdrawn') NOT NULL DEFAULT 'pending',
+    `AppliedAt` timestamp NOT NULL DEFAULT current_timestamp(),
+    `UpdatedAt` timestamp NULL DEFAULT NULL ON UPDATE current_timestamp()
+  ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
+
+--
+-- Dumping data for table `job_application`
+--
+INSERT INTO
+  `job_application` (
+    `ApplicationID`,
+    `JobID`,
+    `FreelancerID`,
+    `CoverLetter`,
+    `ProposedBudget`,
+    `EstimatedDuration`,
+    `Status`,
+    `AppliedAt`,
+    `UpdatedAt`
+  )
+VALUES
+  (
+    1,
+    1,
+    1,
+    NULL,
+    NULL,
+    NULL,
+    '',
+    '2025-11-25 08:05:23',
+    '2025-11-25 11:11:10'
+  ),
+  (
+    2,
+    3,
+    1,
+    NULL,
+    NULL,
+    NULL,
+    '',
+    '2025-11-25 11:14:12',
+    '2025-11-25 11:21:38'
+  ),
+  (
+    3,
+    5,
+    1,
+    NULL,
+    NULL,
+    NULL,
+    'pending',
+    '2025-11-25 11:48:40',
+    NULL
+  );
+
+-- --------------------------------------------------------
+--
+-- Table structure for table `job_application_answer`
+--
+CREATE TABLE
+  `job_application_answer` (
+    `AnswerID` int (11) NOT NULL,
+    `ApplicationID` int (11) DEFAULT NULL,
+    `QuestionID` int (11) NOT NULL,
+    `FreelancerID` int (11) NOT NULL,
+    `JobID` int (11) NOT NULL,
+    `SelectedOptionID` int (11) DEFAULT NULL,
+    `AnswerText` text DEFAULT NULL,
+    `AnsweredAt` timestamp NOT NULL DEFAULT current_timestamp()
+  ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
+
+--
+-- Dumping data for table `job_application_answer`
+--
+INSERT INTO
+  `job_application_answer` (
+    `AnswerID`,
+    `ApplicationID`,
+    `QuestionID`,
+    `FreelancerID`,
+    `JobID`,
+    `SelectedOptionID`,
+    `AnswerText`,
+    `AnsweredAt`
+  )
+VALUES
+  (1, 2, 2, 1, 3, NULL, 'yes', '2025-11-25 11:14:12');
+
+-- --------------------------------------------------------
+--
+-- Table structure for table `job_question`
+--
+CREATE TABLE
+  `job_question` (
+    `QuestionID` int (11) NOT NULL,
+    `JobID` int (11) NOT NULL,
+    `QuestionText` text NOT NULL,
+    `QuestionType` enum ('multiple_choice', 'yes_no') NOT NULL DEFAULT 'multiple_choice',
+    `IsRequired` tinyint (1) DEFAULT 1,
+    `CreatedAt` timestamp NOT NULL DEFAULT current_timestamp()
+  ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
+
+--
+-- Dumping data for table `job_question`
+--
+INSERT INTO
+  `job_question` (
+    `QuestionID`,
+    `JobID`,
+    `QuestionText`,
+    `QuestionType`,
+    `IsRequired`,
+    `CreatedAt`
+  )
+VALUES
+  (1, 2, 'asdf', 'yes_no', 1, '2025-11-25 08:04:28'),
+  (2, 3, 'asdf', 'yes_no', 1, '2025-11-25 11:14:03');
+
+-- --------------------------------------------------------
+--
+-- Table structure for table `job_question_option`
+--
+CREATE TABLE
+  `job_question_option` (
+    `OptionID` int (11) NOT NULL,
+    `QuestionID` int (11) NOT NULL,
+    `OptionText` varchar(500) NOT NULL,
+    `IsCorrectAnswer` tinyint (1) DEFAULT 0,
+    `DisplayOrder` int (11) DEFAULT 0
+  ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 --
@@ -804,58 +750,69 @@ INSERT INTO
   )
 VALUES
   (
-    97,
-    11,
-    'c3',
-    'f1',
-    'hi',
-    NULL,
-    NULL,
-    '2025-11-19 15:29:31',
-    'unread'
-  ),
-  (
-    98,
-    11,
-    'f1',
-    'c3',
-    'hi JIMMY',
-    NULL,
-    NULL,
-    '2025-11-22 01:05:59',
-    'unread'
-  ),
-  (
-    99,
-    11,
-    'c3',
-    'f1',
-    'Ya Hi Google',
-    NULL,
-    NULL,
-    '2025-11-22 01:06:04',
-    'unread'
-  ),
-  (
-    100,
-    13,
-    'c1',
-    'f1',
-    'hi',
-    NULL,
-    NULL,
-    '2025-11-23 14:25:09',
-    'unread'
-  ),
-  (
-    101,
-    12,
+    1,
+    14,
     'c2',
     'f1',
-    'I am interested in your project: \"asdf\". I would like to discuss more about this opportunity.',
-    NULL,
-    NULL,
-    '2025-11-23 14:34:33',
+    '📋 Project Agreement: sadf\nAmount: RM 12.00',
+    '/uploads/messages/agreement_26_1764054315.pdf',
+    'application/pdf',
+    '2025-11-25 15:05:15',
+    'unread'
+  ),
+  (
+    2,
+    14,
+    'c2',
+    'f1',
+    '📋 Project Agreement: asdf\nAmount: RM 122.00',
+    '/uploads/messages/agreement_28_1764055504.pdf',
+    'application/pdf',
+    '2025-11-25 15:25:04',
+    'unread'
+  ),
+  (
+    3,
+    14,
+    'c2',
+    'f1',
+    '📋 Project Agreement: asdf\nAmount: RM 12.00',
+    '/uploads/messages/agreement_2_1764058987.pdf',
+    'application/pdf',
+    '2025-11-25 16:23:07',
+    'unread'
+  ),
+  (
+    4,
+    14,
+    'c2',
+    'f1',
+    '📋 Project Agreement: asdf\nAmount: RM 444.00',
+    '/uploads/messages/agreement_3_1764059041.pdf',
+    'application/pdf',
+    '2025-11-25 16:24:01',
+    'unread'
+  ),
+  (
+    5,
+    14,
+    'c2',
+    'f1',
+    '📋 Project Agreement: asdf\nAmount: RM 34.00',
+    '/uploads/messages/agreement_4_1764059093.pdf',
+    'application/pdf',
+    '2025-11-25 16:24:53',
+    'unread'
+  ),
+  (
+    6,
+    14,
+    'c2',
+    'f1',
+    '📋 Project Agreement: asdf\nAmount: RM 21.00',
+    '/uploads/messages/agreement_5_1764059220.pdf',
+    'application/pdf',
+    '2025-11-25 16:27:00',
     'unread'
   );
 
@@ -964,6 +921,215 @@ VALUES
   (3, 'networking'),
   (4, 'adfasd');
 
+-- --------------------------------------------------------
+--
+-- Table structure for table `wallet`
+--
+CREATE TABLE
+  `wallet` (
+    `WalletID` int (11) NOT NULL,
+    `UserID` varchar(11) NOT NULL,
+    `Balance` decimal(10, 2) NOT NULL,
+    `LockedBalance` decimal(10, 2) NOT NULL,
+    `LastUpdated` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
+
+--
+-- Dumping data for table `wallet`
+--
+INSERT INTO
+  `wallet` (
+    `WalletID`,
+    `UserID`,
+    `Balance`,
+    `LockedBalance`,
+    `LastUpdated`
+  )
+VALUES
+  (1, '3', 0.00, 0.00, '2025-11-23 07:49:41'),
+  (2, '2', 0.00, 0.00, '2025-11-23 07:49:41'),
+  (3, '1', 0.00, 0.00, '2025-11-23 07:49:41'),
+  (4, '4', 2000.00, 0.00, '2025-11-23 14:34:27'),
+  (5, '5', 1500.00, 0.00, '2025-11-23 14:40:21');
+
+-- --------------------------------------------------------
+--
+-- Table structure for table `wallet_transactions`
+--
+CREATE TABLE
+  `wallet_transactions` (
+    `TransactionID` int (11) NOT NULL,
+    `WalletID` int (11) NOT NULL,
+    `Type` enum (
+      'topup',
+      'payment',
+      'earning',
+      'refund',
+      'withdrawal'
+    ) NOT NULL,
+    `Amount` decimal(10, 2) NOT NULL,
+    `Status` enum ('pending', 'completed', 'failed') NOT NULL DEFAULT 'pending',
+    `Description` text DEFAULT NULL,
+    `ReferenceID` varchar(100) DEFAULT NULL COMMENT 'Order ID, Payment ID, etc.',
+    `CreatedAt` timestamp NOT NULL DEFAULT current_timestamp()
+  ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
+
+--
+-- Dumping data for table `wallet_transactions`
+--
+INSERT INTO
+  `wallet_transactions` (
+    `TransactionID`,
+    `WalletID`,
+    `Type`,
+    `Amount`,
+    `Status`,
+    `Description`,
+    `ReferenceID`,
+    `CreatedAt`
+  )
+VALUES
+  (
+    1,
+    4,
+    'topup',
+    50.00,
+    'pending',
+    'Wallet top-up via Stripe',
+    NULL,
+    '2025-11-23 08:00:14'
+  ),
+  (
+    2,
+    4,
+    'topup',
+    50.00,
+    'pending',
+    'Wallet top-up via Stripe',
+    NULL,
+    '2025-11-23 08:01:52'
+  ),
+  (
+    3,
+    4,
+    'topup',
+    100.00,
+    'pending',
+    'Wallet top-up via Stripe',
+    NULL,
+    '2025-11-23 08:03:00'
+  ),
+  (
+    4,
+    4,
+    'topup',
+    100.00,
+    'failed',
+    'Payment error: Not a valid URL',
+    NULL,
+    '2025-11-23 08:06:17'
+  ),
+  (
+    5,
+    4,
+    'topup',
+    100.00,
+    'failed',
+    'Payment error: Not a valid URL',
+    NULL,
+    '2025-11-23 08:06:23'
+  ),
+  (
+    6,
+    4,
+    'topup',
+    100.00,
+    'failed',
+    'Payment error: Not a valid URL',
+    NULL,
+    '2025-11-23 08:07:10'
+  ),
+  (
+    7,
+    4,
+    'topup',
+    100.00,
+    'failed',
+    'Payment error: Not a valid URL',
+    NULL,
+    '2025-11-23 08:10:20'
+  ),
+  (
+    8,
+    4,
+    'topup',
+    200.00,
+    'failed',
+    'Payment error: Not a valid URL',
+    NULL,
+    '2025-11-23 08:16:41'
+  ),
+  (
+    9,
+    4,
+    'topup',
+    50.00,
+    'failed',
+    'Payment error: Not a valid URL',
+    NULL,
+    '2025-11-23 08:19:46'
+  ),
+  (
+    10,
+    4,
+    'topup',
+    100.00,
+    'completed',
+    'Wallet Top Up via Stripe',
+    NULL,
+    '2025-11-23 08:49:49'
+  ),
+  (
+    11,
+    4,
+    'topup',
+    900.00,
+    'completed',
+    'Wallet Top Up via Stripe',
+    NULL,
+    '2025-11-23 09:01:25'
+  ),
+  (
+    12,
+    4,
+    'topup',
+    1000.00,
+    'completed',
+    'Wallet Top Up via Stripe',
+    NULL,
+    '2025-11-23 14:34:27'
+  ),
+  (
+    13,
+    5,
+    'topup',
+    1000.00,
+    'completed',
+    'Wallet Top Up via Stripe',
+    NULL,
+    '2025-11-23 14:39:40'
+  ),
+  (
+    14,
+    5,
+    'topup',
+    500.00,
+    'completed',
+    'Wallet Top Up via Stripe',
+    NULL,
+    '2025-11-23 14:40:21'
+  );
+
 --
 -- Indexes for dumped tables
 --
@@ -1019,6 +1185,35 @@ ALTER TABLE `job` ADD PRIMARY KEY (`JobID`),
 ADD KEY `ClientID` (`ClientID`);
 
 --
+-- Indexes for table `job_application`
+--
+ALTER TABLE `job_application` ADD PRIMARY KEY (`ApplicationID`),
+ADD KEY `JobID` (`JobID`),
+ADD KEY `FreelancerID` (`FreelancerID`),
+ADD KEY `Status` (`Status`);
+
+--
+-- Indexes for table `job_application_answer`
+--
+ALTER TABLE `job_application_answer` ADD PRIMARY KEY (`AnswerID`),
+ADD KEY `QuestionID` (`QuestionID`),
+ADD KEY `FreelancerID` (`FreelancerID`),
+ADD KEY `JobID` (`JobID`),
+ADD KEY `SelectedOptionID` (`SelectedOptionID`);
+
+--
+-- Indexes for table `job_question`
+--
+ALTER TABLE `job_question` ADD PRIMARY KEY (`QuestionID`),
+ADD KEY `JobID` (`JobID`);
+
+--
+-- Indexes for table `job_question_option`
+--
+ALTER TABLE `job_question_option` ADD PRIMARY KEY (`OptionID`),
+ADD KEY `QuestionID` (`QuestionID`);
+
+--
 -- Indexes for table `message`
 --
 ALTER TABLE `message` ADD PRIMARY KEY (`MessageID`),
@@ -1063,6 +1258,19 @@ ADD KEY `ClientID` (`ClientID`);
 ALTER TABLE `skill` ADD PRIMARY KEY (`SkillID`);
 
 --
+-- Indexes for table `wallet`
+--
+ALTER TABLE `wallet` ADD PRIMARY KEY (`WalletID`);
+
+--
+-- Indexes for table `wallet_transactions`
+--
+ALTER TABLE `wallet_transactions` ADD PRIMARY KEY (`TransactionID`),
+ADD KEY `WalletID` (`WalletID`),
+ADD KEY `idx_wallet_type_status` (`WalletID`, `Type`, `Status`),
+ADD KEY `idx_created_at` (`CreatedAt`);
+
+--
 -- AUTO_INCREMENT for dumped tables
 --
 --
@@ -1075,7 +1283,7 @@ AUTO_INCREMENT = 2;
 -- AUTO_INCREMENT for table `agreement`
 --
 ALTER TABLE `agreement` MODIFY `AgreementID` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 20;
+AUTO_INCREMENT = 7;
 
 --
 -- AUTO_INCREMENT for table `client`
@@ -1087,7 +1295,7 @@ AUTO_INCREMENT = 4;
 -- AUTO_INCREMENT for table `conversation`
 --
 ALTER TABLE `conversation` MODIFY `ConversationID` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 14;
+AUTO_INCREMENT = 15;
 
 --
 -- AUTO_INCREMENT for table `freelancer`
@@ -1104,13 +1312,36 @@ ALTER TABLE `gig` MODIFY `GigID` int (11) NOT NULL AUTO_INCREMENT;
 -- AUTO_INCREMENT for table `job`
 --
 ALTER TABLE `job` MODIFY `JobID` int (11) NOT NULL AUTO_INCREMENT,
+AUTO_INCREMENT = 6;
+
+--
+-- AUTO_INCREMENT for table `job_application`
+--
+ALTER TABLE `job_application` MODIFY `ApplicationID` int (11) NOT NULL AUTO_INCREMENT,
 AUTO_INCREMENT = 4;
+
+--
+-- AUTO_INCREMENT for table `job_application_answer`
+--
+ALTER TABLE `job_application_answer` MODIFY `AnswerID` int (11) NOT NULL AUTO_INCREMENT,
+AUTO_INCREMENT = 2;
+
+--
+-- AUTO_INCREMENT for table `job_question`
+--
+ALTER TABLE `job_question` MODIFY `QuestionID` int (11) NOT NULL AUTO_INCREMENT,
+AUTO_INCREMENT = 3;
+
+--
+-- AUTO_INCREMENT for table `job_question_option`
+--
+ALTER TABLE `job_question_option` MODIFY `OptionID` int (11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `message`
 --
 ALTER TABLE `message` MODIFY `MessageID` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 102;
+AUTO_INCREMENT = 7;
 
 --
 -- AUTO_INCREMENT for table `message_notification`
@@ -1141,6 +1372,18 @@ ALTER TABLE `skill` MODIFY `SkillID` int (11) NOT NULL AUTO_INCREMENT,
 AUTO_INCREMENT = 5;
 
 --
+-- AUTO_INCREMENT for table `wallet`
+--
+ALTER TABLE `wallet` MODIFY `WalletID` int (11) NOT NULL AUTO_INCREMENT,
+AUTO_INCREMENT = 6;
+
+--
+-- AUTO_INCREMENT for table `wallet_transactions`
+--
+ALTER TABLE `wallet_transactions` MODIFY `TransactionID` int (11) NOT NULL AUTO_INCREMENT,
+AUTO_INCREMENT = 15;
+
+--
 -- Constraints for dumped tables
 --
 --
@@ -1165,6 +1408,30 @@ ALTER TABLE `gig` ADD CONSTRAINT `gig_ibfk_1` FOREIGN KEY (`FreelancerID`) REFER
 ALTER TABLE `job` ADD CONSTRAINT `job_ibfk_1` FOREIGN KEY (`ClientID`) REFERENCES `client` (`ClientID`) ON DELETE CASCADE;
 
 --
+-- Constraints for table `job_application`
+--
+ALTER TABLE `job_application` ADD CONSTRAINT `job_application_ibfk_1` FOREIGN KEY (`JobID`) REFERENCES `job` (`JobID`) ON DELETE CASCADE,
+ADD CONSTRAINT `job_application_ibfk_2` FOREIGN KEY (`FreelancerID`) REFERENCES `freelancer` (`FreelancerID`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `job_application_answer`
+--
+ALTER TABLE `job_application_answer` ADD CONSTRAINT `job_application_answer_ibfk_1` FOREIGN KEY (`QuestionID`) REFERENCES `job_question` (`QuestionID`) ON DELETE CASCADE,
+ADD CONSTRAINT `job_application_answer_ibfk_2` FOREIGN KEY (`FreelancerID`) REFERENCES `freelancer` (`FreelancerID`) ON DELETE CASCADE,
+ADD CONSTRAINT `job_application_answer_ibfk_3` FOREIGN KEY (`JobID`) REFERENCES `job` (`JobID`) ON DELETE CASCADE,
+ADD CONSTRAINT `job_application_answer_ibfk_4` FOREIGN KEY (`SelectedOptionID`) REFERENCES `job_question_option` (`OptionID`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `job_question`
+--
+ALTER TABLE `job_question` ADD CONSTRAINT `job_question_ibfk_1` FOREIGN KEY (`JobID`) REFERENCES `job` (`JobID`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `job_question_option`
+--
+ALTER TABLE `job_question_option` ADD CONSTRAINT `job_question_option_ibfk_1` FOREIGN KEY (`QuestionID`) REFERENCES `job_question` (`QuestionID`) ON DELETE CASCADE;
+
+--
 -- Constraints for table `message`
 --
 ALTER TABLE `message` ADD CONSTRAINT `message_ibfk_3` FOREIGN KEY (`ConversationID`) REFERENCES `conversation` (`ConversationID`) ON DELETE CASCADE;
@@ -1174,6 +1441,11 @@ ALTER TABLE `message` ADD CONSTRAINT `message_ibfk_3` FOREIGN KEY (`Conversation
 --
 ALTER TABLE `review` ADD CONSTRAINT `review_ibfk_1` FOREIGN KEY (`FreelancerID`) REFERENCES `freelancer` (`FreelancerID`) ON DELETE CASCADE,
 ADD CONSTRAINT `review_ibfk_2` FOREIGN KEY (`ClientID`) REFERENCES `client` (`ClientID`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `wallet_transactions`
+--
+ALTER TABLE `wallet_transactions` ADD CONSTRAINT `wallet_transactions_ibfk_1` FOREIGN KEY (`WalletID`) REFERENCES `wallet` (`WalletID`) ON DELETE CASCADE;
 
 COMMIT;
 

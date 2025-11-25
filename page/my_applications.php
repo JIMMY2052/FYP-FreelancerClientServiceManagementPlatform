@@ -1,4 +1,4 @@
-<?php 
+<?php
 session_start();
 
 // Check if user is logged in and is a client
@@ -11,7 +11,8 @@ $_title = 'My Applications - WorkSnyc';
 require_once 'config.php';
 
 if (!function_exists('getPDOConnection')) {
-    function getPDOConnection(): PDO {
+    function getPDOConnection(): PDO
+    {
         $dsn = 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=utf8mb4';
         $options = [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
@@ -91,7 +92,7 @@ foreach ($applications as &$app) {
                       LEFT JOIN job_question_option jqo ON jaa.SelectedOptionID = jqo.OptionID
                       WHERE jaa.JobID = :jobID AND jaa.FreelancerID = :freelancerID
                       ORDER BY jaa.AnswerID ASC";
-        
+
         $stmtAnswers = $pdo->prepare($sqlAnswers);
         $stmtAnswers->execute([
             ':jobID' => $app['JobID'],
@@ -121,13 +122,13 @@ include '../_head.php';
             <select name="job_id" id="job_id" class="filter-select">
                 <option value="">All Jobs</option>
                 <?php foreach ($clientJobs as $job): ?>
-                <option value="<?= $job['JobID'] ?>" <?= ($jobFilter == $job['JobID']) ? 'selected' : '' ?>>
-                    <?= htmlspecialchars($job['Title']) ?>
-                </option>
+                    <option value="<?= $job['JobID'] ?>" <?= ($jobFilter == $job['JobID']) ? 'selected' : '' ?>>
+                        <?= htmlspecialchars($job['Title']) ?>
+                    </option>
                 <?php endforeach; ?>
             </select>
         </div>
-        
+
         <div class="filter-group">
             <label for="status">Filter by Status:</label>
             <select name="status" id="status" class="filter-select">
@@ -138,7 +139,7 @@ include '../_head.php';
                 <option value="withdrawn" <?= ($statusFilter === 'withdrawn') ? 'selected' : '' ?>>Withdrawn</option>
             </select>
         </div>
-        
+
         <button type="submit" class="filter-btn">
             <i class="fas fa-filter"></i> Apply Filters
         </button>
@@ -161,130 +162,151 @@ include '../_head.php';
     <?php else: ?>
         <div class="applications-list">
             <?php foreach ($applications as $app): ?>
-            <div class="application-card">
-                <div class="application-header">
-                    <div class="freelancer-info">
-                        <div class="freelancer-avatar">
-                            <?php if (!empty($app['ProfilePicture'])): ?>
-                                <img src="<?= htmlspecialchars($app['ProfilePicture']) ?>" 
-                                     alt="<?= htmlspecialchars($app['FirstName']) ?>">
-                            <?php else: ?>
-                                <div class="avatar-placeholder">
-                                    <?= strtoupper(substr($app['FirstName'], 0, 1) . substr($app['LastName'], 0, 1)) ?>
+                <div class="application-card">
+                    <div class="application-header">
+                        <div class="freelancer-info">
+                            <div class="freelancer-avatar">
+                                <?php if (!empty($app['ProfilePicture'])): ?>
+                                    <img src="<?= htmlspecialchars($app['ProfilePicture']) ?>"
+                                        alt="<?= htmlspecialchars($app['FirstName']) ?>">
+                                <?php else: ?>
+                                    <div class="avatar-placeholder">
+                                        <?= strtoupper(substr($app['FirstName'], 0, 1) . substr($app['LastName'], 0, 1)) ?>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                            <div class="freelancer-details">
+                                <h3 class="freelancer-name">
+                                    <?= htmlspecialchars($app['FirstName'] . ' ' . $app['LastName']) ?>
+                                </h3>
+                                <p class="freelancer-email"><?= htmlspecialchars($app['FreelancerEmail']) ?></p>
+                                <div class="freelancer-stats">
+                                    <span class="stat-item">
+                                        <i class="fas fa-star"></i>
+                                        <?= $app['Rating'] ? number_format($app['Rating'], 1) : 'N/A' ?>
+                                    </span>
+                                    <span class="stat-item">
+                                        <i class="fas fa-dollar-sign"></i>
+                                        RM <?= $app['TotalEarned'] ? number_format($app['TotalEarned'], 0) : '0' ?> earned
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <span class="application-status status-<?= strtolower($app['Status']) ?>">
+                            <?= ucfirst($app['Status']) ?>
+                        </span>
+                    </div>
+
+                    <div class="application-body">
+                        <div class="job-reference">
+                            <h4>
+                                <i class="fas fa-briefcase"></i>
+                                Applied for: <?= htmlspecialchars($app['JobTitle']) ?>
+                            </h4>
+                            <div class="job-meta">
+                                <span>Budget: RM <?= number_format($app['JobBudget'], 2) ?></span>
+                                <span>•</span>
+                                <span>Deadline: <?= date('M d, Y', strtotime($app['Deadline'])) ?></span>
+                            </div>
+                        </div>
+
+                        <?php if (!empty($app['CoverLetter'])): ?>
+                            <div class="section">
+                                <h5>Cover Letter</h5>
+                                <p class="cover-letter"><?= nl2br(htmlspecialchars($app['CoverLetter'])) ?></p>
+                            </div>
+                        <?php endif; ?>
+
+                        <div class="proposal-details">
+                            <?php if (!empty($app['ProposedBudget'])): ?>
+                                <div class="detail-item">
+                                    <span class="label">Proposed Budget:</span>
+                                    <span class="value">RM <?= number_format($app['ProposedBudget'], 2) ?></span>
                                 </div>
                             <?php endif; ?>
-                        </div>
-                        <div class="freelancer-details">
-                            <h3 class="freelancer-name">
-                                <?= htmlspecialchars($app['FirstName'] . ' ' . $app['LastName']) ?>
-                            </h3>
-                            <p class="freelancer-email"><?= htmlspecialchars($app['FreelancerEmail']) ?></p>
-                            <div class="freelancer-stats">
-                                <span class="stat-item">
-                                    <i class="fas fa-star"></i>
-                                    <?= $app['Rating'] ? number_format($app['Rating'], 1) : 'N/A' ?>
-                                </span>
-                                <span class="stat-item">
-                                    <i class="fas fa-dollar-sign"></i>
-                                    RM <?= $app['TotalEarned'] ? number_format($app['TotalEarned'], 0) : '0' ?> earned
-                                </span>
+
+                            <?php if (!empty($app['EstimatedDuration'])): ?>
+                                <div class="detail-item">
+                                    <span class="label">Estimated Duration:</span>
+                                    <span class="value"><?= htmlspecialchars($app['EstimatedDuration']) ?></span>
+                                </div>
+                            <?php endif; ?>
+
+                            <div class="detail-item">
+                                <span class="label">Applied On:</span>
+                                <span class="value"><?= date('M d, Y H:i', strtotime($app['AppliedAt'])) ?></span>
                             </div>
                         </div>
-                    </div>
-                    <span class="application-status status-<?= strtolower($app['Status']) ?>">
-                        <?= ucfirst($app['Status']) ?>
-                    </span>
-                </div>
 
-                <div class="application-body">
-                    <div class="job-reference">
-                        <h4>
-                            <i class="fas fa-briefcase"></i>
-                            Applied for: <?= htmlspecialchars($app['JobTitle']) ?>
-                        </h4>
-                        <div class="job-meta">
-                            <span>Budget: RM <?= number_format($app['JobBudget'], 2) ?></span>
-                            <span>•</span>
-                            <span>Deadline: <?= date('M d, Y', strtotime($app['Deadline'])) ?></span>
-                        </div>
-                    </div>
-
-                    <?php if (!empty($app['CoverLetter'])): ?>
-                    <div class="section">
-                        <h5>Cover Letter</h5>
-                        <p class="cover-letter"><?= nl2br(htmlspecialchars($app['CoverLetter'])) ?></p>
-                    </div>
-                    <?php endif; ?>
-
-                    <div class="proposal-details">
-                        <?php if (!empty($app['ProposedBudget'])): ?>
-                        <div class="detail-item">
-                            <span class="label">Proposed Budget:</span>
-                            <span class="value">RM <?= number_format($app['ProposedBudget'], 2) ?></span>
-                        </div>
-                        <?php endif; ?>
-                        
-                        <?php if (!empty($app['EstimatedDuration'])): ?>
-                        <div class="detail-item">
-                            <span class="label">Estimated Duration:</span>
-                            <span class="value"><?= htmlspecialchars($app['EstimatedDuration']) ?></span>
-                        </div>
-                        <?php endif; ?>
-                        
-                        <div class="detail-item">
-                            <span class="label">Applied On:</span>
-                            <span class="value"><?= date('M d, Y H:i', strtotime($app['AppliedAt'])) ?></span>
-                        </div>
-                    </div>
-
-                    <?php if (!empty($app['answers'])): ?>
-                    <div class="section">
-                        <h5>
-                            <i class="fas fa-question-circle"></i>
-                            Screening Questions Answers
-                        </h5>
-                        <div class="answers-list">
-                            <?php foreach ($app['answers'] as $index => $answer): ?>
-                            <div class="answer-item">
-                                <div class="question-text">
-                                    <strong>Q<?= $index + 1 ?>:</strong> <?= htmlspecialchars($answer['QuestionText']) ?>
-                                </div>
-                                <div class="answer-text">
-                                    <i class="fas fa-check-circle"></i>
-                                    <?php if ($answer['QuestionType'] === 'yes_no'): ?>
-                                        <strong><?= ucfirst($answer['AnswerText']) ?></strong>
-                                    <?php else: ?>
-                                        <?= htmlspecialchars($answer['OptionText']) ?>
-                                    <?php endif; ?>
+                        <?php if (!empty($app['answers'])): ?>
+                            <div class="section">
+                                <h5>
+                                    <i class="fas fa-question-circle"></i>
+                                    Screening Questions Answers
+                                </h5>
+                                <div class="answers-list">
+                                    <?php foreach ($app['answers'] as $index => $answer): ?>
+                                        <div class="answer-item">
+                                            <div class="question-text">
+                                                <strong>Q<?= $index + 1 ?>:</strong> <?= htmlspecialchars($answer['QuestionText']) ?>
+                                            </div>
+                                            <div class="answer-text">
+                                                <i class="fas fa-check-circle"></i>
+                                                <?php if ($answer['QuestionType'] === 'yes_no'): ?>
+                                                    <strong><?= ucfirst($answer['AnswerText']) ?></strong>
+                                                <?php else: ?>
+                                                    <?= htmlspecialchars($answer['OptionText']) ?>
+                                                <?php endif; ?>
+                                            </div>
+                                        </div>
+                                    <?php endforeach; ?>
                                 </div>
                             </div>
-                            <?php endforeach; ?>
-                        </div>
+                        <?php endif; ?>
                     </div>
-                    <?php endif; ?>
-                </div>
 
-                <div class="application-footer">
-                    <a href="view_freelancer_profile.php?id=<?= $app['FreelancerID'] ?>" class="btn-small">
-                        <i class="fas fa-user"></i> View Profile
-                    </a>
-                    <a href="messages.php?freelancer_id=<?= $app['FreelancerID'] ?>" class="btn-small">
-                        <i class="fas fa-comment"></i> Message
-                    </a>
-                    
-                    <?php if ($app['Status'] === 'pending'): ?>
-                    <button class="btn-small btn-success" onclick="updateApplicationStatus(<?= $app['ApplicationID'] ?>, 'accepted')">
-                        <i class="fas fa-check"></i> Accept
-                    </button>
-                    <button class="btn-small btn-danger" onclick="updateApplicationStatus(<?= $app['ApplicationID'] ?>, 'rejected')">
-                        <i class="fas fa-times"></i> Reject
-                    </button>
-                    <?php endif; ?>
+                    <div class="application-footer">
+                        <a href="view_freelancer_profile.php?id=<?= $app['FreelancerID'] ?>" class="btn-small">
+                            <i class="fas fa-user"></i> View Profile
+                        </a>
+                        <a href="messages.php?freelancer_id=<?= $app['FreelancerID'] ?>" class="btn-small">
+                            <i class="fas fa-comment"></i> Message
+                        </a>
+
+                        <?php if ($app['Status'] === 'pending'): ?>
+                            <button class="btn-small btn-success" onclick="showAcceptConfirmation(<?= $app['ApplicationID'] ?>, <?= $app['JobBudget'] ?>, '<?= htmlspecialchars($app['JobTitle']) ?>')">
+                                <i class="fas fa-check"></i> Accept
+                            </button>
+                            <button class="btn-small btn-danger" onclick="updateApplicationStatus(<?= $app['ApplicationID'] ?>, 'rejected')">
+                                <i class="fas fa-times"></i> Reject
+                            </button>
+                        <?php endif; ?>
+                    </div>
                 </div>
-            </div>
             <?php endforeach; ?>
         </div>
     <?php endif; ?>
+
+    <!-- Acceptance Confirmation Modal -->
+    <div id="acceptConfirmationModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Accept Application & Sign Agreement</h2>
+                <button class="modal-close" onclick="closeAcceptConfirmation()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <ol>
+                    <li><strong>Review and sign the agreement</strong></li>
+                    <li><strong>Hold the project amount</strong> of <span id="modalJobBudget" class="amount"></span></li>
+                </ol>
+                <p class="warning-text">Amount will be held until project completion or cancelled.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-modal-secondary" onclick="closeAcceptConfirmation()">Cancel</button>
+                <button class="btn-modal-primary" onclick="proceedWithAcceptance()">Proceed to Agreement</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <style>
@@ -337,7 +359,7 @@ include '../_head.php';
         padding: 20px;
         background: white;
         border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         margin-bottom: 25px;
     }
 
@@ -419,13 +441,13 @@ include '../_head.php';
     .application-card {
         background: white;
         border-radius: 16px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         transition: all 0.3s ease;
         overflow: hidden;
     }
 
     .application-card:hover {
-        box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
     }
 
     .application-header {
@@ -685,7 +707,7 @@ include '../_head.php';
         padding: 80px 40px;
         background: white;
         border-radius: 16px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     }
 
     .no-applications i {
@@ -740,37 +762,219 @@ include '../_head.php';
             justify-content: center;
         }
     }
+
+    /* Acceptance Modal */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+
+    .modal-content {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        max-width: 500px;
+        width: 90%;
+        overflow: hidden;
+        animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 25px;
+        background: #f8fafc;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .modal-header h2 {
+        margin: 0;
+        font-size: 1.3rem;
+        color: #2c3e50;
+        font-weight: 700;
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 1.8rem;
+        color: #999;
+        cursor: pointer;
+        transition: color 0.3s ease;
+        padding: 0;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-close:hover {
+        color: #2c3e50;
+    }
+
+    .modal-body {
+        padding: 25px;
+    }
+
+    .modal-body ol {
+        margin: 0 0 20px 0;
+        padding-left: 20px;
+        color: #2c3e50;
+        line-height: 1.8;
+    }
+
+    .modal-body ol li {
+        margin-bottom: 12px;
+        font-weight: 500;
+    }
+
+    .modal-body li strong {
+        color: rgb(159, 232, 112);
+    }
+
+    .warning-text {
+        background: #fff3cd;
+        border-left: 4px solid #ffc107;
+        padding: 12px 15px;
+        border-radius: 6px;
+        color: #856404;
+        font-size: 0.9rem;
+        margin-bottom: 0;
+    }
+
+    .amount {
+        font-weight: 700;
+        color: rgb(159, 232, 112);
+    }
+
+    .modal-footer {
+        display: flex;
+        gap: 12px;
+        padding: 15px 25px;
+        background: #f8fafc;
+        border-top: 1px solid #e9ecef;
+        justify-content: flex-end;
+    }
+
+    .btn-modal-primary,
+    .btn-modal-secondary {
+        padding: 12px 24px;
+        border-radius: 8px;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+    }
+
+    .btn-modal-primary {
+        background: rgb(159, 232, 112);
+        color: #2c3e50;
+    }
+
+    .btn-modal-primary:hover {
+        background: rgb(140, 210, 90);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(159, 232, 112, 0.3);
+    }
+
+    .btn-modal-secondary {
+        background: #e9ecef;
+        color: #555;
+    }
+
+    .btn-modal-secondary:hover {
+        background: #ddd;
+    }
 </style>
 
 <script>
-function updateApplicationStatus(applicationId, newStatus) {
-    if (!confirm(`Are you sure you want to ${newStatus} this application?`)) {
-        return;
-    }
-    
-    // TODO: Implement AJAX call to update application status
-    fetch('update_application_status.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: `application_id=${applicationId}&status=${newStatus}`
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        } else {
-            alert('Error updating application status');
+    function updateApplicationStatus(applicationId, newStatus) {
+        if (!confirm(`Are you sure you want to ${newStatus} this application?`)) {
+            return;
         }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Error updating application status');
+
+        // TODO: Implement AJAX call to update application status
+        fetch('update_application_status.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `application_id=${applicationId}&status=${newStatus}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Error updating application status');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error updating application status');
+            });
+    }
+
+    // Acceptance confirmation modal functions
+    function showAcceptConfirmation(applicationId, jobBudget, jobTitle) {
+        // Store the data
+        pendingAcceptanceData = {
+            applicationId: applicationId,
+            jobBudget: jobBudget,
+            jobTitle: jobTitle
+        };
+
+        document.getElementById('modalJobBudget').textContent = 'RM ' + parseFloat(jobBudget).toLocaleString('en-MY', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        document.getElementById('acceptConfirmationModal').style.display = 'flex';
+    }
+
+    function closeAcceptConfirmation() {
+        document.getElementById('acceptConfirmationModal').style.display = 'none';
+    }
+
+    function proceedWithAcceptance() {
+        const {
+            applicationId
+        } = pendingAcceptanceData;
+        // Redirect to agreementClient.php to sign the agreement
+        window.location.href = `agreementClient.php?application_id=${applicationId}`;
+    }
+
+    // Close modal when clicking outside
+    document.addEventListener('click', function(e) {
+        const modal = document.getElementById('acceptConfirmationModal');
+        if (e.target === modal) {
+            closeAcceptConfirmation();
+        }
     });
-}
 </script>
 
-<?php 
-include '../_foot.php'; 
+<?php
+include '../_foot.php';
 ?>
