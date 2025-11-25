@@ -106,7 +106,7 @@ $pdf->SetLineWidth(0.5);
 // Column 1: Freelancer
 $pdf->SetFont('times', 'B', 9);
 $pdf->SetTextColor(0, 0, 0); // Black
-$pdf->Cell(55, 6, 'FREELANCER', 0, 0, 'R', true);
+$pdf->Cell(55, 6, 'FREELANCER', 0, 0, 'L', true);
 $pdf->SetFont('times', '', 9);
 $pdf->SetTextColor(0, 0, 0); // Black
 $pdf->Cell(0, 6, ' : ' . $freelancer_name, 0, 1, 'L', true);
@@ -114,7 +114,7 @@ $pdf->Cell(0, 6, ' : ' . $freelancer_name, 0, 1, 'L', true);
 // Continue with client info
 $pdf->SetFont('times', 'B', 9);
 $pdf->SetTextColor(0, 0, 0); // Black
-$pdf->Cell(55, 6, 'CLIENT', 0, 0, 'R', true);
+$pdf->Cell(55, 6, 'CLIENT', 0, 0, 'L', true);
 $pdf->SetFont('times', '', 9);
 $pdf->SetTextColor(0, 0, 0); // Black
 $pdf->Cell(0, 6, ' : ' . $client_name, 0, 1, 'L', true);
@@ -123,14 +123,14 @@ $pdf->Cell(0, 6, ' : ' . $client_name, 0, 1, 'L', true);
 $pdf->SetFillColor(255, 255, 255); // White background
 $pdf->SetFont('times', 'B', 9);
 $pdf->SetTextColor(0, 0, 0); // Black
-$pdf->Cell(55, 6, 'DATE SIGNED', 0, 0, 'R', true);
+$pdf->Cell(55, 6, 'DATE SIGNED', 0, 0, 'L', true);
 $pdf->SetFont('times', '', 9);
 $pdf->SetTextColor(0, 0, 0); // Black
 $pdf->Cell(0, 6, ' : ' . date('M d, Y', strtotime($agreement['SignedDate'] ?? 'now')), 0, 1, 'L', true);
 
 $pdf->SetFont('times', 'B', 11);
 $pdf->SetTextColor(0, 0, 0); // Black
-$pdf->Cell(55, 6, 'PROJECT VALUE', 0, 0, 'R', true);
+$pdf->Cell(55, 6, 'PROJECT VALUE', 0, 0, 'L', true);
 $pdf->SetFont('times', 'B', 9);
 $pdf->SetTextColor(0, 0, 0); // Black
 $pdf->Cell(0, 6, ' : RM ' . number_format($agreement['PaymentAmount'], 2), 0, 1, 'L', true);
@@ -140,10 +140,9 @@ $pdf->Ln(6);
 // ===== PROJECT TITLE SECTION =====
 $pdf->SetFont('times', 'B', 14);
 $pdf->SetTextColor(0, 0, 0); // Black
-$pdf->SetFillColor(240, 242, 247);
 $pdf->SetDrawColor(0, 0, 0); // Black
 $pdf->SetLineWidth(0.3);
-$pdf->Cell(0, 8, 'Project: ' . $agreement['ProjectTitle'], 0, 1, 'L', true);
+$pdf->Cell(0, 8, 'Gig: ' . $agreement['ProjectTitle'], 0, 1, 'L', true);
 $pdf->Ln(4);
 
 // ===== PROJECT DETAILS IF PROVIDED =====
