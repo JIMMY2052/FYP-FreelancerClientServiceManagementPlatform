@@ -312,6 +312,7 @@ if ($application_id) {
                         <input type="hidden" name="freelancer_name" value="<?= htmlspecialchars($job_data['FreelancerName']) ?>">
                         <input type="hidden" name="application_id" value="<?= $application_id ?>">
                         <input type="hidden" name="job_id" value="<?= htmlspecialchars($job_data['JobID']) ?>">
+                        <input type="hidden" name="delivery_time" value="<?= htmlspecialchars($job_data['EstimatedDuration']) ?>">
                         <input type="hidden" name="signature" id="signatureData">
 
                         <div class="signature-note">

@@ -23,6 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $application_id = isset($_POST['application_id']) ? intval($_POST['application_id']) : null;
     $freelancer_id = isset($_SESSION['agreement_freelancer_id']) ? intval($_SESSION['agreement_freelancer_id']) : null;
     $job_id = isset($_POST['job_id']) ? intval($_POST['job_id']) : null;
+    $delivery_time = isset($_POST['delivery_time']) ? intval($_POST['delivery_time']) : 0;
     $client_signature = isset($_POST['signature']) ? $_POST['signature'] : null;
 
     // Validate required fields
@@ -67,15 +68,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $job_desc = $app_data['Description'];
 
     // Create agreement record in database
-    $status = 'signed_by_client';
+    $status = 'to_accept';
     $client_signed_date = date('Y-m-d H:i:s');
+    $expired_date = date('Y-m-d H:i:s', strtotime('+1 days')); // Agreement expires in 3 days from signing
     $terms = "• Both parties agree to the terms outlined above.\n• Payment will be processed upon project completion and mutual agreement.\n• Either party may terminate this agreement with written notice.\n• Both parties agree to maintain confidentiality of project details.\n• Any disputes will be resolved through communication or mediation.";
     $scope = $job_desc;
     $deliverables = "To be completed upon milestone deliveries as agreed.";
-    $signature_path = 'signature_client_' . $application_id . '_' . time();
+    $client_signature_path = '/agreement/' . $pdf_filename; // Store the PDF filename path
 
-    $agreement_sql = "INSERT INTO agreement (FreelancerID, ClientID, ClientName, FreelancerName, ProjectTitle, ProjectDetail, PaymentAmount, Status, ClientSignedDate, Terms, Scope, Deliverables, SignaturePath) 
-                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    $agreement_sql = "INSERT INTO agreement (FreelancerID, ClientID, ClientName, FreelancerName, ProjectTitle, ProjectDetail, PaymentAmount, Status, ClientSignedDate, ExpiredDate, Terms, Scope, Deliverables, DeliveryTime, ClientSignaturePath) 
+                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     $agreement_stmt = $conn->prepare($agreement_sql);
 
@@ -86,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 
-    $agreement_stmt->bind_param('iissssdssssss', $freelancer_id, $client_id, $client_name, $freelancer_name, $job_title, $job_desc, $job_budget, $status, $client_signed_date, $terms, $scope, $deliverables, $signature_path);
+    $agreement_stmt->bind_param('iissssdssssisss', $freelancer_id, $client_id, $client_name, $freelancer_name, $job_title, $job_desc, $job_budget, $status, $client_signed_date, $expired_date, $terms, $scope, $deliverables, $delivery_time, $client_signature_path);
 
     if (!$agreement_stmt->execute()) {
         $_SESSION['error'] = "Error creating agreement record: " . $agreement_stmt->error;
