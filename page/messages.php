@@ -11,14 +11,51 @@ $user_id = $_SESSION['user_id'];
 $user_type = $_SESSION['user_type'];
 $user_email = $_SESSION['email'] ?? '';
 
-// Check if client_id is passed (from Contact Me button)
+// Check if client_id is passed (from Contact Me button) or freelancer_id (from my_applications)
 $target_client_id = isset($_GET['client_id']) ? intval($_GET['client_id']) : null;
+$target_freelancer_id = isset($_GET['freelancer_id']) ? intval($_GET['freelancer_id']) : null;
 $target_job_id = isset($_GET['job_id']) ? intval($_GET['job_id']) : null;
 $job_quote = null;
 $show_quote = false; // Only show quote for the specific client conversation
 
+// If a freelancer_id is provided and user is a client, create/open conversation with that freelancer
+if ($target_freelancer_id && $user_type === 'client') {
+    $conn = getDBConnection();
+
+    // Check if conversation already exists
+    $sql = "SELECT ConversationID FROM conversation 
+            WHERE (User1ID = ? AND User1Type = 'client' AND User2ID = ? AND User2Type = 'freelancer')
+            OR (User1ID = ? AND User1Type = 'freelancer' AND User2ID = ? AND User2Type = 'client')";
+
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('iiii', $user_id, $target_freelancer_id, $target_freelancer_id, $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        // Conversation exists, get its ID
+        $row = $result->fetch_assoc();
+        $conversation_id = $row['ConversationID'];
+    } else {
+        // Create new conversation
+        $insert_sql = "INSERT INTO conversation (User1ID, User1Type, User2ID, User2Type, CreatedAt, Status) 
+                       VALUES (?, 'client', ?, 'freelancer', NOW(), 'active')";
+        $insert_stmt = $conn->prepare($insert_sql);
+        $insert_stmt->bind_param('ii', $user_id, $target_freelancer_id);
+        $insert_stmt->execute();
+        $conversation_id = $insert_stmt->insert_id;
+        $insert_stmt->close();
+    }
+
+    $stmt->close();
+    $conn->close();
+
+    // Store the target conversation ID in session
+    $_SESSION['target_conversation_id'] = $conversation_id;
+    $_SESSION['target_freelancer_id'] = $target_freelancer_id;
+}
 // If a client_id is provided and user is a freelancer, create/open conversation with that client
-if ($target_client_id && $user_type === 'freelancer') {
+elseif ($target_client_id && $user_type === 'freelancer') {
     $conn = getDBConnection();
 
     // Check if conversation already exists
@@ -338,10 +375,15 @@ if ($target_client_id && $user_type === 'freelancer') {
             window.showJobQuote = false;
         <?php endif; ?>
 
-        // If targeting a specific client from Contact Me button
+        // If targeting a specific client from Contact Me button or freelancer from my_applications
         <?php if (isset($_SESSION['target_conversation_id'])): ?>
             window.targetConversationId = <?php echo $_SESSION['target_conversation_id']; ?>;
-            window.targetClientId = <?php echo $_SESSION['target_client_id']; ?>;
+            <?php if (isset($_SESSION['target_client_id'])): ?>
+                window.targetClientId = <?php echo $_SESSION['target_client_id']; ?>;
+            <?php endif; ?>
+            <?php if (isset($_SESSION['target_freelancer_id'])): ?>
+                window.targetFreelancerId = <?php echo $_SESSION['target_freelancer_id']; ?>;
+            <?php endif; ?>
             window.autoLoadConversation = true;
         <?php endif; ?>
     </script>
@@ -414,32 +456,36 @@ if ($target_client_id && $user_type === 'freelancer') {
             }
         });
 
-        // Auto-load conversation if coming from "Contact Me" button
+        // Auto-load conversation if coming from "Contact Me" button or "Message" button
         document.addEventListener('DOMContentLoaded', function() {
-            if (window.autoLoadConversation && window.targetClientId) {
-                // Wait for chat list to load, then find and click the target conversation
-                const maxAttempts = 20; // Try for up to 10 seconds (20 * 500ms)
-                let attempts = 0;
+            if (window.autoLoadConversation) {
+                const targetUserId = window.targetClientId || window.targetFreelancerId;
 
-                const autoLoadInterval = setInterval(function() {
-                    attempts++;
+                if (targetUserId) {
+                    // Wait for chat list to load, then find and click the target conversation
+                    const maxAttempts = 20; // Try for up to 10 seconds (20 * 500ms)
+                    let attempts = 0;
 
-                    // Try to find by user ID (more reliable)
-                    const conversationItem = document.querySelector(`[data-user-id="${window.targetClientId}"]`);
+                    const autoLoadInterval = setInterval(function() {
+                        attempts++;
 
-                    if (conversationItem) {
-                        clearInterval(autoLoadInterval);
-                        conversationItem.click();
-                        conversationItem.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'center'
-                        });
-                        console.log('Auto-loaded conversation with client ID:', window.targetClientId);
-                    } else if (attempts >= maxAttempts) {
-                        clearInterval(autoLoadInterval);
-                        console.log('Could not find conversation with client ID:', window.targetClientId);
-                    }
-                }, 500);
+                        // Try to find by user ID (more reliable)
+                        const conversationItem = document.querySelector(`[data-user-id="${targetUserId}"]`);
+
+                        if (conversationItem) {
+                            clearInterval(autoLoadInterval);
+                            conversationItem.click();
+                            conversationItem.scrollIntoView({
+                                behavior: 'smooth',
+                                block: 'center'
+                            });
+                            console.log('Auto-loaded conversation with user ID:', targetUserId);
+                        } else if (attempts >= maxAttempts) {
+                            clearInterval(autoLoadInterval);
+                            console.log('Could not find conversation with user ID:', targetUserId);
+                        }
+                    }, 500);
+                }
             }
         });
     </script>

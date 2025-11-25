@@ -31,12 +31,12 @@ if ($user_type === 'freelancer') {
             (SELECT m.AttachmentPath FROM message m 
              WHERE m.ConversationID = conv.ConversationID
              ORDER BY m.Timestamp DESC LIMIT 1) as lastAttachmentPath,
-            (SELECT m.Timestamp FROM message m 
+            COALESCE((SELECT m.Timestamp FROM message m 
              WHERE m.ConversationID = conv.ConversationID
-             ORDER BY m.Timestamp DESC LIMIT 1) as lastMessageTime
+             ORDER BY m.Timestamp DESC LIMIT 1), conv.LastMessageAt, conv.CreatedAt) as lastMessageTime
         FROM conversation conv
         INNER JOIN client c ON c.ClientID = conv.User2ID AND conv.User2Type = 'client'
-        WHERE conv.User1ID = ? AND conv.User1Type = 'freelancer' AND conv.Status = 'active'
+        WHERE conv.User1ID = ? AND conv.User1Type = 'freelancer' AND (conv.Status = 'active' OR conv.Status IS NULL)
         ORDER BY lastMessageTime DESC
     ";
 
@@ -76,12 +76,12 @@ if ($user_type === 'freelancer') {
             (SELECT m.AttachmentPath FROM message m 
              WHERE m.ConversationID = conv.ConversationID
              ORDER BY m.Timestamp DESC LIMIT 1) as lastAttachmentPath,
-            (SELECT m.Timestamp FROM message m 
+            COALESCE((SELECT m.Timestamp FROM message m 
              WHERE m.ConversationID = conv.ConversationID
-             ORDER BY m.Timestamp DESC LIMIT 1) as lastMessageTime
+             ORDER BY m.Timestamp DESC LIMIT 1), conv.LastMessageAt, conv.CreatedAt) as lastMessageTime
         FROM conversation conv
         INNER JOIN freelancer f ON f.FreelancerID = conv.User1ID AND conv.User1Type = 'freelancer'
-        WHERE conv.User2ID = ? AND conv.User2Type = 'client' AND conv.Status = 'active'
+        WHERE conv.User2ID = ? AND conv.User2Type = 'client' AND (conv.Status = 'active' OR conv.Status IS NULL)
         ORDER BY lastMessageTime DESC
     ";
 
