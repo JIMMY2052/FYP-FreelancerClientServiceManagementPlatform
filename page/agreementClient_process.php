@@ -70,11 +70,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Create agreement record in database
     $status = 'to_accept';
     $client_signed_date = date('Y-m-d H:i:s');
-    $expired_date = date('Y-m-d H:i:s', strtotime('+1 days')); // Agreement expires in 3 days from signing
+    $expired_date = date('Y-m-d H:i:s', strtotime('+1 days')); // Agreement expires in 1 days from signing
     $terms = "• Both parties agree to the terms outlined above.\n• Payment will be processed upon project completion and mutual agreement.\n• Either party may terminate this agreement with written notice.\n• Both parties agree to maintain confidentiality of project details.\n• Any disputes will be resolved through communication or mediation.";
     $scope = $job_desc;
     $deliverables = "To be completed upon milestone deliveries as agreed.";
-    $client_signature_path = '/agreement/' . $pdf_filename; // Store the PDF filename path
+
+    // Generate PDF filename early for storage in database
+    $pdf_filename = 'agreement_' . $application_id . '_' . time() . '.pdf';
+    $client_signature_path = '/uploads/agreements/' . $pdf_filename; // Store the PDF filename path
 
     $agreement_sql = "INSERT INTO agreement (FreelancerID, ClientID, ClientName, FreelancerName, ProjectTitle, ProjectDetail, PaymentAmount, Status, ClientSignedDate, ExpiredDate, Terms, Scope, Deliverables, DeliveryTime, ClientSignaturePath) 
                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -446,7 +449,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         mkdir($uploads_dir, 0755, true);
     }
 
-    $pdf_filename = 'agreement_' . $application_id . '_' . time() . '.pdf';
+    // Use the PDF filename already generated and stored in database
     $pdf_path = $uploads_dir . $pdf_filename;
 
     try {
@@ -501,11 +504,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($conversation_id) {
         $message_text = "I have signed the agreement for the project \"" . $job_title . "\". Please review and sign to proceed. The agreement is attached below.\n\n";
         $message_text .= "Agreement Link: " . $_SERVER['HTTP_HOST'] . "/page/freelancer_agreement_approval.php?agreement_id=" . $agreement_id;
-        $attachment_path = '/agreement/' . $pdf_filename;
+        $attachment_path = '/uploads/agreements/' . $pdf_filename;
         $attachment_type = 'application/pdf';
 
         $msg_sql = "INSERT INTO message (ConversationID, SenderID, ReceiverID, Content, AttachmentPath, AttachmentType, Timestamp, Status) 
-                    VALUES (?, ?, ?, ?, ?, ?, NOW(), 'unread')";
+                    VALUES (?, ?, ?, ?, ?, ?, NOW(), 'to_accept')";
 
         $msg_stmt = $conn->prepare($msg_sql);
         $sender_id = 'c' . $client_id;  // Client sender: c{client_id}
@@ -515,20 +518,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($msg_stmt->execute()) {
             $conn->close();
             $_SESSION['success'] = "Agreement signed successfully! PDF sent to freelancer for review.";
-            header("Location: my_applications.php");
+            header("Location: messages.php?freelancer_id=" . $freelancer_id);
             exit();
         } else {
             $_SESSION['error'] = "Error sending agreement to freelancer: " . $msg_stmt->error;
+            error_log("Message execute error: " . $msg_stmt->error);
+            $conn->close();
+            header("Location: agreementClient.php?application_id=" . $application_id);
+            exit();
         }
     } else {
         $_SESSION['error'] = "Error creating conversation. Please try again.";
         error_log("Conversation creation failed or message send failed");
+        $conn->close();
+        header("Location: agreementClient.php?application_id=" . $application_id);
+        exit();
     }
-
-    $conn->close();
-    $_SESSION['success'] = "Agreement signed successfully! Redirecting...";
-    header("Location: my_applications.php");
-    exit();
 } else {
     $_SESSION['error'] = "Invalid request method.";
     header("Location: my_applications.php");

@@ -4,31 +4,33 @@ require_once __DIR__ . '/page/config.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?=  $_title ?? 'Untitiled' ?></title>
+    <title><?= $_title ?? 'Untitiled' ?></title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="/assets/js/app.js"></script>
     <link rel="stylesheet" href="/assets/css/app.css">
     <link rel="stylesheet" href="/assets/css/freelancer.css">
     <link rel="stylesheet" href="/assets/css/client.css">
 </head>
+
 <body>
     <header class="main-header">
         <div class="header-container">
             <div class="header-logo">
-                <a href="<?php 
-                    if (isset($_SESSION['user_id']) && isset($_SESSION['user_type'])) {
-                        if ($_SESSION['user_type'] === 'freelancer') {
-                            echo '/freelancer_home.php';
-                        } else {
-                            echo '/client_home.php';
-                        }
-                    } else {
-                        echo '/index.php';
-                    }
-                ?>">
+                <a href="<?php
+                            if (isset($_SESSION['user_id']) && isset($_SESSION['user_type'])) {
+                                if ($_SESSION['user_type'] === 'freelancer') {
+                                    echo '/freelancer_home.php';
+                                } else {
+                                    echo '/client_home.php';
+                                }
+                            } else {
+                                echo '/index.php';
+                            }
+                            ?>">
                     <img src="/images/logo.png" alt="Freelancer Platform Logo" class="logo-img">
                 </a>
             </div>
@@ -49,6 +51,7 @@ require_once __DIR__ . '/page/config.php';
                                 <a href="/page/client_profile.php" class="dropdown-item">View Profile</a>
                                 <a href="/page/client_dashboard.php" class="dropdown-item">Dashboard</a>
                             <?php endif; ?>
+                            <a href="/page/agreementListing.php" class="dropdown-item">Manage Agreement</a>
                             <a href="/page/payment/wallet.php" class="dropdown-item">Wallet</a>
                             <a href="/page/logout.php" class="dropdown-item">Logout</a>
                         </div>
