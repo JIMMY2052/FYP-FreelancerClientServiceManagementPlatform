@@ -165,6 +165,10 @@ if ($stmt->execute()) {
         'gig_id' => $gig_id
     );
 
+    // Also store names separately for easy access in agreement_view.php
+    $_SESSION['agreement_freelancer_name'] = $freelancer_name;
+    $_SESSION['agreement_client_name'] = $client_name;
+
     $_SESSION['success'] = "Agreement created successfully with ID: " . $agreement_id;
 
     // Redirect to view agreement with auto-send option

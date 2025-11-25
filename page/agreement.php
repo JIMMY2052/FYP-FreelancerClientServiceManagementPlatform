@@ -489,12 +489,12 @@ if ($client_id) {
         // FORM VALIDATION
         document.getElementById("agreementForm").addEventListener("submit", function(e) {
             e.preventDefault();
-            
+
             // Clear previous error highlighting
             document.querySelectorAll(".form-error").forEach(el => {
                 el.classList.remove("form-error");
             });
-            
+
             const title = document.getElementById("title").value.trim();
             const projectDetail = document.getElementById("projectDetail").value.trim();
             const scope = document.getElementById("scope").value.trim();

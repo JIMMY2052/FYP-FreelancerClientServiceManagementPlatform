@@ -15,17 +15,9 @@ if (!isset($_SESSION['agreement'])) {
 $agreement = $_SESSION['agreement'];
 $agreement_id = isset($agreement['agreement_id']) ? $agreement['agreement_id'] : uniqid('AGR-');
 
-// Get freelancer and client names for display
-$freelancer_name = "Freelancer Name";
-$client_name = "Client Name";
-
-if (isset($_SESSION['freelancer_id'])) {
-    $freelancer_name = $_SESSION['freelancer_name'] ?? "Freelancer Name";
-}
-
-if (isset($_SESSION['client_id'])) {
-    $client_name = $_SESSION['client_name'] ?? "Client Name";
-}
+// Get freelancer and client names from session (passed from agreement_process.php)
+$freelancer_name = isset($_SESSION['agreement_freelancer_name']) ? $_SESSION['agreement_freelancer_name'] : $agreement['freelancer_name'];
+$client_name = isset($_SESSION['agreement_client_name']) ? $_SESSION['agreement_client_name'] : $agreement['client_name'];
 
 // Get success message from redirect
 $showSuccess = isset($_GET['status']) && $_GET['status'] === 'created';
@@ -169,71 +161,73 @@ $chat_id = isset($_GET['chat_id']) ? $_GET['chat_id'] : (isset($_SESSION['curren
         }
 
         .preview-section {
-            margin-bottom: 32px;
+            margin-bottom: 24px;
         }
 
         .section-number {
-            font-size: 1.3rem;
-            color: #1a1a1a;
-            font-weight: 700;
-            margin-bottom: 12px;
             display: flex;
-            align-items: center;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 12px;
         }
 
         .section-number span {
-            display: inline-block;
-            width: 32px;
-            height: 32px;
-            line-height: 32px;
-            text-align: center;
-            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background: #f0f2f5;
             border-radius: 50%;
-            margin-right: 12px;
             font-weight: 700;
             color: #4b5563;
+            font-size: 1rem;
+            flex-shrink: 0;
         }
 
         .section-title {
-            font-size: 1.05rem;
+            font-size: 1rem;
             color: #4b5563;
-            font-weight: 600;
-            margin-bottom: 12px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
         }
 
         .section-content {
-            color: #5a6b7d;
-            font-size: 0.95rem;
-            line-height: 1.7;
+            color: #3d4655;
+            font-size: 0.9rem;
+            line-height: 1.6;
             word-wrap: break-word;
             white-space: pre-wrap;
+            margin-left: 40px;
         }
 
         .payment-box {
             background: #f9fafb;
             border: 1px solid #e5e7eb;
-            border-radius: 6px;
-            padding: 20px;
+            border-radius: 4px;
+            padding: 16px;
             margin-top: 12px;
+            margin-left: 40px;
         }
 
         .payment-total {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 16px;
-            padding-bottom: 16px;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
             border-bottom: 1px solid #e5e7eb;
         }
 
         .payment-label {
             color: #5a6b7d;
             font-weight: 500;
+            font-size: 0.9rem;
         }
 
         .payment-amount {
-            font-size: 1.5rem;
-            color: #1ab394;
+            font-size: 1.3rem;
+            color: #1a1a1a;
             font-weight: 700;
         }
 
@@ -309,6 +303,13 @@ $chat_id = isset($_GET['chat_id']) ? $_GET['chat_id'] : (isset($_SESSION['curren
             </div>
         </div>
 
+        <!-- INTRODUCTORY PARAGRAPH -->
+        <div class="preview-section" style="background: #f9f9f9; border-left: 4px solid #1ab394; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
+            <p style="margin: 0; line-height: 1.6; color: #333; font-size: 0.95rem;">
+                This Services Agreement shall become effective on date (the "Execution Date") and is subject to the terms and conditions stated below between <strong><?php echo htmlspecialchars($freelancer_name); ?></strong> (the "Service Provider") and <strong><?php echo htmlspecialchars($client_name); ?></strong> (the "Client"), collectively referred to as the "Parties".
+            </p>
+        </div>
+
         <!-- SECTION 1: SCOPE OF WORK -->
         <div class="preview-section">
             <div class="section-number">
@@ -316,7 +317,7 @@ $chat_id = isset($_GET['chat_id']) ? $_GET['chat_id'] : (isset($_SESSION['curren
                 <div class="section-title">Scope of Work</div>
             </div>
             <div class="section-content">
-                <?php echo htmlspecialchars($agreement['scope']); ?>
+                <?php echo nl2br(htmlspecialchars($agreement['scope'])); ?>
             </div>
         </div>
 
@@ -327,7 +328,7 @@ $chat_id = isset($_GET['chat_id']) ? $_GET['chat_id'] : (isset($_SESSION['curren
                 <div class="section-title">Deliverables & Timeline</div>
             </div>
             <div class="section-content">
-                <?php echo htmlspecialchars($agreement['deliverables']); ?>
+                <?php echo nl2br(htmlspecialchars($agreement['deliverables'])); ?>
             </div>
         </div>
 
@@ -337,14 +338,12 @@ $chat_id = isset($_GET['chat_id']) ? $_GET['chat_id'] : (isset($_SESSION['curren
                 <span>3</span>
                 <div class="section-title">Payment Terms</div>
             </div>
-            <div class="section-content">
-                <div class="payment-box">
-                    <div class="payment-total">
-                        <span class="payment-label">Total Project Price:</span>
-                        <span class="payment-amount">RM <?php echo number_format($agreement['payment'], 2); ?></span>
-                    </div>
-                    <p style="color: #5a6b7d; font-size: 0.95rem;">Payment will be released in milestones upon completion of deliverables.</p>
+            <div class="payment-box">
+                <div class="payment-total">
+                    <span class="payment-label">Total Project Price:</span>
+                    <span class="payment-amount">RM <?php echo number_format($agreement['payment'], 2); ?></span>
                 </div>
+                <p style="color: #5a6b7d; font-size: 0.9rem; line-height: 1.6; margin: 0;">Payment will be released in milestones upon completion of deliverables.</p>
             </div>
         </div>
 
@@ -355,7 +354,7 @@ $chat_id = isset($_GET['chat_id']) ? $_GET['chat_id'] : (isset($_SESSION['curren
                 <div class="section-title">Terms & Conditions</div>
             </div>
             <div class="section-content">
-                <?php echo htmlspecialchars($agreement['terms']); ?>
+                <?php echo nl2br(htmlspecialchars($agreement['terms'])); ?>
             </div>
         </div>
 
@@ -363,27 +362,25 @@ $chat_id = isset($_GET['chat_id']) ? $_GET['chat_id'] : (isset($_SESSION['curren
         <div class="preview-signature-section" style="margin-top: 40px; padding-top: 24px; border-top: 1px solid #e5e7eb;">
             <h3 style="text-align: center; margin-bottom: 20px; font-size: 1.1rem;">SIGNATURES</h3>
             <div style="display: flex; gap: 30px; justify-content: space-between;">
-                <!-- Freelancer/Contractor Signature -->
+                <!-- Freelancer/Contractor Signature (Left) -->
                 <div class="signature-block" style="flex: 1;">
                     <div class="signature-line" style="height: 80px; border: 1px solid #ddd; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #fafafa; margin-bottom: 10px;">
                         <?php if (!empty($agreement['signature_filename'])): ?>
                             <img src="/uploads/signatures/<?php echo htmlspecialchars($agreement['signature_filename']); ?>" style="max-width: 100%; max-height: 100%; object-fit: contain;" />
-                        <?php else: ?>
-                            <span style="color: #999; font-size: 0.9rem;">[Signature]</span>
                         <?php endif; ?>
                     </div>
                     <div class="signature-label" style="text-align: center; font-weight: 600; margin-top: 10px;">Contractor Signature</div>
-                    <div style="text-align: center; margin-top: 5px; font-size: 0.95rem; color: #1a1a1a;"><?php echo htmlspecialchars($agreement['freelancer_name'] ?? '___________________'); ?></div>
-                    <div style="text-align: center; font-size: 0.9rem; color: #666; margin-top: 8px;">Date: <?php echo date('M d, Y', strtotime($agreement['created_date'])); ?></div>
+                    <div class="signature-name" style="text-align: center; margin-top: 5px;"><?php echo htmlspecialchars($agreement['freelancer_name'] ?? '___________________'); ?></div>
+                    <div style="text-align: center; font-size: 0.9rem; color: #666; margin-top: 8px;">Date: <?php echo date('M d, Y', strtotime($agreement['created_date'] ?? 'now')); ?></div>
                 </div>
 
-                <!-- Client Signature -->
+                <!-- Client Signature (Right) -->
                 <div class="signature-block" style="flex: 1;">
                     <div class="signature-line" style="height: 80px; border: 1px dashed #ccc; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #fafafa; margin-bottom: 10px;">
                         <span style="color: #999; font-size: 0.9rem;">[Client to Sign Here]</span>
                     </div>
                     <div class="signature-label" style="text-align: center; font-weight: 600; margin-top: 10px;">Client Signature</div>
-                    <div style="text-align: center; margin-top: 5px; font-size: 0.95rem; color: #1a1a1a;">___________________</div>
+                    <div style="text-align: center; margin-top: 5px;">___________________</div>
                     <div style="text-align: center; font-size: 0.9rem; color: #666; margin-top: 8px;">Date: ___________</div>
                 </div>
             </div>
