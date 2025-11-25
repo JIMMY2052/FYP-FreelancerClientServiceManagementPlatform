@@ -100,127 +100,143 @@ $pdf->SetAuthor('FYP Platform');
 $pdf->SetTitle('Agreement - ' . $agreement['ProjectTitle']);
 $pdf->SetSubject('Project Agreement');
 
-// Set margins
-$pdf->SetMargins(15, 15, 15);
-$pdf->SetAutoPageBreak(true, 15);
+// Set margins - wider margins for professional look
+$pdf->SetMargins(20, 20, 20);
+$pdf->SetAutoPageBreak(true, 20);
 
 // Add a page
 $pdf->AddPage();
 
-// Set font
-$pdf->SetFont('Helvetica', '', 11);
+// Set default font - using helvetica which is built-in to TCPDF
+$pdf->SetFont('helvetica', '', 11);
 
-// ===== HEADER SECTION =====
-$pdf->SetFont('Helvetica', 'B', 24);
-$pdf->SetTextColor(26, 26, 26);
-$pdf->Cell(0, 15, $agreement['ProjectTitle'], 0, 1, 'L');
+// ===== PROFESSIONAL HEADER SECTION =====
+// Main title bar with gradient-like effect using darker green
+$pdf->SetFillColor(22, 163, 74); // Darker green
+$pdf->SetTextColor(255, 255, 255);
+$pdf->SetFont('helvetica', 'B', 26);
+$pdf->Cell(0, 18, 'PROJECT AGREEMENT', 0, 1, 'C', true);
 
-$pdf->SetFont('Helvetica', '', 11);
-$pdf->SetTextColor(123, 143, 163);
-$pdf->MultiCell(0, 10, $agreement['ProjectDetail'], 0, 'L');
+// Subtitle bar
+$pdf->SetFillColor(34, 197, 94); // Primary green
+$pdf->SetTextColor(255, 255, 255);
+$pdf->SetFont('helvetica', '', 12);
+$projectTitleDisplay = substr(strtoupper($agreement['ProjectTitle']), 0, 50);
+$pdf->Cell(0, 10, $projectTitleDisplay, 0, 1, 'C', true);
 
-// Add spacing
-$pdf->Ln(5);
-
-// Header info section with right-aligned details
-$pdf->SetFont('Helvetica', '', 10);
-$pdf->SetTextColor(123, 143, 163);
-
-// Create table for header info
-$headerData = array();
-$headerData[] = array('Offer from:', $freelancer_name);
-$headerData[] = array('To:', $client_name);
-$headerData[] = array('Date:', date('F j, Y', strtotime($agreement['SignedDate'])));
-
-// Get starting X position
-$startX = $pdf->GetX();
-$pageWidth = $pdf->GetPageWidth();
-$margin = 15;
-
-// Print right-aligned header info
-$lineHeight = 5;
-$labelWidth = 60;
-$valueWidth = 80;
-
-foreach ($headerData as $item) {
-    // Right align - calculate position
-    $x = $pageWidth - $margin - $valueWidth;
-
-    $pdf->SetXY($x - $labelWidth, $pdf->GetY());
-    $pdf->SetFont('Helvetica', '', 9);
-    $pdf->Cell($labelWidth, $lineHeight, $item[0], 0, 0, 'R');
-
-    $pdf->SetFont('Helvetica', 'B', 10);
-    $pdf->SetTextColor(26, 26, 26);
-    $pdf->Cell($valueWidth, $lineHeight, $item[1], 0, 1, 'L');
-
-    $pdf->SetTextColor(123, 143, 163);
-}
-
-// Add border line
-$pdf->SetDrawColor(229, 231, 235);
-$pdf->Line(15, $pdf->GetY() + 3, $pdf->GetPageWidth() - 15, $pdf->GetY() + 3);
 $pdf->Ln(8);
 
-// ===== SECTION 1: SCOPE OF WORK =====
-$pdf->SetFont('Helvetica', 'B', 12);
-$pdf->SetTextColor(26, 26, 26);
-$pdf->Cell(10, 10, '1', 0, 0, 'C');
-$pdf->Cell(0, 10, 'Scope of Work', 0, 1, 'L');
+// ===== PROFESSIONAL HEADER INFO SECTION =====
+// Info box with professional styling
+$pdf->SetFillColor(245, 250, 247);
+$pdf->SetDrawColor(34, 197, 94);
+$pdf->SetLineWidth(0.8);
+$pdf->SetFont('helvetica', '', 10);
 
-$pdf->SetFont('Helvetica', '', 11);
-$pdf->SetTextColor(90, 107, 125);
-$pdf->MultiCell(0, 6, $agreement['Scope'], 0, 'L');
-$pdf->Ln(5);
+// Header info in 3-column layout
+$infoX = $pdf->GetX();
+$infoY = $pdf->GetY();
+$pdf->SetTextColor(22, 163, 74);
 
-// ===== SECTION 2: DELIVERABLES & TIMELINE =====
-$pdf->SetFont('Helvetica', 'B', 12);
-$pdf->SetTextColor(26, 26, 26);
-$pdf->Cell(10, 10, '2', 0, 0, 'C');
-$pdf->Cell(0, 10, 'Deliverables & Timeline', 0, 1, 'L');
+// Freelancer info
+$pdf->SetFont('helvetica', 'B', 9);
+$pdf->Cell(50, 6, 'FREELANCER', 0, 0, 'L', true);
+$pdf->SetFont('helvetica', '', 10);
+$pdf->SetTextColor(0, 0, 0);
+$pdf->Cell(70, 6, $freelancer_name, 0, 0, 'L', true);
 
-$pdf->SetFont('Helvetica', '', 11);
-$pdf->SetTextColor(90, 107, 125);
-$pdf->MultiCell(0, 6, $agreement['Deliverables'], 0, 'L');
-$pdf->Ln(5);
+// Client info
+$pdf->SetFont('helvetica', 'B', 9);
+$pdf->SetTextColor(22, 163, 74);
+$pdf->Cell(35, 6, 'CLIENT', 0, 0, 'L', true);
+$pdf->SetFont('helvetica', '', 10);
+$pdf->SetTextColor(0, 0, 0);
+$pdf->Cell(0, 6, $client_name, 0, 1, 'L', true);
 
-// ===== SECTION 3: PAYMENT TERMS =====
-$pdf->SetFont('Helvetica', 'B', 12);
-$pdf->SetTextColor(26, 26, 26);
-$pdf->Cell(10, 10, '3', 0, 0, 'C');
-$pdf->Cell(0, 10, 'Payment Terms', 0, 1, 'L');
+// Date row
+$pdf->SetFont('helvetica', 'B', 9);
+$pdf->SetTextColor(22, 163, 74);
+$pdf->Cell(50, 6, 'DATE', 0, 0, 'L', true);
+$pdf->SetFont('helvetica', '', 10);
+$pdf->SetTextColor(0, 0, 0);
+$pdf->Cell(70, 6, date('F j, Y', strtotime($agreement['SignedDate'] ?? 'now')), 0, 0, 'L', true);
 
-// Payment box background
-$pdf->SetFillColor(249, 250, 251);
-$pdf->SetDrawColor(229, 231, 235);
-$boxStartY = $pdf->GetY();
+$pdf->SetFont('helvetica', 'B', 9);
+$pdf->SetTextColor(22, 163, 74);
+$pdf->Cell(35, 6, 'AMOUNT', 0, 0, 'L', true);
+$pdf->SetFont('helvetica', 'B', 11);
+$pdf->SetTextColor(22, 163, 74);
+$pdf->Cell(0, 6, 'RM ' . number_format($agreement['PaymentAmount'], 2), 0, 1, 'L', true);
 
-$pdf->Cell(0, 8, 'Total Project Price: RM ' . number_format($agreement['PaymentAmount'], 2), 0, 1, 'L', true);
+// Bottom border for info box
+$pdf->SetDrawColor(34, 197, 94);
+$pdf->SetLineWidth(1.5);
+$pdf->Line(20, $pdf->GetY(), 190, $pdf->GetY());
+$pdf->Ln(8);
 
-$pdf->SetFont('Helvetica', '', 10);
-$pdf->SetTextColor(90, 107, 125);
-$pdf->MultiCell(0, 6, 'Payment will be released in milestones upon completion of deliverables.', 0, 'L', true);
+// ===== PROJECT DETAIL SECTION =====
+if (!empty($agreement['ProjectDetail'])) {
+    $pdf->SetFont('helvetica', '', 10);
+    $pdf->SetTextColor(50, 50, 50);
+    $pdf->SetFillColor(250, 250, 250);
+    $pdf->MultiCell(0, 5, $agreement['ProjectDetail'], 0, 'L', false);
+    $pdf->Ln(5);
+}
 
-$pdf->Ln(3);
+// ===== CONTENT SECTIONS WITH BETTER STYLING =====
+$sectionColor = array(34, 197, 94); // Green for section headers
+$textColor = array(0, 0, 0);
 
-// ===== SECTION 4: TERMS & CONDITIONS =====
-$pdf->SetFont('Helvetica', 'B', 12);
-$pdf->SetTextColor(26, 26, 26);
-$pdf->Cell(10, 10, '4', 0, 0, 'C');
-$pdf->Cell(0, 10, 'Terms & Conditions', 0, 1, 'L');
+// Enhanced function to create professional sections
+function createSection($pdf, $number, $title, $content, $bgColor, $textColor)
+{
+    // Section header with background
+    $pdf->SetFillColor($bgColor[0], $bgColor[1], $bgColor[2]);
+    $pdf->SetTextColor(255, 255, 255);
+    $pdf->SetFont('helvetica', 'B', 14);
+    $pdf->SetDrawColor(22, 163, 74);
+    $pdf->SetLineWidth(0.8);
 
-$pdf->SetFont('Helvetica', '', 11);
-$pdf->SetTextColor(90, 107, 125);
-$pdf->MultiCell(0, 6, $agreement['Terms'], 0, 'L');
+    // Header cell
+    $pdf->Cell(12, 9, $number, 1, 0, 'C', true);
+    $pdf->SetFont('helvetica', 'B', 12);
+    $pdf->Cell(0, 9, '  ' . strtoupper($title), 1, 1, 'L', true);
+
+    // Content area with border
+    $pdf->SetFont('helvetica', '', 10);
+    $pdf->SetTextColor($textColor[0], $textColor[1], $textColor[2]);
+    $pdf->SetDrawColor(34, 197, 94);
+    $pdf->SetLineWidth(0.5);
+    $pdf->SetFillColor(255, 255, 255);
+    $pdf->MultiCell(0, 5, $content, 1, 'L', false);
+    $pdf->Ln(6);
+}
+
+// SECTION 1: SCOPE OF WORK
+createSection($pdf, '1', 'Scope of Work', $agreement['Scope'], $sectionColor, $textColor);
+
+// SECTION 2: DELIVERABLES & TIMELINE
+createSection($pdf, '2', 'Deliverables & Timeline', $agreement['Deliverables'], $sectionColor, $textColor);
+
+// SECTION 3: PAYMENT TERMS
+$paymentText = 'Total Project Price: RM ' . number_format($agreement['PaymentAmount'], 2) . "\n\n" .
+    'Payment will be released in milestones upon completion of deliverables as per the agreed schedule.';
+createSection($pdf, '3', 'Payment Terms', $paymentText, $sectionColor, $textColor);
+
+// SECTION 4: TERMS & CONDITIONS
+createSection($pdf, '4', 'Terms & Conditions', $agreement['Terms'], $sectionColor, $textColor);
 
 // ===== SECTION 5: DIGITAL SIGNATURE =====
-$pdf->Ln(10);
-$pdf->SetFont('Helvetica', 'B', 12);
-$pdf->SetTextColor(26, 26, 26);
-$pdf->Cell(10, 10, '5', 0, 0, 'C');
-$pdf->Cell(0, 10, 'Freelancer Signature', 0, 1, 'L');
+$pdf->SetFillColor(22, 163, 74);
+$pdf->SetTextColor(255, 255, 255);
+$pdf->SetFont('helvetica', 'B', 14);
+$pdf->SetDrawColor(22, 163, 74);
+$pdf->SetLineWidth(0.8);
+$pdf->Cell(12, 9, '5', 1, 0, 'C', true);
+$pdf->SetFont('helvetica', 'B', 12);
+$pdf->Cell(0, 9, '  DIGITAL SIGNATURE', 1, 1, 'L', true);
 
-$pdf->Ln(5);
+$pdf->Ln(6);
 
 // Add signature image if it exists
 $signaturePath = null;
@@ -229,61 +245,71 @@ if (!empty($agreement['SignaturePath'])) {
 }
 
 if ($signaturePath && file_exists($signaturePath)) {
-    // Center the signature
-    $pdf->SetY($pdf->GetY());
-
-    // Signature box
-    $pdf->SetDrawColor(26, 26, 26);
-    $pdf->SetFillColor(255, 255, 255);
-    $boxWidth = 80;
-    $boxHeight = 50;
-
-    // Calculate center position
+    // Draw signature image centered
+    $boxWidth = 75;
+    $boxHeight = 35;
     $pageWidth = $pdf->GetPageWidth();
     $centerX = ($pageWidth - $boxWidth) / 2;
 
-    // Draw signature image
-    $pdf->Image($signaturePath, $centerX, $pdf->GetY(), $boxWidth, $boxHeight);
-    $pdf->SetY($pdf->GetY() + $boxHeight);
+    // Signature box with border
+    $pdf->SetDrawColor(34, 197, 94);
+    $pdf->SetLineWidth(0.5);
+    $pdf->Rect($centerX - 2, $pdf->GetY() - 2, $boxWidth + 4, $boxHeight + 4);
 
-    $pdf->Ln(3);
+    $pdf->Image($signaturePath, $centerX, $pdf->GetY(), $boxWidth, $boxHeight);
+    $pdf->SetY($pdf->GetY() + $boxHeight + 6);
 }
 
-// Signature line and name
-$pdf->SetFont('Helvetica', '', 10);
-$pdf->SetTextColor(90, 107, 125);
+// Professional signature block
+$pdf->SetFont('helvetica', '', 10);
+$pdf->SetTextColor(0, 0, 0);
+$pdf->SetDrawColor(22, 163, 74);
+$pdf->SetLineWidth(1.2);
 
 // Draw signature line
 $lineY = $pdf->GetY();
 $pageWidth = $pdf->GetPageWidth();
-$lineStartX = ($pageWidth - 100) / 2;
-$lineEndX = $lineStartX + 100;
+$lineStartX = ($pageWidth - 85) / 2;
+$pdf->Line($lineStartX, $lineY, $lineStartX + 85, $lineY);
 
-// Set position and draw line
-$pdf->SetXY($lineStartX, $lineY);
-$pdf->SetDrawColor(26, 26, 26);
-$pdf->Line($lineStartX, $lineY, $lineEndX, $lineY);
-
-$pdf->SetY($lineY + 3);
+$pdf->Ln(4);
 
 // Freelancer name
-$pdf->SetFont('Helvetica', '', 10);
-$pdf->SetTextColor(26, 26, 26);
+$pdf->SetFont('helvetica', 'B', 11);
 $freelancerSignatureName = !empty($agreement['FreelancerName']) ? $agreement['FreelancerName'] : 'Freelancer';
 $pdf->SetX($lineStartX);
-$pdf->Cell(100, 8, 'Freelancer Signature: ' . $freelancerSignatureName, 0, 1, 'C');
+$pdf->Cell(85, 7, $freelancerSignatureName, 0, 1, 'C');
 
-// Signature date
-$pdf->SetFont('Helvetica', '', 9);
-$pdf->SetTextColor(123, 143, 163);
+// Signature label
+$pdf->SetFont('helvetica', '', 9);
+$pdf->SetTextColor(80, 80, 80);
 $pdf->SetX($lineStartX);
-$pdf->Cell(100, 6, 'Signed on: ' . date('F j, Y', strtotime($agreement['SignedDate'])), 0, 1, 'C');
+$pdf->Cell(85, 5, 'Freelancer Signature', 0, 1, 'C');
 
-// Add footer
+$pdf->Ln(4);
+
+// Date signed with professional formatting
+$pdf->SetFont('helvetica', '', 9);
+$pdf->SetTextColor(80, 80, 80);
+$pdf->Cell(0, 5, 'Date: ' . date('F j, Y', strtotime($agreement['SignedDate'] ?? 'now')), 0, 1, 'C');
+
+// Add professional footer
 $pdf->Ln(10);
-$pdf->SetFont('Helvetica', '', 9);
-$pdf->SetTextColor(155, 160, 170);
-$pdf->Cell(0, 10, 'Agreement ID: ' . $agreement_id . ' | Generated on ' . date('F j, Y \a\t H:i A'), 0, 0, 'C');
+$pdf->SetFont('helvetica', '', 8);
+$pdf->SetTextColor(120, 120, 120);
+$pdf->SetDrawColor(34, 197, 94);
+$pdf->SetLineWidth(0.5);
+$pdf->Line(20, $pdf->GetY(), 190, $pdf->GetY());
+$pdf->Ln(3);
+
+// Professional footer text
+$footerText1 = 'Agreement ID: ' . $agreement_id . ' | Generated on ' . date('F j, Y \a\t H:i A');
+$pdf->Cell(0, 4, $footerText1, 0, 1, 'C');
+
+$footerText2 = 'This is a digitally signed agreement and is legally binding under the jurisdiction of Malaysia.';
+$pdf->SetFont('helvetica', '', 7);
+$pdf->SetTextColor(150, 150, 150);
+$pdf->Cell(0, 4, $footerText2, 0, 1, 'C');
 
 // Output PDF with clean filename
 $projectTitle = preg_replace('/[^a-zA-Z0-9_-]/', '_', $agreement['ProjectTitle']);
