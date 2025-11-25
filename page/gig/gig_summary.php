@@ -40,8 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $gigCategory = trim($_POST['gigCategory'] ?? '');
     $gigSubcategory = trim($_POST['gigSubcategory'] ?? '');
     $searchTags = trim($_POST['searchTags'] ?? '');
-    $minPrice = isset($_POST['minPrice']) ? floatval($_POST['minPrice']) : 0;
-    $maxPrice = isset($_POST['maxPrice']) ? floatval($_POST['maxPrice']) : 0;
+    $price = isset($_POST['price']) ? floatval($_POST['price']) : 0;
     $deliveryDays = intval($_POST['deliveryDays'] ?? 0);
     $standardDays = intval($_POST['standardDays'] ?? 0);
     $rushDeliveryDays = trim($_POST['rushDeliveryDays'] ?? '');
@@ -58,8 +57,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($gigDescription === '') {
         $errors[] = 'Gig description is required.';
     }
-    if ($minPrice <= 0 || $maxPrice <= 0 || $minPrice >= $maxPrice) {
-        $errors[] = 'Please provide a valid price range (minimum must be less than maximum).';
+    if ($price <= 0) {
+        $errors[] = 'Please provide a valid price (must be greater than 0).';
     }
     if ($deliveryDays <= 0 && $standardDays <= 0) {
         $errors[] = 'Please provide a delivery time.';
@@ -87,11 +86,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $createdAt = date('Y-m-d H:i:s');
         $rushDeliveryValue = ($rushDeliveryDays !== '') ? intval($rushDeliveryDays) : null;
         $additionalRevisionValue = ($additionalRevisionPrice !== '' && $additionalRevisionPrice !== null) ? intval($additionalRevisionPrice) : 0;
-        $minPriceValue = intval($minPrice);
-        $maxPriceValue = intval($maxPrice);
+        $priceValue = intval($price);
 
         try {
-            $stmt = $pdo->prepare("INSERT INTO gig (FreelancerID, Title, Category, Subcategory, SearchTags, Description, MinPrice, MaxPrice, DeliveryTime, RushDelivery, AdditionalRevision, RevisionCount, Image1Path, Image2Path, Image3Path, VideoPath, Status, CreatedAt, UpdatedAt) VALUES (:freelancer_id, :title, :category, :subcategory, :search_tags, :description, :min_price, :max_price, :delivery_time, :rush_delivery, :additional_revision, :revision_count, :image1_path, :image2_path, :image3_path, :video_path, :status, :created_at, :updated_at)");
+            $stmt = $pdo->prepare("INSERT INTO gig (FreelancerID, Title, Category, Subcategory, SearchTags, Description, Price, DeliveryTime, RushDelivery, AdditionalRevision, RevisionCount, Image1Path, Image2Path, Image3Path, VideoPath, Status, CreatedAt, UpdatedAt) VALUES (:freelancer_id, :title, :category, :subcategory, :search_tags, :description, :price, :delivery_time, :rush_delivery, :additional_revision, :revision_count, :image1_path, :image2_path, :image3_path, :video_path, :status, :created_at, :updated_at)");
             $stmt->execute([
                 ':freelancer_id' => $freelancerID,
                 ':title' => $gigTitle,
@@ -99,8 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':subcategory' => $gigSubcategory,
                 ':search_tags' => $searchTags,
                 ':description' => $gigDescription,
-                ':min_price' => $minPriceValue,
-                ':max_price' => $maxPriceValue,
+                ':price' => $priceValue,
                 ':delivery_time' => $deliveryTime,
                 ':rush_delivery' => $rushDeliveryValue,
                 ':additional_revision' => $additionalRevisionValue,
@@ -462,12 +459,8 @@ include '../../_head.php';
                 <h3>💰 Pricing & Delivery</h3>
                 <div class="summary-grid">
                     <div class="summary-card">
-                        <strong>Minimum Price</strong>
-                        <div class="summary-value" id="summaryMinPrice">MYR 0.00</div>
-                    </div>
-                    <div class="summary-card">
-                        <strong>Maximum Price</strong>
-                        <div class="summary-value" id="summaryMaxPrice">MYR 0.00</div>
+                        <strong>Price</strong>
+                        <div class="summary-value" id="summaryPrice">MYR 0.00</div>
                     </div>
                     <div class="summary-card">
                         <strong>Delivery Time</strong>
@@ -523,8 +516,7 @@ include '../../_head.php';
             <input type="hidden" name="gigCategory" id="inputGigCategory">
             <input type="hidden" name="gigSubcategory" id="inputGigSubcategory">
             <input type="hidden" name="searchTags" id="inputSearchTags">
-            <input type="hidden" name="minPrice" id="inputMinPrice">
-            <input type="hidden" name="maxPrice" id="inputMaxPrice">
+            <input type="hidden" name="price" id="inputPrice">
             <input type="hidden" name="deliveryDays" id="inputDeliveryDays">
             <input type="hidden" name="standardDays" id="inputStandardDays">
             <input type="hidden" name="rushDeliveryDays" id="inputRushDeliveryDays">
@@ -596,8 +588,7 @@ include '../../_head.php';
         const subcategory = overview.gigSubcategory || '';
         const tags = overview.searchTags || '';
 
-        const minPrice = parseInt(pricing.minPrice || 0, 10);
-        const maxPrice = parseInt(pricing.maxPrice || 0, 10);
+        const price = parseInt(pricing.price || 0, 10);
         const deliveryDays = pricing.deliveryDays || '';
         const standardDays = pricing.standardDays || '';
         const rushDays = pricing.rushDeliveryDays || '';
@@ -610,8 +601,7 @@ include '../../_head.php';
         document.getElementById('summarySubcategory').textContent = subcategory || '-';
         document.getElementById('summaryTags').textContent = tags || 'No tags added';
 
-        document.getElementById('summaryMinPrice').textContent = `MYR ${minPrice}`;
-        document.getElementById('summaryMaxPrice').textContent = `MYR ${maxPrice}`;
+        document.getElementById('summaryPrice').textContent = `MYR ${price}`;
         document.getElementById('summaryDeliveryTime').textContent = deliveryDays || standardDays || '-';
         document.getElementById('summaryRevisionsIncluded').textContent = revisions ? (revisions === 'unlimited' ? 'Unlimited' : revisions) : '-';
         document.getElementById('summaryRushDelivery').textContent = rushDays ? `${rushDays} day(s)` : 'Not available';
@@ -622,8 +612,7 @@ include '../../_head.php';
         document.getElementById('inputGigCategory').value = category;
         document.getElementById('inputGigSubcategory').value = subcategory;
         document.getElementById('inputSearchTags').value = tags;
-        document.getElementById('inputMinPrice').value = minPrice || '';
-        document.getElementById('inputMaxPrice').value = maxPrice || '';
+        document.getElementById('inputPrice').value = price || '';
         document.getElementById('inputDeliveryDays').value = deliveryDays || '';
         document.getElementById('inputStandardDays').value = standardDays || '';
         document.getElementById('inputRushDeliveryDays').value = rushDays || '';
@@ -635,7 +624,7 @@ include '../../_head.php';
         if (!title) missingFields.push('Gig Title');
         if (!category) missingFields.push('Category');
         if (!subcategory) missingFields.push('Subcategory');
-        if (!minPrice || !maxPrice || minPrice >= maxPrice) missingFields.push('Valid price range');
+        if (!price || price <= 0) missingFields.push('Valid price');
         if (!deliveryDays && !standardDays) missingFields.push('Delivery time');
         if (!revisions) missingFields.push('Revisions');
         if (!descriptionText) missingFields.push('Description');
