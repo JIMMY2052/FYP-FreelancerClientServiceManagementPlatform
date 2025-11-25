@@ -113,121 +113,28 @@ if (!$conversation_id) {
     exit();
 }
 
-// Generate PDF file for the agreement
-require_once __DIR__ . '/../vendor/tecnickcom/tcpdf/tcpdf.php';
-
-// Convert IDs to strings for the PDF metadata
-$sender_id_str = (string)$sender_id;
-$receiver_id_str = (string)$receiver_id;
-
-$pdf = new TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
-$pdf->SetCreator('Freelancer Client Service Management Platform');
-$pdf->SetAuthor('FYP Platform');
-$pdf->SetTitle('Agreement - ' . $agreement['ProjectTitle']);
-$pdf->SetSubject('Project Agreement');
-// Store message metadata in PDF keywords
-$pdf->SetKeywords('SenderID:' . $sender_id_str . ',ReceiverID:' . $receiver_id_str . ',ConversationID:' . $conversation_id);
-$pdf->SetMargins(15, 15, 15);
-$pdf->SetAutoPageBreak(true, 15);
-$pdf->AddPage();
-
-// Add agreement content to PDF
-$pdf->SetFont('times', 'B', 32);
-$pdf->SetTextColor(45, 85, 255);
-$pdf->Cell(0, 15, 'PROJECT AGREEMENT', 0, 1, 'L');
-
-$pdf->SetFont('times', '', 10);
-$pdf->SetTextColor(120, 120, 120);
-$pdf->Cell(0, 6, 'Professional Service Contract', 0, 1, 'L');
-
-$pdf->SetDrawColor(45, 85, 255);
-$pdf->SetLineWidth(1);
-$pdf->Line(15, $pdf->GetY(), 195, $pdf->GetY());
-$pdf->Ln(8);
-
-// Info Grid
-$pdf->SetFont('times', '', 10);
-$colWidth = 85;
-$pdf->SetFillColor(245, 248, 255);
-$pdf->SetDrawColor(200, 215, 255);
-$pdf->SetLineWidth(0.5);
-
-$pdf->SetFont('times', 'B', 9);
-$pdf->SetTextColor(45, 85, 255);
-$pdf->Cell($colWidth, 6, 'FREELANCER', 0, 0, 'L', true);
-$pdf->SetFont('times', '', 10);
-$pdf->SetTextColor(30, 30, 30);
-$pdf->Cell(0, 6, $agreement['FreelancerName'], 0, 1, 'L', true);
-
-$pdf->SetFont('times', 'B', 9);
-$pdf->SetTextColor(45, 85, 255);
-$pdf->Cell($colWidth, 6, 'CLIENT', 0, 0, 'L', true);
-$pdf->SetFont('times', '', 10);
-$pdf->SetTextColor(30, 30, 30);
-$pdf->Cell(0, 6, $agreement['ClientName'], 0, 1, 'L', true);
-
-$pdf->Ln(2);
-$pdf->SetFillColor(248, 250, 255);
-$pdf->SetFont('times', 'B', 9);
-$pdf->SetTextColor(45, 85, 255);
-$pdf->Cell($colWidth, 6, 'DATE SIGNED', 0, 0, 'L', true);
-$pdf->SetFont('times', '', 10);
-$pdf->SetTextColor(30, 30, 30);
-$pdf->Cell(0, 6, date('M d, Y', strtotime($agreement['SignedDate'] ?? 'now')), 0, 1, 'L', true);
-
-$pdf->SetFont('times', 'B', 9);
-$pdf->SetTextColor(45, 85, 255);
-$pdf->Cell($colWidth, 6, 'PROJECT VALUE', 0, 0, 'L', true);
-$pdf->SetFont('times', 'B', 11);
-$pdf->SetTextColor(45, 85, 255);
-$pdf->Cell(0, 6, 'RM ' . number_format($agreement['PaymentAmount'], 2), 0, 1, 'L', true);
-
-$pdf->Ln(6);
-
-// Content sections
-$pdf->SetFont('times', 'B', 14);
-$pdf->SetTextColor(30, 30, 30);
-$pdf->SetFillColor(240, 242, 247);
-$pdf->SetDrawColor(45, 85, 255);
-$pdf->SetLineWidth(0.5);
-$pdf->Cell(0, 8, 'Project: ' . $agreement['ProjectTitle'], 0, 1, 'L', true);
-$pdf->Ln(4);
-
-// Sections
-$sections = [
-    '1' => ['SCOPE OF WORK', $agreement['Scope']],
-    '2' => ['DELIVERABLES & TIMELINE', $agreement['Deliverables']],
-    '3' => ['TERMS & CONDITIONS', $agreement['Terms']]
-];
-
-foreach ($sections as $num => $section) {
-    $pdf->SetTextColor(45, 85, 255);
-    $pdf->SetFont('times', 'B', 12);
-    $pdf->SetDrawColor(45, 85, 255);
-    $pdf->SetLineWidth(0.8);
-    $pdf->Cell(0, 8, $num . '.  ' . strtoupper($section[0]), 'B', 1, 'L', false);
-
-    $pdf->SetFont('times', '', 10);
-    $pdf->SetTextColor(30, 30, 30);
-    $pdf->SetDrawColor(255, 255, 255);
-    $pdf->SetLineWidth(0);
-    $pdf->SetFillColor(255, 255, 255);
-    $pdf->MultiCell(0, 5, $section[1], 0, 'L', false);
-    $pdf->Ln(5);
+// Use the saved PDF path from the database
+// The PDF was already generated and saved when the agreement was created
+if (empty($agreement['SignaturePath'])) {
+    echo json_encode(['success' => false, 'message' => 'Agreement PDF not found. Please save the agreement first.']);
+    exit();
 }
 
-// Save PDF to messages directory
-$uploads_dir = __DIR__ . '/../uploads/messages/';
-if (!is_dir($uploads_dir)) {
-    mkdir($uploads_dir, 0755, true);
-}
+// Use the signature path as the PDF attachment (assuming it's stored with the agreement)
+// If you need a separate PDF path, update the agreement table schema to include a PDFPath column
+// For now, we'll use the agreement's signature path directory to locate the PDF
+$pdf_directory = __DIR__ . '/../uploads/signatures/';
+$pdf_filename = 'agreement_' . $agreement_id . '.pdf';
+$pdf_file_path = $pdf_directory . $pdf_filename;
 
-$pdf_filename = 'agreement_' . $agreement_id . '_' . time() . '.pdf';
-$pdf_file_path = $uploads_dir . $pdf_filename;
-$pdf->Output($pdf_file_path, 'F');
+// Check if the PDF exists
+if (!file_exists($pdf_file_path)) {
+    echo json_encode(['success' => false, 'message' => 'Agreement PDF file not found.']);
+    exit();
+}
 
 // Create web-accessible path for the attachment
-$attachment_web_path = '/uploads/messages/' . $pdf_filename;
+$attachment_web_path = '/uploads/signatures/' . $pdf_filename;
 
 // Build composite sender/receiver IDs (e.g., 'f1', 'c5')
 $prefix_sender = ($sender_type === 'freelancer') ? 'f' : 'c';
