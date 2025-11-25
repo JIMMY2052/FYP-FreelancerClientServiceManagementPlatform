@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 25, 2025 at 06:29 AM
+-- Generation Time: Nov 25, 2025 at 06:45 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 SET
@@ -74,6 +74,8 @@ CREATE TABLE
     `PaymentAmount` decimal(10, 2) DEFAULT NULL,
     `ProjectDetail` text DEFAULT NULL,
     `FreelancerName` varchar(255) DEFAULT NULL,
+    `ClientName` varchar(255) DEFAULT NULL,
+    `GigID` int (11) DEFAULT NULL,
     `SignaturePath` varchar(255) DEFAULT NULL
   ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
 
@@ -92,6 +94,8 @@ INSERT INTO
     `PaymentAmount`,
     `ProjectDetail`,
     `FreelancerName`,
+    `ClientName`,
+    `GigID`,
     `SignaturePath`
   )
 VALUES
@@ -106,6 +110,8 @@ VALUES
     1.00,
     'asdf',
     NULL,
+    NULL,
+    NULL,
     NULL
   ),
   (
@@ -118,6 +124,8 @@ VALUES
     'asdf',
     12.00,
     'asdf',
+    NULL,
+    NULL,
     NULL,
     NULL
   ),
@@ -132,6 +140,8 @@ VALUES
     1000.00,
     'The landing Page',
     NULL,
+    NULL,
+    NULL,
     NULL
   ),
   (
@@ -144,6 +154,8 @@ VALUES
     'asdfasdf',
     11111.00,
     'asdf',
+    NULL,
+    NULL,
     NULL,
     NULL
   ),
@@ -158,6 +170,8 @@ VALUES
     12.00,
     'asdfa',
     NULL,
+    NULL,
+    NULL,
     NULL
   ),
   (
@@ -170,6 +184,8 @@ VALUES
     'asdf',
     1.00,
     'asdfasdf',
+    NULL,
+    NULL,
     NULL,
     NULL
   ),
@@ -184,6 +200,8 @@ VALUES
     222.00,
     'dfasdf',
     NULL,
+    NULL,
+    NULL,
     NULL
   ),
   (
@@ -196,6 +214,8 @@ VALUES
     'asdf',
     111.00,
     'af',
+    NULL,
+    NULL,
     NULL,
     NULL
   ),
@@ -210,6 +230,8 @@ VALUES
     555.00,
     '阿斯顿法国红酒看来',
     NULL,
+    NULL,
+    NULL,
     NULL
   ),
   (
@@ -222,6 +244,8 @@ VALUES
     'ASDF',
     12.00,
     'ASDF',
+    NULL,
+    NULL,
     NULL,
     NULL
   ),
@@ -236,6 +260,8 @@ VALUES
     111.00,
     'asdf',
     'JIMMY CHAN KAH LOK',
+    NULL,
+    NULL,
     'signature_1763868278_69227e766c312.png'
   ),
   (
@@ -249,6 +275,8 @@ VALUES
     12.00,
     'asdf',
     'asdf',
+    NULL,
+    NULL,
     'signature_1763881238_6922b116571c4.png'
   ),
   (
@@ -262,6 +290,8 @@ VALUES
     12.35,
     'asdf',
     'JIMMY CHAN LOK',
+    NULL,
+    NULL,
     'signature_1763988455_692453e7f3eab.png'
   ),
   (
@@ -275,7 +305,84 @@ VALUES
     12.00,
     'asdf',
     'JIMMY CHAN LOK',
+    NULL,
+    NULL,
     'signature_1763989102_6924566e4fc47.png'
+  ),
+  (
+    15,
+    'adsf',
+    '2025-11-25',
+    'pending',
+    'asdf',
+    'asdf',
+    'asdf',
+    123.00,
+    'asdf',
+    'JIMMY CHAN LOK',
+    NULL,
+    NULL,
+    'signature_1764048741_69253f6509d6b.png'
+  ),
+  (
+    16,
+    'adsf',
+    '2025-11-25',
+    'pending',
+    'asdf',
+    'asdf',
+    'asdf',
+    123.00,
+    'asdf',
+    'JIMMY CHAN LOK',
+    NULL,
+    NULL,
+    'signature_1764048824_69253fb8af2a3.png'
+  ),
+  (
+    17,
+    'asdf',
+    '2025-11-25',
+    'pending',
+    'asdf',
+    'asdf',
+    'asdf',
+    112.00,
+    'asdf',
+    'asdf',
+    NULL,
+    NULL,
+    'signature_1764048853_69253fd51ef65.png'
+  ),
+  (
+    18,
+    'asdf',
+    '2025-11-25',
+    'pending',
+    'asdf',
+    'asdfa',
+    'sdf',
+    12.00,
+    'asdf',
+    'asdf',
+    NULL,
+    NULL,
+    'signature_1764048995_692540630583a.png'
+  ),
+  (
+    19,
+    'asdf',
+    '2025-11-25',
+    'pending',
+    'asdf',
+    'asdf',
+    'asdf',
+    12.00,
+    'asdf',
+    'JIMMY CHAN LOK',
+    NULL,
+    NULL,
+    'signature_1764049197_6925412de8dd8.png'
   );
 
 -- --------------------------------------------------------
@@ -869,7 +976,8 @@ ADD UNIQUE KEY `Email` (`Email`);
 --
 -- Indexes for table `agreement`
 --
-ALTER TABLE `agreement` ADD PRIMARY KEY (`AgreementID`);
+ALTER TABLE `agreement` ADD PRIMARY KEY (`AgreementID`),
+ADD KEY `idx_gig_id` (`GigID`);
 
 --
 -- Indexes for table `client`
@@ -967,7 +1075,7 @@ AUTO_INCREMENT = 2;
 -- AUTO_INCREMENT for table `agreement`
 --
 ALTER TABLE `agreement` MODIFY `AgreementID` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 15;
+AUTO_INCREMENT = 20;
 
 --
 -- AUTO_INCREMENT for table `client`
@@ -1035,6 +1143,11 @@ AUTO_INCREMENT = 5;
 --
 -- Constraints for dumped tables
 --
+--
+-- Constraints for table `agreement`
+--
+ALTER TABLE `agreement` ADD CONSTRAINT `agreement_ibfk_gig` FOREIGN KEY (`GigID`) REFERENCES `gig` (`GigID`) ON DELETE SET NULL;
+
 --
 -- Constraints for table `freelancerskill`
 --

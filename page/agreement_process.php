@@ -28,6 +28,8 @@ $deliverables = isset($_POST['deliverables']) ? trim($_POST['deliverables']) : '
 $payment = isset($_POST['payment']) ? floatval($_POST['payment']) : 0;
 $terms = isset($_POST['terms']) ? trim($_POST['terms']) : '';
 $freelancer_name = isset($_POST['freelancer_name']) ? trim($_POST['freelancer_name']) : '';
+$client_name = isset($_POST['client_name']) ? trim($_POST['client_name']) : '';
+$gig_id = isset($_POST['gig_id']) ? intval($_POST['gig_id']) : null;
 $signature_data = isset($_POST['signature_data']) ? $_POST['signature_data'] : '';
 
 // Validate required fields
@@ -59,6 +61,10 @@ if (empty($terms)) {
 
 if (empty($freelancer_name)) {
     $errors[] = "Freelancer name is required.";
+}
+
+if (empty($client_name)) {
+    $errors[] = "Client name is required.";
 }
 
 if (empty($signature_data)) {
@@ -96,8 +102,8 @@ if ($signature_data) {
 }
 
 // Insert agreement into database
-$sql = "INSERT INTO agreement (ProjectTitle, ProjectDetail, Scope, Deliverables, PaymentAmount, Terms, FreelancerName, SignaturePath, Status, SignedDate) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
+$sql = "INSERT INTO agreement (ProjectTitle, ProjectDetail, Scope, Deliverables, PaymentAmount, Terms, FreelancerName, ClientName, GigID, SignaturePath, Status, SignedDate) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
 
 $stmt = $conn->prepare($sql);
 
@@ -110,7 +116,7 @@ if (!$stmt) {
 // Bind parameters
 $status = 'pending';
 $stmt->bind_param(
-    'ssssdssss',
+    'ssssdsssiss',
     $project_title,
     $project_detail,
     $scope,
@@ -118,6 +124,8 @@ $stmt->bind_param(
     $payment,
     $terms,
     $freelancer_name,
+    $client_name,
+    $gig_id,
     $signature_filename,
     $status
 );
@@ -126,6 +134,19 @@ $stmt->bind_param(
 if ($stmt->execute()) {
     // Get the ID of the newly inserted agreement
     $agreement_id = $stmt->insert_id;
+
+    // Get target client/freelancer IDs from session
+    $sender_id = $_SESSION['user_id'];
+    $sender_type = $_SESSION['user_type'];
+    $receiver_id = isset($_SESSION['target_client_id']) ? $_SESSION['target_client_id'] : null;
+    $receiver_type = ($sender_type === 'freelancer') ? 'client' : 'freelancer';
+
+    // If no target client in session, try to fetch from database
+    if (!$receiver_id && isset($_POST['receiver_id'])) {
+        $receiver_id = intval($_POST['receiver_id']);
+    }
+
+    $conn->close();
 
     // Store agreement data in session
     $_SESSION['agreement'] = array(
@@ -137,15 +158,17 @@ if ($stmt->execute()) {
         'payment' => $payment,
         'terms' => $terms,
         'freelancer_name' => $freelancer_name,
+        'client_name' => $client_name,
         'signature_filename' => $signature_filename,
         'created_date' => date('Y-m-d H:i:s'),
-        'status' => 'pending'
+        'status' => 'pending',
+        'gig_id' => $gig_id
     );
 
     $_SESSION['success'] = "Agreement created successfully with ID: " . $agreement_id;
 
-    // Redirect to view the created agreement
-    header("Location: agreement_view.php?status=created");
+    // Redirect to view agreement with auto-send option
+    header("Location: agreement_view.php?status=created&agreement_id=" . $agreement_id . "&send_to_chat=1");
     exit();
 } else {
     $_SESSION['error'] = "Error creating agreement: " . $stmt->error;
@@ -155,4 +178,3 @@ if ($stmt->execute()) {
 
 // Close statement and connection
 $stmt->close();
-$conn->close();

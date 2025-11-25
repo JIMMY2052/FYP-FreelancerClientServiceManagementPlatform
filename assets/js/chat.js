@@ -412,7 +412,35 @@ class ChatApp {
                     if (msg.content || msg.attachmentPath) {
                         contentHTML = '<div class="message-bubble">';
                         if (msg.content) {
-                            contentHTML += `<div class="message-content">${this.escapeHtml(msg.content)}</div>`;
+                            // Check if content is JSON (agreement message)
+                            let parsedContent = null;
+                            try {
+                                parsedContent = JSON.parse(msg.content);
+                            } catch (e) {
+                                // Not JSON, treat as regular message
+                            }
+
+                            if (parsedContent && parsedContent.type === 'agreement') {
+                                // Render agreement message
+                                contentHTML += `
+                                    <div class="message-content agreement-message">
+                                        <div class="agreement-header">📋 Project Agreement</div>
+                                        <div class="agreement-details">
+                                            <p><strong>Project:</strong> ${this.escapeHtml(parsedContent.project_title)}</p>
+                                            <p><strong>Amount:</strong> RM ${parseFloat(parsedContent.payment_amount).toFixed(2)}</p>
+                                            <p><strong>Status:</strong> ${this.escapeHtml(parsedContent.status)}</p>
+                                        </div>
+                                        <form method="POST" action="/page/agreement_pdf.php" style="display: inline;">
+                                            <input type="hidden" name="agreement_id" value="${parsedContent.agreement_id}">
+                                            <button type="submit" class="btn-agreement-download">📥 Download PDF</button>
+                                        </form>
+                                        <a href="/page/agreement_view.php?agreement_id=${parsedContent.agreement_id}" class="btn-agreement-view">👁️ View Details</a>
+                                    </div>
+                                `;
+                            } else {
+                                // Regular message
+                                contentHTML += `<div class="message-content">${this.escapeHtml(msg.content)}</div>`;
+                            }
                         }
                         if (msg.attachmentPath) {
                             contentHTML += this.renderAttachment(msg.attachmentPath, msg.attachmentType, isSent);
@@ -440,7 +468,35 @@ class ChatApp {
                     if (msg.content || msg.attachmentPath) {
                         contentHTML = '<div class="message-bubble">';
                         if (msg.content) {
-                            contentHTML += `<div class="message-content">${this.escapeHtml(msg.content)}</div>`;
+                            // Check if content is JSON (agreement message)
+                            let parsedContent = null;
+                            try {
+                                parsedContent = JSON.parse(msg.content);
+                            } catch (e) {
+                                // Not JSON, treat as regular message
+                            }
+
+                            if (parsedContent && parsedContent.type === 'agreement') {
+                                // Render agreement message
+                                contentHTML += `
+                                    <div class="message-content agreement-message">
+                                        <div class="agreement-header">📋 Project Agreement</div>
+                                        <div class="agreement-details">
+                                            <p><strong>Project:</strong> ${this.escapeHtml(parsedContent.project_title)}</p>
+                                            <p><strong>Amount:</strong> RM ${parseFloat(parsedContent.payment_amount).toFixed(2)}</p>
+                                            <p><strong>Status:</strong> ${this.escapeHtml(parsedContent.status)}</p>
+                                        </div>
+                                        <form method="POST" action="/page/agreement_pdf.php" style="display: inline;">
+                                            <input type="hidden" name="agreement_id" value="${parsedContent.agreement_id}">
+                                            <button type="submit" class="btn-agreement-download">📥 Download PDF</button>
+                                        </form>
+                                        <a href="/page/agreement_view.php?agreement_id=${parsedContent.agreement_id}" class="btn-agreement-view">👁️ View Details</a>
+                                    </div>
+                                `;
+                            } else {
+                                // Regular message
+                                contentHTML += `<div class="message-content">${this.escapeHtml(msg.content)}</div>`;
+                            }
                         }
                         if (msg.attachmentPath) {
                             contentHTML += this.renderAttachment(msg.attachmentPath, msg.attachmentType, isSent);

@@ -29,6 +29,10 @@ if (isset($_SESSION['client_id'])) {
 
 // Get success message from redirect
 $showSuccess = isset($_GET['status']) && $_GET['status'] === 'created';
+
+// Get conversation ID from session or URL parameter for back navigation
+$conversation_id = isset($_GET['conversation_id']) ? intval($_GET['conversation_id']) : (isset($_SESSION['last_conversation_id']) ? $_SESSION['last_conversation_id'] : null);
+$chat_id = isset($_GET['chat_id']) ? $_GET['chat_id'] : (isset($_SESSION['current_chat_id']) ? $_SESSION['current_chat_id'] : null);
 ?>
 
 <!DOCTYPE html>
@@ -277,9 +281,16 @@ $showSuccess = isset($_GET['status']) && $_GET['status'] === 'created';
                 <input type="hidden" name="agreement_id" value="<?php echo $agreement_id; ?>">
                 <button type="submit" class="btn btn-primary">📥 Download as PDF</button>
             </form>
-            <a href="agreement.php" class="btn btn-secondary">
-                ← Back to Create Agreement
-            </a>
+            <button onclick="sendAgreementToChat()" class="btn btn-primary" id="sendChatBtn">💬 Send to Chat</button>
+            <?php if ($chat_id): ?>
+                <a href="messages.php?chatId=<?php echo urlencode($chat_id); ?>" class="btn btn-secondary">
+                    ← Back to Conversation
+                </a>
+            <?php else: ?>
+                <a href="agreement.php" class="btn btn-secondary">
+                    ← Back to Create Agreement
+                </a>
+            <?php endif; ?>
         </div>
 
         <!-- PREVIEW SECTION -->
@@ -358,6 +369,51 @@ $showSuccess = isset($_GET['status']) && $_GET['status'] === 'created';
         </div>
 
     </div>
+
+    <script>
+        // Send agreement PDF to chat
+        function sendAgreementToChat() {
+            const agreementId = <?php echo $agreement_id; ?>;
+            const sendBtn = document.getElementById('sendChatBtn');
+
+            // Show loading state
+            sendBtn.disabled = true;
+            const originalText = sendBtn.textContent;
+            sendBtn.textContent = '⏳ Sending...';
+
+            // Send request to send agreement to chat
+            const chatId = '<?php echo $chat_id; ?>';
+            fetch('send_agreement_to_chat.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'agreement_id=' + agreementId
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Agreement sent to chat successfully! 📤');
+                        // Redirect back to the conversation if we have a chat ID
+                        if (chatId) {
+                            window.location.href = 'messages.php?chatId=' + encodeURIComponent(chatId);
+                        } else {
+                            window.location.href = 'messages.php';
+                        }
+                    } else {
+                        alert('Error: ' + data.message);
+                        sendBtn.disabled = false;
+                        sendBtn.textContent = originalText;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error sending agreement to chat');
+                    sendBtn.disabled = false;
+                    sendBtn.textContent = originalText;
+                });
+        }
+    </script>
 
 </body>
 
