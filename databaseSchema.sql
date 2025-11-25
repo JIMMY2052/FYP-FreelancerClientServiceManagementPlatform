@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 23, 2025 at 02:31 AM
+-- Generation Time: Nov 25, 2025 at 06:29 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 SET
@@ -224,6 +224,58 @@ VALUES
     'ASDF',
     NULL,
     NULL
+  ),
+  (
+    11,
+    'asdf',
+    '2025-11-23',
+    'pending',
+    'asdf',
+    'asdf',
+    'asdf',
+    111.00,
+    'asdf',
+    'JIMMY CHAN KAH LOK',
+    'signature_1763868278_69227e766c312.png'
+  ),
+  (
+    12,
+    'asdf',
+    '2025-11-23',
+    'pending',
+    'asdf',
+    'asdfa',
+    'asdf',
+    12.00,
+    'asdf',
+    'asdf',
+    'signature_1763881238_6922b116571c4.png'
+  ),
+  (
+    13,
+    'asdf',
+    '2025-11-24',
+    'pending',
+    'asdf',
+    'asdf',
+    'asdf',
+    12.35,
+    'asdf',
+    'JIMMY CHAN LOK',
+    'signature_1763988455_692453e7f3eab.png'
+  ),
+  (
+    14,
+    'dsf',
+    '2025-11-24',
+    'pending',
+    'asdf',
+    'asdf',
+    'asdf',
+    12.00,
+    'asdf',
+    'JIMMY CHAN LOK',
+    'signature_1763989102_6924566e4fc47.png'
   );
 
 -- --------------------------------------------------------
@@ -346,6 +398,28 @@ VALUES
     'client',
     '2025-11-19 07:29:22',
     '2025-11-21 17:06:04',
+    'active',
+    NULL
+  ),
+  (
+    12,
+    1,
+    'freelancer',
+    2,
+    'client',
+    '2025-11-23 06:10:41',
+    '2025-11-23 06:34:33',
+    'active',
+    NULL
+  ),
+  (
+    13,
+    1,
+    'freelancer',
+    1,
+    'client',
+    '2025-11-23 06:21:39',
+    '2025-11-23 06:25:09',
     'active',
     NULL
   );
@@ -512,14 +586,16 @@ CREATE TABLE
     `Subcategory` varchar(100) NOT NULL,
     `SearchTags` varchar(100) NOT NULL,
     `Description` text NOT NULL,
-    `MinPrice` int (11) NOT NULL,
-    `MaxPrice` int (11) NOT NULL,
+    `Price` int (11) NOT NULL,
     `DeliveryTime` int (11) NOT NULL,
     `RushDelivery` int (11) DEFAULT NULL,
+    `RushDeliveryPrice` int (11) NOT NULL,
     `AdditionalRevision` int (11) DEFAULT NULL,
     `RevisionCount` int (11) NOT NULL,
-    `ThumnailUrl` varchar(255) DEFAULT NULL,
-    `GalleryUrl` text NOT NULL,
+    `Image1Path` varchar(255) NOT NULL,
+    `Image2Path` varchar(255) DEFAULT NULL,
+    `Image3Path` varchar(255) DEFAULT NULL,
+    `VideoPath` varchar(255) DEFAULT NULL,
     `Status` enum ('active', 'paused', 'deleted') NOT NULL,
     `CreatedAt` datetime NOT NULL,
     `UpdatedAt` datetime DEFAULT NULL
@@ -563,7 +639,7 @@ VALUES
     'asdf',
     12.00,
     '2025-11-14',
-    '',
+    'available',
     '2025-11-19'
   ),
   (
@@ -573,8 +649,18 @@ VALUES
     'asdf',
     888.00,
     '2025-11-15',
-    '',
+    'available',
     '2025-11-19'
+  ),
+  (
+    3,
+    2,
+    'asdf',
+    'asdf',
+    123.00,
+    '2025-11-24',
+    'available',
+    '2025-11-23'
   );
 
 -- --------------------------------------------------------
@@ -642,6 +728,28 @@ VALUES
     NULL,
     '2025-11-22 01:06:04',
     'unread'
+  ),
+  (
+    100,
+    13,
+    'c1',
+    'f1',
+    'hi',
+    NULL,
+    NULL,
+    '2025-11-23 14:25:09',
+    'unread'
+  ),
+  (
+    101,
+    12,
+    'c2',
+    'f1',
+    'I am interested in your project: \"asdf\". I would like to discuss more about this opportunity.',
+    NULL,
+    NULL,
+    '2025-11-23 14:34:33',
+    'unread'
   );
 
 -- --------------------------------------------------------
@@ -700,147 +808,6 @@ CREATE TABLE
     `CreatedAt` timestamp NOT NULL DEFAULT current_timestamp(),
     `ExpiresAt` timestamp NOT NULL DEFAULT current_timestamp()
   ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
-
---
--- Dumping data for table `password_reset`
---
-INSERT INTO
-  `password_reset` (
-    `ResetID`,
-    `Email`,
-    `UserType`,
-    `OTP`,
-    `IsUsed`,
-    `CreatedAt`,
-    `ExpiresAt`
-  )
-VALUES
-  (
-    1,
-    'jimmychankahlok66@gmail.com',
-    'freelancer',
-    '006705',
-    0,
-    '2025-11-21 14:01:51',
-    '2025-11-21 14:16:51'
-  ),
-  (
-    2,
-    'jimmckl-wm22@student.tarc.edu.my',
-    'client',
-    '572138',
-    0,
-    '2025-11-21 14:06:08',
-    '2025-11-21 14:21:08'
-  ),
-  (
-    3,
-    'jimmyckl-wm22@student.tarc.edu.my',
-    'client',
-    '922350',
-    0,
-    '2025-11-21 14:15:39',
-    '2025-11-21 14:30:39'
-  ),
-  (
-    4,
-    'jc636094@gmail.com',
-    'client',
-    '431403',
-    0,
-    '2025-11-21 14:19:10',
-    '2025-11-21 14:34:10'
-  ),
-  (
-    5,
-    'jimmyckl-wm22@student.tarc.edu.my',
-    'client',
-    '341262',
-    0,
-    '2025-11-21 14:20:50',
-    '2025-11-21 14:35:50'
-  ),
-  (
-    6,
-    'jimmyckl-wm22@student.tarc.edu.my',
-    'client',
-    '398954',
-    0,
-    '2025-11-21 14:34:26',
-    '2025-11-21 14:49:26'
-  ),
-  (
-    7,
-    'jimmyckl-wm22@student.tarc.edu.my',
-    'client',
-    '851045',
-    0,
-    '2025-11-21 14:43:02',
-    '2025-11-21 14:58:02'
-  ),
-  (
-    8,
-    'jimmyckl-wm22@student.tarc.edu.my',
-    'client',
-    '374651',
-    0,
-    '2025-11-21 14:43:10',
-    '2025-11-21 14:58:10'
-  ),
-  (
-    9,
-    'jimmyckl-wm22@student.tarc.edu.my',
-    'client',
-    '586047',
-    0,
-    '2025-11-21 14:45:57',
-    '2025-11-21 15:00:57'
-  ),
-  (
-    10,
-    'jimmyckl-wm22@student.tarc.edu.my',
-    'client',
-    '486703',
-    0,
-    '2025-11-21 15:10:17',
-    '2025-11-21 15:25:17'
-  ),
-  (
-    11,
-    'jimmyckl-wm22@student.tarc.edu.my',
-    'client',
-    '927736',
-    0,
-    '2025-11-21 15:10:21',
-    '2025-11-21 15:25:21'
-  ),
-  (
-    12,
-    'jimmyckl-wm22@student.tarc.edu.my',
-    'client',
-    '618723',
-    0,
-    '2025-11-21 15:14:24',
-    '2025-11-21 15:29:24'
-  ),
-  (
-    13,
-    'jimmyckl-wm22@student.tarc.edu.my',
-    'client',
-    '652139',
-    0,
-    '2025-11-21 15:14:28',
-    '2025-11-21 15:29:28'
-  ),
-  (
-    14,
-    'jimmyckl-wm22@student.tarc.edu.my',
-    'client',
-    '727507',
-    1,
-    '2025-11-21 15:14:55',
-    '2025-11-21 15:29:55'
-  );
 
 -- --------------------------------------------------------
 --
@@ -1000,7 +967,7 @@ AUTO_INCREMENT = 2;
 -- AUTO_INCREMENT for table `agreement`
 --
 ALTER TABLE `agreement` MODIFY `AgreementID` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 11;
+AUTO_INCREMENT = 15;
 
 --
 -- AUTO_INCREMENT for table `client`
@@ -1012,7 +979,7 @@ AUTO_INCREMENT = 4;
 -- AUTO_INCREMENT for table `conversation`
 --
 ALTER TABLE `conversation` MODIFY `ConversationID` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 12;
+AUTO_INCREMENT = 14;
 
 --
 -- AUTO_INCREMENT for table `freelancer`
@@ -1029,13 +996,13 @@ ALTER TABLE `gig` MODIFY `GigID` int (11) NOT NULL AUTO_INCREMENT;
 -- AUTO_INCREMENT for table `job`
 --
 ALTER TABLE `job` MODIFY `JobID` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 3;
+AUTO_INCREMENT = 4;
 
 --
 -- AUTO_INCREMENT for table `message`
 --
 ALTER TABLE `message` MODIFY `MessageID` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 100;
+AUTO_INCREMENT = 102;
 
 --
 -- AUTO_INCREMENT for table `message_notification`
