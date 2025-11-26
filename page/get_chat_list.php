@@ -19,6 +19,9 @@ $composite_user_id = $prefix_user . $user_id;
 
 if ($user_type === 'freelancer') {
     // Get conversations for freelancer - only conversations they're part of
+    // Handles both conversation patterns:
+    // 1. User1ID = freelancer, User2ID = client (old pattern)
+    // 2. User1ID = client, User2ID = freelancer (new pattern from agreements)
     $query = "
         SELECT 
             c.ClientID as user_id,
@@ -35,13 +38,18 @@ if ($user_type === 'freelancer') {
              WHERE m.ConversationID = conv.ConversationID
              ORDER BY m.Timestamp DESC LIMIT 1), conv.LastMessageAt, conv.CreatedAt) as lastMessageTime
         FROM conversation conv
-        INNER JOIN client c ON c.ClientID = conv.User2ID AND conv.User2Type = 'client'
-        WHERE conv.User1ID = ? AND conv.User1Type = 'freelancer' AND (conv.Status = 'active' OR conv.Status IS NULL)
+        INNER JOIN client c ON 
+            (c.ClientID = conv.User2ID AND conv.User2Type = 'client') OR
+            (c.ClientID = conv.User1ID AND conv.User1Type = 'client')
+        WHERE 
+            (conv.User1ID = ? AND conv.User1Type = 'freelancer') OR
+            (conv.User2ID = ? AND conv.User2Type = 'freelancer')
+        AND (conv.Status = 'active' OR conv.Status IS NULL)
         ORDER BY lastMessageTime DESC
     ";
 
     $stmt = $conn->prepare($query);
-    $stmt->bind_param("i", $user_id);
+    $stmt->bind_param("ii", $user_id, $user_id);
     $stmt->execute();
     $result = $stmt->get_result();
 
@@ -64,6 +72,9 @@ if ($user_type === 'freelancer') {
     $stmt->close();
 } else {
     // Get conversations for client - only conversations they're part of
+    // Handles both conversation patterns:
+    // 1. User1ID = freelancer, User2ID = client (old pattern)
+    // 2. User1ID = client, User2ID = freelancer (new pattern from agreements)
     $query = "
         SELECT 
             f.FreelancerID as user_id,
@@ -80,13 +91,18 @@ if ($user_type === 'freelancer') {
              WHERE m.ConversationID = conv.ConversationID
              ORDER BY m.Timestamp DESC LIMIT 1), conv.LastMessageAt, conv.CreatedAt) as lastMessageTime
         FROM conversation conv
-        INNER JOIN freelancer f ON f.FreelancerID = conv.User1ID AND conv.User1Type = 'freelancer'
-        WHERE conv.User2ID = ? AND conv.User2Type = 'client' AND (conv.Status = 'active' OR conv.Status IS NULL)
+        INNER JOIN freelancer f ON 
+            (f.FreelancerID = conv.User1ID AND conv.User1Type = 'freelancer') OR
+            (f.FreelancerID = conv.User2ID AND conv.User2Type = 'freelancer')
+        WHERE 
+            (conv.User2ID = ? AND conv.User2Type = 'client') OR
+            (conv.User1ID = ? AND conv.User1Type = 'client')
+        AND (conv.Status = 'active' OR conv.Status IS NULL)
         ORDER BY lastMessageTime DESC
     ";
 
     $stmt = $conn->prepare($query);
-    $stmt->bind_param("i", $user_id);
+    $stmt->bind_param("ii", $user_id, $user_id);
     $stmt->execute();
     $result = $stmt->get_result();
 
