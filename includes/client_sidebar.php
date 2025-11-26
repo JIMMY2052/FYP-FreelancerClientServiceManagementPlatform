@@ -3,17 +3,35 @@
 $current_page = basename($_SERVER['PHP_SELF']);
 ?>
 <style>
+    .sidebar-logo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 20px;
+        border-bottom: 1px solid #e0e0e0;
+        margin-bottom: 5px;
+    }
+
+    .sidebar-logo a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+    }
+
     .logo-img {
-        width: 40px;
-        height: 40px;
+        width: 50px;
+        height: 50px;
         object-fit: contain;
+        display: block;
     }
 </style>
 <!-- Sidebar -->
 <aside class="sidebar">
     <div class="sidebar-logo">
-        <img src="../images/logo.png" alt="WorkSnyc Logo" class="logo-img">
-        <h1 class="logo-text">WorkSnyc</h1>
+        <a href="../client_home.php">
+            <img src="../images/logo.png" alt="WorkSnyc Logo" class="logo-img">
+        </a>
     </div>
     <nav class="sidebar-nav">
         <a href="client_dashboard.php" class="nav-item <?php echo ($current_page === 'client_dashboard.php') ? 'active' : ''; ?>">
