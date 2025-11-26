@@ -478,21 +478,12 @@ if ($application_id) {
                         }
                     }
                 </style>
-                    <div style="text-align: center;">
+                <div style="text-align: center;">
                     <div style="font-size: 3rem; margin-bottom: 16px;">✅</div>
                     <h2 style="font-size: 1.5rem; color: #1a1a1a; margin-bottom: 12px; font-weight: 700;">Sign & Accept Application?</h2>
-                    <p style="color: #666; font-size: 1rem; line-height: 1.6; margin-bottom: 20px;">
+                    <p style="color: #666; font-size: 1rem; line-height: 1.6; margin-bottom: 30px;">
                         By signing this agreement, you confirm that you accept the freelancer's application and authorize the project funds to be held in escrow until completion.
                     </p>
-                    <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 16px; margin-bottom: 20px; text-align: left;">
-                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-                            <span style="font-size: 1.5rem;">🔒</span>
-                            <strong style="color: #856404;">Escrow Protection</strong>
-                        </div>
-                        <p style="margin: 0; color: #856404; font-size: 0.9rem; line-height: 1.5;">
-                            <strong>RM <?= number_format($job_data['JobBudget'], 2) ?></strong> will be deducted from your wallet balance and held securely in escrow. The funds will be released to the freelancer upon project completion and your approval.
-                        </p>
-                    </div>
                     <div style="display: flex; gap: 12px; justify-content: center;">
                         <button id="confirmCancel" type="button" style="
                             padding: 12px 28px;
