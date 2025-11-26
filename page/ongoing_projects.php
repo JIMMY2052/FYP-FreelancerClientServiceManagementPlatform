@@ -34,11 +34,15 @@ if ($user_type === 'client') {
                 f.Rating,
                 e.EscrowID,
                 e.Amount as EscrowAmount,
-                e.Status as EscrowStatus
+                e.Status as EscrowStatus,
+                ws.SubmissionID,
+                ws.Status as SubmissionStatus,
+                ws.SubmittedAt
             FROM agreement a
             JOIN freelancer f ON a.FreelancerID = f.FreelancerID
             LEFT JOIN escrow e ON e.OrderID = a.AgreementID
-            WHERE a.ClientID = ? AND a.Status = 'ongoing'
+            LEFT JOIN work_submissions ws ON ws.AgreementID = a.AgreementID AND ws.Status = 'pending_review'
+            WHERE a.ClientID = ? AND (a.Status = 'ongoing' OR a.Status = 'pending_review')
             ORDER BY a.FreelancerSignedDate DESC";
     
     $stmt = $conn->prepare($sql);
@@ -64,7 +68,7 @@ if ($user_type === 'client') {
             FROM agreement a
             JOIN client c ON a.ClientID = c.ClientID
             LEFT JOIN escrow e ON e.OrderID = a.AgreementID
-            WHERE a.FreelancerID = ? AND a.Status = 'ongoing'
+            WHERE a.FreelancerID = ? AND (a.Status = 'ongoing' OR a.Status = 'pending_review')
             ORDER BY a.FreelancerSignedDate DESC";
     
     $stmt = $conn->prepare($sql);
@@ -406,6 +410,36 @@ $conn->close();
             box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
         }
 
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+            box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+        }
+
+        .status-indicator {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-left: 10px;
+        }
+
+        .status-ongoing {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-pending-review {
+            background: #fff3cd;
+            color: #856404;
+        }
+
         .empty-state {
             text-align: center;
             padding: 80px 20px;
@@ -516,7 +550,12 @@ $conn->close();
                     <div class="project-card">
                         <div class="project-header">
                             <div class="project-title">
-                                <h3><?= htmlspecialchars($project['ProjectTitle']) ?></h3>
+                                <h3>
+                                    <?= htmlspecialchars($project['ProjectTitle']) ?>
+                                    <span class="status-indicator status-<?= str_replace('_', '-', strtolower($project['Status'])) ?>">
+                                        <?= $project['Status'] === 'pending_review' ? '⏳ Pending Review' : '🚀 In Progress' ?>
+                                    </span>
+                                </h3>
                                 <div class="project-id">Agreement #<?= $project['AgreementID'] ?></div>
                             </div>
                             <div class="status-badge">Ongoing</div>
@@ -604,9 +643,14 @@ $conn->close();
                             <a href="messages.php?<?= $user_type === 'client' ? 'freelancer_id=' . $project['FreelancerID'] : 'client_id=' . $project['ClientID'] ?>" class="btn btn-primary">
                                 💬 Message
                             </a>
-                            <?php if ($user_type === 'freelancer'): ?>
+                            <?php if ($user_type === 'freelancer' && $project['Status'] === 'ongoing'): ?>
                                 <a href="submit_work.php?agreement_id=<?= $project['AgreementID'] ?>" class="btn btn-success">
                                     ✅ Submit Work
+                                </a>
+                            <?php endif; ?>
+                            <?php if ($user_type === 'client' && $project['Status'] === 'pending_review' && !empty($project['SubmissionID'])): ?>
+                                <a href="review_work.php?submission_id=<?= $project['SubmissionID'] ?>" class="btn btn-warning">
+                                    👀 Review Work
                                 </a>
                             <?php endif; ?>
                         </div>

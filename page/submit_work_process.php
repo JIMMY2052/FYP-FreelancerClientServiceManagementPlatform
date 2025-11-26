@@ -1,4 +1,7 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 session_start();
 
 // Check if user is logged in and is a freelancer
@@ -142,7 +145,7 @@ try {
     $stmt->close();
 
     // Update agreement status to 'pending_review'
-    $sql = "UPDATE agreement SET Status = 'pending_review', UpdatedAt = NOW() WHERE AgreementID = ?";
+    $sql = "UPDATE agreement SET Status = 'pending_review' WHERE AgreementID = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param('i', $agreement_id);
     $stmt->execute();
@@ -176,6 +179,10 @@ try {
         }
     }
 
+    // Log detailed error for debugging
+    error_log('Work submission error: ' . $e->getMessage());
+    error_log('Stack trace: ' . $e->getTraceAsString());
+    
     $_SESSION['error'] = 'Failed to submit work. Please try again. Error: ' . $e->getMessage();
     header('Location: submit_work.php?agreement_id=' . $agreement_id);
     exit();

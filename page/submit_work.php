@@ -56,6 +56,26 @@ include '../_head.php';
 ?>
 
 <style>
+    .alert {
+        padding: 15px 20px;
+        margin: 20px auto;
+        max-width: 900px;
+        border-radius: 8px;
+        font-weight: 500;
+    }
+    
+    .alert-success {
+        background: #d4edda;
+        border: 1px solid #c3e6cb;
+        color: #155724;
+    }
+    
+    .alert-error {
+        background: #f8d7da;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+    }
+    
     .submit-container {
         max-width: 900px;
         margin: 40px auto;
@@ -396,6 +416,20 @@ include '../_head.php';
         }
     }
 </style>
+
+<?php if (isset($_SESSION['error'])): ?>
+    <div class="alert alert-error">
+        <?= htmlspecialchars($_SESSION['error']) ?>
+        <?php unset($_SESSION['error']); ?>
+    </div>
+<?php endif; ?>
+
+<?php if (isset($_SESSION['success'])): ?>
+    <div class="alert alert-success">
+        <?= htmlspecialchars($_SESSION['success']) ?>
+        <?php unset($_SESSION['success']); ?>
+    </div>
+<?php endif; ?>
 
 <div class="submit-container">
     <a href="ongoing_projects.php" class="back-link">

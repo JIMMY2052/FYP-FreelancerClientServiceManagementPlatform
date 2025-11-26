@@ -231,6 +231,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         error_log("Failed to update job application status: " . $update_app_stmt->error);
     }
     $update_app_stmt->close();
+    
+    // Update job status to 'processing' when agreement is created and funds are locked
+    $update_job_sql = "UPDATE job SET Status = 'processing' WHERE JobID = ?";
+    $update_job_stmt = $conn->prepare($update_job_sql);
+    $update_job_stmt->bind_param('i', $job_id);
+    
+    if ($update_job_stmt->execute()) {
+        error_log("Job #$job_id status updated to 'processing'");
+    } else {
+        error_log("Failed to update job status to processing: " . $update_job_stmt->error);
+    }
+    $update_job_stmt->close();
     // ===== END ESCROW FUNCTIONALITY =====
 
     // Create uploads directory if it doesn't exist
