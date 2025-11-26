@@ -10,6 +10,7 @@ body {
     font-family: 'Momo Trust Display', sans-serif;
     background: linear-gradient(135deg, #f0fde8 0%, #e6fdd5 100%);
     min-height: 100vh;
+    display: flex;
     align-items: center;
     justify-content: center;
     padding: 20px;
