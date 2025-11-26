@@ -387,7 +387,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $pdf->SetDrawColor(255, 255, 255);
     $pdf->SetLineWidth(0);
     $pdf->SetFillColor(255, 255, 255);
-    $pdf->MultiCell(0, 5, !empty($agreement['Deliverables']) ? $agreement['Deliverables'] : 'As agreed upon during project discussion', 0, 'L', false);
+    $pdf->MultiCell(0, 5, !empty($deliverables) ? $deliverables : 'As agreed upon during project discussion', 0, 'L', false);
     $pdf->Ln(5);
 
     // ===== PAYMENT TERMS SECTION =====
@@ -397,8 +397,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $pdf->SetLineWidth(0.3);
     $pdf->Cell(0, 8, '3.  PAYMENT TERMS', 'B', 1, 'L', false);
 
-    $paymentText = 'Project Value: RM ' . number_format($agreement['PaymentAmount'], 2) . "\n" .
-        'Delivery Time: ' . $agreement['DeliveryTime'] . ' days' . "\n" .
+    $paymentText = 'Project Value: RM ' . number_format($job_budget, 2) . "\n" .
+        'Delivery Time: ' . $delivery_time . ' days' . "\n" .
         'Payment Schedule: To be completed upon milestone deliveries as agreed.';
 
     $pdf->SetFont('times', '', 10);
