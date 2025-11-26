@@ -38,6 +38,7 @@ if ($application_id) {
                 j.Budget as JobBudget,
                 j.ClientID,
                 j.Deadline,
+                j.DeliveryTime,
                 CONCAT(f.FirstName, ' ', f.LastName) as FreelancerName,
                 c.CompanyName as ClientName
             FROM job_application ja
@@ -151,8 +152,7 @@ if ($application_id) {
                     </div>
                     <div class="section-content">
                         <div id="pDeliver" class="section-content">
-                            <strong>Deadline:</strong> <?= date('M d, Y', strtotime($job_data['Deadline'])) ?><br>
-                            <strong>Estimated Duration:</strong> <?= htmlspecialchars($job_data['EstimatedDuration']) ?>
+                            To be completed upon milestone deliveries as agreed.
                         </div>
                     </div>
                 </div>
@@ -165,11 +165,9 @@ if ($application_id) {
                     </div>
                     <div class="section-content">
                         <div class="payment-box">
-                            <div class="payment-total">
-                                <span class="payment-label">Total Project Price:</span>
-                                <span class="payment-amount" id="pPayment">RM <?= number_format($job_data['JobBudget'], 2) ?></span>
-                            </div>
-                            <div id="pPaymentInfo" class="section-content">Payment will be held in escrow until project completion, then released to the freelancer upon client approval.</div>
+                            <div class="payment-item"><strong>Project Value:</strong> RM <?= number_format($job_data['JobBudget'], 2) ?></div>
+                            <div class="payment-item"><strong>Delivery Time:</strong> <?= htmlspecialchars($job_data['DeliveryTime']) ?> days</div>
+                            <div class="payment-item"><strong>Payment Schedule:</strong> To be completed upon milestone deliveries as agreed.</div>
                         </div>
                     </div>
                 </div>
@@ -234,11 +232,14 @@ if ($application_id) {
                     <label for="scope">Scope of Work</label>
                     <textarea name="scope" rows="3" id="scope" class="readonly-field" readonly><?= htmlspecialchars($job_data['JobDescription']) ?></textarea>
 
-                    <label for="deliverables">Deliverables & Timeline</label>
-                    <textarea name="deliverables" rows="3" id="deliverables" class="readonly-field" readonly><?= htmlspecialchars($job_data['EstimatedDuration']) ?></textarea>
+                    <label for="deliverables">Deliverables</label>
+                    <textarea name="deliverables" rows="3" id="deliverables" class="readonly-field" readonly>To be completed upon milestone deliveries as agreed.</textarea>
 
                     <label for="payment">Payment Amount (RM)</label>
                     <input type="number" name="payment" id="payment" class="readonly-field" value="<?= htmlspecialchars($job_data['JobBudget']) ?>" step="0.01" readonly>
+
+                    <label for="deliveryTime">Delivery Time (Days)</label>
+                    <input type="number" name="delivery_time" id="deliveryTime" class="readonly-field" value="<?= htmlspecialchars($job_data['DeliveryTime']) ?>" readonly>
 
                     <label for="terms">Terms & Conditions</label>
                     <textarea name="terms" rows="4" id="terms" class="readonly-field" readonly>Payment upon project completion. Freelancer agrees to meet all deliverables within the agreed timeline.</textarea>
@@ -266,7 +267,7 @@ if ($application_id) {
                         <input type="hidden" name="freelancer_name" value="<?= htmlspecialchars($job_data['FreelancerName']) ?>">
                         <input type="hidden" name="application_id" value="<?= $application_id ?>">
                         <input type="hidden" name="job_id" value="<?= htmlspecialchars($job_data['JobID']) ?>">
-                        <input type="hidden" name="delivery_time" value="<?= htmlspecialchars($job_data['EstimatedDuration']) ?>">
+                        <input type="hidden" name="delivery_time" value="<?= htmlspecialchars($job_data['DeliveryTime']) ?>">
                         <input type="hidden" name="signature" id="signatureData">
 
                         <div class="signature-note" id="signatureNote" style="display: none;">
