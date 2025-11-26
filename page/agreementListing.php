@@ -15,7 +15,7 @@ require_once 'config.php';
 
 // Get filter parameter
 $status_filter = isset($_GET['status']) ? $_GET['status'] : 'all';
-$valid_statuses = ['all', 'to_accept', 'ongoing', 'completed', 'declined', 'cancelled', 'disputed'];
+$valid_statuses = ['all', 'to_accept', 'ongoing', 'completed', 'declined', 'cancelled', 'disputed', 'expired'];
 
 if (!in_array($status_filter, $valid_statuses)) {
     $status_filter = 'all';
@@ -23,6 +23,14 @@ if (!in_array($status_filter, $valid_statuses)) {
 
 // Build query based on user type
 $conn = getDBConnection();
+
+// Update expired agreements - check if to_accept agreements have passed their expiration date
+$update_expired_sql = "UPDATE agreement 
+                       SET Status = 'expired' 
+                       WHERE Status = 'to_accept' 
+                       AND ExpiredDate IS NOT NULL 
+                       AND ExpiredDate < NOW()";
+$conn->query($update_expired_sql);
 
 // First, fetch ALL agreements (without status filter) to count by status
 if ($user_type === 'client') {
@@ -139,6 +147,8 @@ function getStatusClass($status)
             return 'status-cancelled';
         case 'disputed':
             return 'status-disputed';
+        case 'expired':
+            return 'status-expired';
         default:
             return 'status-unknown';
     }
@@ -160,13 +170,15 @@ function getStatusLabel($status)
             return 'Cancelled';
         case 'disputed':
             return 'Disputed';
+        case 'expired':
+            return 'Expired';
         default:
             return 'Unknown';
     }
 }
 
 // Count agreements by status (from ALL agreements, not filtered)
-$counts = ['all' => 0, 'to_accept' => 0, 'ongoing' => 0, 'completed' => 0, 'declined' => 0, 'cancelled' => 0, 'disputed' => 0];
+$counts = ['all' => 0, 'to_accept' => 0, 'ongoing' => 0, 'completed' => 0, 'declined' => 0, 'cancelled' => 0, 'disputed' => 0, 'expired' => 0];
 foreach ($all_agreements_for_count as $agreement) {
     $counts['all']++;
     if (isset($counts[$agreement['Status']])) {
@@ -323,6 +335,11 @@ include '../_head.php';
     .status-disputed {
         background: #f5c6cb;
         color: #721c24;
+    }
+
+    .status-expired {
+        background: #ccc;
+        color: #555;
     }
 
     .status-unknown {
@@ -783,13 +800,13 @@ include '../_head.php';
             <i class="fas fa-times-circle"></i> Declined
             <span class="tab-count"><?= $counts['declined'] ?></span>
         </button>
-        <button class="filter-tab <?= $status_filter === 'cancelled' ? 'active' : '' ?>" onclick="window.location.href='?status=cancelled'">
-            <i class="fas fa-ban"></i> Cancelled
-            <span class="tab-count"><?= $counts['cancelled'] ?></span>
-        </button>
         <button class="filter-tab <?= $status_filter === 'disputed' ? 'active' : '' ?>" onclick="window.location.href='?status=disputed'">
             <i class="fas fa-exclamation-circle"></i> Disputed
             <span class="tab-count"><?= $counts['disputed'] ?></span>
+        </button>
+        <button class="filter-tab <?= $status_filter === 'expired' ? 'active' : '' ?>" onclick="window.location.href='?status=expired'">
+            <i class="fas fa-clock"></i> Expired
+            <span class="tab-count"><?= $counts['expired'] ?></span>
         </button>
     </div>
 
@@ -837,32 +854,30 @@ include '../_head.php';
                                 <div class="detail-label">Created</div>
                                 <div class="detail-value date"><?= date('M d, Y', strtotime($agreement['CreatedDate'])) ?></div>
                             </div>
-                            <?php if ($agreement['ClientSignedDate']): ?>
-                                <div class="detail-item">
-                                    <div class="detail-label">Client Signed</div>
-                                    <div class="detail-value date"><?= date('M d, Y', strtotime($agreement['ClientSignedDate'])) ?></div>
-                                </div>
-                            <?php endif; ?>
-                            <?php if ($agreement['FreelancerSignedDate']): ?>
-                                <div class="detail-item">
-                                    <div class="detail-label">Freelancer Signed</div>
-                                    <div class="detail-value date"><?= date('M d, Y', strtotime($agreement['FreelancerSignedDate'])) ?></div>
-                                </div>
-                            <?php endif; ?>
+                            <div class="detail-item">
+                                <div class="detail-label">Client Signed</div>
+                                <div class="detail-value date"><?= $agreement['ClientSignedDate'] ? date('M d, Y', strtotime($agreement['ClientSignedDate'])) : '-' ?></div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Freelancer Signed</div>
+                                <div class="detail-value date"><?= $agreement['FreelancerSignedDate'] ? date('M d, Y', strtotime($agreement['FreelancerSignedDate'])) : '-' ?></div>
+                            </div>
                         </div>
 
                         <!-- Expiration Warning -->
                         <?php
-                        if ($agreement['ExpiredDate']) {
-                            $now = new DateTime();
-                            $expiration = new DateTime($agreement['ExpiredDate']);
-                            $interval = $now->diff($expiration);
-                            $hoursUntilExpiry = ($interval->days * 24) + $interval->h;
+                        if ($agreement['Status'] !== 'declined') {
+                            if ($agreement['ExpiredDate']) {
+                                $now = new DateTime();
+                                $expiration = new DateTime($agreement['ExpiredDate']);
+                                $interval = $now->diff($expiration);
+                                $hoursUntilExpiry = ($interval->days * 24) + $interval->h;
 
-                            if ($now > $expiration) {
-                                echo '<div class="expiration-warning">⚠️ Agreement has expired</div>';
-                            } elseif ($hoursUntilExpiry <= 48) {
-                                echo '<div class="expiration-warning" data-expiry-date="' . $agreement['ExpiredDate'] . '">⏰ Expires in <span class="hours-remaining">' . $hoursUntilExpiry . '</span> hour(s)</div>';
+                                if ($now > $expiration) {
+                                    echo '<div class="expiration-warning">⚠️ Agreement has expired</div>';
+                                } elseif ($hoursUntilExpiry <= 48) {
+                                    echo '<div class="expiration-warning" data-expiry-date="' . $agreement['ExpiredDate'] . '">⏰ Expires in <span class="hours-remaining">' . $hoursUntilExpiry . '</span> hour(s)</div>';
+                                }
                             }
                         }
                         ?>
@@ -907,6 +922,8 @@ include '../_head.php';
                     echo 'No cancelled agreements';
                 } elseif ($status_filter === 'disputed') {
                     echo 'No disputed agreements';
+                } elseif ($status_filter === 'expired') {
+                    echo 'No expired agreements';
                 } else {
                     echo 'Start creating agreements to manage your projects';
                 }
