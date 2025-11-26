@@ -735,6 +735,8 @@ $_title = 'Payment Details - WorkSnyc Platform';
     <script>
         const totalAmount = <?= $totalAmount ?>;
         const walletBalance = <?= $walletBalance ?>;
+        const gigId = <?= $gigId ?>;
+        const rushDelivery = <?= $rushDelivery ? 1 : 0 ?>;
 
         function togglePaymentButton() {
             const checkbox = document.getElementById('agreeTerms');
@@ -759,17 +761,50 @@ $_title = 'Payment Details - WorkSnyc Platform';
                 return;
             }
 
+            // Confirm payment
+            if (!confirm('Confirm payment of RM ' + totalAmount.toFixed(2) + '? Funds will be held in escrow until work is completed and approved.')) {
+                return;
+            }
+
             // Show loading state
             const paymentBtn = document.getElementById('paymentBtn');
             paymentBtn.disabled = true;
-            paymentBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            paymentBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing Payment...';
 
-            // TODO: Implement actual payment processing
-            // For now, redirect to a success page or process the order
-            setTimeout(() => {
-                alert('Payment will be processed. Redirecting...');
-                // window.location.href = 'payment_success.php?gig_id=<?= $gigId ?>&rush=<?= $rushDelivery ? '1' : '0' ?>';
-            }, 1500);
+            // Process payment via AJAX
+            const formData = new FormData();
+            formData.append('gig_id', gigId);
+            formData.append('rush_delivery', rushDelivery);
+            formData.append('agreed_terms', 1);
+
+            fetch('process_gig_payment.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show success message
+                    alert(data.message + ' Agreement ID: #' + data.agreement_id);
+                    // Redirect to agreements page
+                    window.location.href = '../agreementListing.php';
+                } else {
+                    // Show error message
+                    alert('Payment failed: ' + data.message);
+                    // Reset button
+                    paymentBtn.disabled = false;
+                    paymentBtn.innerHTML = '<i class="fas fa-lock"></i> Pay with Wallet';
+                    // Uncheck terms
+                    document.getElementById('agreeTerms').checked = false;
+                }
+            })
+            .catch(error => {
+                console.error('Payment error:', error);
+                alert('An error occurred during payment processing. Please try again.');
+                // Reset button
+                paymentBtn.disabled = false;
+                paymentBtn.innerHTML = '<i class="fas fa-lock"></i> Pay with Wallet';
+            });
         }
     </script>
 </body>

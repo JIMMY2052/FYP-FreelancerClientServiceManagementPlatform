@@ -40,10 +40,13 @@ if ($action === 'reject' && empty($review_notes)) {
 $conn = getDBConnection();
 
 // Verify submission belongs to this client and is pending review
-$sql = "SELECT ws.SubmissionID, ws.Status, a.PaymentAmount, a.ProjectTitle 
+$sql = "SELECT ws.SubmissionID, ws.Status, a.PaymentAmount, a.ProjectTitle, ja.JobID 
         FROM work_submissions ws
         JOIN agreement a ON ws.AgreementID = a.AgreementID
-        WHERE ws.SubmissionID = ? AND ws.ClientID = ? AND ws.Status = 'pending_review'";
+        LEFT JOIN job_application ja ON ja.FreelancerID = ws.FreelancerID AND ja.Status = 'accepted'
+        WHERE ws.SubmissionID = ? AND ws.ClientID = ? AND ws.Status = 'pending_review'
+        ORDER BY ja.ApplicationDate DESC
+        LIMIT 1";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param('ii', $submission_id, $client_id);
 $stmt->execute();
@@ -60,6 +63,7 @@ if ($result->num_rows === 0) {
 $submission = $result->fetch_assoc();
 $payment_amount = $submission['PaymentAmount'];
 $project_title = $submission['ProjectTitle'];
+$job_id = $submission['JobID'];
 $stmt->close();
 
 // Begin transaction
@@ -84,6 +88,17 @@ try {
         $stmt->bind_param('i', $agreement_id);
         $stmt->execute();
         $stmt->close();
+        
+        // 2b. Update job status to 'completed' if JobID exists
+        if (!empty($job_id)) {
+            $sql = "UPDATE job SET Status = 'completed' WHERE JobID = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param('i', $job_id);
+            if (!$stmt->execute()) {
+                error_log("Failed to update job status to completed: " . $stmt->error);
+            }
+            $stmt->close();
+        }
         
         // 2b. Update job status to 'completed'
         $sql = "UPDATE job j 
