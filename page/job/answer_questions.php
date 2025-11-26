@@ -198,7 +198,7 @@ include '../../_head.php';
         </div>
 
         <div class="form-buttons">
-            <a href="job_details.php?job_id=<?= $jobID ?>" class="back-btn">
+            <a href="javascript:history.back()" class="back-btn">
                 <i class="fas fa-arrow-left"></i>
                 Back
             </a>
@@ -219,7 +219,7 @@ include '../../_head.php';
         </div>
         
         <div class="form-buttons">
-            <a href="job_details.php?job_id=<?= $jobID ?>" class="back-btn">
+            <a href="javascript:history.back()" class="back-btn">
                 <i class="fas fa-arrow-left"></i>
                 Back
             </a>

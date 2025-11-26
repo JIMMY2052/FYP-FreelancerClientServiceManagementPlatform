@@ -13,16 +13,22 @@ require_once '../config.php';
 
 $conn = getDBConnection();
 
+// Get freelancer ID
+$freelancerID = $_SESSION['user_id'];
+
 // read filters from GET
 $q = trim($_GET['q'] ?? '');
 $min_budget = isset($_GET['min_budget']) && $_GET['min_budget'] !== '' ? floatval($_GET['min_budget']) : null;
 $max_budget = isset($_GET['max_budget']) && $_GET['max_budget'] !== '' ? floatval($_GET['max_budget']) : null;
 $sort = $_GET['sort'] ?? 'newest';
 
-// build query - only show available jobs
+// build query - only show available jobs that the freelancer hasn't applied to
 $sql = "SELECT JobID, ClientID, Title, Description, Budget, Deadline, Status, PostDate
         FROM job
-        WHERE Status = 'available'";
+        WHERE Status = 'available'
+        AND JobID NOT IN (
+            SELECT JobID FROM job_application WHERE FreelancerID = ?
+        )";
 
 $params = [];
 $types = '';
@@ -51,21 +57,29 @@ if ($max_budget !== null) {
 if ($sort === 'highest') {
     $sql .= " ORDER BY Budget DESC, PostDate DESC";
 } else { // newest (default)
-    $sql .= " ORDER BY PostDate DESC";
-}
-
 // limit
 $sql .= " LIMIT 100";
 
+// Prepare params array with freelancerID as first parameter
+$allParams = [$freelancerID];
+$allTypes = 'i';
+
+// Add filter params
+foreach ($params as $param) {
+    $allParams[] = $param;
+}
+$allTypes .= $types;
+
 $stmt = $conn->prepare($sql);
-if ($types !== '') {
-    // bind dynamically
-    $bind_names[] = $types;
-    for ($i = 0; $i < count($params); $i++) {
-        $bind_name = 'bind' . $i;
-        $$bind_name = $params[$i];
-        $bind_names[] = &$$bind_name;
-    }
+// bind dynamically
+$bind_names = [$allTypes];
+for ($i = 0; $i < count($allParams); $i++) {
+    $bind_name = 'bind' . $i;
+    $$bind_name = $allParams[$i];
+    $bind_names[] = &$$bind_name;
+}
+call_user_func_array([$stmt, 'bind_param'], $bind_names);
+$stmt->execute();
     call_user_func_array([$stmt, 'bind_param'], $bind_names);
 }
 $stmt->execute();
@@ -115,7 +129,7 @@ $jobs = $result->fetch_all(MYSQLI_ASSOC);
 
                     <div class="project-actions">
                         <a href="job_details.php?id=<?php echo $job['JobID']; ?>" class="btn-small">View Details</a>
-                        <a href="/page/job/apply/applyJob.php?id=<?php echo $job['JobID']; ?>" class="btn-small">Apply</a>
+                        <a href="answer_questions.php?job_id=<?php echo $job['JobID']; ?>" class="btn-small">Apply</a>
                     </div>
                 </div>
             <?php endforeach; ?>

@@ -18,7 +18,7 @@ $newJobID = $_SESSION['new_job_id'] ?? null;
 $conn = getDBConnection();
 
 // Fetch all jobs for this client
-$stmt = $conn->prepare("SELECT JobID, Title, Description, Budget, Deadline, Status, PostDate FROM job WHERE ClientID = ? ORDER BY PostDate DESC");
+$stmt = $conn->prepare("SELECT JobID, Title, Description, Budget, Deadline, Status, PostDate FROM job WHERE ClientID = ? AND Status != 'deleted' ORDER BY PostDate DESC");
 $stmt->bind_param("i", $clientID);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -88,9 +88,9 @@ $stmt->close();
                     </div>
 
                     <div class="job-card-footer">
-                        <a href="/job/view/jobDetails.php?id=<?php echo $job['JobID']; ?>" class="btn-small">View Details</a>
-                        <a href="/job/edit/editJob.php?id=<?php echo $job['JobID']; ?>" class="btn-small">Edit</a>
-                        <a href="/job/delete/deleteJob.php?id=<?php echo $job['JobID']; ?>" class="btn-small btn-danger" onclick="return confirm('Are you sure?');">Delete</a>
+                        <a href="/page/job/client_job_details.php?id=<?php echo $job['JobID']; ?>" class="btn-small">View Details</a>
+                        <a href="/page/job/editJob.php?id=<?php echo $job['JobID']; ?>" class="btn-small">Edit</a>
+                        <a href="/page/job/deleteJob.php?id=<?php echo $job['JobID']; ?>" class="btn-small btn-danger" onclick="return confirm('Are you sure you want to delete this job?');">Delete</a>
                     </div>
                 </div>
             <?php endforeach; ?>

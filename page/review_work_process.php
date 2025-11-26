@@ -45,7 +45,7 @@ $sql = "SELECT ws.SubmissionID, ws.Status, a.PaymentAmount, a.ProjectTitle, ja.J
         JOIN agreement a ON ws.AgreementID = a.AgreementID
         LEFT JOIN job_application ja ON ja.FreelancerID = ws.FreelancerID AND ja.Status = 'accepted'
         WHERE ws.SubmissionID = ? AND ws.ClientID = ? AND ws.Status = 'pending_review'
-        ORDER BY ja.ApplicationDate DESC
+        ORDER BY ja.AppliedAt DESC
         LIMIT 1";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param('ii', $submission_id, $client_id);
@@ -99,18 +99,6 @@ try {
             }
             $stmt->close();
         }
-        
-        // 2b. Update job status to 'completed'
-        $sql = "UPDATE job j 
-                JOIN agreement a ON j.JobID = (SELECT JobID FROM job_application WHERE FreelancerID = ? AND JobID IN (SELECT JobID FROM job WHERE ClientID = ?)) 
-                SET j.Status = 'completed' 
-                WHERE a.AgreementID = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param('iii', $freelancer_id, $client_id, $agreement_id);
-        if (!$stmt->execute()) {
-            error_log("Failed to update job status to completed: " . $stmt->error);
-        }
-        $stmt->close();
         
         // 3. Release escrow funds to freelancer
         // Get escrow record
