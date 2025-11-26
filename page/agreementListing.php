@@ -61,6 +61,7 @@ if ($user_type === 'client') {
                 a.ClientSignedDate,
                 a.FreelancerSignedDate,
                 a.ExpiredDate,
+                a.agreeementPath,
                 CONCAT(f.FirstName, ' ', f.LastName) as FreelancerName,
                 f.ProfilePicture as FreelancerProfilePic,
                 c.CompanyName as ClientName
@@ -87,6 +88,7 @@ if ($user_type === 'client') {
                 a.ClientSignedDate,
                 a.FreelancerSignedDate,
                 a.ExpiredDate,
+                a.agreeementPath,
                 CONCAT(f.FirstName, ' ', f.LastName) as FreelancerName,
                 f.ProfilePicture as FreelancerProfilePic,
                 c.CompanyName as ClientName
@@ -469,6 +471,17 @@ include '../_head.php';
         background: #dee2e6;
     }
 
+    .btn-decline {
+        background: #e74c3c;
+        color: white;
+    }
+
+    .btn-decline:hover {
+        background: #c0392b;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
+    }
+
     .empty-state {
         text-align: center;
         padding: 60px 20px;
@@ -517,6 +530,112 @@ include '../_head.php';
         color: #856404;
     }
 
+    /* Modal Styles */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-overlay.active {
+        display: flex;
+    }
+
+    .modal-dialog {
+        background: white;
+        border-radius: 12px;
+        padding: 30px;
+        max-width: 400px;
+        width: 90%;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .modal-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .modal-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: #f8d7da;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+        font-size: 24px;
+    }
+
+    .modal-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #2c3e50;
+        margin: 0;
+    }
+
+    .modal-body {
+        margin-bottom: 25px;
+        color: #7f8c8d;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    .modal-footer {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+    }
+
+    .modal-btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .modal-btn-cancel {
+        background: #e9ecef;
+        color: #2c3e50;
+    }
+
+    .modal-btn-cancel:hover {
+        background: #dee2e6;
+    }
+
+    .modal-btn-confirm {
+        background: #e74c3c;
+        color: white;
+    }
+
+    .modal-btn-confirm:hover {
+        background: #c0392b;
+    }
+
     @media (max-width: 768px) {
         .agreements-grid {
             grid-template-columns: 1fr;
@@ -545,6 +664,68 @@ include '../_head.php';
 </style>
 
 <script>
+    // Decline agreement function
+    function declineAgreement(agreementId) {
+        showDeclineModal(agreementId);
+    }
+
+    // Show decline confirmation modal
+    function showDeclineModal(agreementId) {
+        const modal = document.getElementById('declineModal');
+        const confirmBtn = document.getElementById('confirmDeclineBtn');
+
+        modal.classList.add('active');
+
+        confirmBtn.onclick = function() {
+            confirmDecline(agreementId);
+        };
+    }
+
+    // Close modal
+    function closeDeclineModal() {
+        const modal = document.getElementById('declineModal');
+        modal.classList.remove('active');
+    }
+
+    // Confirm decline action
+    function confirmDecline(agreementId) {
+        closeDeclineModal();
+
+        fetch('decline_agreement.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    agreement_id: agreementId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+
+    // Close modal when clicking overlay
+    document.addEventListener('DOMContentLoaded', function() {
+        const modal = document.getElementById('declineModal');
+        if (modal) {
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closeDeclineModal();
+                }
+            });
+        }
+
+        updateExpirationTimes();
+        setInterval(updateExpirationTimes, 2 * 60 * 1000);
+    });
+
     // Update expiration times every 2 minutes (120000 milliseconds)
     function updateExpirationTimes() {
         const expirationElements = document.querySelectorAll('.expiration-warning[data-expiry-date]');
@@ -568,13 +749,6 @@ include '../_head.php';
             }
         });
     }
-
-    // Initial update when page loads
-    document.addEventListener('DOMContentLoaded', function() {
-        updateExpirationTimes();
-        // Set interval to update every 2 minutes
-        setInterval(updateExpirationTimes, 2 * 60 * 1000);
-    });
 </script>
 
 <!-- Main Content -->
@@ -696,8 +870,8 @@ include '../_head.php';
 
                     <!-- Actions -->
                     <div class="card-actions">
-                        <a href="agreement_view.php?agreement_id=<?= $agreement['AgreementID'] ?>" class="btn btn-view">
-                            <i class="fas fa-eye"></i> View
+                        <a href="<?= htmlspecialchars($agreement['agreeementPath']) ?>" target="_blank" class="btn btn-view">
+                            <i class="fas fa-eye"></i> View PDF
                         </a>
                         <?php
                         // Show action buttons based on status and user type
@@ -705,6 +879,9 @@ include '../_head.php';
                             echo '<a href="freelancer_agreement_approval.php?agreement_id=' . $agreement['AgreementID'] . '" class="btn btn-sign">';
                             echo '<i class="fas fa-pen"></i> Review & Sign';
                             echo '</a>';
+                            echo '<button type="button" class="btn btn-decline" onclick="declineAgreement(' . $agreement['AgreementID'] . ')">';
+                            echo '<i class="fas fa-times"></i> Decline';
+                            echo '</button>';
                         }
                         ?>
                     </div>
@@ -738,6 +915,28 @@ include '../_head.php';
         </div>
     <?php endif; ?>
 </div>
+
+<!-- Decline Confirmation Modal -->
+<div class="modal-overlay" id="declineModal">
+    <div class="modal-dialog">
+        <div class="modal-header">
+            <div class="modal-icon">⚠️</div>
+            <h2 class="modal-title">Decline Agreement</h2>
+        </div>
+        <div class="modal-body">
+            Are you sure you want to decline this agreement? This action cannot be undone and the client will be notified.
+        </div>
+        <div class="modal-footer">
+            <button class="modal-btn modal-btn-cancel" onclick="closeDeclineModal()">
+                Cancel
+            </button>
+            <button class="modal-btn modal-btn-confirm" id="confirmDeclineBtn">
+                Yes, Decline
+            </button>
+        </div>
+    </div>
+</div>
+
 </body>
 
 </html>
