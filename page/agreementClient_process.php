@@ -216,6 +216,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $transaction_stmt->execute();
     $transaction_stmt->close();
     error_log("Wallet transaction recorded for escrow lock");
+
+    // Update job application status from 'pending' to 'accepted'
+    $update_app_sql = "UPDATE job_application SET Status = 'accepted', UpdatedAt = NOW() WHERE ApplicationID = ?";
+    $update_app_stmt = $conn->prepare($update_app_sql);
+    $update_app_stmt->bind_param('i', $application_id);
+    
+    if ($update_app_stmt->execute()) {
+        error_log("Job application #$application_id status updated to 'accepted'");
+    } else {
+        error_log("Failed to update job application status: " . $update_app_stmt->error);
+    }
+    $update_app_stmt->close();
     // ===== END ESCROW FUNCTIONALITY =====
 
     require_once '../vendor/autoload.php';
