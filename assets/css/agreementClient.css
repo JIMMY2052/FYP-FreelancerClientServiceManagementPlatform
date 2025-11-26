@@ -1,0 +1,84 @@
+.form-error {
+    border: 2px solid #dc3545 !important;
+    background-color: #fff5f5;
+}
+
+.readonly-field {
+    background-color: #f8f9fa;
+    cursor: not-allowed;
+}
+
+#confirmSignature {
+    background-color: #ccc;
+    color: #666;
+    cursor: not-allowed;
+    transition: all 0.3s ease;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+#confirmSignature:not(:disabled):hover {
+    background-color: #158a74;
+    box-shadow: 0 4px 12px rgba(26, 179, 148, 0.3);
+}
+
+#confirmSignature:disabled {
+    opacity: 0.6;
+}
+
+.header-back-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    background-color: #f0f1f3;
+    color: #333;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    z-index: 100;
+}
+
+.header-back-btn:hover {
+    background-color: #e0e2e8;
+    border-color: #999;
+}
+
+.header-back-btn:active {
+    transform: scale(0.98);
+}
+
+.btn-submit-green {
+    background-color: #ccc;
+    color: #666;
+    cursor: not-allowed;
+    transition: all 0.3s ease;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 15px;
+}
+
+.btn-submit-green:not(:disabled) {
+    background-color: #1ab394;
+    color: white;
+    cursor: pointer;
+}
+
+.btn-submit-green:not(:disabled):hover {
+    background-color: #158a74;
+    box-shadow: 0 4px 12px rgba(26, 179, 148, 0.3);
+}
+
+.btn-submit-green:disabled {
+    opacity: 0.6;
+}

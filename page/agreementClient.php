@@ -7,9 +7,15 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'client') {
     exit();
 }
 
+// Only allow POST requests
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    header('Location: my_applications.php');
+    exit();
+}
+
 $_title = 'Review & Sign Agreement';
 $client_id = $_SESSION['user_id'];
-$application_id = isset($_GET['application_id']) ? intval($_GET['application_id']) : null;
+$application_id = isset($_POST['application_id']) ? intval($_POST['application_id']) : null;
 
 require_once 'config.php';
 
@@ -72,93 +78,20 @@ if ($application_id) {
     <link rel="stylesheet" href="/assets/css/freelancer.css">
     <link rel="stylesheet" href="/assets/css/client.css">
     <link rel="stylesheet" href="../assets/css/agreement.css">
-    <style>
-        .form-error {
-            border: 2px solid #dc3545 !important;
-            background-color: #fff5f5;
-        }
-
-        .readonly-field {
-            background-color: #f8f9fa;
-            cursor: not-allowed;
-        }
-
-        #confirmSignature {
-            background-color: #ccc;
-            color: #666;
-            cursor: not-allowed;
-            transition: all 0.3s ease;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            font-weight: 600;
-        }
-
-        #confirmSignature:not(:disabled):hover {
-            background-color: #158a74;
-            box-shadow: 0 4px 12px rgba(26, 179, 148, 0.3);
-        }
-
-        #confirmSignature:disabled {
-            opacity: 0.6;
-        }
-    </style>
+    <link rel="stylesheet" href="../assets/css/agreementClient.css">
 </head>
 
 <body>
-    <header class="main-header">
-        <div class="header-container">
-            <div class="header-logo">
-                <a href="<?php
-                            if (isset($_SESSION['user_id']) && isset($_SESSION['user_type'])) {
-                                if ($_SESSION['user_type'] === 'freelancer') {
-                                    echo '/freelancer_home.php';
-                                } else {
-                                    echo '/client_home.php';
-                                }
-                            } else {
-                                echo '/index.php';
-                            }
-                            ?>">
-                    <img src="/images/logo.png" alt="Freelancer Platform Logo" class="logo-img">
-                </a>
-            </div>
-            <nav class="header-nav">
-                <?php if (isset($_SESSION['user_id']) && isset($_SESSION['user_type'])): ?>
-                    <!-- Show profile and notification when logged in -->
-                    <span class="notification-icon">🔔</span>
-                    <div class="profile-dropdown">
-                        <div class="profile-avatar">👤</div>
-                        <div class="dropdown-menu">
-                            <?php if ($_SESSION['user_type'] === 'freelancer'): ?>
-                                <a href="/page/freelancer_profile.php" class="dropdown-item">View Profile</a>
-                                <a href="/page/freelancer_dashboard.php" class="dropdown-item">Dashboard</a>
-                            <?php else: ?>
-                                <a href="/page/client_profile.php" class="dropdown-item">View Profile</a>
-                                <a href="/page/client_dashboard.php" class="dropdown-item">Dashboard</a>
-                            <?php endif; ?>
-                            <a href="/page/payment/wallet.php" class="dropdown-item">Wallet</a>
-                            <a href="/page/logout.php" class="dropdown-item">Logout</a>
-                        </div>
-                    </div>
-                <?php else: ?>
-                    <!-- Show login and signup when not logged in -->
-                    <a href="/page/login.php" class="btn btn-login">Login</a>
-                    <a href="/page/signup.php" class="btn btn-signup">Sign Up</a>
-                <?php endif; ?>
-            </nav>
-        </div>
-    </header>
-
+    <button type="button" onclick="window.history.back()" class="header-back-btn">
+        <span>←</span> Back
+    </button>
     <div class="header">
         <div class="header-top">
             <div>
-                <h1>📋 Review & Sign Agreement</h1>
+                <h1>Review & Sign Agreement</h1>
                 <p>Review the project agreement and sign to accept the freelancer application</p>
             </div>
-            <button type="button" onclick="window.history.back()" class="header-back-btn">
-                ← Back
-            </button>
+
         </div>
     </div>
 
@@ -174,7 +107,7 @@ if ($application_id) {
 
             <!-- LIVE PREVIEW SECTION (Left) -->
             <div class="preview-box">
-                <h2>👁️ Agreement Preview</h2>
+                <h2>Agreement Preview</h2>
 
                 <!-- HEADER -->
                 <div class="preview-header">
@@ -288,7 +221,7 @@ if ($application_id) {
 
             <!-- FORM SECTION (Right) -->
             <div class="form-box">
-                <h2>✏️ Sign Agreement</h2>
+                <h2>Sign Agreement</h2>
 
                 <form id="agreementForm" action="agreementClient_process.php" method="POST">
 
@@ -312,9 +245,13 @@ if ($application_id) {
 
                     <!-- SIGNATURE SECTION -->
                     <div class="signature-section">
-                        <h3>🖊️ Your Digital Signature</h3>
-                        <p>Sign below to accept this agreement and the freelancer application</p>
 
+                        <h3>🖊️ Your Digital Signature</h3>
+                        <p>Sign below to accept this agreement and enter your name.</p>
+                        <div class="signature-name-field">
+                            <label for="clientName">Your Full Name (for signature) *</label>
+                            <input type="text" name="client_name" id="clientName" placeholder="Enter your full name" required>
+                        </div>
                         <div class="signature-container">
                             <canvas id="signaturePad"></canvas>
                         </div>
@@ -324,10 +261,7 @@ if ($application_id) {
                             <button type="button" class="sign-submit" id="confirmSignature">Confirm Signature</button>
                         </div>
 
-                        <div class="signature-name-field">
-                            <label for="clientName">Your Full Name (for signature) *</label>
-                            <input type="text" name="client_name" id="clientName" placeholder="Enter your full name" required>
-                        </div>
+
 
                         <input type="hidden" name="freelancer_name" value="<?= htmlspecialchars($job_data['FreelancerName']) ?>">
                         <input type="hidden" name="application_id" value="<?= $application_id ?>">
@@ -335,7 +269,7 @@ if ($application_id) {
                         <input type="hidden" name="delivery_time" value="<?= htmlspecialchars($job_data['EstimatedDuration']) ?>">
                         <input type="hidden" name="signature" id="signatureData">
 
-                        <div class="signature-note">
+                        <div class="signature-note" id="signatureNote" style="display: none;">
                             ✓ Your signature confirms your acceptance of this agreement and the application
                         </div>
                     </div>
@@ -372,6 +306,11 @@ if ($application_id) {
         let signaturePad;
         let isSignatureSigned = false;
         let isSignatureConfirmed = false;
+
+        function updateSubmitButtonState() {
+            const submitBtn = document.querySelector('.btn-submit-green');
+            submitBtn.disabled = !isSignatureConfirmed;
+        }
 
         function updateConfirmButtonState() {
             const confirmBtn = document.getElementById("confirmSignature");
@@ -414,8 +353,9 @@ if ($application_id) {
                 backgroundColor: 'rgb(255, 255, 255)'
             });
 
-            // Set initial button state
+            // Set initial button states
             updateConfirmButtonState();
+            updateSubmitButtonState();
 
             // Clear button
             document.getElementById("clearSignature").addEventListener("click", function() {
@@ -425,7 +365,9 @@ if ($application_id) {
                 document.getElementById("signatureData").value = "";
                 document.getElementById("pSignatureImage").style.display = "none";
                 document.getElementById("pSignatureName").textContent = "___________________";
+                document.getElementById("signatureNote").style.display = "none";
                 updateConfirmButtonState();
+                updateSubmitButtonState();
             });
 
             // Track signature changes
@@ -457,9 +399,11 @@ if ($application_id) {
                 img.src = signatureDataURL;
                 img.style.display = "block";
                 document.getElementById("pSignatureName").textContent = clientName;
+                document.getElementById("signatureNote").style.display = "block";
 
-                // Disable button after confirmation
+                // Disable confirm button and enable submit button after confirmation
                 updateConfirmButtonState();
+                updateSubmitButtonState();
 
                 alert("Signature confirmed successfully!");
             });

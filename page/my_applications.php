@@ -39,7 +39,7 @@ try {
     $walletStmt = $pdo->prepare($walletSql);
     $walletStmt->execute([':clientID' => $clientID]);
     $walletData = $walletStmt->fetch();
-    
+
     if ($walletData) {
         $clientBalance = floatval($walletData['Balance']);
         $lockedBalance = floatval($walletData['LockedBalance']);
@@ -109,7 +109,7 @@ try {
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
     $applications = $stmt->fetchAll();
-    
+
     // Debug: Log the applications fetched
     error_log('[my_applications] Total applications fetched: ' . count($applications));
     foreach ($applications as $app) {
@@ -1044,7 +1044,7 @@ include '../_head.php';
 
     // Acceptance confirmation modal functions
     const clientBalance = <?= $clientBalance ?>;
-    
+
     function showAcceptConfirmation(applicationId, jobBudget, jobTitle) {
         // Check if client has sufficient balance
         if (clientBalance < jobBudget) {
@@ -1052,7 +1052,7 @@ include '../_head.php';
             showInsufficientBalanceModal(jobBudget);
             return;
         }
-        
+
         // Store the data
         pendingAcceptanceData = {
             applicationId: applicationId,
@@ -1066,32 +1066,32 @@ include '../_head.php';
         });
         document.getElementById('acceptConfirmationModal').style.display = 'flex';
     }
-    
+
     function showInsufficientBalanceModal(requiredAmount) {
         const amountNeeded = requiredAmount - clientBalance;
-        
+
         document.getElementById('modalCurrentBalance').textContent = 'RM ' + parseFloat(clientBalance).toLocaleString('en-MY', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         });
-        
+
         document.getElementById('modalRequiredAmount').textContent = 'RM ' + parseFloat(requiredAmount).toLocaleString('en-MY', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         });
-        
+
         document.getElementById('modalAmountNeeded').textContent = 'RM ' + parseFloat(amountNeeded).toLocaleString('en-MY', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         });
-        
+
         document.getElementById('insufficientBalanceModal').style.display = 'flex';
     }
-    
+
     function closeInsufficientBalanceModal() {
         document.getElementById('insufficientBalanceModal').style.display = 'none';
     }
-    
+
     function goToTopUp() {
         window.location.href = 'payment/wallet.php';
     }
@@ -1104,8 +1104,19 @@ include '../_head.php';
         const {
             applicationId
         } = pendingAcceptanceData;
-        // Redirect to agreementClient.php to sign the agreement
-        window.location.href = `agreementClient.php?application_id=${applicationId}`;
+        // Create a form and submit via POST to agreementClient.php
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = 'agreementClient.php';
+
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'application_id';
+        input.value = applicationId;
+
+        form.appendChild(input);
+        document.body.appendChild(form);
+        form.submit();
     }
 
     // Close modal when clicking outside
