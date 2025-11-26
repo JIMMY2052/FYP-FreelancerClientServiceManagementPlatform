@@ -396,6 +396,16 @@ $conn->close();
             background: #e0e2e8;
         }
 
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+        }
+
         .empty-state {
             text-align: center;
             padding: 80px 20px;
@@ -594,6 +604,11 @@ $conn->close();
                             <a href="messages.php?<?= $user_type === 'client' ? 'freelancer_id=' . $project['FreelancerID'] : 'client_id=' . $project['ClientID'] ?>" class="btn btn-primary">
                                 💬 Message
                             </a>
+                            <?php if ($user_type === 'freelancer'): ?>
+                                <a href="submit_work.php?agreement_id=<?= $project['AgreementID'] ?>" class="btn btn-success">
+                                    ✅ Submit Work
+                                </a>
+                            <?php endif; ?>
                         </div>
                     </div>
                 <?php endforeach; ?>
