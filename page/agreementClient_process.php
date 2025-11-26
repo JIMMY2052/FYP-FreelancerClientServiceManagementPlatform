@@ -231,12 +231,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         error_log("Failed to update job application status: " . $update_app_stmt->error);
     }
     $update_app_stmt->close();
-    
+
     // Update job status to 'processing' when agreement is created and funds are locked
     $update_job_sql = "UPDATE job SET Status = 'processing' WHERE JobID = ?";
     $update_job_stmt = $conn->prepare($update_job_sql);
     $update_job_stmt->bind_param('i', $job_id);
-    
+
     if ($update_job_stmt->execute()) {
         error_log("Job #$job_id status updated to 'processing'");
     } else {
@@ -273,7 +273,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Set document properties
     $pdf->SetCreator('Freelancer Client Service Management Platform');
     $pdf->SetAuthor('FYP Platform');
-    $pdf->SetTitle('Agreement - ' . $job_title);
+    $pdf->SetTitle('WorkSyng Agreement - ' . $job_title);
     $pdf->SetSubject('Project Agreement');
 
     // Set margins
@@ -344,13 +344,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $pdf->Cell(0, 8, 'Gig: ' . $job_title, 0, 1, 'L', true);
     $pdf->Ln(4);
 
-    // ===== PROJECT DETAILS IF PROVIDED =====
-    if (!empty($job_desc)) {
-        $pdf->SetFont('times', '', 10);
-        $pdf->SetTextColor(0, 0, 0); // Black
-        $pdf->MultiCell(0, 5, $job_desc, 0, 'L', false);
-        $pdf->Ln(4);
-    }
 
     // ===== INTRODUCTORY PARAGRAPH =====
     $pdf->SetFont('times', '', 10);
@@ -381,18 +374,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $pdf->MultiCell(0, 5, $job_desc, 0, 'L', false);
     $pdf->Ln(5);
 
-    // ===== PAYMENT TERMS SECTION =====
-    $pdf->SetTextColor(0, 0, 0); // Black
+    // ===== DELIVERABLES SECTION =====
+    $pdf->SetTextColor(0, 0, 0);
     $pdf->SetFont('times', 'B', 12);
-    $pdf->SetDrawColor(0, 0, 0); // Black
+    $pdf->SetDrawColor(0, 0, 0);
     $pdf->SetLineWidth(0.3);
-    $pdf->Cell(0, 8, '2.  PAYMENT TERMS', 'B', 1, 'L', false);
+    $pdf->Cell(0, 8, '2.  DELIVERABLES', 'B', 1, 'L', false);
 
-    $paymentText = 'Project Value: RM ' . number_format($job_budget, 2) . "\n\n" .
+    $pdf->SetFont('times', '', 10);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetDrawColor(255, 255, 255);
+    $pdf->SetLineWidth(0);
+    $pdf->SetFillColor(255, 255, 255);
+    $pdf->MultiCell(0, 5, !empty($agreement['Deliverables']) ? $agreement['Deliverables'] : 'As agreed upon during project discussion', 0, 'L', false);
+    $pdf->Ln(5);
+
+    // ===== PAYMENT TERMS SECTION =====
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetFont('times', 'B', 12);
+    $pdf->SetDrawColor(0, 0, 0);
+    $pdf->SetLineWidth(0.3);
+    $pdf->Cell(0, 8, '3.  PAYMENT TERMS', 'B', 1, 'L', false);
+
+    $paymentText = 'Project Value: RM ' . number_format($agreement['PaymentAmount'], 2) . "\n" .
+        'Delivery Time: ' . $agreement['DeliveryTime'] . ' days' . "\n" .
         'Payment Schedule: To be completed upon milestone deliveries as agreed.';
 
     $pdf->SetFont('times', '', 10);
-    $pdf->SetTextColor(0, 0, 0); // Black
+    $pdf->SetTextColor(0, 0, 0);
     $pdf->SetDrawColor(255, 255, 255);
     $pdf->SetLineWidth(0);
     $pdf->SetFillColor(255, 255, 255);
@@ -404,7 +413,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $pdf->SetFont('times', 'B', 12);
     $pdf->SetDrawColor(0, 0, 0); // Black
     $pdf->SetLineWidth(0.3);
-    $pdf->Cell(0, 8, '3.  TERMS & CONDITIONS', 'B', 1, 'L', false);
+    $pdf->Cell(0, 8, '4.  TERMS & CONDITIONS', 'B', 1, 'L', false);
 
     $termsText = "• Both parties agree to the terms outlined above.\n";
     $termsText .= "• Payment will be processed upon project completion and mutual agreement.\n";
@@ -426,7 +435,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $pdf->SetFont('times', 'B', 12);
     $pdf->SetDrawColor(0, 0, 0); // Black
     $pdf->SetLineWidth(0.3);
-    $pdf->Cell(0, 8, '4.  SIGNATURES', 'B', 1, 'L', false);
+    $pdf->Cell(0, 8, '5.  SIGNATURES', 'B', 1, 'L', false);
 
     $pdf->Ln(6);
 

@@ -860,13 +860,23 @@ include '../_head.php';
                             </div>
                             <div class="detail-item">
                                 <div class="detail-label">Freelancer Signed</div>
-                                <div class="detail-value date"><?= $agreement['FreelancerSignedDate'] ? date('M d, Y', strtotime($agreement['FreelancerSignedDate'])) : '-' ?></div>
+                                <div class="detail-value date">
+                                    <?= $agreement['FreelancerSignedDate'] ? date('M d, Y', strtotime($agreement['FreelancerSignedDate'])) : '-' ?>
+                                </div>
                             </div>
+                            <?php if ($agreement['Status'] === 'ongoing'): ?>
+                            <div class="detail-item">
+                                <div class="detail-label">Complete By</div>
+                                <div class="detail-value date">
+                                    <?= $agreement['ExpiredDate'] ? date('M d, Y', strtotime($agreement['ExpiredDate'])) : '-' ?>
+                                </div>
+                            </div>
+                            <?php endif; ?>
                         </div>
 
                         <!-- Expiration Warning -->
                         <?php
-                        if ($agreement['Status'] !== 'declined') {
+                        if ($agreement['Status'] !== 'declined' && $agreement['Status'] !== 'ongoing') {
                             if ($agreement['ExpiredDate']) {
                                 $now = new DateTime();
                                 $expiration = new DateTime($agreement['ExpiredDate']);

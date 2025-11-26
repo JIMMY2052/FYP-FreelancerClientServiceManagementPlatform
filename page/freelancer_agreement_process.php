@@ -172,16 +172,9 @@ try {
     $pdf->SetTextColor(0, 0, 0);
     $pdf->SetDrawColor(0, 0, 0);
     $pdf->SetLineWidth(0.3);
-    $pdf->Cell(0, 8, 'Project: ' . $agreement['ProjectTitle'], 0, 1, 'L', true);
+    $pdf->Cell(0, 8, 'Gig: ' . $agreement['ProjectTitle'], 0, 1, 'L', true);
     $pdf->Ln(4);
 
-    // ===== PROJECT DETAILS IF PROVIDED =====
-    if (!empty($agreement['ProjectDetail'])) {
-        $pdf->SetFont('times', '', 10);
-        $pdf->SetTextColor(0, 0, 0);
-        $pdf->MultiCell(0, 5, $agreement['ProjectDetail'], 0, 'L', false);
-        $pdf->Ln(4);
-    }
 
     // ===== INTRODUCTORY PARAGRAPH =====
     $pdf->SetFont('times', '', 10);
@@ -234,8 +227,8 @@ try {
     $pdf->SetLineWidth(0.3);
     $pdf->Cell(0, 8, '3.  PAYMENT TERMS', 'B', 1, 'L', false);
 
-    $paymentText = 'Project Value: RM ' . number_format($agreement['PaymentAmount'], 2) . "\n\n" .
-        'Delivery Time: ' . $agreement['DeliveryTime'] . ' days' . "\n\n" .
+    $paymentText = 'Project Value: RM ' . number_format($agreement['PaymentAmount'], 2) . "\n" .
+        'Delivery Time: ' . $agreement['DeliveryTime'] . ' days' . "\n" .
         'Payment Schedule: To be completed upon milestone deliveries as agreed.';
 
     $pdf->SetFont('times', '', 10);
@@ -375,19 +368,28 @@ try {
     $signature_db_path = '/uploads/agreements/' . $signature_filename;
     $pdf_path_for_db = '/uploads/agreements/' . $pdf_filename;
 
+    // Calculate new expiration date based on delivery time
+    // Created date + delivery time days + set to 11:59 PM
+    $created_date = new DateTime($agreement['CreatedDate']);
+    $delivery_days = intval($agreement['DeliveryTime']);
+    $new_expired_date = $created_date->add(new DateInterval('P' . $delivery_days . 'D'));
+    $new_expired_date->setTime(23, 59, 59);
+    $new_expired_date_str = $new_expired_date->format('Y-m-d H:i:s');
+
     $update_sql = "UPDATE agreement 
                    SET Status = 'ongoing', 
                        FreelancerSignaturePath = ?,
                        FreelancerSignedDate = NOW(),
-                       agreeementPath = ?
+                       agreeementPath = ?,
+                       ExpiredDate = ?
                    WHERE AgreementID = ? AND FreelancerID = ?";
 
     $update_stmt = $conn->prepare($update_sql);
-    $update_stmt->bind_param('ssii', $signature_db_path, $pdf_path_for_db, $agreement_id, $freelancer_id);
+    $update_stmt->bind_param('sssii', $signature_db_path, $pdf_path_for_db, $new_expired_date_str, $agreement_id, $freelancer_id);
     $success = $update_stmt->execute();
     $update_stmt->close();
 
-    error_log("Agreement #$agreement_id updated: Status=ongoing, FreelancerSignaturePath=$signature_db_path, agreeementPath=$pdf_path_for_db");
+    error_log("Agreement #$agreement_id updated: Status=ongoing, FreelancerSignaturePath=$signature_db_path, agreeementPath=$pdf_path_for_db, ExpiredDate=$new_expired_date_str");
 
     if ($success) {
         // Get conversation with client
