@@ -176,7 +176,7 @@ elseif ($target_client_id && $user_type === 'freelancer') {
             <div class="chat-sidebar-header">
                 <div class="sidebar-top">
                     <h1 class="sidebar-title">Messages</h1>
-                    <button class="sidebar-menu-btn" title="Menu">⋮</button>
+
                 </div>
                 <div class="sidebar-search-wrapper">
                     <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
