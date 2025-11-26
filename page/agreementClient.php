@@ -82,6 +82,26 @@ if ($application_id) {
             background-color: #f8f9fa;
             cursor: not-allowed;
         }
+
+        #confirmSignature {
+            background-color: #ccc;
+            color: #666;
+            cursor: not-allowed;
+            transition: all 0.3s ease;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+
+        #confirmSignature:not(:disabled):hover {
+            background-color: #158a74;
+            box-shadow: 0 4px 12px rgba(26, 179, 148, 0.3);
+        }
+
+        #confirmSignature:disabled {
+            opacity: 0.6;
+        }
     </style>
 </head>
 
@@ -351,6 +371,34 @@ if ($application_id) {
         // ===== SIGNATURE PAD INITIALIZATION =====
         let signaturePad;
         let isSignatureSigned = false;
+        let isSignatureConfirmed = false;
+
+        function updateConfirmButtonState() {
+            const confirmBtn = document.getElementById("confirmSignature");
+            const clientName = document.getElementById("clientName").value.trim();
+            const hasSignature = signaturePad && !signaturePad.isEmpty();
+
+            // If signature is confirmed, button stays disabled until cleared
+            if (isSignatureConfirmed) {
+                confirmBtn.style.backgroundColor = '#ccc';
+                confirmBtn.style.color = '#666';
+                confirmBtn.style.cursor = 'not-allowed';
+                confirmBtn.disabled = true;
+                return;
+            }
+
+            if (hasSignature && clientName) {
+                confirmBtn.style.backgroundColor = '#1ab394';
+                confirmBtn.style.color = 'white';
+                confirmBtn.style.cursor = 'pointer';
+                confirmBtn.disabled = false;
+            } else {
+                confirmBtn.style.backgroundColor = '#ccc';
+                confirmBtn.style.color = '#666';
+                confirmBtn.style.cursor = 'not-allowed';
+                confirmBtn.disabled = true;
+            }
+        }
 
         document.addEventListener('DOMContentLoaded', function() {
             const canvas = document.getElementById("signaturePad");
@@ -366,14 +414,24 @@ if ($application_id) {
                 backgroundColor: 'rgb(255, 255, 255)'
             });
 
+            // Set initial button state
+            updateConfirmButtonState();
+
             // Clear button
             document.getElementById("clearSignature").addEventListener("click", function() {
                 signaturePad.clear();
                 isSignatureSigned = false;
+                isSignatureConfirmed = false;
                 document.getElementById("signatureData").value = "";
                 document.getElementById("pSignatureImage").style.display = "none";
                 document.getElementById("pSignatureName").textContent = "___________________";
+                updateConfirmButtonState();
             });
+
+            // Track signature changes
+            signaturePad.onEnd = function() {
+                updateConfirmButtonState();
+            };
 
             // Confirm signature button
             document.getElementById("confirmSignature").addEventListener("click", function() {
@@ -392,6 +450,7 @@ if ($application_id) {
                 const signatureDataURL = signaturePad.toDataURL("image/png");
                 document.getElementById("signatureData").value = signatureDataURL;
                 isSignatureSigned = true;
+                isSignatureConfirmed = true;
 
                 // Update preview
                 const img = document.getElementById("pSignatureImage");
@@ -399,13 +458,18 @@ if ($application_id) {
                 img.style.display = "block";
                 document.getElementById("pSignatureName").textContent = clientName;
 
+                // Disable button after confirmation
+                updateConfirmButtonState();
+
                 alert("Signature confirmed successfully!");
             });
 
             // Update client name in preview as typing
             document.getElementById("clientName").addEventListener("input", function() {
-                if (isSignatureSigned) {
+                if (isSignatureConfirmed) {
                     document.getElementById("pSignatureName").textContent = this.value.trim() || "___________________";
+                } else {
+                    updateConfirmButtonState();
                 }
             });
         });
