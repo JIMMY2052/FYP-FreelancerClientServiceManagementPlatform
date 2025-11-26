@@ -24,30 +24,7 @@ if (!in_array($status_filter, $valid_statuses)) {
 // Build query based on user type
 $conn = getDBConnection();
 
-// First, fetch ALL agreements (without status filter) to count by status
-if ($user_type === 'client') {
-    $count_sql = "SELECT a.Status
-                FROM agreement a
-                WHERE a.ClientID = ?";
-} else {
-    $count_sql = "SELECT a.Status
-                FROM agreement a
-                WHERE a.FreelancerID = ?";
-}
-
-$count_stmt = $conn->prepare($count_sql);
-$count_stmt->bind_param('i', $user_id);
-$count_stmt->execute();
-$count_result = $count_stmt->get_result();
-$all_agreements_for_count = [];
-
-while ($row = $count_result->fetch_assoc()) {
-    $all_agreements_for_count[] = $row;
-}
-
-$count_stmt->close();
-
-// Now fetch filtered agreements for display
+// FETCH ALL AGREEMENTS (NO STATUS FILTER IN QUERY)
 if ($user_type === 'client') {
     // Client view - agreements where they are the client
     $sql = "SELECT 
@@ -67,13 +44,8 @@ if ($user_type === 'client') {
             FROM agreement a
             JOIN freelancer f ON a.FreelancerID = f.FreelancerID
             JOIN client c ON a.ClientID = c.ClientID
-            WHERE a.ClientID = ?";
-
-    if ($status_filter !== 'all') {
-        $sql .= " AND a.Status = ?";
-    }
-
-    $sql .= " ORDER BY a.CreatedDate DESC";
+            WHERE a.ClientID = ?
+            ORDER BY a.CreatedDate DESC";
 } else {
     // Freelancer view - agreements where they are the freelancer
     $sql = "SELECT 
@@ -93,33 +65,43 @@ if ($user_type === 'client') {
             FROM agreement a
             JOIN freelancer f ON a.FreelancerID = f.FreelancerID
             JOIN client c ON a.ClientID = c.ClientID
-            WHERE a.FreelancerID = ?";
-
-    if ($status_filter !== 'all') {
-        $sql .= " AND a.Status = ?";
-    }
-
-    $sql .= " ORDER BY a.CreatedDate DESC";
+            WHERE a.FreelancerID = ?
+            ORDER BY a.CreatedDate DESC";
 }
 
 $stmt = $conn->prepare($sql);
-
-if ($status_filter !== 'all') {
-    $stmt->bind_param('is', $user_id, $status_filter);
-} else {
-    $stmt->bind_param('i', $user_id);
-}
-
+$stmt->bind_param('i', $user_id);
 $stmt->execute();
 $result = $stmt->get_result();
-$agreements = [];
+$all_agreements = [];
 
 while ($row = $result->fetch_assoc()) {
-    $agreements[] = $row;
+    $all_agreements[] = $row;
 }
 
 $stmt->close();
 $conn->close();
+
+// COUNT ALL STATUSES FROM COMPLETE SET
+$counts = ['all' => 0, 'to_accept' => 0, 'ongoing' => 0, 'completed' => 0, 'declined' => 0, 'cancelled' => 0, 'disputed' => 0];
+foreach ($all_agreements as $agreement) {
+    $counts['all']++;
+    if (isset($counts[$agreement['Status']])) {
+        $counts[$agreement['Status']]++;
+    }
+}
+
+// FILTER FOR DISPLAY AFTER COUNTING
+$agreements = [];
+if ($status_filter === 'all') {
+    $agreements = $all_agreements;
+} else {
+    foreach ($all_agreements as $agreement) {
+        if ($agreement['Status'] === $status_filter) {
+            $agreements[] = $agreement;
+        }
+    }
+}
 
 // Function to get status badge class
 function getStatusClass($status)
@@ -160,15 +142,6 @@ function getStatusLabel($status)
             return 'Disputed';
         default:
             return 'Unknown';
-    }
-}
-
-// Count agreements by status (from ALL agreements, not filtered)
-$counts = ['all' => 0, 'to_accept' => 0, 'ongoing' => 0, 'completed' => 0, 'declined' => 0, 'cancelled' => 0, 'disputed' => 0];
-foreach ($all_agreements_for_count as $agreement) {
-    $counts['all']++;
-    if (isset($counts[$agreement['Status']])) {
-        $counts[$agreement['Status']]++;
     }
 }
 
@@ -544,39 +517,6 @@ include '../_head.php';
     }
 </style>
 
-<script>
-    // Update expiration times every 2 minutes (120000 milliseconds)
-    function updateExpirationTimes() {
-        const expirationElements = document.querySelectorAll('.expiration-warning[data-expiry-date]');
-
-        expirationElements.forEach(function(element) {
-            const expiryDate = new Date(element.getAttribute('data-expiry-date'));
-            const now = new Date();
-            const timeDiff = expiryDate - now;
-
-            if (timeDiff <= 0) {
-                element.innerHTML = '⚠️ Agreement has expired';
-                element.removeAttribute('data-expiry-date');
-            } else {
-                const hoursRemaining = Math.floor(timeDiff / (1000 * 60 * 60));
-                const minutesRemaining = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
-
-                const hoursSpan = element.querySelector('.hours-remaining');
-                if (hoursSpan) {
-                    hoursSpan.textContent = hoursRemaining;
-                }
-            }
-        });
-    }
-
-    // Initial update when page loads
-    document.addEventListener('DOMContentLoaded', function() {
-        updateExpirationTimes();
-        // Set interval to update every 2 minutes
-        setInterval(updateExpirationTimes, 2 * 60 * 1000);
-    });
-</script>
-
 <!-- Main Content -->
 <div class="container">
     <!-- Page Header -->
@@ -683,12 +623,12 @@ include '../_head.php';
                             $now = new DateTime();
                             $expiration = new DateTime($agreement['ExpiredDate']);
                             $interval = $now->diff($expiration);
-                            $hoursUntilExpiry = ($interval->days * 24) + $interval->h;
+                            $daysUntilExpiry = $interval->days;
 
                             if ($now > $expiration) {
                                 echo '<div class="expiration-warning">⚠️ Agreement has expired</div>';
-                            } elseif ($hoursUntilExpiry <= 48) {
-                                echo '<div class="expiration-warning" data-expiry-date="' . $agreement['ExpiredDate'] . '">⏰ Expires in <span class="hours-remaining">' . $hoursUntilExpiry . '</span> hour(s)</div>';
+                            } elseif ($daysUntilExpiry <= 2) {
+                                echo '<div class="expiration-warning">⏰ Expires in ' . $daysUntilExpiry . ' day(s)</div>';
                             }
                         }
                         ?>
