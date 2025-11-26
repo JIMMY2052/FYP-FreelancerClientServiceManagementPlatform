@@ -253,7 +253,7 @@ try {
     $pdf->SetLineWidth(0.3);
     $pdf->Cell(0, 8, '4.  TERMS & CONDITIONS', 'B', 1, 'L', false);
 
-    $termsText = !empty($agreement['Terms']) ? $agreement['Terms'] : 
+    $termsText = !empty($agreement['Terms']) ? $agreement['Terms'] :
         "• Both parties agree to the terms outlined above.\n" .
         "• Payment will be processed upon project completion and mutual agreement.\n" .
         "• Either party may terminate this agreement with written notice.\n" .
@@ -373,18 +373,21 @@ try {
 
     // Update agreement in database
     $signature_db_path = '/uploads/agreements/' . $signature_filename;
+    $pdf_path_for_db = '/uploads/agreements/' . $pdf_filename;
+
     $update_sql = "UPDATE agreement 
                    SET Status = 'ongoing', 
                        FreelancerSignaturePath = ?,
-                       FreelancerSignedDate = NOW()
+                       FreelancerSignedDate = NOW(),
+                       agreeementPath = ?
                    WHERE AgreementID = ? AND FreelancerID = ?";
 
     $update_stmt = $conn->prepare($update_sql);
-    $update_stmt->bind_param('sii', $signature_db_path, $agreement_id, $freelancer_id);
+    $update_stmt->bind_param('ssii', $signature_db_path, $pdf_path_for_db, $agreement_id, $freelancer_id);
     $success = $update_stmt->execute();
     $update_stmt->close();
 
-    error_log("Agreement #$agreement_id updated: Status=ongoing, FreelancerSignaturePath=$signature_db_path");
+    error_log("Agreement #$agreement_id updated: Status=ongoing, FreelancerSignaturePath=$signature_db_path, agreeementPath=$pdf_path_for_db");
 
     if ($success) {
         // Get conversation with client
@@ -422,7 +425,7 @@ try {
         $sender_id = 'f' . $freelancer_id;
         $receiver_id = 'c' . $client_id;
         $message_text = 'Agreement signed successfully! The agreement "' . $agreement['ProjectTitle'] . '" has been signed and is now active.';
-        $attachment_path = $pdf_path;
+        $attachment_path = $pdf_path_for_db;
         $attachment_type = 'application/pdf';
 
         $msg_stmt = $conn->prepare($message_sql);

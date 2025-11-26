@@ -77,10 +77,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Generate PDF filename early for storage in database
     $pdf_filename = 'agreement_' . $application_id . '_' . time() . '.pdf';
-    $client_signature_path = '/uploads/agreements/' . $pdf_filename; // Store the PDF filename path
+    $client_signature_path = '/uploads/agreements/signature_c' . $client_id . '_a' . $application_id . '_' . time() . '.png'; // Store signature file path
 
-    $agreement_sql = "INSERT INTO agreement (FreelancerID, ClientID, ClientName, FreelancerName, ProjectTitle, ProjectDetail, PaymentAmount, Status, ClientSignedDate, ExpiredDate, Terms, Scope, Deliverables, DeliveryTime, ClientSignaturePath) 
-                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    $agreement_sql = "INSERT INTO agreement (FreelancerID, ClientID, ClientName, FreelancerName, ProjectTitle, ProjectDetail, PaymentAmount, Status, ClientSignedDate, ExpiredDate, Terms, Scope, Deliverables, DeliveryTime, ClientSignaturePath, agreeementPath) 
+                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     $agreement_stmt = $conn->prepare($agreement_sql);
 
@@ -91,7 +91,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 
-    $agreement_stmt->bind_param('iissssdssssisss', $freelancer_id, $client_id, $client_name, $freelancer_name, $job_title, $job_desc, $job_budget, $status, $client_signed_date, $expired_date, $terms, $scope, $deliverables, $delivery_time, $client_signature_path);
+    // Prepare PDF path for database storage
+    $pdf_path_for_db = '/uploads/agreements/' . $pdf_filename;
+
+    $agreement_stmt->bind_param('iissssdssssissss', $freelancer_id, $client_id, $client_name, $freelancer_name, $job_title, $job_desc, $job_budget, $status, $client_signed_date, $expired_date, $terms, $scope, $deliverables, $delivery_time, $client_signature_path, $pdf_path_for_db);
 
     if (!$agreement_stmt->execute()) {
         $_SESSION['error'] = "Error creating agreement record: " . $agreement_stmt->error;
@@ -148,7 +151,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $delete_stmt->bind_param('i', $agreement_id);
         $delete_stmt->execute();
         $delete_stmt->close();
-        
+
         $_SESSION['error'] = "Insufficient wallet balance. You have RM " . number_format($current_balance, 2) . " but need RM " . number_format($job_budget, 2) . ". Please <a href='payment/wallet.php'>top up your wallet</a> first.";
         error_log("Insufficient balance: Client $client_id has RM $current_balance but needs RM $job_budget");
         $conn->close();
@@ -161,7 +164,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $escrow_created_at = date('Y-m-d H:i:s');
     $escrow_sql = "INSERT INTO escrow (OrderID, PayerID, PayeeID, Amount, Status, CreatedAt) VALUES (?, ?, ?, ?, ?, ?)";
     $escrow_stmt = $conn->prepare($escrow_sql);
-    
+
     if (!$escrow_stmt) {
         $_SESSION['error'] = "Database error creating escrow: " . $conn->error;
         error_log("Escrow prepare error: " . $conn->error);
@@ -171,7 +174,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $escrow_stmt->bind_param('iiidss', $agreement_id, $client_id, $freelancer_id, $job_budget, $escrow_status, $escrow_created_at);
-    
+
     if (!$escrow_stmt->execute()) {
         $_SESSION['error'] = "Error creating escrow record: " . $escrow_stmt->error;
         error_log("Escrow execute error: " . $escrow_stmt->error);
@@ -180,7 +183,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header("Location: agreementClient.php?application_id=" . $application_id);
         exit();
     }
-    
+
     $escrow_id = $conn->insert_id;
     $escrow_stmt->close();
     error_log("Escrow record created with ID: $escrow_id - RM $job_budget locked for Agreement #$agreement_id");
@@ -188,11 +191,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Update wallet: move funds from Balance to LockedBalance
     $new_balance = $current_balance - $job_budget;
     $new_locked = $current_locked + $job_budget;
-    
+
     $update_wallet_sql = "UPDATE wallet SET Balance = ?, LockedBalance = ? WHERE WalletID = ?";
     $update_wallet_stmt = $conn->prepare($update_wallet_sql);
     $update_wallet_stmt->bind_param('ddi', $new_balance, $new_locked, $wallet_id);
-    
+
     if (!$update_wallet_stmt->execute()) {
         $_SESSION['error'] = "Error updating wallet balance: " . $update_wallet_stmt->error;
         error_log("Wallet update error: " . $update_wallet_stmt->error);
@@ -209,7 +212,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $transaction_status = 'completed';
     $transaction_desc = "Funds locked in escrow for project: " . $job_title . " (Agreement #" . $agreement_id . ")";
     $transaction_ref = "escrow_" . $escrow_id;
-    
+
     $transaction_sql = "INSERT INTO wallet_transactions (WalletID, Type, Amount, Status, Description, ReferenceID, CreatedAt) VALUES (?, ?, ?, ?, ?, ?, NOW())";
     $transaction_stmt = $conn->prepare($transaction_sql);
     $transaction_stmt->bind_param('isdsss', $wallet_id, $transaction_type, $job_budget, $transaction_status, $transaction_desc, $transaction_ref);
@@ -221,7 +224,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $update_app_sql = "UPDATE job_application SET Status = 'accepted', UpdatedAt = NOW() WHERE ApplicationID = ?";
     $update_app_stmt = $conn->prepare($update_app_sql);
     $update_app_stmt->bind_param('i', $application_id);
-    
+
     if ($update_app_stmt->execute()) {
         error_log("Job application #$application_id status updated to 'accepted'");
     } else {
@@ -229,6 +232,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     $update_app_stmt->close();
     // ===== END ESCROW FUNCTIONALITY =====
+
+    // Create uploads directory if it doesn't exist
+    $base_dir = dirname(dirname(__FILE__));
+    $uploads_dir = $base_dir . '/uploads/agreements/';
+
+    if (!is_dir($uploads_dir)) {
+        mkdir($uploads_dir, 0755, true);
+    }
+
+    // Save client signature as PNG file
+    $signature_base64 = str_replace('data:image/png;base64,', '', $client_signature);
+    $signature_binary = base64_decode($signature_base64);
+
+    if ($signature_binary !== false) {
+        $signature_filename = 'signature_c' . $client_id . '_a' . $application_id . '_' . time() . '.png';
+        $signature_file_path = $uploads_dir . $signature_filename;
+        file_put_contents($signature_file_path, $signature_binary);
+        $client_signature_path = '/uploads/agreements/' . $signature_filename;
+    }
 
     require_once '../vendor/autoload.php';
     require_once '../vendor/tecnickcom/tcpdf/tcpdf.php';
@@ -480,14 +502,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $pdf->Cell($signatureBoxWidth, 4, 'Date: ' . date('M d, Y'), 0, 1, 'C');
 
     // Save PDF to server
-    $base_dir = dirname(dirname(__FILE__));
-    $uploads_dir = $base_dir . '/uploads/agreements/';
-
-    if (!is_dir($uploads_dir)) {
-        mkdir($uploads_dir, 0755, true);
-    }
-
-    // Use the PDF filename already generated and stored in database
     $pdf_path = $uploads_dir . $pdf_filename;
 
     try {
@@ -542,7 +556,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($conversation_id) {
         $message_text = "I have signed the agreement for the project \"" . $job_title . "\". Please review and sign to proceed. The agreement is attached below.\n\n";
         $message_text .= "Agreement Link: " . $_SERVER['HTTP_HOST'] . "/page/freelancer_agreement_approval.php?agreement_id=" . $agreement_id;
-        $attachment_path = '/uploads/agreements/' . $pdf_filename;
+        $attachment_path = $pdf_path_for_db;
         $attachment_type = 'application/pdf';
 
         $msg_sql = "INSERT INTO message (ConversationID, SenderID, ReceiverID, Content, AttachmentPath, AttachmentType, Timestamp, Status) 
