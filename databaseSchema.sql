@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 26, 2025 at 07:16 AM
+-- Generation Time: Nov 26, 2025 at 01:32 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 SET
@@ -68,6 +68,9 @@ CREATE TABLE
     `FreelancerID` int (11) DEFAULT NULL,
     `ClientID` int (11) DEFAULT NULL,
     `CreatedDate` timestamp NOT NULL DEFAULT current_timestamp(),
+    `CompleteDate` date DEFAULT NULL,
+    `DeliveryDate` date DEFAULT NULL,
+    `agreeementPath` varchar(255) DEFAULT NULL,
     `ClientSignedDate` datetime DEFAULT NULL,
     `ClientSignaturePath` varchar(255) DEFAULT NULL,
     `FreelancerSignedDate` datetime DEFAULT NULL,
@@ -94,6 +97,9 @@ INSERT INTO
     `FreelancerID`,
     `ClientID`,
     `CreatedDate`,
+    `CompleteDate`,
+    `DeliveryDate`,
+    `agreeementPath`,
     `ClientSignedDate`,
     `ClientSignaturePath`,
     `FreelancerSignedDate`,
@@ -112,149 +118,26 @@ INSERT INTO
   )
 VALUES
   (
-    1,
-    1,
     2,
-    '2025-11-26 04:22:31',
-    '2025-11-26 12:22:31',
-    '/uploads/agreements/agreement_3_1764130951.pdf',
-    NULL,
-    '2025-11-27 12:22:31',
-    NULL,
-    '• Both parties agree to the terms outlined above.\n• Payment will be processed upon project completion and mutual agreement.\n• Either party may terminate this agreement with written notice.\n• Both parties agree to maintain confidentiality of project details.\n• Any disputes will be resolved through communication or mediation.',
-    'to_accept',
-    'asdf',
-    '0',
-    0,
-    'To be completed upon milestone deliveries as agreed.',
-    666.00,
-    'asdf',
-    'JIMMY CHAN LOK',
-    'Genting'
-  ),
-  (
-    2,
-    1,
-    2,
-    '2025-11-26 04:56:03',
-    '2025-11-26 12:56:03',
-    '/uploads/agreements/agreement_4_1764132963.pdf',
-    NULL,
-    '2025-11-27 12:56:03',
-    NULL,
-    '• Both parties agree to the terms outlined above.\n• Payment will be processed upon project completion and mutual agreement.\n• Either party may terminate this agreement with written notice.\n• Both parties agree to maintain confidentiality of project details.\n• Any disputes will be resolved through communication or mediation.',
-    'to_accept',
-    'Google',
-    '0',
-    0,
-    'To be completed upon milestone deliveries as agreed.',
-    12.00,
-    'asdf',
-    'JIMMY CHAN LOK',
-    'Genting'
-  ),
-  (
-    7,
     3,
     2,
-    '2025-11-26 04:59:56',
-    '2025-11-26 12:59:56',
-    '/uploads/agreements/agreement_5_1764133196.pdf',
+    '2025-11-26 11:46:13',
     NULL,
-    '2025-11-27 12:59:56',
     NULL,
+    '/uploads/agreements/agreement_2.pdf',
+    '2025-11-26 19:46:13',
+    '/uploads/agreements/signature_c2_a13_1764157573.png',
+    '2025-11-26 19:47:19',
+    '2025-11-27 19:46:13',
+    '/uploads/agreements/signature_f3_a2_1764157639.png',
     '• Both parties agree to the terms outlined above.\n• Payment will be processed upon project completion and mutual agreement.\n• Either party may terminate this agreement with written notice.\n• Both parties agree to maintain confidentiality of project details.\n• Any disputes will be resolved through communication or mediation.',
-    'to_accept',
-    'Google',
+    'ongoing',
+    'dfsg',
     '0',
     0,
     'To be completed upon milestone deliveries as agreed.',
-    12.00,
-    'asdf',
-    'hc c',
-    'Genting'
-  ),
-  (
-    8,
-    1,
-    2,
-    '2025-11-26 05:22:15',
-    '2025-11-26 13:22:15',
-    '/uploads/agreements/agreement_3_1764134535.pdf',
-    NULL,
-    '2025-11-27 13:22:15',
-    NULL,
-    '• Both parties agree to the terms outlined above.\n• Payment will be processed upon project completion and mutual agreement.\n• Either party may terminate this agreement with written notice.\n• Both parties agree to maintain confidentiality of project details.\n• Any disputes will be resolved through communication or mediation.',
-    'to_accept',
-    'asdf',
-    '0',
-    0,
-    'To be completed upon milestone deliveries as agreed.',
-    666.00,
-    'asdf',
-    'JIMMY CHAN LOK',
-    'Genting'
-  ),
-  (
-    9,
-    3,
-    2,
-    '2025-11-26 05:44:58',
-    '2025-11-26 13:44:58',
-    '/uploads/agreements/agreement_6_1764135898.pdf',
-    NULL,
-    '2025-11-27 13:44:58',
-    NULL,
-    '• Both parties agree to the terms outlined above.\n• Payment will be processed upon project completion and mutual agreement.\n• Either party may terminate this agreement with written notice.\n• Both parties agree to maintain confidentiality of project details.\n• Any disputes will be resolved through communication or mediation.',
-    'to_accept',
-    'asdf',
-    '0',
-    0,
-    'To be completed upon milestone deliveries as agreed.',
-    666.00,
-    'asdf',
-    'hc c',
-    'Genting'
-  ),
-  (
-    10,
-    3,
-    2,
-    '2025-11-26 05:47:52',
-    '2025-11-26 13:47:52',
-    '/uploads/agreements/agreement_7_1764136072.pdf',
-    NULL,
-    '2025-11-27 13:47:52',
-    NULL,
-    '• Both parties agree to the terms outlined above.\n• Payment will be processed upon project completion and mutual agreement.\n• Either party may terminate this agreement with written notice.\n• Both parties agree to maintain confidentiality of project details.\n• Any disputes will be resolved through communication or mediation.',
-    'to_accept',
-    'Google',
-    '0',
-    0,
-    'To be completed upon milestone deliveries as agreed.',
-    12.00,
-    'asdf',
-    'hc c',
-    'Genting'
-  ),
-  (
-    11,
-    3,
-    2,
-    '2025-11-26 05:55:46',
-    '2025-11-26 13:55:46',
-    '/uploads/agreements/agreement_8_1764136546.pdf',
-    NULL,
-    '2025-11-27 13:55:46',
-    NULL,
-    '• Both parties agree to the terms outlined above.\n• Payment will be processed upon project completion and mutual agreement.\n• Either party may terminate this agreement with written notice.\n• Both parties agree to maintain confidentiality of project details.\n• Any disputes will be resolved through communication or mediation.',
-    'to_accept',
-    'Google',
-    '0',
-    0,
-    'To be completed upon milestone deliveries as agreed.',
-    12.00,
-    'asdf',
+    1.00,
+    'dsfg',
     'hc c',
     'Genting'
   );
@@ -372,24 +255,13 @@ INSERT INTO
   )
 VALUES
   (
-    32,
-    2,
-    'client',
-    1,
-    'freelancer',
-    '2025-11-26 04:22:32',
-    NULL,
-    'active',
-    NULL
-  ),
-  (
-    33,
+    34,
     2,
     'client',
     3,
     'freelancer',
-    '2025-11-26 04:59:41',
-    NULL,
+    '2025-11-26 07:51:15',
+    '2025-11-26 08:07:15',
     'active',
     NULL
   );
@@ -483,6 +355,56 @@ VALUES
     12.00,
     'hold',
     '2025-11-26 05:55:46',
+    NULL
+  ),
+  (
+    7,
+    12,
+    2,
+    3,
+    1.00,
+    'hold',
+    '2025-11-26 06:44:19',
+    NULL
+  ),
+  (
+    8,
+    13,
+    2,
+    3,
+    12.00,
+    'hold',
+    '2025-11-26 07:32:20',
+    NULL
+  ),
+  (
+    9,
+    14,
+    2,
+    3,
+    1.00,
+    'hold',
+    '2025-11-26 07:41:01',
+    NULL
+  ),
+  (
+    10,
+    1,
+    2,
+    3,
+    1.00,
+    'hold',
+    '2025-11-26 08:36:30',
+    NULL
+  ),
+  (
+    11,
+    2,
+    2,
+    3,
+    1.00,
+    'hold',
+    '2025-11-26 11:46:13',
     NULL
   );
 
@@ -800,6 +722,50 @@ VALUES
     '2025-11-29',
     'available',
     '2025-11-25'
+  ),
+  (
+    6,
+    2,
+    'SITE CORE',
+    'asdf',
+    1.00,
+    0,
+    '2025-11-08',
+    'available',
+    '2025-11-26'
+  ),
+  (
+    7,
+    2,
+    'JIMMY',
+    'jimmy',
+    12.00,
+    0,
+    '2025-11-30',
+    'available',
+    '2025-11-26'
+  ),
+  (
+    8,
+    2,
+    'dfsg',
+    'dsfg',
+    1.00,
+    0,
+    '2025-11-29',
+    'processing',
+    '2025-11-26'
+  ),
+  (
+    9,
+    2,
+    'SITE CORE PROJECT',
+    'Web Development',
+    1.00,
+    0,
+    '2025-11-30',
+    'available',
+    '2025-11-26'
   );
 
 -- --------------------------------------------------------
@@ -836,81 +802,15 @@ INSERT INTO
   )
 VALUES
   (
-    1,
-    1,
-    1,
-    NULL,
-    NULL,
-    NULL,
-    '',
-    '2025-11-25 08:05:23',
-    '2025-11-25 11:11:10'
-  ),
-  (
-    2,
-    3,
-    1,
-    NULL,
-    NULL,
-    NULL,
-    '',
-    '2025-11-25 11:14:12',
-    '2025-11-25 11:21:38'
-  ),
-  (
-    3,
-    5,
-    1,
-    NULL,
-    NULL,
-    NULL,
-    'accepted',
-    '2025-11-25 11:48:40',
-    '2025-11-26 05:22:15'
-  ),
-  (
-    4,
-    2,
-    1,
-    NULL,
-    NULL,
-    NULL,
-    'accepted',
-    '2025-11-26 04:43:36',
-    '2025-11-26 04:56:03'
-  ),
-  (
-    5,
-    2,
-    3,
-    NULL,
-    NULL,
-    NULL,
-    'accepted',
-    '2025-11-26 04:59:24',
-    '2025-11-26 04:59:56'
-  ),
-  (
-    6,
-    5,
-    3,
-    NULL,
-    NULL,
-    NULL,
-    'accepted',
-    '2025-11-26 05:22:48',
-    '2025-11-26 05:44:58'
-  ),
-  (
+    13,
     8,
-    1,
     3,
     NULL,
     NULL,
     NULL,
     'accepted',
-    '2025-11-26 05:49:26',
-    '2025-11-26 05:55:46'
+    '2025-11-26 11:45:50',
+    '2025-11-26 11:46:13'
   );
 
 -- --------------------------------------------------------
@@ -1025,81 +925,59 @@ INSERT INTO
   )
 VALUES
   (
-    6,
-    32,
-    'f1',
-    'c2',
-    'I have signed the agreement for the project \"asdf\". Please review and sign to proceed. The agreement is attached below.\n\nAgreement Link: localhost:8000/page/freelancer_agreement_approval.php?agreement_id=1',
-    '/uploads/agreements/agreement_3_1764130951.pdf',
-    'application/pdf',
-    '2025-11-26 12:22:32',
-    'to_accept'
-  ),
-  (
-    7,
-    32,
-    'f1',
-    'c2',
-    'I have signed the agreement for the project \"Google\". Please review and sign to proceed. The agreement is attached below.\n\nAgreement Link: localhost:8000/page/freelancer_agreement_approval.php?agreement_id=2',
-    '/uploads/agreements/agreement_4_1764132963.pdf',
-    'application/pdf',
-    '2025-11-26 12:56:04',
-    'to_accept'
-  ),
-  (
-    8,
-    33,
+    1,
+    34,
     'f3',
     'c2',
-    'I have signed the agreement for the project \"Google\". Please review and sign to proceed. The agreement is attached below.\n\nAgreement Link: localhost:8000/page/freelancer_agreement_approval.php?agreement_id=7',
-    '/uploads/agreements/agreement_5_1764133196.pdf',
-    'application/pdf',
-    '2025-11-26 12:59:56',
-    'to_accept'
+    'hi',
+    NULL,
+    NULL,
+    '2025-11-26 16:07:00',
+    'unread'
   ),
   (
-    9,
-    32,
-    'f1',
+    2,
+    34,
     'c2',
-    'I have signed the agreement for the project \"asdf\". Please review and sign to proceed. The agreement is attached below.\n\nAgreement Link: localhost:8000/page/freelancer_agreement_approval.php?agreement_id=8',
-    '/uploads/agreements/agreement_3_1764134535.pdf',
-    'application/pdf',
-    '2025-11-26 13:22:15',
-    'to_accept'
+    'f3',
+    'hi',
+    NULL,
+    NULL,
+    '2025-11-26 16:07:15',
+    'unread'
   ),
   (
-    10,
-    33,
+    3,
+    34,
     'f3',
     'c2',
-    'I have signed the agreement for the project \"asdf\". Please review and sign to proceed. The agreement is attached below.\n\nAgreement Link: localhost:8000/page/freelancer_agreement_approval.php?agreement_id=9',
-    '/uploads/agreements/agreement_6_1764135898.pdf',
+    'I have signed the agreement for the project \"SITE CORE PROJECT\". Please review and sign to proceed. The agreement is attached below.\n\nAgreement Link: localhost:8000/page/freelancer_agreement_approval.php?agreement_id=1',
+    '/uploads/agreements/agreement_12_1764146190.pdf',
     'application/pdf',
-    '2025-11-26 13:44:58',
+    '2025-11-26 16:36:30',
     'to_accept'
   ),
   (
-    11,
-    33,
+    4,
+    34,
     'f3',
     'c2',
-    'I have signed the agreement for the project \"Google\". Please review and sign to proceed. The agreement is attached below.\n\nAgreement Link: localhost:8000/page/freelancer_agreement_approval.php?agreement_id=10',
-    '/uploads/agreements/agreement_7_1764136072.pdf',
+    'I have signed the agreement for the project \"dfsg\". Please review and sign to proceed. The agreement is attached below.\n\nAgreement Link: localhost:8000/page/freelancer_agreement_approval.php?agreement_id=2',
+    '/uploads/agreements/agreement_13_1764157573.pdf',
     'application/pdf',
-    '2025-11-26 13:47:52',
+    '2025-11-26 19:46:13',
     'to_accept'
   ),
   (
-    12,
-    33,
-    'f3',
+    5,
+    34,
     'c2',
-    'I have signed the agreement for the project \"Google\". Please review and sign to proceed. The agreement is attached below.\n\nAgreement Link: localhost:8000/page/freelancer_agreement_approval.php?agreement_id=11',
-    '/uploads/agreements/agreement_8_1764136546.pdf',
+    'f3',
+    'Agreement signed successfully! The agreement \"dfsg\" has been signed and is now active.',
+    '/uploads/agreements/agreement_2.pdf',
     'application/pdf',
-    '2025-11-26 13:55:46',
-    'to_accept'
+    '2025-11-26 19:47:19',
+    'unread'
   );
 
 -- --------------------------------------------------------
@@ -1143,6 +1021,23 @@ VALUES
     '2025-11-19 06:55:46',
     1
   );
+
+-- --------------------------------------------------------
+--
+-- Table structure for table `notifications`
+--
+CREATE TABLE
+  `notifications` (
+    `NotificationID` int (11) NOT NULL,
+    `UserID` int (11) NOT NULL,
+    `UserType` enum ('client', 'freelancer', 'admin') NOT NULL,
+    `Message` text NOT NULL,
+    `RelatedType` varchar(50) DEFAULT NULL,
+    `RelatedID` int (11) DEFAULT NULL,
+    `CreatedAt` datetime NOT NULL,
+    `IsRead` tinyint (1) DEFAULT 0,
+    `ReadAt` datetime DEFAULT NULL
+  ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 --
@@ -1209,6 +1104,22 @@ VALUES
 
 -- --------------------------------------------------------
 --
+-- Table structure for table `submission_files`
+--
+CREATE TABLE
+  `submission_files` (
+    `FileID` int (11) NOT NULL,
+    `SubmissionID` int (11) NOT NULL,
+    `OriginalFileName` varchar(255) NOT NULL,
+    `StoredFileName` varchar(255) NOT NULL,
+    `FilePath` varchar(500) NOT NULL,
+    `FileSize` bigint (20) NOT NULL,
+    `FileType` varchar(50) DEFAULT NULL,
+    `UploadedAt` datetime NOT NULL
+  ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+--
 -- Table structure for table `wallet`
 --
 CREATE TABLE
@@ -1233,7 +1144,7 @@ INSERT INTO
   )
 VALUES
   (1, '3', 0.00, 0.00, '2025-11-23 07:49:41'),
-  (2, '2', 220.00, 1380.00, '2025-11-26 05:55:46'),
+  (2, '2', 204.00, 1396.00, '2025-11-26 11:46:13'),
   (3, '1', 0.00, 0.00, '2025-11-23 07:49:41'),
   (4, '4', 2000.00, 0.00, '2025-11-23 14:34:27'),
   (5, '5', 1500.00, 0.00, '2025-11-23 14:40:21');
@@ -1504,7 +1415,81 @@ VALUES
     'Funds locked in escrow for project: Google (Agreement #11)',
     'escrow_6',
     '2025-11-26 05:55:46'
+  ),
+  (
+    24,
+    2,
+    'payment',
+    1.00,
+    'completed',
+    'Funds locked in escrow for project: SITE CORE (Agreement #12)',
+    'escrow_7',
+    '2025-11-26 06:44:19'
+  ),
+  (
+    25,
+    2,
+    'payment',
+    12.00,
+    'completed',
+    'Funds locked in escrow for project: JIMMY (Agreement #13)',
+    'escrow_8',
+    '2025-11-26 07:32:20'
+  ),
+  (
+    26,
+    2,
+    'payment',
+    1.00,
+    'completed',
+    'Funds locked in escrow for project: dfsg (Agreement #14)',
+    'escrow_9',
+    '2025-11-26 07:41:01'
+  ),
+  (
+    27,
+    2,
+    'payment',
+    1.00,
+    'completed',
+    'Funds locked in escrow for project: SITE CORE PROJECT (Agreement #1)',
+    'escrow_10',
+    '2025-11-26 08:36:30'
+  ),
+  (
+    28,
+    2,
+    'payment',
+    1.00,
+    'completed',
+    'Funds locked in escrow for project: dfsg (Agreement #2)',
+    'escrow_11',
+    '2025-11-26 11:46:13'
   );
+
+-- --------------------------------------------------------
+--
+-- Table structure for table `work_submissions`
+--
+CREATE TABLE
+  `work_submissions` (
+    `SubmissionID` int (11) NOT NULL,
+    `AgreementID` int (11) NOT NULL,
+    `FreelancerID` int (11) NOT NULL,
+    `ClientID` int (11) NOT NULL,
+    `SubmissionTitle` varchar(255) NOT NULL,
+    `SubmissionNotes` text DEFAULT NULL,
+    `Status` enum (
+      'pending_review',
+      'approved',
+      'rejected',
+      'revision_requested'
+    ) DEFAULT 'pending_review',
+    `ReviewNotes` text DEFAULT NULL,
+    `ReviewedAt` datetime DEFAULT NULL,
+    `SubmittedAt` datetime NOT NULL,
+    `CreatedAt` timestamp NOT NULL DEFAULT current_timestamp()
+  ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
 
 --
 -- Indexes for dumped tables
@@ -1619,6 +1604,14 @@ ADD UNIQUE KEY `unique_notification` (
 );
 
 --
+-- Indexes for table `notifications`
+--
+ALTER TABLE `notifications` ADD PRIMARY KEY (`NotificationID`),
+ADD KEY `idx_user` (`UserID`, `UserType`),
+ADD KEY `idx_read` (`IsRead`),
+ADD KEY `idx_created` (`CreatedAt`);
+
+--
 -- Indexes for table `password_reset`
 --
 ALTER TABLE `password_reset` ADD PRIMARY KEY (`ResetID`),
@@ -1643,6 +1636,12 @@ ADD KEY `ClientID` (`ClientID`);
 ALTER TABLE `skill` ADD PRIMARY KEY (`SkillID`);
 
 --
+-- Indexes for table `submission_files`
+--
+ALTER TABLE `submission_files` ADD PRIMARY KEY (`FileID`),
+ADD KEY `idx_submission` (`SubmissionID`);
+
+--
 -- Indexes for table `wallet`
 --
 ALTER TABLE `wallet` ADD PRIMARY KEY (`WalletID`);
@@ -1654,6 +1653,15 @@ ALTER TABLE `wallet_transactions` ADD PRIMARY KEY (`TransactionID`),
 ADD KEY `WalletID` (`WalletID`),
 ADD KEY `idx_wallet_type_status` (`WalletID`, `Type`, `Status`),
 ADD KEY `idx_created_at` (`CreatedAt`);
+
+--
+-- Indexes for table `work_submissions`
+--
+ALTER TABLE `work_submissions` ADD PRIMARY KEY (`SubmissionID`),
+ADD KEY `idx_agreement` (`AgreementID`),
+ADD KEY `idx_freelancer` (`FreelancerID`),
+ADD KEY `idx_client` (`ClientID`),
+ADD KEY `idx_status` (`Status`);
 
 --
 -- AUTO_INCREMENT for dumped tables
@@ -1668,7 +1676,7 @@ AUTO_INCREMENT = 2;
 -- AUTO_INCREMENT for table `agreement`
 --
 ALTER TABLE `agreement` MODIFY `AgreementID` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 12;
+AUTO_INCREMENT = 3;
 
 --
 -- AUTO_INCREMENT for table `client`
@@ -1680,13 +1688,13 @@ AUTO_INCREMENT = 4;
 -- AUTO_INCREMENT for table `conversation`
 --
 ALTER TABLE `conversation` MODIFY `ConversationID` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 34;
+AUTO_INCREMENT = 35;
 
 --
 -- AUTO_INCREMENT for table `escrow`
 --
 ALTER TABLE `escrow` MODIFY `EscrowID` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 7;
+AUTO_INCREMENT = 12;
 
 --
 -- AUTO_INCREMENT for table `freelancer`
@@ -1704,13 +1712,13 @@ AUTO_INCREMENT = 2;
 -- AUTO_INCREMENT for table `job`
 --
 ALTER TABLE `job` MODIFY `JobID` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 6;
+AUTO_INCREMENT = 10;
 
 --
 -- AUTO_INCREMENT for table `job_application`
 --
 ALTER TABLE `job_application` MODIFY `ApplicationID` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 9;
+AUTO_INCREMENT = 14;
 
 --
 -- AUTO_INCREMENT for table `job_application_answer`
@@ -1733,13 +1741,18 @@ ALTER TABLE `job_question_option` MODIFY `OptionID` int (11) NOT NULL AUTO_INCRE
 -- AUTO_INCREMENT for table `message`
 --
 ALTER TABLE `message` MODIFY `MessageID` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 13;
+AUTO_INCREMENT = 6;
 
 --
 -- AUTO_INCREMENT for table `message_notification`
 --
 ALTER TABLE `message_notification` MODIFY `NotificationID` int (11) NOT NULL AUTO_INCREMENT,
 AUTO_INCREMENT = 8;
+
+--
+-- AUTO_INCREMENT for table `notifications`
+--
+ALTER TABLE `notifications` MODIFY `NotificationID` int (11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `password_reset`
@@ -1764,6 +1777,11 @@ ALTER TABLE `skill` MODIFY `SkillID` int (11) NOT NULL AUTO_INCREMENT,
 AUTO_INCREMENT = 5;
 
 --
+-- AUTO_INCREMENT for table `submission_files`
+--
+ALTER TABLE `submission_files` MODIFY `FileID` int (11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `wallet`
 --
 ALTER TABLE `wallet` MODIFY `WalletID` int (11) NOT NULL AUTO_INCREMENT,
@@ -1773,7 +1791,12 @@ AUTO_INCREMENT = 6;
 -- AUTO_INCREMENT for table `wallet_transactions`
 --
 ALTER TABLE `wallet_transactions` MODIFY `TransactionID` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 24;
+AUTO_INCREMENT = 29;
+
+--
+-- AUTO_INCREMENT for table `work_submissions`
+--
+ALTER TABLE `work_submissions` MODIFY `SubmissionID` int (11) NOT NULL AUTO_INCREMENT;
 
 --
 -- Constraints for dumped tables
@@ -1836,9 +1859,21 @@ ALTER TABLE `review` ADD CONSTRAINT `review_ibfk_1` FOREIGN KEY (`FreelancerID`)
 ADD CONSTRAINT `review_ibfk_2` FOREIGN KEY (`ClientID`) REFERENCES `client` (`ClientID`) ON DELETE CASCADE;
 
 --
+-- Constraints for table `submission_files`
+--
+ALTER TABLE `submission_files` ADD CONSTRAINT `submission_files_ibfk_1` FOREIGN KEY (`SubmissionID`) REFERENCES `work_submissions` (`SubmissionID`) ON DELETE CASCADE;
+
+--
 -- Constraints for table `wallet_transactions`
 --
 ALTER TABLE `wallet_transactions` ADD CONSTRAINT `wallet_transactions_ibfk_1` FOREIGN KEY (`WalletID`) REFERENCES `wallet` (`WalletID`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `work_submissions`
+--
+ALTER TABLE `work_submissions` ADD CONSTRAINT `work_submissions_ibfk_1` FOREIGN KEY (`AgreementID`) REFERENCES `agreement` (`AgreementID`) ON DELETE CASCADE,
+ADD CONSTRAINT `work_submissions_ibfk_2` FOREIGN KEY (`FreelancerID`) REFERENCES `freelancer` (`FreelancerID`) ON DELETE CASCADE,
+ADD CONSTRAINT `work_submissions_ibfk_3` FOREIGN KEY (`ClientID`) REFERENCES `client` (`ClientID`) ON DELETE CASCADE;
 
 COMMIT;
 

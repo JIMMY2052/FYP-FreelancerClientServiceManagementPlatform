@@ -32,6 +32,8 @@ $sql = "SELECT
             a.CreatedDate,
             a.ClientSignedDate,
             a.FreelancerSignedDate,
+            a.DeliveryDate,
+            a.CompleteDate,
             a.ExpiredDate,
             a.DeliveryTime,
             a.ClientSignaturePath,

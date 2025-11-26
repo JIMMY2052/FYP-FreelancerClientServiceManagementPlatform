@@ -312,10 +312,20 @@ try {
 
     // Embed client signature if provided
     $pdf->SetXY($rightX, $clientBoxY);
-    if ($agreement['ClientSignaturePath'] && file_exists($_SERVER['DOCUMENT_ROOT'] . $agreement['ClientSignaturePath'])) {
-        $pdf->Image($_SERVER['DOCUMENT_ROOT'] . $agreement['ClientSignaturePath'], $rightX + 5, $clientBoxY + 5, $signatureBoxWidth - 10, 30, 'PNG');
+    $client_sig_path = $_SERVER['DOCUMENT_ROOT'] . $agreement['ClientSignaturePath'];
+    if ($agreement['ClientSignaturePath']) {
+        try {
+            $pdf->Image($client_sig_path, $rightX + 5, $clientBoxY + 5, $signatureBoxWidth - 10, 30, 'PNG');
+        } catch (Exception $imageError) {
+            error_log("Failed to embed client signature from $client_sig_path: " . $imageError->getMessage());
+            // Placeholder if image fails to load
+            $pdf->SetXY($rightX + 5, $clientBoxY + $signatureHeight / 2 - 5);
+            $pdf->SetFont('times', '', 9);
+            $pdf->SetTextColor(0, 0, 0);
+            $pdf->Cell($signatureBoxWidth - 10, 5, '[Pending Signature]', 0, 1, 'C');
+        }
     } else {
-        // Placeholder if no signature found
+        // Placeholder if no signature path in database
         $pdf->SetXY($rightX + 5, $clientBoxY + $signatureHeight / 2 - 5);
         $pdf->SetFont('times', '', 9);
         $pdf->SetTextColor(0, 0, 0);
@@ -368,28 +378,28 @@ try {
     $signature_db_path = '/uploads/agreements/' . $signature_filename;
     $pdf_path_for_db = '/uploads/agreements/' . $pdf_filename;
 
-    // Calculate new expiration date based on delivery time
-    // Created date + delivery time days + set to 11:59 PM
+    // Calculate delivery date based on delivery time
+    // Created date + delivery time days
     $created_date = new DateTime($agreement['CreatedDate']);
     $delivery_days = intval($agreement['DeliveryTime']);
-    $new_expired_date = $created_date->add(new DateInterval('P' . $delivery_days . 'D'));
-    $new_expired_date->setTime(23, 59, 59);
-    $new_expired_date_str = $new_expired_date->format('Y-m-d H:i:s');
+    $delivery_date = clone $created_date;
+    $delivery_date->add(new DateInterval('P' . $delivery_days . 'D'));
+    $delivery_date_str = $delivery_date->format('Y-m-d');
 
     $update_sql = "UPDATE agreement 
                    SET Status = 'ongoing', 
                        FreelancerSignaturePath = ?,
                        FreelancerSignedDate = NOW(),
                        agreeementPath = ?,
-                       ExpiredDate = ?
+                       DeliveryDate = ?
                    WHERE AgreementID = ? AND FreelancerID = ?";
 
     $update_stmt = $conn->prepare($update_sql);
-    $update_stmt->bind_param('sssii', $signature_db_path, $pdf_path_for_db, $new_expired_date_str, $agreement_id, $freelancer_id);
+    $update_stmt->bind_param('sssii', $signature_db_path, $pdf_path_for_db, $delivery_date_str, $agreement_id, $freelancer_id);
     $success = $update_stmt->execute();
     $update_stmt->close();
 
-    error_log("Agreement #$agreement_id updated: Status=ongoing, FreelancerSignaturePath=$signature_db_path, agreeementPath=$pdf_path_for_db, ExpiredDate=$new_expired_date_str");
+    error_log("Agreement #$agreement_id updated: Status=ongoing, FreelancerSignaturePath=$signature_db_path, agreeementPath=$pdf_path_for_db, DeliveryDate=$delivery_date_str");
 
     if ($success) {
         // Get conversation with client

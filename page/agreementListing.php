@@ -68,6 +68,8 @@ if ($user_type === 'client') {
                 a.CreatedDate,
                 a.ClientSignedDate,
                 a.FreelancerSignedDate,
+                a.DeliveryDate,
+                a.CompleteDate,
                 a.ExpiredDate,
                 a.agreeementPath,
                 CONCAT(f.FirstName, ' ', f.LastName) as FreelancerName,
@@ -95,6 +97,8 @@ if ($user_type === 'client') {
                 a.CreatedDate,
                 a.ClientSignedDate,
                 a.FreelancerSignedDate,
+                a.DeliveryDate,
+                a.CompleteDate,
                 a.ExpiredDate,
                 a.agreeementPath,
                 CONCAT(f.FirstName, ' ', f.LastName) as FreelancerName,
@@ -860,34 +864,50 @@ include '../_head.php';
                             </div>
                             <div class="detail-item">
                                 <div class="detail-label">Freelancer Signed</div>
-                                <div class="detail-value date">
-                                    <?= $agreement['FreelancerSignedDate'] ? date('M d, Y', strtotime($agreement['FreelancerSignedDate'])) : '-' ?>
-                                </div>
+                                <div class="detail-value date"><?= $agreement['FreelancerSignedDate'] ? date('M d, Y', strtotime($agreement['FreelancerSignedDate'])) : '-' ?></div>
                             </div>
                             <?php if ($agreement['Status'] === 'ongoing'): ?>
-                            <div class="detail-item">
-                                <div class="detail-label">Complete By</div>
-                                <div class="detail-value date">
-                                    <?= $agreement['ExpiredDate'] ? date('M d, Y', strtotime($agreement['ExpiredDate'])) : '-' ?>
+                                <div class="detail-item">
+                                    <div class="detail-label">Delivery Date</div>
+                                    <div class="detail-value date"><?= $agreement['DeliveryDate'] ? date('M d, Y', strtotime($agreement['DeliveryDate'])) : '-' ?></div>
                                 </div>
-                            </div>
+                            <?php endif; ?>
+                            <?php if ($agreement['Status'] === 'completed'): ?>
+                                <div class="detail-item">
+                                    <div class="detail-label">Completed Date</div>
+                                    <div class="detail-value date"><?= $agreement['CompleteDate'] ? date('M d, Y', strtotime($agreement['CompleteDate'])) : '-' ?></div>
+                                </div>
                             <?php endif; ?>
                         </div>
 
-                        <!-- Expiration Warning -->
+                        <!-- Delivery Deadline Warning (for ongoing agreements) -->
                         <?php
-                        if ($agreement['Status'] !== 'declined' && $agreement['Status'] !== 'ongoing') {
-                            if ($agreement['ExpiredDate']) {
-                                $now = new DateTime();
-                                $expiration = new DateTime($agreement['ExpiredDate']);
-                                $interval = $now->diff($expiration);
-                                $hoursUntilExpiry = ($interval->days * 24) + $interval->h;
+                        if ($agreement['Status'] === 'ongoing' && $agreement['DeliveryDate']) {
+                            $now = new DateTime();
+                            $delivery = new DateTime($agreement['DeliveryDate']);
+                            $interval = $now->diff($delivery);
+                            $hoursUntilDelivery = ($interval->days * 24) + $interval->h;
 
-                                if ($now > $expiration) {
-                                    echo '<div class="expiration-warning">⚠️ Agreement has expired</div>';
-                                } elseif ($hoursUntilExpiry <= 48) {
-                                    echo '<div class="expiration-warning" data-expiry-date="' . $agreement['ExpiredDate'] . '">⏰ Expires in <span class="hours-remaining">' . $hoursUntilExpiry . '</span> hour(s)</div>';
-                                }
+                            if ($now > $delivery) {
+                                echo '<div class="expiration-warning">⚠️ Delivery deadline has passed</div>';
+                            } elseif ($hoursUntilDelivery <= 48) {
+                                echo '<div class="expiration-warning" data-expiry-date="' . $agreement['DeliveryDate'] . '">⏰ Delivery due in <span class="hours-remaining">' . $hoursUntilDelivery . '</span> hour(s)</div>';
+                            }
+                        }
+                        ?>
+
+                        <!-- Expiration Warning (for to_accept agreements) -->
+                        <?php
+                        if ($agreement['Status'] === 'to_accept' && $agreement['ExpiredDate']) {
+                            $now = new DateTime();
+                            $expiration = new DateTime($agreement['ExpiredDate']);
+                            $interval = $now->diff($expiration);
+                            $hoursUntilExpiry = ($interval->days * 24) + $interval->h;
+
+                            if ($now > $expiration) {
+                                echo '<div class="expiration-warning">⚠️ Agreement signature deadline has expired</div>';
+                            } elseif ($hoursUntilExpiry <= 48) {
+                                echo '<div class="expiration-warning" data-expiry-date="' . $agreement['ExpiredDate'] . '">⏰ Signature expires in <span class="hours-remaining">' . $hoursUntilExpiry . '</span> hour(s)</div>';
                             }
                         }
                         ?>

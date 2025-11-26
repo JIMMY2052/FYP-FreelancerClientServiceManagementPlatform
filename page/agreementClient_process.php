@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Verify application ownership (client auth)
-    $verify_sql = "SELECT ja.ApplicationID, ja.JobID, ja.FreelancerID, j.Title, j.Budget, j.Description, 
+    $verify_sql = "SELECT ja.ApplicationID, ja.JobID, ja.FreelancerID, j.Title, j.Budget, j.Description, j.DeliveryTime,
                           c.ClientID, c.CompanyName, f.FirstName as FreelancerFirstName, f.LastName as FreelancerLastName
                    FROM job_application ja
                    JOIN job j ON ja.JobID = j.JobID
@@ -66,6 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $job_title = $app_data['Title'];
     $job_budget = $app_data['Budget'];
     $job_desc = $app_data['Description'];
+    $delivery_time = intval($app_data['DeliveryTime']);
 
     // Create agreement record in database
     $status = 'to_accept';
