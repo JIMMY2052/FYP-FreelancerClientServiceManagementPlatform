@@ -15,6 +15,7 @@ require_once __DIR__ . '/../../page/config.php';
 $title = isset($_POST['title']) ? trim($_POST['title']) : '';
 $description = isset($_POST['description']) ? trim($_POST['description']) : '';
 $budget = isset($_POST['budget']) ? floatval($_POST['budget']) : 0;
+$deliveryTime = isset($_POST['deliveryTime']) ? intval($_POST['deliveryTime']) : 0;
 $postDate = isset($_POST['postDate']) ? trim($_POST['postDate']) : '';
 $postTime = isset($_POST['postTime']) ? trim($_POST['postTime']) : '';
 $deadline = isset($_POST['deadline']) ? trim($_POST['deadline']) : '';
@@ -37,9 +38,9 @@ try {
     $clientID = $_SESSION['user_id'];
     $status = 'available'; // Default status when job is created
     
-    $stmt = $conn->prepare("INSERT INTO job (ClientID, Title, Description, Budget, Deadline, Status, PostDate) 
-                            VALUES (?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("issdsss", $clientID, $title, $description, $budget, $deadline, $status, $postDateTime);
+    $stmt = $conn->prepare("INSERT INTO job (ClientID, Title, Description, Budget, DeliveryTime, Deadline, Status, PostDate) 
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("issdisss", $clientID, $title, $description, $budget, $deliveryTime, $deadline, $status, $postDateTime);
     
     if ($stmt->execute()) {
         $jobID = $stmt->insert_id;

@@ -11,6 +11,7 @@ include '../../_head.php';
     $jobTitle = $_POST["jobTitle"] ?? '';
     $jobDescription = $_POST["jobDescription"] ?? '';
     $jobSalary = $_POST["jobSalary"] ?? '';
+    $deliveryTime = $_POST["deliveryTime"] ?? '';
     $professionalField = $_POST["professionalField"] ?? '';
     $postDate = $_POST["postDate"] ?? '';
     $postTime = $_POST["postTime"] ?? '';
@@ -32,6 +33,10 @@ include '../../_head.php';
         <p>Salary</p>
         <input type="text" value="<?php echo htmlspecialchars($jobSalary); ?>" disabled>
         <input type="hidden" name="budget" value="<?php echo htmlspecialchars($jobSalary); ?>">
+
+        <p>Delivery Time (Days)</p>
+        <input type="text" value="<?php echo htmlspecialchars($deliveryTime); ?>" disabled>
+        <input type="hidden" name="deliveryTime" value="<?php echo htmlspecialchars($deliveryTime); ?>">
 
         <p>Looking At</p>
         <input type="text" value="<?php echo htmlspecialchars($professionalField); ?>" disabled>

@@ -62,6 +62,10 @@ $current_page = basename($_SERVER['PHP_SELF']);
             <span class="nav-icon">📄</span>
             <span>Agreements</span>
         </a>
+        <a href="activity_history.php" class="nav-item <?php echo ($current_page === 'activity_history.php') ? 'active' : ''; ?>">
+            <span class="nav-icon">📋</span>
+            <span>Activity History</span>
+        </a>
         <a href="client_profile.php" class="nav-item <?php echo (in_array($current_page, ['client_profile.php', 'edit_client_profile.php'])) ? 'active' : ''; ?>">
             <span class="nav-icon">👤</span>
             <span>Profile</span>

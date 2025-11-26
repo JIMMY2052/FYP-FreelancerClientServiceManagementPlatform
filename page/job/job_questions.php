@@ -14,6 +14,7 @@ include '../../_head.php';
 $jobTitle = $_POST["jobTitle"] ?? '';
 $jobDescription = $_POST["jobDescription"] ?? '';
 $jobSalary = $_POST["jobSalary"] ?? '';
+$deliveryTime = $_POST["deliveryTime"] ?? '';
 $professionalField = $_POST["professionalField"] ?? '';
 $postDate = $_POST["postDate"] ?? '';
 $postTime = $_POST["postTime"] ?? '';
@@ -38,6 +39,7 @@ if (empty($jobTitle) || empty($jobDescription) || empty($jobSalary) || empty($de
         <input type="hidden" name="jobTitle" value="<?= htmlspecialchars($jobTitle) ?>">
         <input type="hidden" name="jobDescription" value="<?= htmlspecialchars($jobDescription) ?>">
         <input type="hidden" name="jobSalary" value="<?= htmlspecialchars($jobSalary) ?>">
+        <input type="hidden" name="deliveryTime" value="<?= htmlspecialchars($deliveryTime) ?>">
         <input type="hidden" name="professionalField" value="<?= htmlspecialchars($professionalField) ?>">
         <input type="hidden" name="postDate" value="<?= htmlspecialchars($postDate) ?>">
         <input type="hidden" name="postTime" value="<?= htmlspecialchars($postTime) ?>">
