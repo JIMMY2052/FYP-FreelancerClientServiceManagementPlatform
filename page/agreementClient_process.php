@@ -113,6 +113,111 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     error_log("Agreement record successfully created with ID: " . $agreement_id);
+
+    // ===== ESCROW FUNCTIONALITY: Check wallet balance and lock funds =====
+    // Get client's wallet
+    $wallet_check_sql = "SELECT WalletID, Balance, LockedBalance FROM wallet WHERE UserID = ?";
+    $wallet_check_stmt = $conn->prepare($wallet_check_sql);
+    $wallet_check_stmt->bind_param('i', $client_id);
+    $wallet_check_stmt->execute();
+    $wallet_result = $wallet_check_stmt->get_result();
+
+    if ($wallet_result->num_rows === 0) {
+        // Create wallet if doesn't exist
+        $create_wallet_sql = "INSERT INTO wallet (UserID, Balance, LockedBalance) VALUES (?, 0.00, 0.00)";
+        $create_wallet_stmt = $conn->prepare($create_wallet_sql);
+        $create_wallet_stmt->bind_param('i', $client_id);
+        $create_wallet_stmt->execute();
+        $wallet_id = $conn->insert_id;
+        $current_balance = 0.00;
+        $current_locked = 0.00;
+        $create_wallet_stmt->close();
+    } else {
+        $wallet_data = $wallet_result->fetch_assoc();
+        $wallet_id = $wallet_data['WalletID'];
+        $current_balance = floatval($wallet_data['Balance']);
+        $current_locked = floatval($wallet_data['LockedBalance']);
+    }
+    $wallet_check_stmt->close();
+
+    // Check if client has sufficient balance
+    if ($current_balance < $job_budget) {
+        // Delete the agreement since we can't proceed without funds
+        $delete_agreement_sql = "DELETE FROM agreement WHERE AgreementID = ?";
+        $delete_stmt = $conn->prepare($delete_agreement_sql);
+        $delete_stmt->bind_param('i', $agreement_id);
+        $delete_stmt->execute();
+        $delete_stmt->close();
+        
+        $_SESSION['error'] = "Insufficient wallet balance. You have RM " . number_format($current_balance, 2) . " but need RM " . number_format($job_budget, 2) . ". Please <a href='payment/wallet.php'>top up your wallet</a> first.";
+        error_log("Insufficient balance: Client $client_id has RM $current_balance but needs RM $job_budget");
+        $conn->close();
+        header("Location: agreementClient.php?application_id=" . $application_id);
+        exit();
+    }
+
+    // Create escrow record to hold funds
+    $escrow_status = 'hold';
+    $escrow_created_at = date('Y-m-d H:i:s');
+    $escrow_sql = "INSERT INTO escrow (OrderID, PayerID, PayeeID, Amount, Status, CreatedAt) VALUES (?, ?, ?, ?, ?, ?)";
+    $escrow_stmt = $conn->prepare($escrow_sql);
+    
+    if (!$escrow_stmt) {
+        $_SESSION['error'] = "Database error creating escrow: " . $conn->error;
+        error_log("Escrow prepare error: " . $conn->error);
+        $conn->close();
+        header("Location: agreementClient.php?application_id=" . $application_id);
+        exit();
+    }
+
+    $escrow_stmt->bind_param('iiidss', $agreement_id, $client_id, $freelancer_id, $job_budget, $escrow_status, $escrow_created_at);
+    
+    if (!$escrow_stmt->execute()) {
+        $_SESSION['error'] = "Error creating escrow record: " . $escrow_stmt->error;
+        error_log("Escrow execute error: " . $escrow_stmt->error);
+        $escrow_stmt->close();
+        $conn->close();
+        header("Location: agreementClient.php?application_id=" . $application_id);
+        exit();
+    }
+    
+    $escrow_id = $conn->insert_id;
+    $escrow_stmt->close();
+    error_log("Escrow record created with ID: $escrow_id - RM $job_budget locked for Agreement #$agreement_id");
+
+    // Update wallet: move funds from Balance to LockedBalance
+    $new_balance = $current_balance - $job_budget;
+    $new_locked = $current_locked + $job_budget;
+    
+    $update_wallet_sql = "UPDATE wallet SET Balance = ?, LockedBalance = ? WHERE WalletID = ?";
+    $update_wallet_stmt = $conn->prepare($update_wallet_sql);
+    $update_wallet_stmt->bind_param('ddi', $new_balance, $new_locked, $wallet_id);
+    
+    if (!$update_wallet_stmt->execute()) {
+        $_SESSION['error'] = "Error updating wallet balance: " . $update_wallet_stmt->error;
+        error_log("Wallet update error: " . $update_wallet_stmt->error);
+        $update_wallet_stmt->close();
+        $conn->close();
+        header("Location: agreementClient.php?application_id=" . $application_id);
+        exit();
+    }
+    $update_wallet_stmt->close();
+    error_log("Wallet updated: Balance RM $current_balance -> RM $new_balance, Locked RM $current_locked -> RM $new_locked");
+
+    // Record wallet transaction
+    $transaction_type = 'payment';
+    $transaction_status = 'completed';
+    $transaction_desc = "Funds locked in escrow for project: " . $job_title . " (Agreement #" . $agreement_id . ")";
+    $transaction_ref = "escrow_" . $escrow_id;
+    
+    $transaction_sql = "INSERT INTO wallet_transactions (WalletID, Type, Amount, Status, Description, ReferenceID, CreatedAt) VALUES (?, ?, ?, ?, ?, ?, NOW())";
+    $transaction_stmt = $conn->prepare($transaction_sql);
+    $transaction_stmt->bind_param('isdsss', $wallet_id, $transaction_type, $job_budget, $transaction_status, $transaction_desc, $transaction_ref);
+    $transaction_stmt->execute();
+    $transaction_stmt->close();
+    error_log("Wallet transaction recorded for escrow lock");
+    // ===== END ESCROW FUNCTIONALITY =====
+
     require_once '../vendor/autoload.php';
     require_once '../vendor/tecnickcom/tcpdf/tcpdf.php';
 
