@@ -33,6 +33,31 @@ $pdo = getPDOConnection();
 // Debug: Log the client ID
 error_log('[my_applications] Client ID: ' . $clientID);
 
+// Get client's wallet balance
+try {
+    $walletSql = "SELECT Balance, LockedBalance FROM wallet WHERE UserID = :clientID";
+    $walletStmt = $pdo->prepare($walletSql);
+    $walletStmt->execute([':clientID' => $clientID]);
+    $walletData = $walletStmt->fetch();
+    
+    if ($walletData) {
+        $clientBalance = floatval($walletData['Balance']);
+        $lockedBalance = floatval($walletData['LockedBalance']);
+    } else {
+        // Create wallet if doesn't exist
+        $createWalletSql = "INSERT INTO wallet (UserID, Balance, LockedBalance) VALUES (:clientID, 0.00, 0.00)";
+        $createWalletStmt = $pdo->prepare($createWalletSql);
+        $createWalletStmt->execute([':clientID' => $clientID]);
+        $clientBalance = 0.00;
+        $lockedBalance = 0.00;
+    }
+    error_log('[my_applications] Client wallet balance: RM ' . $clientBalance);
+} catch (PDOException $e) {
+    error_log('[my_applications] Failed to fetch wallet balance: ' . $e->getMessage());
+    $clientBalance = 0.00;
+    $lockedBalance = 0.00;
+}
+
 // Get filter parameters
 $jobFilter = isset($_GET['job_id']) ? intval($_GET['job_id']) : null;
 $statusFilter = isset($_GET['status']) ? $_GET['status'] : null;
@@ -324,6 +349,49 @@ include '../_head.php';
             <div class="modal-footer">
                 <button class="btn-modal-secondary" onclick="closeAcceptConfirmation()">Cancel</button>
                 <button class="btn-modal-primary" onclick="proceedWithAcceptance()">Proceed to Agreement</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Insufficient Balance Modal -->
+    <div id="insufficientBalanceModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Insufficient Wallet Balance</h2>
+                <button class="modal-close" onclick="closeInsufficientBalanceModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="text-align: center; padding: 20px 0;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 4rem; color: #ffc107; margin-bottom: 20px;"></i>
+                    <p style="font-size: 1.1rem; color: #2c3e50; margin-bottom: 15px;">
+                        You don't have enough balance in your wallet to accept this application.
+                    </p>
+                    <div style="background: #f8fafc; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span style="color: #666;">Current Balance:</span>
+                            <span style="font-weight: 700; color: #2c3e50;" id="modalCurrentBalance">RM 0.00</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span style="color: #666;">Required Amount:</span>
+                            <span style="font-weight: 700; color: #dc3545;" id="modalRequiredAmount">RM 0.00</span>
+                        </div>
+                        <div style="border-top: 2px solid #e9ecef; margin: 10px 0; padding-top: 10px;">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="color: #666; font-weight: 600;">Amount Needed:</span>
+                                <span style="font-weight: 700; color: #ffc107; font-size: 1.1rem;" id="modalAmountNeeded">RM 0.00</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p style="font-size: 0.9rem; color: #666;">
+                        Please top up your wallet to proceed with accepting this application.
+                    </p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-modal-secondary" onclick="closeInsufficientBalanceModal()">Cancel</button>
+                <button class="btn-modal-primary" onclick="goToTopUp()" style="background: #28a745;">
+                    <i class="fas fa-wallet"></i> Top Up Wallet
+                </button>
             </div>
         </div>
     </div>
@@ -975,7 +1043,16 @@ include '../_head.php';
     }
 
     // Acceptance confirmation modal functions
+    const clientBalance = <?= $clientBalance ?>;
+    
     function showAcceptConfirmation(applicationId, jobBudget, jobTitle) {
+        // Check if client has sufficient balance
+        if (clientBalance < jobBudget) {
+            // Show insufficient balance modal
+            showInsufficientBalanceModal(jobBudget);
+            return;
+        }
+        
         // Store the data
         pendingAcceptanceData = {
             applicationId: applicationId,
@@ -988,6 +1065,35 @@ include '../_head.php';
             maximumFractionDigits: 2
         });
         document.getElementById('acceptConfirmationModal').style.display = 'flex';
+    }
+    
+    function showInsufficientBalanceModal(requiredAmount) {
+        const amountNeeded = requiredAmount - clientBalance;
+        
+        document.getElementById('modalCurrentBalance').textContent = 'RM ' + parseFloat(clientBalance).toLocaleString('en-MY', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        
+        document.getElementById('modalRequiredAmount').textContent = 'RM ' + parseFloat(requiredAmount).toLocaleString('en-MY', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        
+        document.getElementById('modalAmountNeeded').textContent = 'RM ' + parseFloat(amountNeeded).toLocaleString('en-MY', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        
+        document.getElementById('insufficientBalanceModal').style.display = 'flex';
+    }
+    
+    function closeInsufficientBalanceModal() {
+        document.getElementById('insufficientBalanceModal').style.display = 'none';
+    }
+    
+    function goToTopUp() {
+        window.location.href = 'payment/wallet.php';
     }
 
     function closeAcceptConfirmation() {
