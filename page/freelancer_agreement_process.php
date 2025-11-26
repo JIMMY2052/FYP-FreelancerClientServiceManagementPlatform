@@ -34,12 +34,19 @@ $sql = "SELECT
             a.ExpiredDate,
             a.DeliveryTime,
             a.ClientSignaturePath,
+            a.Terms,
+            a.Scope,
+            a.Deliverables,
+            a.ProjectDetail,
             CONCAT(f.FirstName, ' ', f.LastName) as FreelancerName,
             c.CompanyName as ClientName
         FROM agreement a
         JOIN freelancer f ON a.FreelancerID = f.FreelancerID
         JOIN client c ON a.ClientID = c.ClientID
         WHERE a.AgreementID = ? AND a.FreelancerID = ?";
+
+// Also fetch client signature from database if the path exists
+$client_signature_path_from_db = null;
 
 $stmt = $conn->prepare($sql);
 $stmt->bind_param('ii', $agreement_id, $freelancer_id);
@@ -97,9 +104,10 @@ try {
     $pdf = new TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
 
     // Set document information
-    $pdf->SetCreator('WorkSync Platform');
-    $pdf->SetAuthor('WorkSync');
-    $pdf->SetTitle('Signed Agreement - ' . $agreement['ProjectTitle']);
+    $pdf->SetCreator('Freelancer Client Service Management Platform');
+    $pdf->SetAuthor('FYP Platform');
+    $pdf->SetTitle('Agreement - ' . $agreement['ProjectTitle']);
+    $pdf->SetSubject('Project Agreement');
 
     // Set margins
     $pdf->SetMargins(15, 15, 15);
@@ -108,102 +116,260 @@ try {
     // Add page
     $pdf->AddPage();
 
-    // Set font
-    $pdf->SetFont('helvetica', 'B', 16);
-    $pdf->Cell(0, 15, 'SERVICE AGREEMENT', 0, 1, 'C');
+    // ===== MODERN CLEAN HEADER =====
+    $pdf->SetFont('times', 'B', 32);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->Cell(0, 15, 'Service Contract', 0, 1, 'L');
 
-    $pdf->SetFont('helvetica', '', 10);
-    $pdf->Cell(0, 8, 'WorkSync Freelancer Platform', 0, 1, 'C');
-    $pdf->Ln(5);
-
-    // Agreement Details
-    $pdf->SetFont('helvetica', 'B', 12);
-    $pdf->Cell(0, 8, 'Agreement Details', 0, 1);
-
-    $pdf->SetFont('helvetica', '', 10);
-    $pdf->Cell(50, 7, 'Agreement ID:', 0, 0);
-    $pdf->Cell(0, 7, $agreement['AgreementID'], 0, 1);
-
-    $pdf->Cell(50, 7, 'Project Title:', 0, 0);
-    $pdf->MultiCell(0, 7, $agreement['ProjectTitle']);
-
-    $pdf->Cell(50, 7, 'Payment Amount:', 0, 0);
-    $pdf->Cell(0, 7, 'RM ' . number_format($agreement['PaymentAmount'], 2), 0, 1);
-
-    $pdf->Cell(50, 7, 'Delivery Time:', 0, 0);
-    $pdf->Cell(0, 7, $agreement['DeliveryTime'], 0, 1);
-
-    $pdf->Cell(50, 7, 'Created Date:', 0, 0);
-    $pdf->Cell(0, 7, date('M d, Y', strtotime($agreement['CreatedDate'])), 0, 1);
-
+    // Decorative line
+    $pdf->SetDrawColor(0, 0, 0);
+    $pdf->SetLineWidth(0.3);
+    $pdf->Line(15, $pdf->GetY(), 195, $pdf->GetY());
     $pdf->Ln(8);
 
-    // Parties
-    $pdf->SetFont('helvetica', 'B', 12);
-    $pdf->Cell(0, 8, 'Parties', 0, 1);
+    // ===== INFO GRID SECTION =====
+    $pdf->SetFont('times', '', 10);
 
-    $pdf->SetFont('helvetica', '', 10);
-    $pdf->Cell(50, 7, 'Client:', 0, 0);
-    $pdf->Cell(0, 7, $agreement['ClientName'], 0, 1);
+    // Row 1 - Freelancer and Client
+    $pdf->SetFillColor(255, 255, 255);
+    $pdf->SetDrawColor(0, 0, 0);
+    $pdf->SetLineWidth(0.5);
 
-    $pdf->Cell(50, 7, 'Freelancer:', 0, 0);
-    $pdf->Cell(0, 7, $agreement['FreelancerName'], 0, 1);
+    $pdf->SetFont('times', 'B', 9);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->Cell(55, 6, 'FREELANCER', 0, 0, 'L', true);
+    $pdf->SetFont('times', '', 9);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->Cell(0, 6, ' : ' . $agreement['FreelancerName'], 0, 1, 'L', true);
 
-    $pdf->Ln(10);
+    $pdf->SetFont('times', 'B', 9);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->Cell(55, 6, 'CLIENT', 0, 0, 'L', true);
+    $pdf->SetFont('times', '', 9);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->Cell(0, 6, ' : ' . $agreement['ClientName'], 0, 1, 'L', true);
 
-    // Signatures Section
-    $pdf->SetFont('helvetica', 'B', 12);
-    $pdf->Cell(0, 8, 'Signatures', 0, 1);
+    // Row 2 - Date and Amount
+    $pdf->SetFillColor(255, 255, 255);
+    $pdf->SetFont('times', 'B', 9);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->Cell(55, 6, 'DATE SIGNED', 0, 0, 'L', true);
+    $pdf->SetFont('times', '', 9);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->Cell(0, 6, ' : ' . date('M d, Y'), 0, 1, 'L', true);
 
-    $pdf->SetFont('helvetica', '', 10);
+    $pdf->SetFont('times', 'B', 11);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->Cell(55, 6, 'PROJECT VALUE', 0, 0, 'L', true);
+    $pdf->SetFont('times', 'B', 9);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->Cell(0, 6, ' : RM ' . number_format($agreement['PaymentAmount'], 2), 0, 1, 'L', true);
 
-    // Two column layout for signatures
-    $x_col1 = 15;
-    $x_col2 = 105;
-    $y_sig_start = $pdf->GetY();
+    $pdf->Ln(6);
 
-    // Client signature column
-    $pdf->SetXY($x_col1, $y_sig_start);
-    $pdf->SetFont('helvetica', 'B', 10);
-    $pdf->Cell(80, 7, 'Client Signature', 0, 1);
+    // ===== PROJECT TITLE SECTION =====
+    $pdf->SetFont('times', 'B', 14);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetDrawColor(0, 0, 0);
+    $pdf->SetLineWidth(0.3);
+    $pdf->Cell(0, 8, 'Project: ' . $agreement['ProjectTitle'], 0, 1, 'L', true);
+    $pdf->Ln(4);
 
-    $pdf->SetXY($x_col1, $y_sig_start + 8);
-    if ($agreement['ClientSignaturePath'] && file_exists($_SERVER['DOCUMENT_ROOT'] . $agreement['ClientSignaturePath'])) {
-        $pdf->Image($_SERVER['DOCUMENT_ROOT'] . $agreement['ClientSignaturePath'], $x_col1 + 5, $pdf->GetY(), 60, 30);
-        $pdf->SetY($pdf->GetY() + 35);
-    } else {
-        $pdf->SetFont('helvetica', '', 9);
-        $pdf->MultiCell(70, 7, '[Client Signature]', 1);
+    // ===== PROJECT DETAILS IF PROVIDED =====
+    if (!empty($agreement['ProjectDetail'])) {
+        $pdf->SetFont('times', '', 10);
+        $pdf->SetTextColor(0, 0, 0);
+        $pdf->MultiCell(0, 5, $agreement['ProjectDetail'], 0, 'L', false);
+        $pdf->Ln(4);
     }
 
-    $pdf->SetXY($x_col1, $pdf->GetY() + 5);
-    $pdf->SetFont('helvetica', '', 9);
-    if ($agreement['ClientSignedDate']) {
-        $pdf->Cell(80, 6, 'Signed: ' . date('M d, Y', strtotime($agreement['ClientSignedDate'])), 0, 1);
-    }
+    // ===== INTRODUCTORY PARAGRAPH =====
+    $pdf->SetFont('times', '', 10);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetFillColor(249, 249, 249);
+    $pdf->SetDrawColor(0, 0, 0);
+    $pdf->SetLineWidth(0.3);
 
-    // Freelancer signature column
-    $pdf->SetXY($x_col2, $y_sig_start);
-    $pdf->SetFont('helvetica', 'B', 10);
-    $pdf->Cell(80, 7, 'Freelancer Signature', 0, 1);
+    $introText = 'This Services Agreement shall become effective on date (the "Execution Date") and is subject to the terms and conditions stated below between ' . $agreement['FreelancerName'] . ' (the "Service Provider") and ' . $agreement['ClientName'] . ' (the "Client"), collectively referred to as the "Parties".';
 
-    $pdf->SetXY($x_col2, $y_sig_start + 8);
+    // Add border box around intro paragraph
+    $pdf->SetXY(15, $pdf->GetY());
+    $pdf->MultiCell(0, 5, $introText, 'LRB', 'L', true);
+    $pdf->Ln(6);
+
+    // ===== SCOPE OF WORK SECTION =====
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetFont('times', 'B', 12);
+    $pdf->SetDrawColor(0, 0, 0);
+    $pdf->SetLineWidth(0.3);
+    $pdf->Cell(0, 8, '1.  SCOPE OF WORK', 'B', 1, 'L', false);
+
+    $pdf->SetFont('times', '', 10);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetDrawColor(255, 255, 255);
+    $pdf->SetLineWidth(0);
+    $pdf->SetFillColor(255, 255, 255);
+    $pdf->MultiCell(0, 5, !empty($agreement['Scope']) ? $agreement['Scope'] : $agreement['ProjectDetail'], 0, 'L', false);
+    $pdf->Ln(5);
+
+    // ===== DELIVERABLES SECTION =====
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetFont('times', 'B', 12);
+    $pdf->SetDrawColor(0, 0, 0);
+    $pdf->SetLineWidth(0.3);
+    $pdf->Cell(0, 8, '2.  DELIVERABLES', 'B', 1, 'L', false);
+
+    $pdf->SetFont('times', '', 10);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetDrawColor(255, 255, 255);
+    $pdf->SetLineWidth(0);
+    $pdf->SetFillColor(255, 255, 255);
+    $pdf->MultiCell(0, 5, !empty($agreement['Deliverables']) ? $agreement['Deliverables'] : 'As agreed upon during project discussion', 0, 'L', false);
+    $pdf->Ln(5);
+
+    // ===== PAYMENT TERMS SECTION =====
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetFont('times', 'B', 12);
+    $pdf->SetDrawColor(0, 0, 0);
+    $pdf->SetLineWidth(0.3);
+    $pdf->Cell(0, 8, '3.  PAYMENT TERMS', 'B', 1, 'L', false);
+
+    $paymentText = 'Project Value: RM ' . number_format($agreement['PaymentAmount'], 2) . "\n\n" .
+        'Delivery Time: ' . $agreement['DeliveryTime'] . ' days' . "\n\n" .
+        'Payment Schedule: To be completed upon milestone deliveries as agreed.';
+
+    $pdf->SetFont('times', '', 10);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetDrawColor(255, 255, 255);
+    $pdf->SetLineWidth(0);
+    $pdf->SetFillColor(255, 255, 255);
+    $pdf->MultiCell(0, 5, $paymentText, 0, 'L', false);
+    $pdf->Ln(5);
+
+    // ===== TERMS & CONDITIONS SECTION =====
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetFont('times', 'B', 12);
+    $pdf->SetDrawColor(0, 0, 0);
+    $pdf->SetLineWidth(0.3);
+    $pdf->Cell(0, 8, '4.  TERMS & CONDITIONS', 'B', 1, 'L', false);
+
+    $termsText = !empty($agreement['Terms']) ? $agreement['Terms'] : 
+        "• Both parties agree to the terms outlined above.\n" .
+        "• Payment will be processed upon project completion and mutual agreement.\n" .
+        "• Either party may terminate this agreement with written notice.\n" .
+        "• Both parties agree to maintain confidentiality of project details.\n" .
+        "• Any disputes will be resolved through communication or mediation.\n";
+
+    $pdf->SetFont('times', '', 10);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetDrawColor(255, 255, 255);
+    $pdf->SetLineWidth(0);
+    $pdf->SetFillColor(255, 255, 255);
+    $pdf->MultiCell(0, 5, $termsText, 0, 'L', false);
+    $pdf->Ln(5);
+
+    // ===== SIGNATURE SECTION =====
+    $pdf->Ln(3);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetFont('times', 'B', 12);
+    $pdf->SetDrawColor(0, 0, 0);
+    $pdf->SetLineWidth(0.3);
+    $pdf->Cell(0, 8, '5.  SIGNATURES', 'B', 1, 'L', false);
+
+    $pdf->Ln(6);
+
+    // Dual signature layout
+    $signatureBoxWidth = 60;
+    $leftX = 15;
+    $rightX = 15 + $signatureBoxWidth + 15;
+    $signatureHeight = 50;
+    $currentY = $pdf->GetY();
+
+    // ===== FREELANCER SIGNATURE (LEFT) =====
+    $pdf->SetXY($leftX, $currentY);
+    $pdf->SetFont('times', 'B', 10);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->Cell($signatureBoxWidth, 5, 'FREELANCER SIGNATURE', 0, 1, 'C');
+
+    // Signature box
+    $boxY = $pdf->GetY();
+    $pdf->SetDrawColor(0, 0, 0);
+    $pdf->SetLineWidth(0.5);
+    $pdf->SetXY($leftX, $boxY);
+    $pdf->Rect($leftX, $boxY, $signatureBoxWidth, $signatureHeight);
+
+    // Embed freelancer signature
+    $pdf->SetXY($leftX, $boxY);
     if (file_exists($signature_path)) {
-        $pdf->Image($signature_path, $x_col2 + 5, $pdf->GetY(), 60, 30);
-        $pdf->SetY($pdf->GetY() + 35);
+        $pdf->Image($signature_path, $leftX + 5, $boxY + 5, $signatureBoxWidth - 10, 30, 'PNG');
     }
 
-    $pdf->SetXY($x_col2, $pdf->GetY() + 5);
-    $pdf->SetFont('helvetica', '', 9);
-    $pdf->Cell(80, 6, 'Signed: ' . date('M d, Y'), 0, 1);
+    // ===== CLIENT SIGNATURE (RIGHT) =====
+    $pdf->SetXY($rightX, $currentY);
+    $pdf->SetFont('times', 'B', 10);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->Cell($signatureBoxWidth, 5, 'CLIENT SIGNATURE', 0, 1, 'C');
 
-    // Generate filename based on agreement ID (same as client side)
+    // Signature box
+    $clientBoxY = $pdf->GetY();
+    $pdf->SetDrawColor(0, 0, 0);
+    $pdf->SetLineWidth(0.5);
+    $pdf->SetXY($rightX, $clientBoxY);
+    $pdf->Rect($rightX, $clientBoxY, $signatureBoxWidth, $signatureHeight);
+
+    // Embed client signature if provided
+    $pdf->SetXY($rightX, $clientBoxY);
+    if ($agreement['ClientSignaturePath'] && file_exists($_SERVER['DOCUMENT_ROOT'] . $agreement['ClientSignaturePath'])) {
+        $pdf->Image($_SERVER['DOCUMENT_ROOT'] . $agreement['ClientSignaturePath'], $rightX + 5, $clientBoxY + 5, $signatureBoxWidth - 10, 30, 'PNG');
+    } else {
+        // Placeholder if no signature found
+        $pdf->SetXY($rightX + 5, $clientBoxY + $signatureHeight / 2 - 5);
+        $pdf->SetFont('times', '', 9);
+        $pdf->SetTextColor(0, 0, 0);
+        $pdf->Cell($signatureBoxWidth - 10, 5, '[Pending Signature]', 0, 1, 'C');
+    }
+
+    // Move to below the signature boxes
+    $newY = max($boxY, $clientBoxY) + $signatureHeight + 2;
+    $pdf->SetY($newY);
+
+    // Freelancer name
+    $pdf->SetXY($leftX, $pdf->GetY());
+    $pdf->SetFont('times', 'B', 9);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->Cell($signatureBoxWidth, 5, $agreement['FreelancerName'], 0, 1, 'C');
+
+    // Freelancer date
+    $pdf->SetXY($leftX, $pdf->GetY());
+    $pdf->SetFont('times', '', 8);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->Cell($signatureBoxWidth, 4, 'Date: ' . date('M d, Y'), 0, 1, 'C');
+
+    // Client name
+    $pdf->SetXY($rightX, $newY);
+    $pdf->SetFont('times', 'B', 9);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->Cell($signatureBoxWidth, 5, $agreement['ClientName'], 0, 1, 'C');
+
+    // Client date
+    $pdf->SetXY($rightX, $pdf->GetY());
+    $pdf->SetFont('times', '', 8);
+    $pdf->SetTextColor(0, 0, 0);
+    if ($agreement['ClientSignedDate']) {
+        $pdf->Cell($signatureBoxWidth, 4, 'Date: ' . date('M d, Y', strtotime($agreement['ClientSignedDate'])), 0, 1, 'C');
+    } else {
+        $pdf->Cell($signatureBoxWidth, 4, 'Date: ___________', 0, 1, 'C');
+    }
+
+    // Generate filename based on agreement ID
     $pdf_filename = 'agreement_' . $agreement_id . '.pdf';
     $pdf_path = '/uploads/agreements/' . $pdf_filename;
     $full_pdf_path = $_SERVER['DOCUMENT_ROOT'] . $pdf_path;
 
     // Save PDF (overwrites previous version if it exists)
     $pdf->Output($full_pdf_path, 'F');
+
+    error_log("PDF generated for agreement #$agreement_id at $full_pdf_path");
 
     // Update agreement in database
     $signature_db_path = '/uploads/agreements/' . $signature_filename;
@@ -217,6 +383,8 @@ try {
     $update_stmt->bind_param('sii', $signature_db_path, $agreement_id, $freelancer_id);
     $success = $update_stmt->execute();
     $update_stmt->close();
+
+    error_log("Agreement #$agreement_id updated: Status=ongoing, FreelancerSignaturePath=$signature_db_path");
 
     if ($success) {
         // Get conversation with client

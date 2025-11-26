@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 25, 2025 at 03:36 PM
+-- Generation Time: Nov 26, 2025 at 07:16 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 SET
@@ -112,224 +112,14 @@ INSERT INTO
   )
 VALUES
   (
-    2,
+    1,
     1,
     2,
-    '2025-11-25 13:08:55',
-    '2025-11-25 21:08:55',
+    '2025-11-26 04:22:31',
+    '2025-11-26 12:22:31',
+    '/uploads/agreements/agreement_3_1764130951.pdf',
     NULL,
-    NULL,
-    NULL,
-    NULL,
-    '• Both parties agree to the terms outlined above.\n• Payment will be processed upon project completion and mutual agreement.\n• Either party may terminate this agreement with written notice.\n• Both parties agree to maintain confidentiality of project details.\n• Any disputes will be resolved through communication or mediation.',
-    'signed_by_client',
-    'asdf',
-    'asdf',
-    0,
-    'To be completed upon milestone deliveries as agreed.',
-    666.00,
-    'asdf',
-    'JIMMY CHAN LOK',
-    'Genting'
-  ),
-  (
-    3,
-    1,
-    2,
-    '2025-11-25 13:13:13',
-    '2025-11-25 21:13:13',
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    '• Both parties agree to the terms outlined above.\n• Payment will be processed upon project completion and mutual agreement.\n• Either party may terminate this agreement with written notice.\n• Both parties agree to maintain confidentiality of project details.\n• Any disputes will be resolved through communication or mediation.',
-    'signed_by_client',
-    'asdf',
-    'asdf',
-    0,
-    'To be completed upon milestone deliveries as agreed.',
-    666.00,
-    'asdf',
-    'JIMMY CHAN LOK',
-    'Genting'
-  ),
-  (
-    4,
-    1,
-    2,
-    '2025-11-25 13:14:14',
-    '2025-11-25 21:14:14',
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    '• Both parties agree to the terms outlined above.\n• Payment will be processed upon project completion and mutual agreement.\n• Either party may terminate this agreement with written notice.\n• Both parties agree to maintain confidentiality of project details.\n• Any disputes will be resolved through communication or mediation.',
-    'signed_by_client',
-    'asdf',
-    'asdf',
-    0,
-    'To be completed upon milestone deliveries as agreed.',
-    666.00,
-    'asdf',
-    'JIMMY CHAN LOK',
-    'Genting'
-  ),
-  (
-    5,
-    1,
-    2,
-    '2025-11-25 13:15:12',
-    '2025-11-25 21:15:12',
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    '• Both parties agree to the terms outlined above.\n• Payment will be processed upon project completion and mutual agreement.\n• Either party may terminate this agreement with written notice.\n• Both parties agree to maintain confidentiality of project details.\n• Any disputes will be resolved through communication or mediation.',
-    'signed_by_client',
-    'asdf',
-    'asdf',
-    0,
-    'To be completed upon milestone deliveries as agreed.',
-    666.00,
-    'asdf',
-    'JIMMY CHAN LOK',
-    'Genting'
-  ),
-  (
-    6,
-    1,
-    2,
-    '2025-11-25 13:19:23',
-    '2025-11-25 21:19:23',
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    '• Both parties agree to the terms outlined above.\n• Payment will be processed upon project completion and mutual agreement.\n• Either party may terminate this agreement with written notice.\n• Both parties agree to maintain confidentiality of project details.\n• Any disputes will be resolved through communication or mediation.',
-    'signed_by_client',
-    'asdf',
-    'asdf',
-    0,
-    'To be completed upon milestone deliveries as agreed.',
-    666.00,
-    'asdf',
-    'JIMMY CHAN LOK',
-    'Genting'
-  ),
-  (
-    7,
-    1,
-    2,
-    '2025-11-25 13:24:47',
-    '2025-11-25 21:24:47',
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    '• Both parties agree to the terms outlined above.\n• Payment will be processed upon project completion and mutual agreement.\n• Either party may terminate this agreement with written notice.\n• Both parties agree to maintain confidentiality of project details.\n• Any disputes will be resolved through communication or mediation.',
-    'signed_by_client',
-    'asdf',
-    'asdf',
-    0,
-    'To be completed upon milestone deliveries as agreed.',
-    666.00,
-    'asdf',
-    'JIMMY CHAN LOK',
-    'Genting'
-  ),
-  (
-    8,
-    1,
-    2,
-    '2025-11-25 13:26:52',
-    '2025-11-25 21:26:52',
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    '• Both parties agree to the terms outlined above.\n• Payment will be processed upon project completion and mutual agreement.\n• Either party may terminate this agreement with written notice.\n• Both parties agree to maintain confidentiality of project details.\n• Any disputes will be resolved through communication or mediation.',
-    'signed_by_client',
-    'asdf',
-    'asdf',
-    0,
-    'To be completed upon milestone deliveries as agreed.',
-    666.00,
-    'asdf',
-    'JIMMY CHAN LOK',
-    'Genting'
-  ),
-  (
-    9,
-    1,
-    2,
-    '2025-11-25 13:52:27',
-    '2025-11-25 21:52:27',
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    '• Both parties agree to the terms outlined above.\n• Payment will be processed upon project completion and mutual agreement.\n• Either party may terminate this agreement with written notice.\n• Both parties agree to maintain confidentiality of project details.\n• Any disputes will be resolved through communication or mediation.',
-    'signed_by_client',
-    'asdf',
-    'asdf',
-    0,
-    'To be completed upon milestone deliveries as agreed.',
-    666.00,
-    'asdf',
-    'JIMMY CHAN LOK',
-    'Genting'
-  ),
-  (
-    10,
-    1,
-    2,
-    '2025-11-25 14:07:17',
-    '2025-11-25 22:07:17',
-    '/agreement/',
-    NULL,
-    '2025-12-25 22:07:17',
-    NULL,
-    '• Both parties agree to the terms outlined above.\n• Payment will be processed upon project completion and mutual agreement.\n• Either party may terminate this agreement with written notice.\n• Both parties agree to maintain confidentiality of project details.\n• Any disputes will be resolved through communication or mediation.',
-    'signed_by_client',
-    'asdf',
-    'asdf',
-    0,
-    'To be completed upon milestone deliveries as agreed.',
-    666.00,
-    'asdf',
-    'JIMMY CHAN LOK',
-    'Genting'
-  ),
-  (
-    11,
-    1,
-    2,
-    '2025-11-25 14:08:35',
-    '2025-11-25 22:08:35',
-    '/agreement/',
-    NULL,
-    '2025-12-25 22:08:35',
-    NULL,
-    '• Both parties agree to the terms outlined above.\n• Payment will be processed upon project completion and mutual agreement.\n• Either party may terminate this agreement with written notice.\n• Both parties agree to maintain confidentiality of project details.\n• Any disputes will be resolved through communication or mediation.',
-    'signed_by_client',
-    'asdf',
-    'asdf',
-    0,
-    'To be completed upon milestone deliveries as agreed.',
-    666.00,
-    'asdf',
-    'JIMMY CHAN LOK',
-    'Genting'
-  ),
-  (
-    12,
-    1,
-    2,
-    '2025-11-25 14:35:10',
-    '2025-11-25 22:35:10',
-    '/agreement/',
-    NULL,
-    '2025-11-28 22:35:10',
+    '2025-11-27 12:22:31',
     NULL,
     '• Both parties agree to the terms outlined above.\n• Payment will be processed upon project completion and mutual agreement.\n• Either party may terminate this agreement with written notice.\n• Both parties agree to maintain confidentiality of project details.\n• Any disputes will be resolved through communication or mediation.',
     'to_accept',
@@ -340,6 +130,132 @@ VALUES
     666.00,
     'asdf',
     'JIMMY CHAN LOK',
+    'Genting'
+  ),
+  (
+    2,
+    1,
+    2,
+    '2025-11-26 04:56:03',
+    '2025-11-26 12:56:03',
+    '/uploads/agreements/agreement_4_1764132963.pdf',
+    NULL,
+    '2025-11-27 12:56:03',
+    NULL,
+    '• Both parties agree to the terms outlined above.\n• Payment will be processed upon project completion and mutual agreement.\n• Either party may terminate this agreement with written notice.\n• Both parties agree to maintain confidentiality of project details.\n• Any disputes will be resolved through communication or mediation.',
+    'to_accept',
+    'Google',
+    '0',
+    0,
+    'To be completed upon milestone deliveries as agreed.',
+    12.00,
+    'asdf',
+    'JIMMY CHAN LOK',
+    'Genting'
+  ),
+  (
+    7,
+    3,
+    2,
+    '2025-11-26 04:59:56',
+    '2025-11-26 12:59:56',
+    '/uploads/agreements/agreement_5_1764133196.pdf',
+    NULL,
+    '2025-11-27 12:59:56',
+    NULL,
+    '• Both parties agree to the terms outlined above.\n• Payment will be processed upon project completion and mutual agreement.\n• Either party may terminate this agreement with written notice.\n• Both parties agree to maintain confidentiality of project details.\n• Any disputes will be resolved through communication or mediation.',
+    'to_accept',
+    'Google',
+    '0',
+    0,
+    'To be completed upon milestone deliveries as agreed.',
+    12.00,
+    'asdf',
+    'hc c',
+    'Genting'
+  ),
+  (
+    8,
+    1,
+    2,
+    '2025-11-26 05:22:15',
+    '2025-11-26 13:22:15',
+    '/uploads/agreements/agreement_3_1764134535.pdf',
+    NULL,
+    '2025-11-27 13:22:15',
+    NULL,
+    '• Both parties agree to the terms outlined above.\n• Payment will be processed upon project completion and mutual agreement.\n• Either party may terminate this agreement with written notice.\n• Both parties agree to maintain confidentiality of project details.\n• Any disputes will be resolved through communication or mediation.',
+    'to_accept',
+    'asdf',
+    '0',
+    0,
+    'To be completed upon milestone deliveries as agreed.',
+    666.00,
+    'asdf',
+    'JIMMY CHAN LOK',
+    'Genting'
+  ),
+  (
+    9,
+    3,
+    2,
+    '2025-11-26 05:44:58',
+    '2025-11-26 13:44:58',
+    '/uploads/agreements/agreement_6_1764135898.pdf',
+    NULL,
+    '2025-11-27 13:44:58',
+    NULL,
+    '• Both parties agree to the terms outlined above.\n• Payment will be processed upon project completion and mutual agreement.\n• Either party may terminate this agreement with written notice.\n• Both parties agree to maintain confidentiality of project details.\n• Any disputes will be resolved through communication or mediation.',
+    'to_accept',
+    'asdf',
+    '0',
+    0,
+    'To be completed upon milestone deliveries as agreed.',
+    666.00,
+    'asdf',
+    'hc c',
+    'Genting'
+  ),
+  (
+    10,
+    3,
+    2,
+    '2025-11-26 05:47:52',
+    '2025-11-26 13:47:52',
+    '/uploads/agreements/agreement_7_1764136072.pdf',
+    NULL,
+    '2025-11-27 13:47:52',
+    NULL,
+    '• Both parties agree to the terms outlined above.\n• Payment will be processed upon project completion and mutual agreement.\n• Either party may terminate this agreement with written notice.\n• Both parties agree to maintain confidentiality of project details.\n• Any disputes will be resolved through communication or mediation.',
+    'to_accept',
+    'Google',
+    '0',
+    0,
+    'To be completed upon milestone deliveries as agreed.',
+    12.00,
+    'asdf',
+    'hc c',
+    'Genting'
+  ),
+  (
+    11,
+    3,
+    2,
+    '2025-11-26 05:55:46',
+    '2025-11-26 13:55:46',
+    '/uploads/agreements/agreement_8_1764136546.pdf',
+    NULL,
+    '2025-11-27 13:55:46',
+    NULL,
+    '• Both parties agree to the terms outlined above.\n• Payment will be processed upon project completion and mutual agreement.\n• Either party may terminate this agreement with written notice.\n• Both parties agree to maintain confidentiality of project details.\n• Any disputes will be resolved through communication or mediation.',
+    'to_accept',
+    'Google',
+    '0',
+    0,
+    'To be completed upon milestone deliveries as agreed.',
+    12.00,
+    'asdf',
+    'hc c',
     'Genting'
   );
 
@@ -456,14 +372,117 @@ INSERT INTO
   )
 VALUES
   (
-    18,
-    1,
-    'freelancer',
+    32,
     2,
     'client',
-    '2025-11-25 13:40:22',
-    '2025-11-25 13:47:10',
+    1,
+    'freelancer',
+    '2025-11-26 04:22:32',
+    NULL,
     'active',
+    NULL
+  ),
+  (
+    33,
+    2,
+    'client',
+    3,
+    'freelancer',
+    '2025-11-26 04:59:41',
+    NULL,
+    'active',
+    NULL
+  );
+
+-- --------------------------------------------------------
+--
+-- Table structure for table `escrow`
+--
+CREATE TABLE
+  `escrow` (
+    `EscrowID` int (11) NOT NULL,
+    `OrderID` int (11) DEFAULT NULL COMMENT 'Order/Project ID if applicable',
+    `PayerID` int (11) NOT NULL COMMENT 'Client ID who pays',
+    `PayeeID` int (11) NOT NULL COMMENT 'Freelancer ID who receives',
+    `Amount` decimal(10, 2) NOT NULL,
+    `Status` enum ('hold', 'released', 'refunded') NOT NULL DEFAULT 'hold',
+    `CreatedAt` timestamp NOT NULL DEFAULT current_timestamp(),
+    `ReleasedAt` timestamp NULL DEFAULT NULL
+  ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
+
+--
+-- Dumping data for table `escrow`
+--
+INSERT INTO
+  `escrow` (
+    `EscrowID`,
+    `OrderID`,
+    `PayerID`,
+    `PayeeID`,
+    `Amount`,
+    `Status`,
+    `CreatedAt`,
+    `ReleasedAt`
+  )
+VALUES
+  (
+    1,
+    2,
+    2,
+    1,
+    12.00,
+    'hold',
+    '2025-11-26 04:56:03',
+    NULL
+  ),
+  (
+    2,
+    7,
+    2,
+    3,
+    12.00,
+    'hold',
+    '2025-11-26 04:59:56',
+    NULL
+  ),
+  (
+    3,
+    8,
+    2,
+    1,
+    666.00,
+    'hold',
+    '2025-11-26 05:22:15',
+    NULL
+  ),
+  (
+    4,
+    9,
+    2,
+    3,
+    666.00,
+    'hold',
+    '2025-11-26 05:44:58',
+    NULL
+  ),
+  (
+    5,
+    10,
+    2,
+    3,
+    12.00,
+    'hold',
+    '2025-11-26 05:47:52',
+    NULL
+  ),
+  (
+    6,
+    11,
+    2,
+    3,
+    12.00,
+    'hold',
+    '2025-11-26 05:55:46',
     NULL
   );
 
@@ -644,6 +663,56 @@ CREATE TABLE
     `UpdatedAt` datetime DEFAULT NULL
   ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
 
+--
+-- Dumping data for table `gig`
+--
+INSERT INTO
+  `gig` (
+    `GigID`,
+    `FreelancerID`,
+    `Title`,
+    `Category`,
+    `Subcategory`,
+    `SearchTags`,
+    `Description`,
+    `Price`,
+    `DeliveryTime`,
+    `RushDelivery`,
+    `RushDeliveryPrice`,
+    `AdditionalRevision`,
+    `RevisionCount`,
+    `Image1Path`,
+    `Image2Path`,
+    `Image3Path`,
+    `VideoPath`,
+    `Status`,
+    `CreatedAt`,
+    `UpdatedAt`
+  )
+VALUES
+  (
+    1,
+    1,
+    'asdf',
+    'graphic-design',
+    'brand-style-guide',
+    'asdf',
+    'sdfgasdfga',
+    50,
+    5,
+    NULL,
+    0,
+    41,
+    1,
+    '/images/gig_media/gig-img-69258fe1668d22.24165885.png',
+    '/images/gig_media/gig-img-69258fe166b923.17453196.png',
+    '/images/gig_media/gig-img-69258fe166ef69.11102469.png',
+    NULL,
+    'active',
+    '2025-11-26 12:44:04',
+    NULL
+  );
+
 -- --------------------------------------------------------
 --
 -- Table structure for table `job`
@@ -795,9 +864,53 @@ VALUES
     NULL,
     NULL,
     NULL,
-    'pending',
+    'accepted',
     '2025-11-25 11:48:40',
-    NULL
+    '2025-11-26 05:22:15'
+  ),
+  (
+    4,
+    2,
+    1,
+    NULL,
+    NULL,
+    NULL,
+    'accepted',
+    '2025-11-26 04:43:36',
+    '2025-11-26 04:56:03'
+  ),
+  (
+    5,
+    2,
+    3,
+    NULL,
+    NULL,
+    NULL,
+    'accepted',
+    '2025-11-26 04:59:24',
+    '2025-11-26 04:59:56'
+  ),
+  (
+    6,
+    5,
+    3,
+    NULL,
+    NULL,
+    NULL,
+    'accepted',
+    '2025-11-26 05:22:48',
+    '2025-11-26 05:44:58'
+  ),
+  (
+    8,
+    1,
+    3,
+    NULL,
+    NULL,
+    NULL,
+    'accepted',
+    '2025-11-26 05:49:26',
+    '2025-11-26 05:55:46'
   );
 
 -- --------------------------------------------------------
@@ -831,7 +944,9 @@ INSERT INTO
     `AnsweredAt`
   )
 VALUES
-  (1, 2, 2, 1, 3, NULL, 'yes', '2025-11-25 11:14:12');
+  (1, 2, 2, 1, 3, NULL, 'yes', '2025-11-25 11:14:12'),
+  (2, 4, 1, 1, 2, NULL, 'yes', '2025-11-26 04:43:36'),
+  (3, 5, 1, 3, 2, NULL, 'yes', '2025-11-26 04:59:24');
 
 -- --------------------------------------------------------
 --
@@ -910,169 +1025,81 @@ INSERT INTO
   )
 VALUES
   (
-    1,
-    18,
-    'c2',
-    'f1',
-    'I am interested in your project: \"Google\". I would like to discuss more about this opportunity.',
-    NULL,
-    NULL,
-    '2025-11-25 21:40:30',
-    'unread'
-  ),
-  (
-    2,
-    18,
-    'c2',
-    'f1',
-    'hi',
-    NULL,
-    NULL,
-    '2025-11-25 21:40:33',
-    'unread'
-  ),
-  (
-    3,
-    18,
-    'f1',
-    'c2',
-    'ji',
-    NULL,
-    NULL,
-    '2025-11-25 21:42:26',
-    'unread'
-  ),
-  (
-    4,
-    18,
-    'f1',
-    'c2',
-    'ji',
-    NULL,
-    NULL,
-    '2025-11-25 21:42:29',
-    'unread'
-  ),
-  (
-    5,
-    18,
-    'f1',
-    'c2',
-    'asdf',
-    NULL,
-    NULL,
-    '2025-11-25 21:42:36',
-    'unread'
-  ),
-  (
     6,
-    18,
-    'c2',
+    32,
     'f1',
-    'asdf',
-    NULL,
-    NULL,
-    '2025-11-25 21:42:40',
-    'unread'
+    'c2',
+    'I have signed the agreement for the project \"asdf\". Please review and sign to proceed. The agreement is attached below.\n\nAgreement Link: localhost:8000/page/freelancer_agreement_approval.php?agreement_id=1',
+    '/uploads/agreements/agreement_3_1764130951.pdf',
+    'application/pdf',
+    '2025-11-26 12:22:32',
+    'to_accept'
   ),
   (
     7,
-    18,
-    'c2',
+    32,
     'f1',
-    'sdfg',
-    NULL,
-    NULL,
-    '2025-11-25 21:43:25',
-    'unread'
+    'c2',
+    'I have signed the agreement for the project \"Google\". Please review and sign to proceed. The agreement is attached below.\n\nAgreement Link: localhost:8000/page/freelancer_agreement_approval.php?agreement_id=2',
+    '/uploads/agreements/agreement_4_1764132963.pdf',
+    'application/pdf',
+    '2025-11-26 12:56:04',
+    'to_accept'
   ),
   (
     8,
-    18,
-    'f1',
+    33,
+    'f3',
     'c2',
-    'asdf',
-    NULL,
-    NULL,
-    '2025-11-25 21:46:15',
-    'unread'
+    'I have signed the agreement for the project \"Google\". Please review and sign to proceed. The agreement is attached below.\n\nAgreement Link: localhost:8000/page/freelancer_agreement_approval.php?agreement_id=7',
+    '/uploads/agreements/agreement_5_1764133196.pdf',
+    'application/pdf',
+    '2025-11-26 12:59:56',
+    'to_accept'
   ),
   (
     9,
-    18,
-    'c2',
+    32,
     'f1',
-    'asdf',
-    NULL,
-    NULL,
-    '2025-11-25 21:46:35',
-    'unread'
+    'c2',
+    'I have signed the agreement for the project \"asdf\". Please review and sign to proceed. The agreement is attached below.\n\nAgreement Link: localhost:8000/page/freelancer_agreement_approval.php?agreement_id=8',
+    '/uploads/agreements/agreement_3_1764134535.pdf',
+    'application/pdf',
+    '2025-11-26 13:22:15',
+    'to_accept'
   ),
   (
     10,
-    18,
+    33,
+    'f3',
     'c2',
-    'f1',
-    'sdfg',
-    NULL,
-    NULL,
-    '2025-11-25 21:47:07',
-    'unread'
+    'I have signed the agreement for the project \"asdf\". Please review and sign to proceed. The agreement is attached below.\n\nAgreement Link: localhost:8000/page/freelancer_agreement_approval.php?agreement_id=9',
+    '/uploads/agreements/agreement_6_1764135898.pdf',
+    'application/pdf',
+    '2025-11-26 13:44:58',
+    'to_accept'
   ),
   (
     11,
-    18,
-    'f1',
+    33,
+    'f3',
     'c2',
-    'asdf',
-    NULL,
-    NULL,
-    '2025-11-25 21:47:10',
-    'unread'
+    'I have signed the agreement for the project \"Google\". Please review and sign to proceed. The agreement is attached below.\n\nAgreement Link: localhost:8000/page/freelancer_agreement_approval.php?agreement_id=10',
+    '/uploads/agreements/agreement_7_1764136072.pdf',
+    'application/pdf',
+    '2025-11-26 13:47:52',
+    'to_accept'
   ),
   (
     12,
-    18,
-    'f1',
+    33,
+    'f3',
     'c2',
-    'I have signed the agreement for the project \"asdf\". Please review and sign to proceed. The agreement is attached below.\n\nAgreement Link: localhost:8000/page/freelancer_agreement_approval.php?agreement_id=9',
-    '/agreement/agreement_3_1764078747.pdf',
+    'I have signed the agreement for the project \"Google\". Please review and sign to proceed. The agreement is attached below.\n\nAgreement Link: localhost:8000/page/freelancer_agreement_approval.php?agreement_id=11',
+    '/uploads/agreements/agreement_8_1764136546.pdf',
     'application/pdf',
-    '2025-11-25 21:52:27',
-    'unread'
-  ),
-  (
-    13,
-    18,
-    'f1',
-    'c2',
-    'I have signed the agreement for the project \"asdf\". Please review and sign to proceed. The agreement is attached below.\n\nAgreement Link: localhost:8000/page/freelancer_agreement_approval.php?agreement_id=10',
-    '/agreement/agreement_3_1764079637.pdf',
-    'application/pdf',
-    '2025-11-25 22:07:17',
-    'unread'
-  ),
-  (
-    14,
-    18,
-    'f1',
-    'c2',
-    'I have signed the agreement for the project \"asdf\". Please review and sign to proceed. The agreement is attached below.\n\nAgreement Link: localhost:8000/page/freelancer_agreement_approval.php?agreement_id=11',
-    '/agreement/agreement_3_1764079715.pdf',
-    'application/pdf',
-    '2025-11-25 22:08:35',
-    'unread'
-  ),
-  (
-    15,
-    18,
-    'f1',
-    'c2',
-    'I have signed the agreement for the project \"asdf\". Please review and sign to proceed. The agreement is attached below.\n\nAgreement Link: localhost:8000/page/freelancer_agreement_approval.php?agreement_id=12',
-    '/agreement/agreement_3_1764081310.pdf',
-    'application/pdf',
-    '2025-11-25 22:35:10',
-    'unread'
+    '2025-11-26 13:55:46',
+    'to_accept'
   );
 
 -- --------------------------------------------------------
@@ -1206,7 +1233,7 @@ INSERT INTO
   )
 VALUES
   (1, '3', 0.00, 0.00, '2025-11-23 07:49:41'),
-  (2, '2', 0.00, 0.00, '2025-11-23 07:49:41'),
+  (2, '2', 220.00, 1380.00, '2025-11-26 05:55:46'),
   (3, '1', 0.00, 0.00, '2025-11-23 07:49:41'),
   (4, '4', 2000.00, 0.00, '2025-11-23 14:34:27'),
   (5, '5', 1500.00, 0.00, '2025-11-23 14:40:21');
@@ -1387,6 +1414,96 @@ VALUES
     'Wallet Top Up via Stripe',
     NULL,
     '2025-11-23 14:40:21'
+  ),
+  (
+    15,
+    2,
+    'topup',
+    100.00,
+    'completed',
+    'Wallet Top Up via Stripe',
+    NULL,
+    '2025-11-26 04:45:27'
+  ),
+  (
+    16,
+    2,
+    'payment',
+    12.00,
+    'completed',
+    'Funds locked in escrow for project: Google (Agreement #2)',
+    'escrow_1',
+    '2025-11-26 04:56:03'
+  ),
+  (
+    17,
+    2,
+    'payment',
+    12.00,
+    'completed',
+    'Funds locked in escrow for project: Google (Agreement #7)',
+    'escrow_2',
+    '2025-11-26 04:59:56'
+  ),
+  (
+    18,
+    2,
+    'topup',
+    1000.00,
+    'completed',
+    'Wallet Top Up via Stripe',
+    NULL,
+    '2025-11-26 05:22:00'
+  ),
+  (
+    19,
+    2,
+    'payment',
+    666.00,
+    'completed',
+    'Funds locked in escrow for project: asdf (Agreement #8)',
+    'escrow_3',
+    '2025-11-26 05:22:15'
+  ),
+  (
+    20,
+    2,
+    'topup',
+    500.00,
+    'completed',
+    'Wallet Top Up via Stripe',
+    NULL,
+    '2025-11-26 05:23:13'
+  ),
+  (
+    21,
+    2,
+    'payment',
+    666.00,
+    'completed',
+    'Funds locked in escrow for project: asdf (Agreement #9)',
+    'escrow_4',
+    '2025-11-26 05:44:58'
+  ),
+  (
+    22,
+    2,
+    'payment',
+    12.00,
+    'completed',
+    'Funds locked in escrow for project: Google (Agreement #10)',
+    'escrow_5',
+    '2025-11-26 05:47:52'
+  ),
+  (
+    23,
+    2,
+    'payment',
+    12.00,
+    'completed',
+    'Funds locked in escrow for project: Google (Agreement #11)',
+    'escrow_6',
+    '2025-11-26 05:55:46'
   );
 
 --
@@ -1419,6 +1536,14 @@ ADD UNIQUE KEY `unique_conversation` (`User1ID`, `User1Type`, `User2ID`, `User2T
 ADD KEY `idx_user1` (`User1ID`, `User1Type`),
 ADD KEY `idx_user2` (`User2ID`, `User2Type`),
 ADD KEY `idx_timestamp` (`LastMessageAt`);
+
+--
+-- Indexes for table `escrow`
+--
+ALTER TABLE `escrow` ADD PRIMARY KEY (`EscrowID`),
+ADD KEY `PayerID` (`PayerID`),
+ADD KEY `PayeeID` (`PayeeID`),
+ADD KEY `Status` (`Status`);
 
 --
 -- Indexes for table `freelancer`
@@ -1543,7 +1668,7 @@ AUTO_INCREMENT = 2;
 -- AUTO_INCREMENT for table `agreement`
 --
 ALTER TABLE `agreement` MODIFY `AgreementID` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 13;
+AUTO_INCREMENT = 12;
 
 --
 -- AUTO_INCREMENT for table `client`
@@ -1555,7 +1680,13 @@ AUTO_INCREMENT = 4;
 -- AUTO_INCREMENT for table `conversation`
 --
 ALTER TABLE `conversation` MODIFY `ConversationID` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 19;
+AUTO_INCREMENT = 34;
+
+--
+-- AUTO_INCREMENT for table `escrow`
+--
+ALTER TABLE `escrow` MODIFY `EscrowID` int (11) NOT NULL AUTO_INCREMENT,
+AUTO_INCREMENT = 7;
 
 --
 -- AUTO_INCREMENT for table `freelancer`
@@ -1566,7 +1697,8 @@ AUTO_INCREMENT = 6;
 --
 -- AUTO_INCREMENT for table `gig`
 --
-ALTER TABLE `gig` MODIFY `GigID` int (11) NOT NULL AUTO_INCREMENT;
+ALTER TABLE `gig` MODIFY `GigID` int (11) NOT NULL AUTO_INCREMENT,
+AUTO_INCREMENT = 2;
 
 --
 -- AUTO_INCREMENT for table `job`
@@ -1578,13 +1710,13 @@ AUTO_INCREMENT = 6;
 -- AUTO_INCREMENT for table `job_application`
 --
 ALTER TABLE `job_application` MODIFY `ApplicationID` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 4;
+AUTO_INCREMENT = 9;
 
 --
 -- AUTO_INCREMENT for table `job_application_answer`
 --
 ALTER TABLE `job_application_answer` MODIFY `AnswerID` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 2;
+AUTO_INCREMENT = 4;
 
 --
 -- AUTO_INCREMENT for table `job_question`
@@ -1601,7 +1733,7 @@ ALTER TABLE `job_question_option` MODIFY `OptionID` int (11) NOT NULL AUTO_INCRE
 -- AUTO_INCREMENT for table `message`
 --
 ALTER TABLE `message` MODIFY `MessageID` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 16;
+AUTO_INCREMENT = 13;
 
 --
 -- AUTO_INCREMENT for table `message_notification`
@@ -1641,7 +1773,7 @@ AUTO_INCREMENT = 6;
 -- AUTO_INCREMENT for table `wallet_transactions`
 --
 ALTER TABLE `wallet_transactions` MODIFY `TransactionID` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 15;
+AUTO_INCREMENT = 24;
 
 --
 -- Constraints for dumped tables
