@@ -19,7 +19,8 @@ if (!$gigId) {
 
 // Database connection
 if (!function_exists('getPDOConnection')) {
-    function getPDOConnection(): PDO {
+    function getPDOConnection(): PDO
+    {
         $dsn = 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=utf8mb4';
         $options = [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
@@ -45,14 +46,14 @@ try {
             INNER JOIN freelancer f ON g.FreelancerID = f.FreelancerID
             CROSS JOIN client c
             WHERE g.GigID = :gigId AND c.ClientID = :clientId AND g.Status = 'active'";
-    
+
     $stmt = $pdo->prepare($sql);
     $stmt->execute([
         ':gigId' => $gigId,
         ':clientId' => $_SESSION['user_id']
     ]);
     $orderData = $stmt->fetch();
-    
+
     if (!$orderData) {
         $_SESSION['error'] = 'Gig not found or unavailable.';
         header('Location: ../gig/browse_gigs.php');
@@ -84,6 +85,7 @@ $_title = 'Payment Details - WorkSnyc Platform';
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -129,7 +131,7 @@ $_title = 'Payment Details - WorkSnyc Platform';
             background: white;
             border-radius: 16px;
             padding: 30px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         }
 
         .agreement-section h2 {
@@ -291,7 +293,7 @@ $_title = 'Payment Details - WorkSnyc Platform';
             background: white;
             border-radius: 16px;
             padding: 25px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             margin-bottom: 20px;
         }
 
@@ -567,6 +569,7 @@ $_title = 'Payment Details - WorkSnyc Platform';
         }
     </style>
 </head>
+
 <body>
     <?php require_once '../../_head.php'; ?>
 
@@ -580,7 +583,7 @@ $_title = 'Payment Details - WorkSnyc Platform';
             <!-- Left Side: Agreement Preview -->
             <div class="agreement-section">
                 <h2><i class="fas fa-file-contract"></i> Service Agreement Preview</h2>
-                
+
                 <div class="agreement-content">
                     <div class="agreement-header">
                         <h3>Service Agreement</h3>
@@ -610,10 +613,10 @@ $_title = 'Payment Details - WorkSnyc Platform';
                             <span class="detail-value">RM <?= number_format($basePrice, 2) ?></span>
                         </div>
                         <?php if ($rushDelivery && $rushFee > 0): ?>
-                        <div class="detail-row">
-                            <span class="detail-label">Rush Delivery Fee</span>
-                            <span class="detail-value">RM <?= number_format($rushFee, 2) ?></span>
-                        </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Rush Delivery Fee</span>
+                                <span class="detail-value">RM <?= number_format($rushFee, 2) ?></span>
+                            </div>
                         <?php endif; ?>
                         <div class="detail-row">
                             <span class="detail-label">Delivery Time</span>
@@ -650,7 +653,7 @@ $_title = 'Payment Details - WorkSnyc Platform';
             <div class="order-summary-section">
                 <div class="summary-card">
                     <h3>Order Summary</h3>
-                    
+
                     <div class="gig-info">
                         <div class="gig-title"><?= htmlspecialchars($orderData['Title']) ?></div>
                         <div class="gig-seller">
@@ -667,10 +670,10 @@ $_title = 'Payment Details - WorkSnyc Platform';
                             <span class="price-value">RM <?= number_format($basePrice, 2) ?></span>
                         </div>
                         <?php if ($rushDelivery && $rushFee > 0): ?>
-                        <div class="price-row">
-                            <span class="price-label"><i class="fas fa-bolt"></i> Rush Delivery</span>
-                            <span class="price-value">RM <?= number_format($rushFee, 2) ?></span>
-                        </div>
+                            <div class="price-row">
+                                <span class="price-label"><i class="fas fa-bolt"></i> Rush Delivery</span>
+                                <span class="price-value">RM <?= number_format($rushFee, 2) ?></span>
+                            </div>
                         <?php endif; ?>
                         <div class="price-row">
                             <span class="price-label">Delivery</span>
@@ -741,7 +744,7 @@ $_title = 'Payment Details - WorkSnyc Platform';
         function togglePaymentButton() {
             const checkbox = document.getElementById('agreeTerms');
             const paymentBtn = document.getElementById('paymentBtn');
-            
+
             if (checkbox.checked && walletBalance >= totalAmount) {
                 paymentBtn.disabled = false;
             } else {
@@ -778,34 +781,56 @@ $_title = 'Payment Details - WorkSnyc Platform';
             formData.append('agreed_terms', 1);
 
             fetch('process_gig_payment.php', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Show success message
-                    alert(data.message + ' Agreement ID: #' + data.agreement_id);
-                    // Redirect to agreements page
-                    window.location.href = '../agreementListing.php';
-                } else {
-                    // Show error message
-                    alert('Payment failed: ' + data.message);
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Redirect to gig agreement page to review and sign
+                        if (data.redirect) {
+                            // Create a form and submit it to pass data via POST
+                            const form = document.createElement('form');
+                            form.method = 'POST';
+                            form.action = '../' + data.redirect;
+
+                            const input1 = document.createElement('input');
+                            input1.type = 'hidden';
+                            input1.name = 'gig_id';
+                            input1.value = data.gig_id;
+                            form.appendChild(input1);
+
+                            const input2 = document.createElement('input');
+                            input2.type = 'hidden';
+                            input2.name = 'rush_delivery';
+                            input2.value = data.rush_delivery;
+                            form.appendChild(input2);
+
+                            document.body.appendChild(form);
+                            form.submit();
+                        } else {
+                            alert(data.message);
+                            window.location.href = '../agreementListing.php';
+                        }
+                    } else {
+                        // Show error message
+                        alert('Payment failed: ' + data.message);
+                        // Reset button
+                        paymentBtn.disabled = false;
+                        paymentBtn.innerHTML = '<i class="fas fa-lock"></i> Pay with Wallet';
+                        // Uncheck terms
+                        document.getElementById('agreeTerms').checked = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Payment error:', error);
+                    alert('An error occurred during payment processing. Please try again.');
                     // Reset button
                     paymentBtn.disabled = false;
                     paymentBtn.innerHTML = '<i class="fas fa-lock"></i> Pay with Wallet';
-                    // Uncheck terms
-                    document.getElementById('agreeTerms').checked = false;
-                }
-            })
-            .catch(error => {
-                console.error('Payment error:', error);
-                alert('An error occurred during payment processing. Please try again.');
-                // Reset button
-                paymentBtn.disabled = false;
-                paymentBtn.innerHTML = '<i class="fas fa-lock"></i> Pay with Wallet';
-            });
+                });
         }
     </script>
 </body>
+
 </html>

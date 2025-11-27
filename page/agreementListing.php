@@ -657,6 +657,206 @@ foreach ($all_agreements_for_count as $agreement) {
         background: #c0392b;
     }
 
+    .btn-dispute {
+        background: #e74c3c;
+        color: white;
+    }
+
+    .btn-dispute:hover {
+        background: #c0392b;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
+    }
+
+    /* Dispute Modal Styles */
+    .dispute-modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 2000;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .dispute-modal-overlay.active {
+        display: flex;
+    }
+
+    .dispute-modal-content {
+        background: white;
+        border-radius: 12px;
+        padding: 30px;
+        max-width: 500px;
+        width: 100%;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        animation: slideUp 0.3s ease;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .dispute-modal-header {
+        margin-bottom: 25px;
+    }
+
+    .dispute-modal-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: #2c3e50;
+        margin: 0 0 8px;
+    }
+
+    .dispute-modal-subtitle {
+        font-size: 13px;
+        color: #7f8c8d;
+        margin: 0;
+    }
+
+    .dispute-form-group {
+        margin-bottom: 20px;
+    }
+
+    .dispute-form-label {
+        display: block;
+        font-size: 13px;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+    }
+
+    .dispute-form-select,
+    .dispute-form-textarea,
+    .dispute-form-file {
+        width: 100%;
+        padding: 12px;
+        border: 1.5px solid #e0e6ed;
+        border-radius: 6px;
+        font-size: 13px;
+        font-family: inherit;
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+    }
+
+    .dispute-form-select:focus,
+    .dispute-form-textarea:focus,
+    .dispute-form-file:focus {
+        outline: none;
+        border-color: #1ab394;
+        box-shadow: 0 0 0 3px rgba(26, 179, 148, 0.1);
+    }
+
+    .dispute-form-textarea {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    .file-upload-area {
+        border: 2px dashed #e0e6ed;
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+        transition: all 0.3s ease;
+        background: #f9fafb;
+        cursor: pointer;
+    }
+
+    .file-upload-area:hover {
+        border-color: #1ab394;
+        background: #f0f9f7;
+    }
+
+    .file-upload-area.dragover {
+        border-color: #1ab394;
+        background: #e8f8f4;
+        transform: scale(1.02);
+    }
+
+    .file-upload-icon {
+        font-size: 32px;
+        margin-bottom: 10px;
+    }
+
+    .file-upload-text {
+        font-size: 13px;
+        color: #7f8c8d;
+        margin: 0;
+    }
+
+    .file-upload-hint {
+        font-size: 12px;
+        color: #95a5a6;
+        margin-top: 5px;
+    }
+
+    .file-name-display {
+        margin-top: 10px;
+        padding: 10px;
+        background: #d4edda;
+        color: #155724;
+        border-radius: 6px;
+        font-size: 12px;
+        display: none;
+    }
+
+    .dispute-modal-buttons {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+        margin-top: 25px;
+    }
+
+    .dispute-modal-btn {
+        padding: 12px 20px;
+        border: none;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .dispute-modal-btn-cancel {
+        background: #e9ecef;
+        color: #2c3e50;
+    }
+
+    .dispute-modal-btn-cancel:hover {
+        background: #dee2e6;
+    }
+
+    .dispute-modal-btn-submit {
+        background: #e74c3c;
+        color: white;
+    }
+
+    .dispute-modal-btn-submit:hover {
+        background: #c0392b;
+        transform: translateY(-1px);
+    }
+
+    .dispute-modal-btn-submit:disabled {
+        background: #bdc3c7;
+        cursor: not-allowed;
+        transform: none;
+    }
+
     @media (max-width: 768px) {
         .agreements-grid {
             grid-template-columns: 1fr;
@@ -697,7 +897,7 @@ foreach ($all_agreements_for_count as $agreement) {
 
         // Store agreement ID in the button's data attribute
         confirmBtn.setAttribute('data-agreement-id', agreementId);
-        
+
         modal.classList.add('active');
     }
 
@@ -746,7 +946,7 @@ foreach ($all_agreements_for_count as $agreement) {
     document.addEventListener('DOMContentLoaded', function() {
         const modal = document.getElementById('declineModal');
         const confirmBtn = document.getElementById('confirmDeclineBtn');
-        
+
         if (modal) {
             modal.addEventListener('click', function(e) {
                 if (e.target === modal) {
@@ -792,6 +992,147 @@ foreach ($all_agreements_for_count as $agreement) {
             }
         });
     }
+
+    // ===== DISPUTE MODAL FUNCTIONS =====
+    let currentDisputeAgreementId = null;
+
+    function openDisputeModal(agreementId, projectTitle) {
+        currentDisputeAgreementId = agreementId;
+        document.getElementById('disputeProjectTitle').value = projectTitle;
+        document.getElementById('disputeReason').value = '';
+        document.getElementById('disputeDetails').value = '';
+        document.getElementById('evidenceFile').value = '';
+        document.getElementById('fileNameDisplay').style.display = 'none';
+        document.getElementById('disputeForm').reset();
+        document.getElementById('disputeModal').classList.add('active');
+    }
+
+    function closeDisputeModal() {
+        document.getElementById('disputeModal').classList.remove('active');
+        currentDisputeAgreementId = null;
+    }
+
+    // File upload handling
+    const fileUploadArea = document.getElementById('fileUploadArea');
+    const evidenceFile = document.getElementById('evidenceFile');
+    const fileNameDisplay = document.getElementById('fileNameDisplay');
+
+    if (fileUploadArea && evidenceFile) {
+        fileUploadArea.addEventListener('click', function() {
+            evidenceFile.click();
+        });
+
+        evidenceFile.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                const fileName = this.files[0].name;
+                const fileSize = (this.files[0].size / 1024).toFixed(2);
+                fileNameDisplay.innerHTML = `✓ ${fileName} (${fileSize} KB)`;
+                fileNameDisplay.style.display = 'block';
+            }
+        });
+
+        // Drag and drop
+        fileUploadArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.classList.add('dragover');
+        });
+
+        fileUploadArea.addEventListener('dragleave', function() {
+            this.classList.remove('dragover');
+        });
+
+        fileUploadArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+            if (e.dataTransfer.files.length > 0) {
+                evidenceFile.files = e.dataTransfer.files;
+                const event = new Event('change', {
+                    bubbles: true
+                });
+                evidenceFile.dispatchEvent(event);
+            }
+        });
+    }
+
+    function updateReasonText() {
+        const reason = document.getElementById('disputeReason').value;
+        const detailsField = document.getElementById('disputeDetails');
+
+        if (reason === 'Other') {
+            detailsField.placeholder = 'Please explain the issue in detail...';
+        } else {
+            detailsField.placeholder = 'Provide additional context or evidence for this issue...';
+        }
+    }
+
+    function handleDisputeSubmit(event) {
+        event.preventDefault();
+
+        const reason = document.getElementById('disputeReason').value;
+        const reasonText = document.getElementById('disputeDetails').value;
+
+        if (!reason || !reasonText) {
+            alert('Please fill in all required fields');
+            return;
+        }
+
+        if (!currentDisputeAgreementId) {
+            alert('Error: Agreement ID not found');
+            return;
+        }
+
+        const submitBtn = document.getElementById('disputeSubmitBtn');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Filing Dispute...';
+
+        const formData = new FormData();
+        formData.append('agreement_id', currentDisputeAgreementId);
+        formData.append('reason', reason);
+        formData.append('reason_text', reasonText);
+
+        if (document.getElementById('evidenceFile').files.length > 0) {
+            formData.append('evidence_file', document.getElementById('evidenceFile').files[0]);
+        }
+
+        fetch('file_dispute.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        throw new Error(data.message || 'Error filing dispute');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    alert('Dispute filed successfully! Our admin team will review it shortly.');
+                    closeDisputeModal();
+                    // Reload page to show updated status
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    alert('Error: ' + (data.message || 'Failed to file dispute'));
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'File Dispute';
+                }
+            })
+            .catch(error => {
+                alert('Error: ' + error.message);
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'File Dispute';
+            });
+    }
+
+    // Close dispute modal when clicking outside
+    document.getElementById('disputeModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeDisputeModal();
+        }
+    });
 </script>
 
 <!-- Main Content -->
@@ -950,6 +1291,13 @@ foreach ($all_agreements_for_count as $agreement) {
                             echo '<i class="fas fa-times"></i> Decline';
                             echo '</button>';
                         }
+
+                        // Show dispute button for ongoing agreements
+                        if ($agreement['Status'] === 'ongoing') {
+                            echo '<button type="button" class="btn btn-dispute" onclick="openDisputeModal(' . $agreement['AgreementID'] . ', \'' . htmlspecialchars(str_replace("'", "\\'", $agreement['ProjectTitle']), ENT_QUOTES) . '\')">';
+                            echo '<i class="fas fa-exclamation-triangle"></i> File Dispute';
+                            echo '</button>';
+                        }
                         ?>
                     </div>
                 </div>
@@ -1003,6 +1351,64 @@ foreach ($all_agreements_for_count as $agreement) {
                 Yes, Decline
             </button>
         </div>
+    </div>
+</div>
+
+<!-- File Dispute Modal -->
+<div class="dispute-modal-overlay" id="disputeModal">
+    <div class="dispute-modal-content">
+        <div class="dispute-modal-header">
+            <h2 class="dispute-modal-title">⚠️ File a Dispute</h2>
+            <p class="dispute-modal-subtitle">Report an issue with this agreement for admin review</p>
+        </div>
+
+        <form id="disputeForm" onsubmit="handleDisputeSubmit(event)">
+            <div class="dispute-form-group">
+                <label class="dispute-form-label">Project</label>
+                <input type="text" id="disputeProjectTitle" readonly style="background: #f5f7fa; cursor: not-allowed;">
+            </div>
+
+            <div class="dispute-form-group">
+                <label class="dispute-form-label">Dispute Reason *</label>
+                <select name="reason" id="disputeReason" class="dispute-form-select" required onchange="updateReasonText()">
+                    <option value="">-- Select a reason --</option>
+                    <option value="Non-delivery of work">Non-delivery of work</option>
+                    <option value="Poor quality work">Poor quality work</option>
+                    <option value="Incomplete deliverables">Incomplete deliverables</option>
+                    <option value="Missed deadline">Missed deadline</option>
+                    <option value="Non-payment">Non-payment</option>
+                    <option value="Unprofessional conduct">Unprofessional conduct</option>
+                    <option value="Breach of agreement terms">Breach of agreement terms</option>
+                    <option value="Other">Other (specify below)</option>
+                </select>
+            </div>
+
+            <div class="dispute-form-group">
+                <label class="dispute-form-label">Additional Details *</label>
+                <textarea name="reason_text" id="disputeDetails" class="dispute-form-textarea" placeholder="Provide detailed explanation of the issue..." required></textarea>
+                <small style="color: #7f8c8d; display: block; margin-top: 5px;">Please provide as much detail as possible to help our team resolve this issue</small>
+            </div>
+
+            <div class="dispute-form-group">
+                <label class="dispute-form-label">Upload Evidence (Optional)</label>
+                <div class="file-upload-area" id="fileUploadArea">
+                    <div class="file-upload-icon">📎</div>
+                    <p class="file-upload-text">Click or drag files here to upload</p>
+                    <p class="file-upload-hint">Accepted: Images (JPG, PNG, GIF) and PDF | Max: 5MB</p>
+                    <input type="file" id="evidenceFile" name="evidence_file" accept="image/jpeg,image/png,image/gif,application/pdf" style="display: none;">
+                </div>
+                <div class="file-name-display" id="fileNameDisplay"></div>
+            </div>
+
+            <div class="dispute-modal-buttons">
+                <button type="button" class="dispute-modal-btn dispute-modal-btn-cancel" onclick="closeDisputeModal()">
+                    Cancel
+                </button>
+                <button type="submit" class="dispute-modal-btn dispute-modal-btn-submit" id="disputeSubmitBtn">
+                    File Dispute
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
