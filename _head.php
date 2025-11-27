@@ -42,7 +42,64 @@ require_once __DIR__ . '/page/config.php';
                     <!-- Show profile and notification when logged in -->
                     <span class="notification-icon">🔔</span>
                     <div class="profile-dropdown">
-                        <div class="profile-avatar">👤</div>
+                        <div class="profile-avatar" style="width: 36px; height: 36px; border-radius: 50%; background-color: #22c55e; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; cursor: pointer; overflow: hidden; flex-shrink: 0;">
+                            <?php
+                            // Display user profile picture from database
+                            if (isset($_SESSION['user_id']) && isset($_SESSION['user_type'])) {
+                                $user_id = $_SESSION['user_id'];
+                                $user_type = $_SESSION['user_type'];
+
+                                // Get database connection
+                                $conn = getDBConnection();
+
+                                // Determine table and columns based on user type
+                                if ($user_type === 'freelancer') {
+                                    $table = 'freelancer';
+                                    $id_column = 'FreelancerID';
+                                    $name_col1 = 'FirstName';
+                                    $name_col2 = 'LastName';
+                                } else {
+                                    $table = 'client';
+                                    $id_column = 'ClientID';
+                                    $name_col1 = 'CompanyName';
+                                    $name_col2 = null;
+                                }
+
+                                $query = "SELECT ProfilePicture, $name_col1" . ($name_col2 ? ", $name_col2" : "") . " FROM $table WHERE $id_column = ?";
+                                $stmt = $conn->prepare($query);
+                                $stmt->bind_param('i', $user_id);
+                                $stmt->execute();
+                                $result = $stmt->get_result();
+
+                                if ($result && $result->num_rows > 0) {
+                                    $user = $result->fetch_assoc();
+                                    $profilePicture = $user['ProfilePicture'] ?? null;
+                                    $name1 = $user[$name_col1] ?? '';
+                                    $name2 = $name_col2 ? ($user[$name_col2] ?? '') : '';
+
+                                    // Display profile picture if exists
+                                    // _head.php is in root, so the path is directly as stored in database
+                                    if (!empty($profilePicture) && file_exists($_SERVER['DOCUMENT_ROOT'] . '/' . $profilePicture)) {
+                                        echo '<img src="/' . htmlspecialchars($profilePicture) . '" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block;">';
+                                    } else {
+                                        // Show initials fallback
+                                        if ($user_type === 'freelancer') {
+                                            $initials = strtoupper(substr($name1 ?: 'F', 0, 1) . substr($name2 ?: 'L', 0, 1));
+                                        } else {
+                                            $initials = strtoupper(substr($name1 ?: 'C', 0, 1));
+                                        }
+                                        echo $initials;
+                                    }
+                                } else {
+                                    echo '👤';
+                                }
+
+                                $stmt->close();
+                            } else {
+                                echo '👤';
+                            }
+                            ?>
+                        </div>
                         <div class="dropdown-menu">
                             <?php if ($_SESSION['user_type'] === 'freelancer'): ?>
                                 <a href="/page/freelancer_profile.php" class="dropdown-item">View Profile</a>

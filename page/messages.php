@@ -135,16 +135,58 @@ elseif ($target_client_id && $user_type === 'freelancer') {
                 <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
             </svg>
             <div class="profile-dropdown">
-                <div class="profile-avatar" id="profileAvatar">
+                <div class="profile-avatar" id="profileAvatar" style="width: 36px; height: 36px; border-radius: 50%; background-color: #22c55e; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; cursor: pointer; overflow: hidden; flex-shrink: 0;">
                     <?php
-                    if (isset($_SESSION['email'])) {
-                        $email = $_SESSION['email'];
-                        $name_parts = explode(' ', $email);
-                        $initials = strtoupper(substr($name_parts[0], 0, 1));
-                        if (isset($name_parts[1])) {
-                            $initials .= strtoupper(substr($name_parts[1], 0, 1));
+                    // Display user profile picture from database
+                    if (isset($_SESSION['user_id']) && isset($_SESSION['user_type'])) {
+                        $user_id = $_SESSION['user_id'];
+                        $user_type = $_SESSION['user_type'];
+
+                        // Get database connection
+                        $conn = getDBConnection();
+
+                        // Determine table and columns based on user type
+                        if ($user_type === 'freelancer') {
+                            $table = 'freelancer';
+                            $id_column = 'FreelancerID';
+                            $name_col1 = 'FirstName';
+                            $name_col2 = 'LastName';
+                        } else {
+                            $table = 'client';
+                            $id_column = 'ClientID';
+                            $name_col1 = 'CompanyName';
+                            $name_col2 = null;
                         }
-                        echo $initials;
+
+                        $query = "SELECT ProfilePicture, $name_col1" . ($name_col2 ? ", $name_col2" : "") . " FROM $table WHERE $id_column = ?";
+                        $stmt = $conn->prepare($query);
+                        $stmt->bind_param('i', $user_id);
+                        $stmt->execute();
+                        $result = $stmt->get_result();
+
+                        if ($result && $result->num_rows > 0) {
+                            $user = $result->fetch_assoc();
+                            $profilePicture = $user['ProfilePicture'] ?? null;
+                            $name1 = $user[$name_col1] ?? '';
+                            $name2 = $name_col2 ? ($user[$name_col2] ?? '') : '';
+
+                            // Display profile picture if exists
+                            if (!empty($profilePicture) && file_exists('../' . $profilePicture)) {
+                                echo '<img src="/' . htmlspecialchars($profilePicture) . '" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block;">';
+                            } else {
+                                // Show initials fallback
+                                if ($user_type === 'freelancer') {
+                                    $initials = strtoupper(substr($name1 ?: 'F', 0, 1) . substr($name2 ?: 'L', 0, 1));
+                                } else {
+                                    $initials = strtoupper(substr($name1 ?: 'C', 0, 1));
+                                }
+                                echo $initials;
+                            }
+                        } else {
+                            echo '👤';
+                        }
+
+                        $stmt->close();
                     } else {
                         echo '👤';
                     }

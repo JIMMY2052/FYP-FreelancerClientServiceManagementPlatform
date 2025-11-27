@@ -6,7 +6,7 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_type'])) {
     header('Location: login.php');
     exit();
 }
-
+include '../_head.php';
 $_title = 'Agreement Management';
 $user_id = $_SESSION['user_id'];
 $user_type = $_SESSION['user_type'];
@@ -191,7 +191,7 @@ foreach ($all_agreements_for_count as $agreement) {
 }
 
 // Include head (this will output the header and start of body)
-include '../_head.php';
+
 ?>
 
 <style>
