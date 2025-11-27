@@ -103,10 +103,8 @@ require_once __DIR__ . '/page/config.php';
                         <div class="dropdown-menu">
                             <?php if ($_SESSION['user_type'] === 'freelancer'): ?>
                                 <a href="/page/freelancer_profile.php" class="dropdown-item">View Profile</a>
-                                <a href="/page/freelancer_dashboard.php" class="dropdown-item">Dashboard</a>
                             <?php else: ?>
                                 <a href="/page/client_profile.php" class="dropdown-item">View Profile</a>
-                                <a href="/page/client_dashboard.php" class="dropdown-item">Dashboard</a>
                             <?php endif; ?>
                             <a href="/page/agreementListing.php" class="dropdown-item">Manage Agreement</a>
                             <a href="/page/payment/wallet.php" class="dropdown-item">Wallet</a>

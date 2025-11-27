@@ -10,47 +10,30 @@ $current_page = basename($_SERVER['PHP_SELF']);
     }
 </style>
 <!-- Sidebar -->
-<aside class="sidebar">
-    <div class="sidebar-logo">
-        <img src="../images/logo.png" alt="WorkSnyc Logo" class="logo-img">
-        <h1 class="logo-text">WorkSnyc</h1>
-    </div>
+<input type="checkbox" id="sidebarToggle" class="sidebar-checkbox">
+<aside class="sidebar" id="sidebar">
     <nav class="sidebar-nav">
-        <a href="freelancer_dashboard.php" class="nav-item <?php echo ($current_page === 'freelancer_dashboard.php') ? 'active' : ''; ?>">
-            <span class="nav-icon">🏠</span>
-            <span>Dashboard</span>
-        </a>
-        <a href="browse_jobs.php" class="nav-item <?php echo ($current_page === 'browse_jobs.php') ? 'active' : ''; ?>">
-            <span class="nav-icon">🔍</span>
-            <span>Browse Jobs</span>
-        </a>
-        <a href="my_applications.php" class="nav-item <?php echo ($current_page === 'my_applications.php') ? 'active' : ''; ?>">
-            <span class="nav-icon">📁</span>
-            <span>My Applications</span>
-        </a>
         <a href="ongoing_projects.php" class="nav-item <?php echo ($current_page === 'ongoing_projects.php') ? 'active' : ''; ?>">
-            <span class="nav-icon">🚀</span>
-            <span>Ongoing Projects</span>
-        </a>
-        <a href="messages.php" class="nav-item <?php echo ($current_page === 'messages.php') ? 'active' : ''; ?>">
-            <span class="nav-icon">💬</span>
-            <span>Messages</span>
+            Ongoing Projects
         </a>
         <a href="agreementListing.php" class="nav-item <?php echo ($current_page === 'agreementListing.php') ? 'active' : ''; ?>">
-            <span class="nav-icon">📄</span>
-            <span>Agreements</span>
+            Manage Agreement
+        </a>
+        <a href="payment/wallet.php" class="nav-item <?php echo ($current_page === 'wallet.php') ? 'active' : ''; ?>">
+            Wallet
+        </a>
+        <a href="messages.php" class="nav-item <?php echo ($current_page === 'messages.php') ? 'active' : ''; ?>">
+            Messages
         </a>
         <a href="activity_history.php" class="nav-item <?php echo ($current_page === 'activity_history.php') ? 'active' : ''; ?>">
-            <span class="nav-icon">📋</span>
-            <span>Activity History</span>
+            Activity History
         </a>
         <a href="freelancer_profile.php" class="nav-item <?php echo (in_array($current_page, ['freelancer_profile.php', 'edit_freelancer_profile.php'])) ? 'active' : ''; ?>">
-            <span class="nav-icon">👤</span>
-            <span>Profile</span>
+            Profile
         </a>
         <a href="settings.php" class="nav-item <?php echo ($current_page === 'settings.php') ? 'active' : ''; ?>">
-            <span class="nav-icon">⚙️</span>
-            <span>Settings</span>
+            Settings
         </a>
     </nav>
 </aside>
+<label for="sidebarToggle" class="sidebar-overlay" id="sidebarOverlay"></label>

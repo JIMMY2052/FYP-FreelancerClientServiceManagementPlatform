@@ -6,7 +6,7 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_type'])) {
     header('Location: login.php');
     exit();
 }
-include '../_head.php';
+
 $_title = 'Agreement Management';
 $user_id = $_SESSION['user_id'];
 $user_type = $_SESSION['user_type'];
@@ -193,6 +193,15 @@ foreach ($all_agreements_for_count as $agreement) {
 // Include head (this will output the header and start of body)
 
 ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?= $_title ?></title>
+    <link rel="stylesheet" href="/assets/css/app.css">
+    <link rel="stylesheet" href="/assets/css/profile.css">
+    <link rel="stylesheet" href="/assets/css/<?= $user_type === 'client' ? 'client' : 'freelancer' ?>.css">
 
 <style>
     .header-search {
@@ -1135,7 +1144,19 @@ foreach ($all_agreements_for_count as $agreement) {
     });
 </script>
 
+</head>
+<body>
+    <?php 
+    include '../includes/header.php';
+    if ($user_type === 'client') {
+        include '../includes/client_sidebar.php';
+    } else {
+        include '../includes/freelancer_sidebar.php';
+    }
+    ?>
+
 <!-- Main Content -->
+<div class="main-content">
 <div class="container">
     <!-- Page Header -->
     <div class="page-header">
@@ -1410,6 +1431,7 @@ foreach ($all_agreements_for_count as $agreement) {
             </div>
         </form>
     </div>
+</div>
 </div>
 
 </body>

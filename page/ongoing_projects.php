@@ -93,7 +93,8 @@ $conn->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $_title ?></title>
     <link rel="stylesheet" href="/assets/css/app.css">
-    <link rel="stylesheet" href="/assets/css/<?= $user_type === 'client' ? 'client' : 'freelancer' ?>.css">
+    <link rel="stylesheet" href="/assets/css/profile.css">
+    <link rel="stylesheet" href="/assets/css/dashboard.css">
     <style>
         * {
             margin: 0;
@@ -102,7 +103,7 @@ $conn->close();
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Momo Trust Display', sans-serif;
             background: #f5f7fa;
             color: #2c3e50;
         }
@@ -501,6 +502,7 @@ $conn->close();
 </head>
 <body>
     <?php 
+    include '../includes/header.php';
     if ($user_type === 'client') {
         include '../includes/client_sidebar.php';
     } else {
@@ -508,10 +510,11 @@ $conn->close();
     }
     ?>
 
-    <div class="page-container">
-        <a href="<?= $user_type === 'client' ? 'client_dashboard.php' : 'freelancer_dashboard.php' ?>" class="back-link">
-            ← Back to Dashboard
-        </a>
+    <div class="main-content">
+        <div class="page-container">
+            <a href="<?= $user_type === 'client' ? 'client_dashboard.php' : 'freelancer_dashboard.php' ?>" class="back-link">
+                ← Back to Dashboard
+            </a>
 
         <div class="page-header">
             <h1>🚀 Ongoing Projects</h1>
@@ -658,6 +661,7 @@ $conn->close();
                 <?php endforeach; ?>
             </div>
         <?php endif; ?>
+        </div>
     </div>
 
     <script>

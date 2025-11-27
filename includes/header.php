@@ -1,6 +1,29 @@
 <!-- Header -->
 <header class="profile-header">
-
+    <div class="header-left">
+        <?php if (isset($_SESSION['user_id']) && isset($_SESSION['user_type'])): ?>
+        <label for="sidebarToggle" class="menu-toggle" aria-label="Toggle sidebar">
+            <img src="/images/menu_.png" alt="Menu" class="menu-icon">
+        </label>
+        <?php endif; ?>
+    </div>
+    
+    <div class="header-logo">
+        <a href="<?php
+            if (isset($_SESSION['user_id']) && isset($_SESSION['user_type'])) {
+                if ($_SESSION['user_type'] === 'freelancer') {
+                    echo '/freelancer_home.php';
+                } else {
+                    echo '/client_home.php';
+                }
+            } else {
+                echo '/index.php';
+            }
+        ?>">
+            <img src="/images/logo.png" alt="Logo" class="logo-img">
+        </a>
+    </div>
+    
     <div class="header-actions">
         <svg class="notification-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
