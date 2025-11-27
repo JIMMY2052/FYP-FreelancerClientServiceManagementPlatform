@@ -38,8 +38,9 @@ $sql = "SELECT
             a.Scope,
             a.Deliverables,
             a.ProjectDetail,
+            a.ClientName,
             CONCAT(f.FirstName, ' ', f.LastName) as FreelancerName,
-            c.CompanyName as ClientName
+            c.CompanyName as ClientName1
         FROM agreement a
         JOIN freelancer f ON a.FreelancerID = f.FreelancerID
         JOIN client c ON a.ClientID = c.ClientID
@@ -147,13 +148,13 @@ try {
     $pdf->Cell(55, 6, 'CLIENT', 0, 0, 'L', true);
     $pdf->SetFont('times', '', 9);
     $pdf->SetTextColor(0, 0, 0);
-    $pdf->Cell(0, 6, ' : ' . $agreement['ClientName'], 0, 1, 'L', true);
+    $pdf->Cell(0, 6, ' : ' . $agreement['ClientName1'], 0, 1, 'L', true);
 
     // Row 2 - Date and Amount
     $pdf->SetFillColor(255, 255, 255);
     $pdf->SetFont('times', 'B', 9);
     $pdf->SetTextColor(0, 0, 0);
-    $pdf->Cell(55, 6, 'DATE SIGNED', 0, 0, 'L', true);
+    $pdf->Cell(55, 6, 'DATE CREATED', 0, 0, 'L', true);
     $pdf->SetFont('times', '', 9);
     $pdf->SetTextColor(0, 0, 0);
     $pdf->Cell(0, 6, ' : ' . date('M d, Y'), 0, 1, 'L', true);
@@ -165,30 +166,19 @@ try {
     $pdf->SetTextColor(0, 0, 0);
     $pdf->Cell(0, 6, ' : RM ' . number_format($agreement['PaymentAmount'], 2), 0, 1, 'L', true);
 
-    $pdf->Ln(6);
+
+    $pdf->Ln(3);
 
     // ===== PROJECT TITLE SECTION =====
     $pdf->SetFont('times', 'B', 14);
     $pdf->SetTextColor(0, 0, 0);
     $pdf->SetDrawColor(0, 0, 0);
     $pdf->SetLineWidth(0.3);
-    $pdf->Cell(0, 8, 'Gig: ' . $agreement['ProjectTitle'], 0, 1, 'L', true);
-    $pdf->Ln(4);
+    $pdf->Cell(0, 8, 'Gig Title: ' . $agreement['ProjectTitle'], 0, 1, 'L', true);
+    $pdf->Ln(2);
 
 
-    // ===== INTRODUCTORY PARAGRAPH =====
-    $pdf->SetFont('times', '', 10);
-    $pdf->SetTextColor(0, 0, 0);
-    $pdf->SetFillColor(249, 249, 249);
-    $pdf->SetDrawColor(0, 0, 0);
-    $pdf->SetLineWidth(0.3);
 
-    $introText = 'This Services Agreement shall become effective on date (the "Execution Date") and is subject to the terms and conditions stated below between ' . $agreement['FreelancerName'] . ' (the "Service Provider") and ' . $agreement['ClientName'] . ' (the "Client"), collectively referred to as the "Parties".';
-
-    // Add border box around intro paragraph
-    $pdf->SetXY(15, $pdf->GetY());
-    $pdf->MultiCell(0, 5, $introText, 'LRB', 'L', true);
-    $pdf->Ln(6);
 
     // ===== SCOPE OF WORK SECTION =====
     $pdf->SetTextColor(0, 0, 0);
@@ -202,7 +192,7 @@ try {
     $pdf->SetDrawColor(255, 255, 255);
     $pdf->SetLineWidth(0);
     $pdf->SetFillColor(255, 255, 255);
-    $pdf->MultiCell(0, 5, !empty($agreement['Scope']) ? $agreement['Scope'] : $agreement['ProjectDetail'], 0, 'L', false);
+    $pdf->MultiCell(0, 5, !empty($agreement['Deliverables']) ? $agreement['Deliverables'] : 'As agreed upon during project discussion', 0, 'L', false);
     $pdf->Ln(5);
 
     // ===== DELIVERABLES SECTION =====
@@ -212,13 +202,24 @@ try {
     $pdf->SetLineWidth(0.3);
     $pdf->Cell(0, 8, '2.  DELIVERABLES', 'B', 1, 'L', false);
 
+
+    $created_date = new DateTime($agreement['CreatedDate']);
+    $delivery_days = intval($agreement['DeliveryTime']);
+    $delivery_date = clone $created_date;
+    $delivery_date->add(new DateInterval('P' . $delivery_days . 'D'));
+    $delivery_date_str = $delivery_date->format('Y-m-d');
+
     $pdf->SetFont('times', '', 10);
     $pdf->SetTextColor(0, 0, 0);
     $pdf->SetDrawColor(255, 255, 255);
     $pdf->SetLineWidth(0);
     $pdf->SetFillColor(255, 255, 255);
-    $pdf->MultiCell(0, 5, !empty($agreement['Deliverables']) ? $agreement['Deliverables'] : 'As agreed upon during project discussion', 0, 'L', false);
-    $pdf->Ln(5);
+    $deliverableText = 'Delivery Time: ' . $agreement['DeliveryTime'] . ' day(s)' . "\n" .
+        'Date Should Be Completed: ' . $delivery_date_str;
+    $pdf->MultiCell(0, 5, $deliverableText, 0, 'L', false);
+
+
+    $pdf->Ln(3);
 
     // ===== PAYMENT TERMS SECTION =====
     $pdf->SetTextColor(0, 0, 0);
@@ -227,9 +228,8 @@ try {
     $pdf->SetLineWidth(0.3);
     $pdf->Cell(0, 8, '3.  PAYMENT TERMS', 'B', 1, 'L', false);
 
-    $paymentText = 'Project Value: RM ' . number_format($agreement['PaymentAmount'], 2) . "\n" .
-        'Delivery Time: ' . $agreement['DeliveryTime'] . ' days' . "\n" .
-        'Payment Schedule: To be completed upon milestone deliveries as agreed.';
+    $paymentText = 'Total Amount: RM ' . number_format($agreement['PaymentAmount'], 2) . "\n" .
+        'Payment Status: Held in escrow until delivery';
 
     $pdf->SetFont('times', '', 10);
     $pdf->SetTextColor(0, 0, 0);

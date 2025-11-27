@@ -28,6 +28,7 @@ if ($user_type === 'client') {
                 a.FreelancerSignedDate,
                 a.Status,
                 a.FreelancerName,
+                a.agreeementPath,
                 f.FreelancerID,
                 f.Email as FreelancerEmail,
                 f.ProfilePicture,
@@ -44,7 +45,7 @@ if ($user_type === 'client') {
             LEFT JOIN work_submissions ws ON ws.AgreementID = a.AgreementID AND ws.Status = 'pending_review'
             WHERE a.ClientID = ? AND (a.Status = 'ongoing' OR a.Status = 'pending_review')
             ORDER BY a.FreelancerSignedDate DESC";
-    
+
     $stmt = $conn->prepare($sql);
     $stmt->bind_param('i', $user_id);
 } else {
@@ -59,6 +60,7 @@ if ($user_type === 'client') {
                 a.FreelancerSignedDate,
                 a.Status,
                 a.ClientName,
+                a.agreeementPath,
                 c.ClientID,
                 c.Email as ClientEmail,
                 c.ProfilePicture,
@@ -70,11 +72,10 @@ if ($user_type === 'client') {
             LEFT JOIN escrow e ON e.OrderID = a.AgreementID
             WHERE a.FreelancerID = ? AND (a.Status = 'ongoing' OR a.Status = 'pending_review')
             ORDER BY a.FreelancerSignedDate DESC";
-    
+
     $stmt = $conn->prepare($sql);
     $stmt->bind_param('i', $user_id);
 }
-
 $stmt->execute();
 $result = $stmt->get_result();
 $ongoing_projects = [];
@@ -88,6 +89,7 @@ $conn->close();
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -141,7 +143,7 @@ $conn->close();
             background: white;
             border-radius: 12px;
             padding: 20px 30px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             flex: 1;
             min-width: 200px;
         }
@@ -170,14 +172,14 @@ $conn->close();
             background: white;
             border-radius: 16px;
             padding: 25px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
             transition: all 0.3s ease;
             border: 2px solid transparent;
         }
 
         .project-card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
             border-color: #1ab394;
         }
 
@@ -446,7 +448,7 @@ $conn->close();
             padding: 80px 20px;
             background: white;
             border-radius: 16px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         }
 
         .empty-icon {
@@ -500,8 +502,9 @@ $conn->close();
         }
     </style>
 </head>
+
 <body>
-    <?php 
+    <?php
     include '../includes/header.php';
     if ($user_type === 'client') {
         include '../includes/client_sidebar.php';
@@ -516,151 +519,151 @@ $conn->close();
                 ← Back to Dashboard
             </a>
 
-        <div class="page-header">
-            <h1>🚀 Ongoing Projects</h1>
-            <p>Track and manage your active collaborations</p>
-        </div>
+            <div class="page-header">
+                <h1>🚀 Ongoing Projects</h1>
+                <p>Track and manage your active collaborations</p>
+            </div>
 
-        <div class="stats-bar">
-            <div class="stat-card">
-                <div class="stat-label">Active Projects</div>
-                <div class="stat-value"><?= count($ongoing_projects) ?></div>
+            <div class="stats-bar">
+                <div class="stat-card">
+                    <div class="stat-label">Active Projects</div>
+                    <div class="stat-value"><?= count($ongoing_projects) ?></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total Value</div>
+                    <div class="stat-value">RM <?= number_format(array_sum(array_column($ongoing_projects, 'PaymentAmount')), 2) ?></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">In Escrow</div>
+                    <div class="stat-value">RM <?= number_format(array_sum(array_column($ongoing_projects, 'EscrowAmount')), 2) ?></div>
+                </div>
             </div>
-            <div class="stat-card">
-                <div class="stat-label">Total Value</div>
-                <div class="stat-value">RM <?= number_format(array_sum(array_column($ongoing_projects, 'PaymentAmount')), 2) ?></div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">In Escrow</div>
-                <div class="stat-value">RM <?= number_format(array_sum(array_column($ongoing_projects, 'EscrowAmount')), 2) ?></div>
-            </div>
-        </div>
 
-        <?php if (empty($ongoing_projects)): ?>
-            <div class="empty-state">
-                <div class="empty-icon">📋</div>
-                <h3>No Ongoing Projects</h3>
-                <p>You don't have any active projects at the moment.</p>
-                <?php if ($user_type === 'client'): ?>
-                    <a href="job/browse_job.php" class="btn btn-primary" style="display: inline-block;">Browse Jobs</a>
-                <?php else: ?>
-                    <a href="job/browse_job.php" class="btn btn-primary" style="display: inline-block;">Find Jobs</a>
-                <?php endif; ?>
-            </div>
-        <?php else: ?>
-            <div class="projects-grid">
-                <?php foreach ($ongoing_projects as $project): ?>
-                    <div class="project-card">
-                        <div class="project-header">
-                            <div class="project-title">
-                                <h3>
-                                    <?= htmlspecialchars($project['ProjectTitle']) ?>
-                                    <span class="status-indicator status-<?= str_replace('_', '-', strtolower($project['Status'])) ?>">
-                                        <?= $project['Status'] === 'pending_review' ? '⏳ Pending Review' : '🚀 In Progress' ?>
-                                    </span>
-                                </h3>
-                                <div class="project-id">Agreement #<?= $project['AgreementID'] ?></div>
+            <?php if (empty($ongoing_projects)): ?>
+                <div class="empty-state">
+                    <div class="empty-icon">📋</div>
+                    <h3>No Ongoing Projects</h3>
+                    <p>You don't have any active projects at the moment.</p>
+                    <?php if ($user_type === 'client'): ?>
+                        <a href="job/browse_job.php" class="btn btn-primary" style="display: inline-block;">Browse Jobs</a>
+                    <?php else: ?>
+                        <a href="job/browse_job.php" class="btn btn-primary" style="display: inline-block;">Find Jobs</a>
+                    <?php endif; ?>
+                </div>
+            <?php else: ?>
+                <div class="projects-grid">
+                    <?php foreach ($ongoing_projects as $project): ?>
+                        <div class="project-card">
+                            <div class="project-header">
+                                <div class="project-title">
+                                    <h3>
+                                        <?= htmlspecialchars($project['ProjectTitle']) ?>
+                                        <span class="status-indicator status-<?= str_replace('_', '-', strtolower($project['Status'])) ?>">
+                                            <?= $project['Status'] === 'pending_review' ? '⏳ Pending Review' : '🚀 In Progress' ?>
+                                        </span>
+                                    </h3>
+                                    <div class="project-id">Agreement #<?= $project['AgreementID'] ?></div>
+                                </div>
+                                <div class="status-badge">Ongoing</div>
                             </div>
-                            <div class="status-badge">Ongoing</div>
-                        </div>
 
-                        <div class="collaborator-info">
-                            <div class="collaborator-avatar">
-                                <?php if (!empty($project['ProfilePicture'])): ?>
-                                    <img src="<?= htmlspecialchars($project['ProfilePicture']) ?>" alt="Profile">
-                                <?php else: ?>
-                                    <?php 
-                                    $name = $user_type === 'client' ? $project['FreelancerName'] : $project['ClientName'];
-                                    echo strtoupper(substr($name, 0, 1)); 
-                                    ?>
-                                <?php endif; ?>
-                            </div>
-                            <div class="collaborator-details">
-                                <div class="collaborator-label">
-                                    <?= $user_type === 'client' ? 'Freelancer' : 'Client' ?>
+                            <div class="collaborator-info">
+                                <div class="collaborator-avatar">
+                                    <?php if (!empty($project['ProfilePicture'])): ?>
+                                        <img src="<?= htmlspecialchars($project['ProfilePicture']) ?>" alt="Profile">
+                                    <?php else: ?>
+                                        <?php
+                                        $name = $user_type === 'client' ? $project['FreelancerName'] : $project['ClientName'];
+                                        echo strtoupper(substr($name, 0, 1));
+                                        ?>
+                                    <?php endif; ?>
                                 </div>
-                                <div class="collaborator-name">
-                                    <?= htmlspecialchars($user_type === 'client' ? $project['FreelancerName'] : $project['ClientName']) ?>
-                                </div>
-                                <div class="collaborator-email">
-                                    <?= htmlspecialchars($user_type === 'client' ? $project['FreelancerEmail'] : $project['ClientEmail']) ?>
-                                </div>
-                                <?php if ($user_type === 'client' && !empty($project['Rating'])): ?>
-                                    <div class="rating">
-                                        <span class="rating-stars">⭐</span>
-                                        <span class="rating-value"><?= number_format($project['Rating'], 1) ?>/5.0</span>
+                                <div class="collaborator-details">
+                                    <div class="collaborator-label">
+                                        <?= $user_type === 'client' ? 'Freelancer' : 'Client' ?>
                                     </div>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-
-                        <div class="project-description">
-                            <?= htmlspecialchars($project['ProjectDetail']) ?>
-                        </div>
-
-                        <div class="project-meta">
-                            <div class="meta-item">
-                                <div class="meta-label">Project Value</div>
-                                <div class="meta-value amount">RM <?= number_format($project['PaymentAmount'], 2) ?></div>
-                            </div>
-                            <div class="meta-item">
-                                <div class="meta-label">Delivery Time</div>
-                                <div class="meta-value"><?= $project['DeliveryTime'] ?> days</div>
-                            </div>
-                            <div class="meta-item">
-                                <div class="meta-label">Started On</div>
-                                <div class="meta-value">
-                                    <?= date('M d, Y', strtotime($project['FreelancerSignedDate'])) ?>
+                                    <div class="collaborator-name">
+                                        <?= htmlspecialchars($user_type === 'client' ? $project['FreelancerName'] : $project['ClientName']) ?>
+                                    </div>
+                                    <div class="collaborator-email">
+                                        <?= htmlspecialchars($user_type === 'client' ? $project['FreelancerEmail'] : $project['ClientEmail']) ?>
+                                    </div>
+                                    <?php if ($user_type === 'client' && !empty($project['Rating'])): ?>
+                                        <div class="rating">
+                                            <span class="rating-stars">⭐</span>
+                                            <span class="rating-value"><?= number_format($project['Rating'], 1) ?>/5.0</span>
+                                        </div>
+                                    <?php endif; ?>
                                 </div>
                             </div>
-                            <div class="meta-item">
-                                <div class="meta-label">Days Elapsed</div>
-                                <div class="meta-value">
-                                    <?php
-                                    $start_date = new DateTime($project['FreelancerSignedDate']);
-                                    $now = new DateTime();
-                                    $diff = $start_date->diff($now);
-                                    echo $diff->days;
-                                    ?> days
-                                </div>
-                            </div>
-                        </div>
 
-                        <?php if (!empty($project['EscrowAmount'])): ?>
-                            <div class="escrow-info">
-                                <div class="escrow-icon">🔒</div>
-                                <div class="escrow-text">
-                                    <div class="escrow-label">Funds in Escrow</div>
-                                    <div class="escrow-amount">
-                                        RM <?= number_format($project['EscrowAmount'], 2) ?> 
-                                        (<?= ucfirst($project['EscrowStatus']) ?>)
+                            <div class="project-description">
+                                <?= htmlspecialchars($project['ProjectDetail']) ?>
+                            </div>
+
+                            <div class="project-meta">
+                                <div class="meta-item">
+                                    <div class="meta-label">Project Value</div>
+                                    <div class="meta-value amount">RM <?= number_format($project['PaymentAmount'], 2) ?></div>
+                                </div>
+                                <div class="meta-item">
+                                    <div class="meta-label">Delivery Time</div>
+                                    <div class="meta-value"><?= $project['DeliveryTime'] ?> days</div>
+                                </div>
+                                <div class="meta-item">
+                                    <div class="meta-label">Started On</div>
+                                    <div class="meta-value">
+                                        <?= date('M d, Y', strtotime($project['FreelancerSignedDate'])) ?>
+                                    </div>
+                                </div>
+                                <div class="meta-item">
+                                    <div class="meta-label">Days Elapsed</div>
+                                    <div class="meta-value">
+                                        <?php
+                                        $start_date = new DateTime($project['FreelancerSignedDate']);
+                                        $now = new DateTime();
+                                        $diff = $start_date->diff($now);
+                                        echo $diff->days;
+                                        ?> days
                                     </div>
                                 </div>
                             </div>
-                        <?php endif; ?>
 
-                        <div class="project-actions">
-                            <a href="agreement_view.php?id=<?= $project['AgreementID'] ?>" class="btn btn-secondary">
-                                📄 View Agreement
-                            </a>
-                            <a href="messages.php?<?= $user_type === 'client' ? 'freelancer_id=' . $project['FreelancerID'] : 'client_id=' . $project['ClientID'] ?>" class="btn btn-primary">
-                                💬 Message
-                            </a>
-                            <?php if ($user_type === 'freelancer' && $project['Status'] === 'ongoing'): ?>
-                                <a href="submit_work.php?agreement_id=<?= $project['AgreementID'] ?>" class="btn btn-success">
-                                    ✅ Submit Work
-                                </a>
+                            <?php if (!empty($project['EscrowAmount'])): ?>
+                                <div class="escrow-info">
+                                    <div class="escrow-icon">🔒</div>
+                                    <div class="escrow-text">
+                                        <div class="escrow-label">Funds in Escrow</div>
+                                        <div class="escrow-amount">
+                                            RM <?= number_format($project['EscrowAmount'], 2) ?>
+                                            (<?= ucfirst($project['EscrowStatus']) ?>)
+                                        </div>
+                                    </div>
+                                </div>
                             <?php endif; ?>
-                            <?php if ($user_type === 'client' && $project['Status'] === 'pending_review' && !empty($project['SubmissionID'])): ?>
-                                <a href="review_work.php?submission_id=<?= $project['SubmissionID'] ?>" class="btn btn-warning">
-                                    👀 Review Work
+
+                            <div class="project-actions">
+                                <a href="<?= htmlspecialchars($project['agreeementPath']) ?>" target="_blank" class="btn btn-secondary">
+                                    📄 View Agreement
                                 </a>
-                            <?php endif; ?>
+                                <a href="messages.php?<?= $user_type === 'client' ? 'freelancer_id=' . $project['FreelancerID'] : 'client_id=' . $project['ClientID'] ?>" class="btn btn-primary">
+                                    💬 Message
+                                </a>
+                                <?php if ($user_type === 'freelancer' && $project['Status'] === 'ongoing'): ?>
+                                    <a href="submit_work.php?agreement_id=<?= $project['AgreementID'] ?>" class="btn btn-success">
+                                        ✅ Submit Work
+                                    </a>
+                                <?php endif; ?>
+                                <?php if ($user_type === 'client' && $project['Status'] === 'pending_review' && !empty($project['SubmissionID'])): ?>
+                                    <a href="review_work.php?submission_id=<?= $project['SubmissionID'] ?>" class="btn btn-warning">
+                                        👀 Review Work
+                                    </a>
+                                <?php endif; ?>
+                            </div>
                         </div>
-                    </div>
-                <?php endforeach; ?>
-            </div>
-        <?php endif; ?>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
         </div>
     </div>
 
@@ -669,4 +672,5 @@ $conn->close();
         console.log('Ongoing Projects Page Loaded');
     </script>
 </body>
+
 </html>

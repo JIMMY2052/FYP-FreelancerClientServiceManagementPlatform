@@ -291,13 +291,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pdf->Cell(55, 6, 'CLIENT', 0, 0, 'L', true);
         $pdf->SetFont('times', '', 9);
         $pdf->SetTextColor(0, 0, 0); // Black
-        $pdf->Cell(0, 6, ' : ' . $client_name, 0, 1, 'L', true);
+        $pdf->Cell(0, 6, ' : ' . $gig['CompanyName'], 0, 1, 'L', true);
 
-
+        $pdf->SetFillColor(255, 255, 255);
+        $pdf->SetFont('times', 'B', 9);
+        $pdf->SetTextColor(0, 0, 0);
+        $pdf->Cell(55, 6, 'DATE CREATED', 0, 0, 'L', true);
+        $pdf->SetFont('times', '', 9);
+        $pdf->SetTextColor(0, 0, 0);
+        $pdf->Cell(0, 6, ' : ' . date('M d, Y'), 0, 1, 'L', true);
 
         $pdf->SetFont('times', 'B', 11);
         $pdf->SetTextColor(0, 0, 0); // Black
-        $pdf->Cell(55, 6, 'GIG VALUE', 0, 0, 'L', true);
+        $pdf->Cell(55, 6, 'PROJECT VALUE', 0, 0, 'L', true);
         $pdf->SetFont('times', 'B', 9);
         $pdf->SetTextColor(0, 0, 0); // Black
         $pdf->Cell(0, 6, ' : RM ' . number_format($total_amount, 2), 0, 1, 'L', true);
@@ -309,22 +315,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pdf->SetTextColor(0, 0, 0); // Black
         $pdf->SetDrawColor(0, 0, 0); // Black
         $pdf->SetLineWidth(0.3);
-        $pdf->Cell(0, 8, 'Gig: ' . $project_title, 0, 1, 'L', true);
+        $pdf->Cell(0, 8, 'Gig Title: ' . $project_title, 0, 1, 'L', true);
         $pdf->Ln(4);
 
-        // ===== INTRODUCTORY PARAGRAPH =====
-        $pdf->SetFont('times', '', 10);
-        $pdf->SetTextColor(0, 0, 0); // Black
-        $pdf->SetFillColor(249, 249, 249);
-        $pdf->SetDrawColor(0, 0, 0); // Black
-        $pdf->SetLineWidth(0.3);
 
-        $introText = 'This Services Agreement shall become effective on ' . date('M d, Y', strtotime($client_signed_date)) . ' (the "Execution Date") and is subject to the terms and conditions stated below between ' . $freelancer_name . ' (the "Service Provider") and ' . $client_name . ' (the "Client"), collectively referred to as the "Parties".';
-
-        // Add border box around intro paragraph
-        $pdf->SetXY(15, $pdf->GetY());
-        $pdf->MultiCell(0, 5, $introText, 'LRB', 'L', true);
-        $pdf->Ln(3);
 
         // ===== SCOPE OF WORK SECTION =====
         $pdf->SetTextColor(0, 0, 0); // Black
@@ -355,7 +349,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pdf->SetFillColor(255, 255, 255);
         $deliverableText = 'Delivery Time: ' . $delivery_time . ' day(s)' . "\n" .
             'Revisions Included: ' . $gig['RevisionCount'] . "\n" .
-            'As described in the gig specifications';
+            'The date that need to be complete will be calculated from the date the freelancer accepts this agreement.';
         $pdf->MultiCell(0, 5, $deliverableText, 0, 'L', false);
         $pdf->Ln(5);
 
@@ -366,7 +360,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pdf->SetLineWidth(0.3);
         $pdf->Cell(0, 8, '3.  PAYMENT TERMS', 'B', 1, 'L', false);
 
-        $paymentText = 'Base Price: RM ' . number_format($base_price, 2) . "\n";
+
         if ($rush_delivery) {
             $paymentText .= 'Rush Delivery Fee: RM ' . number_format($rush_fee, 2) . "\n";
         }
