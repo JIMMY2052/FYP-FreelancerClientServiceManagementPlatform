@@ -1337,13 +1337,16 @@ body {
     width: 100%;
     margin-left: 0;
     margin-right: 0;
+    box-sizing: border-box;
+    overflow-x: hidden;
 }
 
 .footer-container {
     width: 100%;
-    max-width: 100%;
-    margin: 0;
+    max-width: 1400px;
+    margin: 0 auto;
     padding: 0 2rem;
+    box-sizing: border-box;
 }
 
 .footer-content {
@@ -1638,5 +1641,617 @@ body {
         width: 60px;
         height: 60px;
         font-size: 2rem;
+    }
+}
+
+/* Freelancer Home Page Sections */
+
+/* Hero Section for Freelancer */
+.freelancer-hero-section {
+    background: linear-gradient(135deg, #f0fde8 0%, #e6fdd5 100%);
+    padding: 5rem 0;
+    margin: 0;
+}
+
+.freelancer-hero-section .container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+.freelancer-hero-section .hero-content-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 4rem;
+}
+
+.freelancer-hero-section .hero-text {
+    flex: 1;
+}
+
+.freelancer-hero-section .hero-title {
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0 0 1.5rem 0;
+    line-height: 1.2;
+}
+
+.freelancer-hero-section .hero-subtitle {
+    font-size: 1.5rem;
+    color: #4b5563;
+    margin: 0 0 2.5rem 0;
+    line-height: 1.6;
+    font-family: 'Inter', sans-serif;
+}
+
+.freelancer-hero-section .hero-image-wrapper {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.freelancer-hero-section .hero-main-image {
+    width: 100%;
+    max-width: 600px;
+    height: auto;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    object-fit: cover;
+}
+
+/* Quick Stats Section */
+.quick-stats-section {
+    padding: 3rem 0;
+    background-color: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.quick-stats-section .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+}
+
+.quick-stats-section .stat-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    background-color: #f9fafb;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    border: 1px solid #e5e7eb;
+}
+
+.quick-stats-section .stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    border-color: rgb(159, 232, 112);
+}
+
+.quick-stats-section .stat-icon {
+    font-size: 2.5rem;
+    margin: 0;
+}
+
+.quick-stats-section .stat-info {
+    flex: 1;
+}
+
+.quick-stats-section .stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0 0 0.25rem 0;
+}
+
+.quick-stats-section .stat-label {
+    font-size: 0.9375rem;
+    color: #6b7280;
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+}
+
+/* Specializations Section */
+.specializations-section {
+    padding: 5rem 0;
+    background-color: #f9fafb;
+}
+
+.specializations-section .section-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.specializations-section .section-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0 0 1rem 0;
+}
+
+.specializations-section .section-subtitle {
+    font-size: 1.25rem;
+    color: #6b7280;
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+}
+
+/* Available Opportunities Section */
+.opportunities-section {
+    padding: 5rem 0;
+    background-color: #ffffff;
+}
+
+.opportunities-section .section-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.opportunities-section .section-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0 0 1rem 0;
+}
+
+.opportunities-section .section-subtitle {
+    font-size: 1.25rem;
+    color: #6b7280;
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+}
+
+.opportunities-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.opportunity-card {
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 2rem;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.opportunity-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+    border-color: rgb(159, 232, 112);
+}
+
+.opportunity-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.opportunity-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+    flex: 1;
+}
+
+.opportunity-budget {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: rgb(159, 232, 112);
+    white-space: nowrap;
+}
+
+.opportunity-description {
+    font-size: 1rem;
+    color: #6b7280;
+    line-height: 1.6;
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+}
+
+.opportunity-skills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.skill-tag {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background-color: #f3f4f6;
+    color: #4b5563;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.skill-tag:hover {
+    background-color: #e5e7eb;
+    color: #1f2937;
+}
+
+.opportunity-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1rem;
+    border-top: 1px solid #e5e7eb;
+}
+
+.opportunity-time {
+    font-size: 0.875rem;
+    color: #9ca3af;
+    font-family: 'Inter', sans-serif;
+}
+
+.btn-small {
+    padding: 0.625rem 1.5rem;
+    background-color: rgb(159, 232, 112);
+    color: #ffffff;
+    text-decoration: none;
+    border-radius: 24px;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    transition: all 0.3s ease;
+    border: 1px solid rgb(159, 232, 112);
+}
+
+.btn-small:hover {
+    background-color: rgb(139, 212, 92);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(159, 232, 112, 0.3);
+}
+
+.view-all-section {
+    text-align: center;
+}
+
+.btn-primary {
+    display: inline-block;
+    padding: 1rem 2.5rem;
+    background-color: rgb(159, 232, 112);
+    color: #ffffff;
+    text-decoration: none;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 1.125rem;
+    transition: all 0.3s ease;
+    border: 1px solid rgb(159, 232, 112);
+}
+
+.btn-primary:hover {
+    background-color: rgb(139, 212, 92);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(159, 232, 112, 0.4);
+}
+
+/* Freelancer Tools Section */
+.freelancer-tools-section {
+    padding: 5rem 0;
+    background-color: #f9fafb;
+}
+
+.freelancer-tools-section .section-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.freelancer-tools-section .section-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0 0 1rem 0;
+}
+
+.freelancer-tools-section .section-subtitle {
+    font-size: 1.25rem;
+    color: #6b7280;
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+}
+
+.tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+}
+
+.tool-item {
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 2rem;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.tool-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+    border-color: rgb(159, 232, 112);
+}
+
+.tool-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.tool-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 1rem 0;
+}
+
+.tool-description {
+    font-size: 1rem;
+    color: #6b7280;
+    line-height: 1.6;
+    margin: 0 0 1.5rem 0;
+    font-family: 'Inter', sans-serif;
+}
+
+.tool-link {
+    display: inline-block;
+    color: rgb(159, 232, 112);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+}
+
+.tool-link:hover {
+    color: rgb(139, 212, 92);
+    padding-left: 5px;
+}
+
+/* Recent Activity Section */
+.recent-activity-section {
+    padding: 5rem 0;
+    background-color: #ffffff;
+}
+
+.recent-activity-section .section-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.recent-activity-section .section-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0;
+}
+
+.activity-list {
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.activity-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    background-color: #f9fafb;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    transition: all 0.3s ease;
+}
+
+.activity-item:hover {
+    background-color: #ffffff;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    border-color: rgb(159, 232, 112);
+}
+
+.activity-icon {
+    font-size: 2rem;
+    flex-shrink: 0;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #ffffff;
+    border-radius: 50%;
+    border: 1px solid #e5e7eb;
+}
+
+.activity-content {
+    flex: 1;
+}
+
+.activity-text {
+    font-size: 1rem;
+    color: #4b5563;
+    margin: 0 0 0.5rem 0;
+    line-height: 1.6;
+    font-family: 'Inter', sans-serif;
+}
+
+.activity-text strong {
+    color: #1f2937;
+    font-weight: 600;
+}
+
+.activity-time {
+    font-size: 0.875rem;
+    color: #9ca3af;
+    font-family: 'Inter', sans-serif;
+}
+
+/* Responsive Design for Freelancer Home */
+@media (max-width: 968px) {
+    .freelancer-hero-section .hero-content-wrapper {
+        flex-direction: column;
+        gap: 2rem;
+        text-align: center;
+    }
+    
+    .freelancer-hero-section .hero-title {
+        font-size: 2.5rem;
+    }
+    
+    .freelancer-hero-section .hero-subtitle {
+        font-size: 1.25rem;
+    }
+    
+    .opportunities-grid {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+    
+    .tools-grid {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .freelancer-hero-section {
+        padding: 3rem 0;
+    }
+    
+    .freelancer-hero-section .hero-title {
+        font-size: 2rem;
+    }
+    
+    .freelancer-hero-section .hero-subtitle {
+        font-size: 1.125rem;
+    }
+    
+    .freelancer-hero-section .hero-buttons {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .freelancer-hero-section .btn-hero {
+        width: 100%;
+    }
+    
+    .quick-stats-section .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+    
+    .quick-stats-section .stat-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+    }
+    
+    .opportunities-section,
+    .freelancer-tools-section,
+    .recent-activity-section {
+        padding: 3rem 0;
+    }
+    
+    .opportunities-section .section-title,
+    .freelancer-tools-section .section-title,
+    .recent-activity-section .section-title {
+        font-size: 2rem;
+    }
+    
+    .opportunities-section .section-subtitle,
+    .freelancer-tools-section .section-subtitle {
+        font-size: 1.125rem;
+    }
+    
+    .opportunities-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .tools-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .freelancer-hero-section {
+        padding: 2rem 0;
+    }
+    
+    .freelancer-hero-section .hero-title {
+        font-size: 1.75rem;
+    }
+    
+    .freelancer-hero-section .hero-subtitle {
+        font-size: 1rem;
+    }
+    
+    .quick-stats-section {
+        padding: 2rem 0;
+    }
+    
+    .quick-stats-section .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .quick-stats-section .stat-card {
+        padding: 1rem;
+    }
+    
+    .quick-stats-section .stat-number {
+        font-size: 1.75rem;
+    }
+    
+    .opportunities-section,
+    .freelancer-tools-section,
+    .recent-activity-section {
+        padding: 2.5rem 0;
+    }
+    
+    .opportunities-section .section-title,
+    .freelancer-tools-section .section-title,
+    .recent-activity-section .section-title {
+        font-size: 1.75rem;
+    }
+    
+    .opportunities-section .section-subtitle,
+    .freelancer-tools-section .section-subtitle {
+        font-size: 1rem;
+    }
+    
+    .opportunity-card,
+    .tool-item {
+        padding: 1.5rem;
+    }
+    
+    .opportunity-header {
+        flex-direction: column;
+    }
+    
+    .opportunity-title {
+        font-size: 1.25rem;
+    }
+    
+    .opportunity-budget {
+        font-size: 1.125rem;
+    }
+    
+    .activity-item {
+        gap: 1rem;
+        padding: 1rem;
+    }
+    
+    .activity-icon {
+        font-size: 1.5rem;
+        width: 40px;
+        height: 40px;
     }
 }

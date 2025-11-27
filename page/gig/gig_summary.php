@@ -27,6 +27,7 @@ if (!function_exists('getPDOConnection')) {
 }
 
 $_title = 'Create Gig - Publish';
+include '../../_head.php';
 
 $errors = [];
 $successMessage = '';

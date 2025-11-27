@@ -9,6 +9,7 @@ if (isset($_SESSION['user_id']) && !in_array($_SESSION['user_type'], ['client', 
 }
 
 $_title = 'Browse Gigs - WorkSnyc Freelancer Platform';
+include '../../_head.php';
 require_once '../config.php';
 
 if (!function_exists('getPDOConnection')) {

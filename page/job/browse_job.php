@@ -8,6 +8,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'freelancer') {
 }
 
 $_title = 'Browse Jobs';
+include '../../_head.php';
 require_once '../config.php';
 
 $conn = getDBConnection();
@@ -138,6 +139,17 @@ $jobs = $result->fetch_all(MYSQLI_ASSOC);
 
 <style>
     /* Browse Projects Page */
+    body {
+        overflow-x: hidden;
+    }
+
+    .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 2rem;
+        box-sizing: border-box;
+    }
+
     .browse-header {
         display: flex;
         justify-content: space-between;
@@ -162,16 +174,18 @@ $jobs = $result->fetch_all(MYSQLI_ASSOC);
         background: white;
         border-radius: 16px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        box-sizing: border-box;
     }
 
     .filter-input {
         flex: 1;
-        min-width: 220px;
+        min-width: 200px;
         padding: 11px 16px;
         border-radius: 12px;
         border: 1px solid #ddd;
         font-size: 0.9rem;
         transition: all 0.3s ease;
+        box-sizing: border-box;
     }
 
     .filter-input:focus {
@@ -187,6 +201,7 @@ $jobs = $result->fetch_all(MYSQLI_ASSOC);
         font-size: 0.9rem;
         background: white;
         transition: all 0.3s ease;
+        box-sizing: border-box;
     }
 
     .filter-select:focus {
@@ -205,6 +220,7 @@ $jobs = $result->fetch_all(MYSQLI_ASSOC);
         cursor: pointer;
         transition: all 0.3s ease;
         font-size: 0.9rem;
+        box-sizing: border-box;
     }
 
     .filter-search:hover {
@@ -222,6 +238,7 @@ $jobs = $result->fetch_all(MYSQLI_ASSOC);
         transition: all 0.3s ease;
         display: inline-block;
         font-size: 0.9rem;
+        box-sizing: border-box;
     }
 
     .filter-reset:hover {
@@ -238,7 +255,7 @@ $jobs = $result->fetch_all(MYSQLI_ASSOC);
     /* Projects Grid */
     .browse-projects-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
         gap: 20px;
     }
 
@@ -251,6 +268,7 @@ $jobs = $result->fetch_all(MYSQLI_ASSOC);
         transition: all 0.3s ease;
         display: flex;
         flex-direction: column;
+        box-sizing: border-box;
     }
 
     .project-card:hover {
@@ -272,6 +290,8 @@ $jobs = $result->fetch_all(MYSQLI_ASSOC);
         color: #2c3e50;
         margin: 0;
         line-height: 1.3;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
     }
 
     .project-budget {
@@ -290,6 +310,8 @@ $jobs = $result->fetch_all(MYSQLI_ASSOC);
         line-height: 1.5;
         margin: 0 0 15px 0;
         flex-grow: 1;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
     }
 
     .project-meta {
@@ -323,6 +345,7 @@ $jobs = $result->fetch_all(MYSQLI_ASSOC);
         text-decoration: none;
         font-weight: 600;
         transition: all 0.3s ease;
+        box-sizing: border-box;
     }
 
     .project-actions .btn-small:hover {
@@ -356,6 +379,10 @@ $jobs = $result->fetch_all(MYSQLI_ASSOC);
 
     /* Responsive Design */
     @media (max-width: 768px) {
+        .container {
+            padding: 0 1rem;
+        }
+
         .browse-header {
             flex-direction: column;
             align-items: flex-start;
@@ -403,6 +430,10 @@ $jobs = $result->fetch_all(MYSQLI_ASSOC);
     }
 
     @media (max-width: 480px) {
+        .container {
+            padding: 0 0.5rem;
+        }
+
         .browse-header h1 {
             font-size: 1.5rem;
         }

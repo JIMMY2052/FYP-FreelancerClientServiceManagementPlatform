@@ -34,9 +34,6 @@ require_once __DIR__ . '/page/config.php';
                     <img src="/images/logo.png" alt="Freelancer Platform Logo" class="logo-img">
                 </a>
             </div>
-            <div class="header-search">
-                <input type="text" placeholder="Search for services..." class="search-input">
-            </div>
             <nav class="header-nav">
                 <?php if (isset($_SESSION['user_id']) && isset($_SESSION['user_type'])): ?>
                     <!-- Show profile and notification when logged in -->

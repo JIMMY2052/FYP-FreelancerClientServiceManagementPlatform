@@ -10,7 +10,7 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_type'])) {
 $_title = 'Activity History';
 $user_id = $_SESSION['user_id'];
 $user_type = $_SESSION['user_type'];
-
+ 
 require_once 'config.php';
 
 $conn = getDBConnection();

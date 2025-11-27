@@ -72,6 +72,15 @@ $conn->close();
     <style>
         body {
             background: #f5f7fa;
+            margin: 0;
+            padding: 0;
+        }
+
+        .main-content {
+            margin-left: 0;
+            padding-top: 0;
+            background-color: #f5f7fa !important;
+            min-height: auto !important;
         }
 
         .wallet-container {
@@ -483,8 +492,15 @@ $conn->close();
     </style>
 </head>
 <body>
-    <?php require_once '../../_head.php'; ?>
-
+    <?php 
+    include '../../includes/header.php';
+    if ($user_type === 'client') {
+        include '../../includes/client_sidebar.php';
+    } else {
+        include '../../includes/freelancer_sidebar.php';
+    }
+    ?>
+    <div class="main-content">
     <div class="wallet-container">
         <div class="wallet-header">
             <h1><i class="fas fa-wallet"></i> My Wallet</h1>

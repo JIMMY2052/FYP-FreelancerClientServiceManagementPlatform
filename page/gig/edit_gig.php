@@ -8,6 +8,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'freelancer') {
 }
 
 $_title = 'Edit Gig';
+include '../../_head.php';
 require_once '../config.php';
 
 // Get gig ID from URL

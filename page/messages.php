@@ -117,22 +117,11 @@ elseif ($target_client_id && $user_type === 'freelancer') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Messages - WorkSync</title>
-    <link rel="stylesheet" href="/assets/css/app.css">
-    <link rel="stylesheet" href="/assets/css/profile.css">
-    <link rel="stylesheet" href="/assets/css/<?= $user_type === 'client' ? 'client' : 'freelancer' ?>.css">
+    <link rel="stylesheet" href="../assets/css/style.css">
     <link rel="stylesheet" href="../assets/css/chat.css">
 </head>
 
 <body class="chat-page">
-    <?php 
-    include '../includes/header.php';
-    if ($user_type === 'client') {
-        include '../includes/client_sidebar.php';
-    } else {
-        include '../includes/freelancer_sidebar.php';
-    }
-    ?>
-    <div class="main-content">
     <!-- Top Right Navigation -->
     <div class="chat-top-nav">
         <div class="logo-section">
@@ -690,7 +679,6 @@ elseif ($target_client_id && $user_type === 'freelancer') {
             }
         }
     </style>
-    </div>
 </body>
 
 </html>

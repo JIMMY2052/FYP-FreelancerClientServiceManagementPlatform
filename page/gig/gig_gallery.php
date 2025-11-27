@@ -8,6 +8,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'freelancer') {
 }
 
 $_title = 'Create Gig - Gallery';
+include '../../_head.php';
 
 $gallerySessionKey = 'gig_gallery';
 $galleryState = $_SESSION[$gallerySessionKey] ?? ['images' => [], 'video' => null];

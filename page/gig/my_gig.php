@@ -8,6 +8,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'freelancer') {
 }
 
 $_title = 'My Gigs';
+include '../../_head.php';
 require_once '../config.php';
 
 if (!function_exists('getPDOConnection')) {

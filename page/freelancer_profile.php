@@ -244,7 +244,7 @@ $conn->close();
                                 <div class="project-info">
                                     <h3 class="project-title"><?php echo htmlspecialchars($gig['Title']); ?></h3>
                                     <p class="project-freelancer">Category: <?php echo htmlspecialchars($gig['Category']); ?></p>
-                                    <p class="project-budget">Price Range: RM<?php echo number_format($gig['MinPrice'], 2); ?> - RM<?php echo number_format($gig['MaxPrice'], 2); ?></p>
+                                    <p class="project-budget">Price: RM<?php echo number_format($gig['Price'], 2); ?></p>
                                 </div>
                                 <div class="project-status">
                                     <?php
