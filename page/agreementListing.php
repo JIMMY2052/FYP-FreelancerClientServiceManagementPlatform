@@ -1251,7 +1251,7 @@ foreach ($all_agreements_for_count as $agreement) {
                                 <div class="detail-value date"><?= $agreement['ClientSignedDate'] ? date('M d, Y h:i A', strtotime($agreement['ClientSignedDate'])) : '-' ?></div>
                             </div>
                             <div class="detail-item">
-                                <div class="detail-label">Freelancer Signed</div>
+                                <div class="detail-label"><?= $agreement['Status'] === 'declined' ? 'Freelancer Declined' : 'Freelancer Signed' ?></div>
                                 <div class="detail-value date"><?= $agreement['FreelancerSignedDate'] ? date('M d, Y h:i A', strtotime($agreement['FreelancerSignedDate'])) : '-' ?></div>
                             </div>
                             <?php if ($agreement['Status'] === 'ongoing'): ?>
