@@ -29,7 +29,7 @@ $categoryData = [
             'logo-design' => [
                 'design_style' => ['Modern', 'Minimal', 'Vintage', 'Abstract', 'Geometric'],
                 'file_format' => ['PNG', 'SVG', 'AI', 'PSD', 'PDF'],
-                'revisions' => ['1', '2', '3', '5', 'Unlimited']
+                'revisions' => ['0', '1', '2', '3', '5', 'Unlimited']
             ],
             'brand-style-guide' => [
                 'pages_included' => ['5-10', '10-20', '20-30', '30+'],
@@ -483,10 +483,23 @@ $categoryData = [
         font-size: 0.9rem;
     }
 
+    .metadata-item label .required {
+        color: #e74c3c;
+        margin-left: 2px;
+    }
+
     .checkbox-group {
         display: flex;
         flex-wrap: wrap;
         gap: 12px;
+        padding: 12px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .checkbox-group.error {
+        border: 2px solid #e74c3c;
+        background: #ffebee;
     }
 
     .checkbox-item {
@@ -495,15 +508,18 @@ $categoryData = [
         gap: 6px;
     }
 
-    .checkbox-item input[type="checkbox"] {
+    .checkbox-item input[type="checkbox"],
+    .checkbox-item input[type="radio"] {
         width: auto;
         margin: 0;
+        cursor: pointer;
     }
 
     .checkbox-item label {
         margin: 0;
         font-weight: 400;
         font-size: 0.9rem;
+        cursor: pointer;
     }
 
     /* Form Actions */
@@ -764,12 +780,16 @@ $categoryData = [
                 // Format label (convert kebab-case to Title Case)
                 const label = key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 
+                // Check if this is revisions field (should be radio button)
+                const isRevisionsField = key === 'revisions';
+                const inputType = isRevisionsField ? 'radio' : 'checkbox';
+                
                 metadataItem.innerHTML = `
-                    <label>${label}</label>
-                    <div class="checkbox-group">
+                    <label>${label} <span class="required">*</span></label>
+                    <div class="checkbox-group" data-group="${key}">
                         ${Array.isArray(options) ? options.map(option => `
                             <div class="checkbox-item">
-                                <input type="checkbox" name="${key}" value="${option}" id="${key}_${option}">
+                                <input type="${inputType}" name="${key}" value="${option}" id="${key}_${option}">
                                 <label for="${key}_${option}">${option}</label>
                             </div>
                         `).join('') : ''}
@@ -789,6 +809,31 @@ $categoryData = [
         if (!form.checkValidity()) {
             alert('Please fill in all required fields');
             form.reportValidity();
+            return;
+        }
+
+        // Validate metadata: ensure at least one option is selected for each element
+        const metadataGroups = document.querySelectorAll('.checkbox-group[data-group]');
+        let hasError = false;
+        let errorMessage = '';
+
+        metadataGroups.forEach(group => {
+            const groupName = group.getAttribute('data-group');
+            const inputs = group.querySelectorAll('input[type="checkbox"], input[type="radio"]');
+            const checked = Array.from(inputs).some(input => input.checked);
+            
+            if (!checked) {
+                hasError = true;
+                const label = groupName.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+                errorMessage += `• Please select at least one option for "${label}"\n`;
+                group.classList.add('error');
+            } else {
+                group.classList.remove('error');
+            }
+        });
+
+        if (hasError) {
+            alert('Please complete all gig details:\n\n' + errorMessage);
             return;
         }
 
@@ -821,6 +866,7 @@ $categoryData = [
     function getMetadataValues() {
         const metadata = {};
         const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+        const radios = document.querySelectorAll('input[type="radio"]:checked');
         
         checkboxes.forEach(checkbox => {
             const key = checkbox.name;
@@ -828,6 +874,11 @@ $categoryData = [
                 metadata[key] = [];
             }
             metadata[key].push(checkbox.value);
+        });
+
+        radios.forEach(radio => {
+            const key = radio.name;
+            metadata[key] = [radio.value]; // Radio buttons only have one value
         });
 
         return metadata;

@@ -695,11 +695,10 @@ foreach ($all_agreements_for_count as $agreement) {
         const modal = document.getElementById('declineModal');
         const confirmBtn = document.getElementById('confirmDeclineBtn');
 
+        // Store agreement ID in the button's data attribute
+        confirmBtn.setAttribute('data-agreement-id', agreementId);
+        
         modal.classList.add('active');
-
-        confirmBtn.onclick = function() {
-            confirmDecline(agreementId);
-        };
     }
 
     // Close modal
@@ -712,33 +711,56 @@ foreach ($all_agreements_for_count as $agreement) {
     function confirmDecline(agreementId) {
         closeDeclineModal();
 
+        console.log('Declining agreement ID:', agreementId);
+
         fetch('decline_agreement.php', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
                 },
                 body: JSON.stringify({
                     agreement_id: agreementId
                 })
             })
-            .then(response => response.json())
+            .then(response => {
+                console.log('Response status:', response.status);
+                return response.json();
+            })
             .then(data => {
+                console.log('Response data:', data);
                 if (data.success) {
+                    alert('Agreement declined successfully. Funds have been refunded to the client.');
                     location.reload();
+                } else {
+                    alert('Error: ' + (data.message || 'Failed to decline agreement'));
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
+                alert('An error occurred while declining the agreement. Please try again.');
             });
     }
 
     // Close modal when clicking overlay
     document.addEventListener('DOMContentLoaded', function() {
         const modal = document.getElementById('declineModal');
+        const confirmBtn = document.getElementById('confirmDeclineBtn');
+        
         if (modal) {
             modal.addEventListener('click', function(e) {
                 if (e.target === modal) {
                     closeDeclineModal();
+                }
+            });
+        }
+
+        // Add click event listener to confirm button
+        if (confirmBtn) {
+            confirmBtn.addEventListener('click', function() {
+                const agreementId = this.getAttribute('data-agreement-id');
+                if (agreementId) {
+                    confirmDecline(parseInt(agreementId));
                 }
             });
         }

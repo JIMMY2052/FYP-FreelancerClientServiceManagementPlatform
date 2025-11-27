@@ -416,16 +416,19 @@ $conn->close();
             margin-bottom: 8px;
         }
 
-        .form-group input {
+        .form-group input,
+        .form-group select {
             width: 100%;
             padding: 12px 16px;
             border: 2px solid #e9ecef;
             border-radius: 12px;
             font-size: 1rem;
             transition: all 0.3s ease;
+            box-sizing: border-box;
         }
 
-        .form-group input:focus {
+        .form-group input:focus,
+        .form-group select:focus {
             outline: none;
             border-color: rgb(159, 232, 112);
         }
@@ -493,18 +496,10 @@ $conn->close();
                 <div class="wallet-card-label">Available Balance</div>
                 <div class="wallet-balance">RM <?= number_format($wallet['Balance'], 2) ?></div>
                 <div class="wallet-actions">
-                    <?php if ($user_type === 'client'): ?>
-                        <button class="btn-topup" onclick="openTopupModal()">
-                            <i class="fas fa-plus"></i>
-                            Top Up
-                        </button>
-                    <?php endif; ?>
-                    <?php if ($user_type === 'freelancer'): ?>
-                        <button class="btn-withdraw" onclick="openWithdrawModal()">
-                            <i class="fas fa-arrow-up"></i>
-                            Withdraw
-                        </button>
-                    <?php endif; ?>
+                    <button class="btn-withdraw" onclick="openWithdrawModal()">
+                        <i class="fas fa-arrow-up"></i>
+                        Withdraw
+                    </button>
                 </div>
             </div>
 
@@ -591,6 +586,55 @@ $conn->close();
         </div>
     </div>
 
+    <!-- Withdraw Modal -->
+    <div class="modal" id="withdrawModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Withdraw Funds</h3>
+                <p>Withdraw funds from your wallet to your bank account</p>
+            </div>
+            <form id="withdrawForm" method="POST" action="withdraw_process.php">
+                <div class="form-group">
+                    <label for="withdraw_amount">Amount (RM)</label>
+                    <input type="number" id="withdraw_amount" name="amount" min="10" max="<?= number_format($wallet['Balance'], 2, '.', '') ?>" step="0.01" required placeholder="Enter amount">
+                    <div style="font-size: 0.85rem; color: #666; margin-top: 5px;">
+                        Available balance: RM <?= number_format($wallet['Balance'], 2) ?>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="bank_name">Bank Name</label>
+                    <select id="bank_name" name="bank_name" required>
+                        <option value="" disabled selected>Select your bank</option>
+                        <option value="Maybank">Maybank</option>
+                        <option value="CIMB Bank">CIMB Bank</option>
+                        <option value="Public Bank">Public Bank</option>
+                        <option value="RHB Bank">RHB Bank</option>
+                        <option value="Hong Leong Bank">Hong Leong Bank</option>
+                        <option value="AmBank">AmBank</option>
+                        <option value="Bank Islam">Bank Islam</option>
+                        <option value="OCBC Bank">OCBC Bank</option>
+                        <option value="HSBC Bank">HSBC Bank</option>
+                        <option value="Standard Chartered">Standard Chartered</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="account_number">Account Number</label>
+                    <input type="text" id="account_number" name="account_number" required placeholder="Enter your account number" pattern="[0-9]+" title="Please enter numbers only">
+                </div>
+                <div class="form-group">
+                    <label for="account_holder">Account Holder Name</label>
+                    <input type="text" id="account_holder" name="account_holder" required placeholder="As per bank account">
+                </div>
+                <button type="submit" class="btn-submit">
+                    <i class="fas fa-university"></i>
+                    Request Withdrawal
+                </button>
+            </form>
+            <button class="modal-close" onclick="closeWithdrawModal()">&times;</button>
+        </div>
+    </div>
+
     <?php require_once '../../_foot.php'; ?>
 
     <script>
@@ -633,13 +677,23 @@ $conn->close();
         }
 
         function openWithdrawModal() {
-            alert('Withdraw functionality will be implemented soon.');
+            document.getElementById('withdrawModal').classList.add('active');
+        }
+
+        function closeWithdrawModal() {
+            document.getElementById('withdrawModal').classList.remove('active');
         }
 
         // Close modal on outside click
         document.getElementById('topupModal').addEventListener('click', function(e) {
             if (e.target === this) {
                 closeTopupModal();
+            }
+        });
+
+        document.getElementById('withdrawModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeWithdrawModal();
             }
         });
     </script>

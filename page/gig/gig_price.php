@@ -226,6 +226,23 @@ include '../../_head.php';
         box-shadow: 0 0 0 3px rgba(159, 232, 112, 0.1);
     }
 
+    .form-group input.error,
+    .form-group select.error {
+        border-color: #e74c3c;
+        background: #ffebee;
+    }
+
+    .error-message {
+        color: #e74c3c;
+        font-size: 0.85rem;
+        margin-top: 5px;
+        display: none;
+    }
+
+    .error-message.show {
+        display: block;
+    }
+
     .form-group textarea {
         resize: vertical;
         min-height: 80px;
@@ -442,7 +459,8 @@ include '../../_head.php';
                             <option value="5">5 Days</option>
                             <option value="7">7 Days</option>
                         </select>
-                        <div class="form-description">Faster delivery option</div>
+                        <div class="form-description">Faster delivery option (must be less than regular delivery)</div>
+                        <div class="error-message" id="rushDeliveryError">Rush delivery must be less than regular delivery time</div>
                     </div>
                 </div>
 
@@ -559,10 +577,66 @@ include '../../_head.php';
         const revisionsSelect = document.getElementById('revisions');
 
         priceInput.addEventListener('input', updateSummary);
-        deliveryDaysInput.addEventListener('input', updateSummary);
-        rushDeliverySelect.addEventListener('change', updateSummary);
+        deliveryDaysInput.addEventListener('input', function() {
+            updateRushDeliveryOptions();
+            validateRushDelivery();
+            updateSummary();
+        });
+        rushDeliverySelect.addEventListener('change', function() {
+            validateRushDelivery();
+            updateSummary();
+        });
         rushDeliveryPriceInput.addEventListener('input', updateSummary);
         revisionsSelect.addEventListener('change', updateSummary);
+    }
+
+    function updateRushDeliveryOptions() {
+        const deliveryDays = parseInt(document.getElementById('deliveryDays').value, 10);
+        const rushDeliverySelect = document.getElementById('rushDeliveryDays');
+        const currentValue = rushDeliverySelect.value;
+        
+        // Clear all options except the first (Optional)
+        rushDeliverySelect.innerHTML = '<option value="" selected hidden>Optional</option>';
+        
+        if (deliveryDays && deliveryDays > 1) {
+            // Add options from 1 to deliveryDays - 1
+            const maxRushDays = deliveryDays - 1;
+            const options = [1, 2, 3, 5, 7, 10, 14, 21, 30];
+            
+            options.forEach(days => {
+                if (days < deliveryDays) {
+                    const option = document.createElement('option');
+                    option.value = days;
+                    option.textContent = days === 1 ? '1 Day' : `${days} Days`;
+                    rushDeliverySelect.appendChild(option);
+                }
+            });
+            
+            // Restore previous value if it's still valid
+            if (currentValue && parseInt(currentValue, 10) < deliveryDays) {
+                rushDeliverySelect.value = currentValue;
+            } else if (currentValue) {
+                // Previous value is now invalid, reset
+                rushDeliverySelect.value = '';
+            }
+        }
+    }
+
+    function validateRushDelivery() {
+        const deliveryDays = parseInt(document.getElementById('deliveryDays').value, 10);
+        const rushDeliveryDays = parseInt(document.getElementById('rushDeliveryDays').value, 10);
+        const rushDeliverySelect = document.getElementById('rushDeliveryDays');
+        const errorMessage = document.getElementById('rushDeliveryError');
+        
+        if (rushDeliveryDays && deliveryDays && rushDeliveryDays >= deliveryDays) {
+            rushDeliverySelect.classList.add('error');
+            errorMessage.classList.add('show');
+            return false;
+        } else {
+            rushDeliverySelect.classList.remove('error');
+            errorMessage.classList.remove('show');
+            return true;
+        }
     }
 
     function updateSummary() {
@@ -630,6 +704,15 @@ include '../../_head.php';
         const price = parseInt(document.getElementById('price').value, 10);
         if (price < 5) {
             alert('Minimum price must be at least MYR 5');
+            return;
+        }
+
+        // Validate rush delivery
+        const deliveryDays = parseInt(document.getElementById('deliveryDays').value, 10);
+        const rushDeliveryDays = parseInt(document.getElementById('rushDeliveryDays').value, 10);
+        if (rushDeliveryDays && rushDeliveryDays >= deliveryDays) {
+            alert('Rush delivery must be less than the regular delivery time.\n\nFor example: If delivery is ' + deliveryDays + ' days, rush delivery can only be 1 to ' + (deliveryDays - 1) + ' days.');
+            document.getElementById('rushDeliveryDays').focus();
             return;
         }
 

@@ -119,7 +119,7 @@ try {
                         </div>
 
                         <div class="card-actions">
-                            <a href="/page/freelancer/edit_service.php?id=<?php echo $service['GigID']; ?>" class="btn-small btn-edit">Edit</a>
+                            <a href="/page/gig/edit_gig.php?id=<?php echo $service['GigID']; ?>" class="btn-small btn-edit">Edit</a>
                             <form method="post" style="flex: 1;">
                                 <input type="hidden" name="action" value="delete">
                                 <input type="hidden" name="gig_id" value="<?php echo $service['GigID']; ?>">
