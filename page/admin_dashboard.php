@@ -27,6 +27,7 @@ $conn->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - WorkSnyc</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../assets/css/style.css">
     <link rel="stylesheet" href="../assets/css/admin.css">
 </head>
@@ -50,7 +51,7 @@ $conn->close();
                     <div class="stat-card">
                         <div class="stat-card-header">
                             <h3 class="stat-card-title">Total Users</h3>
-                            <span class="stat-card-icon">👥</span>
+                            <i class="stat-card-icon fas fa-users"></i>
                         </div>
                         <p class="stat-card-value"><?php echo $total_users; ?></p>
                         <div class="stat-card-change positive">
@@ -61,7 +62,7 @@ $conn->close();
                     <div class="stat-card">
                         <div class="stat-card-header">
                             <h3 class="stat-card-title">Active Users</h3>
-                            <span class="stat-card-icon">✅</span>
+                            <i class="stat-card-icon fas fa-check-circle"></i>
                         </div>
                         <p class="stat-card-value"><?php echo $active_freelancers + $active_clients; ?></p>
                         <div class="stat-card-change positive">
@@ -72,7 +73,7 @@ $conn->close();
                     <div class="stat-card">
                         <div class="stat-card-header">
                             <h3 class="stat-card-title">Inactive Users</h3>
-                            <span class="stat-card-icon">❌</span>
+                            <i class="stat-card-icon fas fa-times-circle"></i>
                         </div>
                         <p class="stat-card-value"><?php echo ($freelancer_count - $active_freelancers) + ($client_count - $active_clients); ?></p>
                         <div class="stat-card-change">
@@ -83,7 +84,7 @@ $conn->close();
                     <div class="stat-card">
                         <div class="stat-card-header">
                             <h3 class="stat-card-title">Platform Health</h3>
-                            <span class="stat-card-icon">📈</span>
+                            <i class="stat-card-icon fas fa-chart-bar"></i>
                         </div>
                         <p class="stat-card-value"><?php echo $total_users > 0 ? round((($active_freelancers + $active_clients) / $total_users) * 100) : 0; ?>%</p>
                         <div class="stat-card-change positive">

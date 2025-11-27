@@ -128,7 +128,398 @@ $conn->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Users - WorkSnyc Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Momo+Trust+Display&display=swap">
     <link rel="stylesheet" href="../assets/css/admin.css">
+    <style>
+        body {
+            font-family: 'Momo Trust Display', sans-serif;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            font-family: 'Momo Trust Display', sans-serif;
+            font-weight: 500;
+        }
+
+        p,
+        .error-message,
+        .form-control,
+        select,
+        input[type="text"],
+        button,
+        a {
+            font-family: 'Inter', sans-serif;
+        }
+
+        table {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn-signin {
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+        }
+
+        .table-header h2 {
+            font-family: 'Momo Trust Display', sans-serif;
+            font-weight: 500;
+        }
+
+        /* Filter Section Styling */
+        .filter-section {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafb 100%);
+            padding: 24px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .filter-form {
+            display: flex;
+            gap: 16px;
+            width: 100%;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .filter-input-group {
+            flex: 1;
+            min-width: 250px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .filter-input-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #374151;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .filter-select {
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 1.5px solid #e5e7eb;
+            font-size: 0.9375rem;
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff;
+            transition: all 0.3s ease;
+            color: #374151;
+            cursor: pointer;
+            min-width: 160px;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: rgb(159, 232, 112);
+            box-shadow: 0 0 0 3px rgba(159, 232, 112, 0.1);
+        }
+
+        .filter-select:hover {
+            border-color: rgb(159, 232, 112);
+        }
+
+        .filter-input {
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 1.5px solid #e5e7eb;
+            font-size: 0.9375rem;
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff;
+            transition: all 0.3s ease;
+            color: #374151;
+            width: 100%;
+        }
+
+        .filter-input::placeholder {
+            color: #9ca3af;
+        }
+
+        .filter-input:focus {
+            outline: none;
+            border-color: rgb(159, 232, 112);
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(159, 232, 112, 0.1);
+        }
+
+        .filter-button {
+            padding: 10px 24px;
+            background: linear-gradient(135deg, rgb(159, 232, 112) 0%, rgb(139, 212, 92) 100%);
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 12px rgba(159, 232, 112, 0.3);
+            white-space: nowrap;
+        }
+
+        .filter-button:hover {
+            background: linear-gradient(135deg, rgb(139, 212, 92) 0%, rgb(119, 192, 72) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(159, 232, 112, 0.4);
+        }
+
+        .filter-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(159, 232, 112, 0.3);
+        }
+
+        /* Table Styling */
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .table-header {
+            padding: 20px 24px;
+            border-bottom: 1.5px solid #f3f4f6;
+            background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+        }
+
+        .table-header h2 {
+            margin: 0;
+            font-size: 18px;
+            color: #1f2937;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table thead tr {
+            background-color: #f9fafb;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        table thead th {
+            padding: 14px 20px;
+            text-align: left;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #374151;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        table tbody tr {
+            border-bottom: 1px solid #f3f4f6;
+            transition: all 0.3s ease;
+        }
+
+        table tbody tr:hover {
+            background-color: #f9fafb;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+        }
+
+        table tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        table td {
+            padding: 16px 20px;
+            color: #1f2937;
+            font-size: 14px;
+        }
+
+        /* User Avatar */
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgb(159, 232, 112) 0%, rgb(139, 212, 92) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 14px;
+            flex-shrink: 0;
+            box-shadow: 0 2px 6px rgba(159, 232, 112, 0.2);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #1f2937;
+            display: block;
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+
+        .badge-freelancer {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+
+        .badge-client {
+            background-color: #fce7f3;
+            color: #9f1239;
+        }
+
+        /* Status Form */
+        .form-control {
+            padding: 8px 14px;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            color: #374151;
+            cursor: pointer;
+            background-color: white;
+            transition: all 0.3s ease;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23374151' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            padding-right: 32px;
+        }
+
+        .form-control option {
+            padding: 8px;
+            background-color: white;
+            color: #374151;
+        }
+
+        .form-control:hover {
+            border-color: rgb(159, 232, 112);
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239f6d1c' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: rgb(159, 232, 112);
+            box-shadow: 0 0 0 3px rgba(159, 232, 112, 0.1);
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239fe870' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .btn-sm {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .btn-edit {
+            background-color: #3b82f6;
+            color: white;
+            border: 1.5px solid #3b82f6;
+        }
+
+        .btn-edit:hover {
+            background-color: #2563eb;
+            border-color: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-edit:active {
+            transform: translateY(0);
+        }
+
+        .btn-delete {
+            background-color: #ef4444;
+            color: white;
+            border: 1.5px solid #ef4444;
+        }
+
+        .btn-delete:hover {
+            background-color: #dc2626;
+            border-color: #dc2626;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-delete:active {
+            transform: translateY(0);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #9ca3af;
+        }
+
+        .empty-state p {
+            margin: 0;
+            font-size: 15px;
+        }
+
+        @media (max-width: 768px) {
+            table {
+                font-size: 12px;
+            }
+
+            table th,
+            table td {
+                padding: 12px 10px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                gap: 6px;
+            }
+
+            .btn-sm {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .user-avatar {
+                width: 36px;
+                height: 36px;
+                font-size: 12px;
+            }
+        }
+    </style>
 </head>
 
 <body class="admin-layout">
@@ -146,7 +537,6 @@ $conn->close();
                         <h1>User Management</h1>
                         <p>Manage access and roles for platform users</p>
                     </div>
-                    <a href="add_user.php" class="btn-signin" style="padding: 12px 24px; text-decoration: none; display: inline-block; border-radius: 8px; margin: 0;">+ Add User</a>
                 </div>
 
                 <?php if (isset($_SESSION['success'])): ?>
@@ -168,25 +558,28 @@ $conn->close();
                 <?php endif; ?>
 
                 <!-- Filter Section -->
-                <div style="background-color: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; display: flex; gap: 15px; align-items: center;">
-                    <form method="GET" action="admin_manage_users.php" style="display: flex; gap: 15px; width: 100%; align-items: center;">
-                        <div style="flex: 1;">
+                <div class="filter-section">
+                    <form method="GET" action="admin_manage_users.php" class="filter-form">
+                        <div class="filter-input-group" style="flex: 2;">
+                            <label class="filter-input-label">Search</label>
                             <input
                                 type="text"
                                 name="search"
                                 placeholder="Search by name or email..."
-                                class="form-control"
-                                value="<?php echo htmlspecialchars($search_query); ?>"
-                                style="margin: 0;">
+                                class="filter-input"
+                                value="<?php echo htmlspecialchars($search_query); ?>">
                         </div>
 
-                        <select name="type" class="form-control" style="flex: 0 1 150px; margin: 0;">
-                            <option value="all" <?php echo $filter_type === 'all' ? 'selected' : ''; ?>>All Users</option>
-                            <option value="freelancer" <?php echo $filter_type === 'freelancer' ? 'selected' : ''; ?>>Freelancers</option>
-                            <option value="client" <?php echo $filter_type === 'client' ? 'selected' : ''; ?>>Clients</option>
-                        </select>
+                        <div class="filter-input-group">
+                            <label class="filter-input-label">User Type</label>
+                            <select name="type" class="filter-select">
+                                <option value="all" <?php echo $filter_type === 'all' ? 'selected' : ''; ?>>All Users</option>
+                                <option value="freelancer" <?php echo $filter_type === 'freelancer' ? 'selected' : ''; ?>>Freelancers</option>
+                                <option value="client" <?php echo $filter_type === 'client' ? 'selected' : ''; ?>>Clients</option>
+                            </select>
+                        </div>
 
-                        <button type="submit" class="btn-signin" style="margin: 0; padding: 12px 20px; flex: 0 0 auto;">Filter</button>
+                        <button type="submit" class="filter-button"><i class="fas fa-search"></i> Filter</button>
                     </form>
                 </div>
 
@@ -211,13 +604,11 @@ $conn->close();
                                 <?php foreach ($users as $user): ?>
                                     <tr>
                                         <td>
-                                            <div style="display: flex; align-items: center; gap: 12px;">
-                                                <div style="width: 40px; height: 40px; border-radius: 50%; background-color: #e5e7eb; display: flex; align-items: center; justify-content: center; color: #6b7280; font-weight: 600;">
-                                                    <?php echo substr($user['Name'] ?? '', 0, 1); ?>
+                                            <div class="user-info">
+                                                <div class="user-avatar">
+                                                    <?php echo strtoupper(substr($user['Name'] ?? '', 0, 1)); ?>
                                                 </div>
-                                                <div>
-                                                    <div style="font-weight: 600;"><?php echo htmlspecialchars($user['Name'] ?? ''); ?></div>
-                                                </div>
+                                                <span class="user-name"><?php echo htmlspecialchars($user['Name'] ?? ''); ?></span>
                                             </div>
                                         </td>
                                         <td><?php echo htmlspecialchars($user['Email'] ?? ''); ?></td>
@@ -231,7 +622,7 @@ $conn->close();
                                                 <input type="hidden" name="action" value="update_status">
                                                 <input type="hidden" name="user_id" value="<?php echo $user[$user['type'] === 'freelancer' ? 'FreelancerID' : 'ClientID']; ?>">
                                                 <input type="hidden" name="user_type" value="<?php echo $user['type']; ?>">
-                                                <select name="status" class="form-control" onchange="this.form.submit();" style="padding: 6px 8px; font-size: 12px; border-radius: 6px; border: 1px solid var(--border-color);">
+                                                <select name="status" class="form-control" onchange="this.form.submit();">
                                                     <option value="active" <?php echo ($user['Status'] ?? '') === 'active' ? 'selected' : ''; ?>>Active</option>
                                                     <option value="inactive" <?php echo ($user['Status'] ?? '') === 'inactive' ? 'selected' : ''; ?>>Inactive</option>
                                                     <option value="suspended" <?php echo ($user['Status'] ?? '') === 'suspended' ? 'selected' : ''; ?>>Suspended</option>
@@ -241,12 +632,16 @@ $conn->close();
                                         <td><?php echo date('Y-m-d', strtotime($user['created'] ?? 'now')); ?></td>
                                         <td>
                                             <div class="action-buttons">
-                                                <a href="edit_user.php?id=<?php echo $user[$user['type'] === 'freelancer' ? 'FreelancerID' : 'ClientID']; ?>&type=<?php echo $user['type']; ?>" class="btn-sm" style="background-color: #3b82f6; color: white; text-decoration: none; padding: 6px 12px; border-radius: 6px;">Edit</a>
+                                                <a href="edit_user.php?id=<?php echo $user[$user['type'] === 'freelancer' ? 'FreelancerID' : 'ClientID']; ?>&type=<?php echo $user['type']; ?>" class="btn-sm btn-edit">
+                                                    <i class="fas fa-pencil-alt"></i> Edit
+                                                </a>
                                                 <form method="POST" action="admin_manage_users.php" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this user?');">
                                                     <input type="hidden" name="action" value="delete">
                                                     <input type="hidden" name="user_id" value="<?php echo $user[$user['type'] === 'freelancer' ? 'FreelancerID' : 'ClientID']; ?>">
                                                     <input type="hidden" name="user_type" value="<?php echo $user['type']; ?>">
-                                                    <button type="submit" class="btn-sm btn-delete">Delete</button>
+                                                    <button type="submit" class="btn-sm btn-delete">
+                                                        <i class="fas fa-trash-alt"></i> Delete
+                                                    </button>
                                                 </form>
                                             </div>
                                         </td>
@@ -254,8 +649,8 @@ $conn->close();
                                 <?php endforeach; ?>
                             <?php else: ?>
                                 <tr>
-                                    <td colspan="6" style="text-align: center; padding: 30px;">
-                                        <p style="color: #9ca3af;">No users found</p>
+                                    <td colspan="6" class="empty-state">
+                                        <p>No users found</p>
                                     </td>
                                 </tr>
                             <?php endif; ?>
