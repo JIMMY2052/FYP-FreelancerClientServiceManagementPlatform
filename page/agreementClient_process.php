@@ -25,6 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $job_id = isset($_POST['job_id']) ? intval($_POST['job_id']) : null;
     $delivery_time = isset($_POST['delivery_time']) ? intval($_POST['delivery_time']) : 0;
     $client_signature = isset($_POST['signature']) ? $_POST['signature'] : null;
+    $client_signed_name = isset($_POST['client_name']) ? trim($_POST['client_name']) : null;
 
     // Validate required fields
     if (!$application_id || !$freelancer_id || !$job_id) {
@@ -61,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $app_data = $verify_result->fetch_assoc();
-    $client_name = $app_data['CompanyName'];
+    $client_name = !empty($client_signed_name) ? $client_signed_name : $app_data['CompanyName'];
     $freelancer_name = $app_data['FreelancerFirstName'] . ' ' . $app_data['FreelancerLastName'];
     $job_title = $app_data['Title'];
     $job_budget = $app_data['Budget'];
@@ -577,7 +578,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Send message with PDF attachment to freelancer
     if ($conversation_id) {
         $message_text = "I have signed the agreement for the project \"" . $job_title . "\". Please review and sign to proceed. The agreement is attached below.\n\n";
-        $message_text .= "Agreement Link: " . $_SERVER['HTTP_HOST'] . "/page/freelancer_agreement_approval.php?agreement_id=" . $agreement_id;
         $attachment_path = $pdf_path_for_db;
         $attachment_type = 'application/pdf';
 
