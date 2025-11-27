@@ -8,7 +8,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'freelancer') {
 }
 
 $_title = 'Create Gig - Overview';
-include '../../_head.php';
 
 // Category and Subcategory mapping with metadata
 $categoryData = [

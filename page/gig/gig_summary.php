@@ -122,7 +122,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-include '../../_head.php';
 ?>
 
 <style>

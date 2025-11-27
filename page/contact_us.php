@@ -2,7 +2,6 @@
 session_start();
 
 $_title = 'Contact Us';
-include '../_head.php';
 require_once 'config.php';
 
 // Handle inquiry form submission

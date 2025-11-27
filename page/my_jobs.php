@@ -1,7 +1,3 @@
-<?php 
-    include '../_head.php';
-?>
-
 <?php
 
 // Check if user is logged in and is a client

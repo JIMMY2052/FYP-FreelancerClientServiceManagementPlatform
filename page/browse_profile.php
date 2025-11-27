@@ -2,7 +2,6 @@
 session_start();
 
 $_title = 'Search Results';
-include '../_head.php';
 require_once 'config.php';
 
 $conn = getDBConnection();

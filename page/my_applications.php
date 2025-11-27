@@ -144,7 +144,6 @@ foreach ($applications as &$app) {
     }
 }
 
-include '../_head.php';
 ?>
 
 <div class="container">

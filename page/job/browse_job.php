@@ -7,8 +7,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'freelancer') {
     exit();
 }
 
-$_title = 'Browse Projects';
-include '../../_head.php';
+$_title = 'Browse Jobs';
 require_once '../config.php';
 
 $conn = getDBConnection();

@@ -52,7 +52,6 @@ $agreement = $result->fetch_assoc();
 $stmt->close();
 $conn->close();
 
-include '../_head.php';
 ?>
 
 <style>

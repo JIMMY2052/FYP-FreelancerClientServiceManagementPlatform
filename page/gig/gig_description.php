@@ -8,7 +8,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'freelancer') {
 }
 
 $_title = 'Create Gig - Description';
-include '../../_head.php';
 ?>
 
 <style>

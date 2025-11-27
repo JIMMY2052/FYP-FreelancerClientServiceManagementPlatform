@@ -89,7 +89,6 @@ try {
     $questions = [];
 }
 
-include '../../_head.php'; 
 ?>
 
 <div class="form-container">

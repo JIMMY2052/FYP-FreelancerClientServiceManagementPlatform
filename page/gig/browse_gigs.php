@@ -170,7 +170,6 @@ try {
     $gigs = [];
 }
 
-include '../../_head.php';
 ?>
 
 <style>

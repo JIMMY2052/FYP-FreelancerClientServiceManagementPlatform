@@ -158,6 +158,7 @@ usort($activities, function($a, $b) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $_title ?></title>
     <link rel="stylesheet" href="/assets/css/app.css">
+    <link rel="stylesheet" href="/assets/css/profile.css">
     <link rel="stylesheet" href="/assets/css/<?= $user_type === 'client' ? 'client' : 'freelancer' ?>.css">
     <style>
         * {
@@ -387,7 +388,16 @@ usort($activities, function($a, $b) {
     </style>
 </head>
 <body>
-    <div class="main-container">
+    <?php 
+    include '../includes/header.php';
+    if ($user_type === 'client') {
+        include '../includes/client_sidebar.php';
+    } else {
+        include '../includes/freelancer_sidebar.php';
+    }
+    ?>
+    <div class="main-content">
+        <div class="main-container">
         <?php 
         if ($user_type === 'client') {
             include '../includes/client_sidebar.php';
@@ -493,5 +503,6 @@ usort($activities, function($a, $b) {
             });
         }
     </script>
+    </div>
 </body>
 </html>

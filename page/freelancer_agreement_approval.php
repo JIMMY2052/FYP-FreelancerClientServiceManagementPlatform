@@ -70,7 +70,6 @@ if ($now > $expiration) {
 $conn->close();
 
 // Include head
-include '../_head.php';
 ?>
 
 <style>

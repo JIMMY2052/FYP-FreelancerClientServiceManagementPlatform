@@ -8,7 +8,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'client') {
 }
 
 $_title = 'Add Screening Questions';
-include '../../_head.php'; 
 
 // Get job data from POST
 $jobTitle = $_POST["jobTitle"] ?? '';
