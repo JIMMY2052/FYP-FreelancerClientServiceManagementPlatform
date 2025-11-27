@@ -75,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $project_detail = $gig['Description'];
     $status = 'to_accept'; // Freelancer needs to accept
     $client_signed_date = date('Y-m-d H:i:s');
-    $expired_date = date('Y-m-d H:i:s', strtotime('+7 days')); // 7 days for freelancer to accept
+    $expired_date = date('Y-m-d H:i:s', strtotime('+1 days')); // 7 days for freelancer to accept
 
     $terms = "• The freelancer will deliver the gig-based service as described within {$delivery_time} day(s).\n";
     $terms .= "• The client will pay RM " . number_format($total_amount, 2) . " which is held in escrow.\n";
