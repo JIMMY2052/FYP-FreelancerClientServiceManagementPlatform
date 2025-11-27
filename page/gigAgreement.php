@@ -132,12 +132,7 @@ if ($gig_id) {
                     </div>
                 </div>
 
-                <!-- INTRODUCTORY PARAGRAPH -->
-                <div class="preview-section" style="background: #f9f9f9; border-left: 4px solid #1ab394; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
-                    <p style="margin: 0; line-height: 1.6; color: #333; font-size: 0.95rem;">
-                        This Services Agreement for Gig-Based Work shall become effective on date (the "Execution Date") and is subject to the terms and conditions stated below between <strong><?= htmlspecialchars($gig_data['FreelancerName']) ?></strong> (the "Service Provider") and <strong><?= htmlspecialchars($gig_data['ClientName']) ?></strong> (the "Client"), collectively referred to as the "Parties".
-                    </p>
-                </div>
+
 
                 <!-- SECTION 1: SCOPE OF WORK -->
                 <div class="preview-section">
@@ -173,7 +168,7 @@ if ($gig_id) {
                     </div>
                     <div class="section-content">
                         <div class="payment-box">
-                            <div class="payment-item"><strong>Base Price:</strong> RM <?= number_format($gig_data['Price'], 2) ?></div>
+
                             <?php if ($gig_data['RushDeliverySelected']): ?>
                                 <div class="payment-item"><strong>Rush Delivery Fee:</strong> RM <?= number_format($gig_data['RushDeliveryPrice'], 2) ?></div>
                             <?php endif; ?>
@@ -247,8 +242,7 @@ if ($gig_id) {
                     <label for="deliveryTime">Delivery Time (Days)</label>
                     <input type="number" name="delivery_time" id="deliveryTime" class="readonly-field" value="<?= $gig_data['FinalDeliveryTime'] ?>" readonly>
 
-                    <label for="basePrice">Base Price (RM)</label>
-                    <input type="number" name="base_price" id="basePrice" class="readonly-field" value="<?= $gig_data['Price'] ?>" step="0.01" readonly>
+
 
                     <?php if ($gig_data['RushDeliverySelected']): ?>
                         <label for="rushFee">Rush Delivery Fee (RM)</label>
