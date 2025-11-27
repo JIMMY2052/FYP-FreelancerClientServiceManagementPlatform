@@ -3,6 +3,7 @@
 session_start();
 
 $_title = 'Index';
+include '../../_head.php';
 
 ?>
 
