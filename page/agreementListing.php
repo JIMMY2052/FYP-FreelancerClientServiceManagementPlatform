@@ -995,8 +995,12 @@ foreach ($all_agreements_for_count as $agreement) {
                 const minutesRemaining = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
 
                 const hoursSpan = element.querySelector('.hours-remaining');
+                const minutesSpan = element.querySelector('.minutes-remaining');
                 if (hoursSpan) {
                     hoursSpan.textContent = hoursRemaining;
+                }
+                if (minutesSpan) {
+                    minutesSpan.textContent = minutesRemaining;
                 }
             }
         });
@@ -1240,15 +1244,15 @@ foreach ($all_agreements_for_count as $agreement) {
                             </div>
                             <div class="detail-item">
                                 <div class="detail-label">Created</div>
-                                <div class="detail-value date"><?= date('M d, Y', strtotime($agreement['CreatedDate'])) ?></div>
+                                <div class="detail-value date"><?= date('M d, Y h:i A', strtotime($agreement['CreatedDate'])) ?></div>
                             </div>
                             <div class="detail-item">
                                 <div class="detail-label">Client Signed</div>
-                                <div class="detail-value date"><?= $agreement['ClientSignedDate'] ? date('M d, Y', strtotime($agreement['ClientSignedDate'])) : '-' ?></div>
+                                <div class="detail-value date"><?= $agreement['ClientSignedDate'] ? date('M d, Y h:i A', strtotime($agreement['ClientSignedDate'])) : '-' ?></div>
                             </div>
                             <div class="detail-item">
                                 <div class="detail-label">Freelancer Signed</div>
-                                <div class="detail-value date"><?= $agreement['FreelancerSignedDate'] ? date('M d, Y', strtotime($agreement['FreelancerSignedDate'])) : '-' ?></div>
+                                <div class="detail-value date"><?= $agreement['FreelancerSignedDate'] ? date('M d, Y h:i A', strtotime($agreement['FreelancerSignedDate'])) : '-' ?></div>
                             </div>
                             <?php if ($agreement['Status'] === 'ongoing'): ?>
                                 <div class="detail-item">
@@ -1271,11 +1275,12 @@ foreach ($all_agreements_for_count as $agreement) {
                             $delivery = new DateTime($agreement['DeliveryDate']);
                             $interval = $now->diff($delivery);
                             $hoursUntilDelivery = ($interval->days * 24) + $interval->h;
+                            $minutesUntilDelivery = $interval->i;
 
                             if ($now > $delivery) {
                                 echo '<div class="expiration-warning">⚠️ Delivery deadline has passed</div>';
                             } elseif ($hoursUntilDelivery <= 48) {
-                                echo '<div class="expiration-warning" data-expiry-date="' . $agreement['DeliveryDate'] . '">⏰ Delivery due in <span class="hours-remaining">' . $hoursUntilDelivery . '</span> hour(s)</div>';
+                                echo '<div class="expiration-warning" data-expiry-date="' . $agreement['DeliveryDate'] . '">⏰ Delivery due in <span class="hours-remaining">' . $hoursUntilDelivery . '</span>h <span class="minutes-remaining">' . $minutesUntilDelivery . '</span>m</div>';
                             }
                         }
                         ?>
@@ -1287,11 +1292,12 @@ foreach ($all_agreements_for_count as $agreement) {
                             $expiration = new DateTime($agreement['ExpiredDate']);
                             $interval = $now->diff($expiration);
                             $hoursUntilExpiry = ($interval->days * 24) + $interval->h;
+                            $minutesUntilExpiry = $interval->i;
 
                             if ($now > $expiration) {
                                 echo '<div class="expiration-warning">⚠️ Agreement signature deadline has expired</div>';
-                            } elseif ($hoursUntilExpiry <= 48) {
-                                echo '<div class="expiration-warning" data-expiry-date="' . $agreement['ExpiredDate'] . '">⏰ Signature expires in <span class="hours-remaining">' . $hoursUntilExpiry . '</span> hour(s)</div>';
+                            } elseif ($hoursUntilExpiry <= 24) {
+                                echo '<div class="expiration-warning" data-expiry-date="' . $agreement['ExpiredDate'] . '">⏰ This agreement will expires in <span class="hours-remaining">' . $hoursUntilExpiry . '</span>h <span class="minutes-remaining">' . $minutesUntilExpiry . '</span>m</div>';
                             }
                         }
                         ?>

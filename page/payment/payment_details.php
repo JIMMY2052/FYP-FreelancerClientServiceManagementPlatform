@@ -532,6 +532,134 @@ $_title = 'Payment Details - WorkSnyc Platform';
             color: rgb(159, 232, 112);
         }
 
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: scale(0.95);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .modal-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .modal-icon.warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .modal-icon.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .modal-icon.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .modal-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin: 0;
+        }
+
+        .modal-message {
+            font-size: 0.95rem;
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .modal-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-btn.primary {
+            background: rgb(159, 232, 112);
+            color: #2c3e50;
+            flex: 1;
+        }
+
+        .modal-btn.primary:hover {
+            background: rgb(140, 210, 90);
+            box-shadow: 0 4px 12px rgba(159, 232, 112, 0.3);
+        }
+
+        .modal-btn.secondary {
+            background: #e9ecef;
+            color: #555;
+        }
+
+        .modal-btn.secondary:hover {
+            background: #dde1e6;
+        }
+
+        .modal-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
         @media (max-width: 1024px) {
             .payment-layout {
                 grid-template-columns: 1fr;
@@ -735,11 +863,95 @@ $_title = 'Payment Details - WorkSnyc Platform';
 
     <?php require_once '../../_foot.php'; ?>
 
+    <!-- Modal for messages -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-icon" id="modalIcon"></div>
+                <h3 class="modal-title" id="modalTitle"></h3>
+            </div>
+            <p class="modal-message" id="modalMessage"></p>
+            <div class="modal-actions" id="modalActions"></div>
+        </div>
+    </div>
+
     <script>
         const totalAmount = <?= $totalAmount ?>;
         const walletBalance = <?= $walletBalance ?>;
         const gigId = <?= $gigId ?>;
         const rushDelivery = <?= $rushDelivery ? 1 : 0 ?>;
+
+        // Modal functions
+        function showModal(type, title, message, actions = []) {
+            const modal = document.getElementById('modalOverlay');
+            const icon = document.getElementById('modalIcon');
+            const titleEl = document.getElementById('modalTitle');
+            const messageEl = document.getElementById('modalMessage');
+            const actionsEl = document.getElementById('modalActions');
+
+            // Set icon
+            icon.className = 'modal-icon ' + type;
+            if (type === 'warning') {
+                icon.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+            } else if (type === 'error') {
+                icon.innerHTML = '<i class="fas fa-times-circle"></i>';
+            } else if (type === 'success') {
+                icon.innerHTML = '<i class="fas fa-check-circle"></i>';
+            } else if (type === 'info') {
+                icon.innerHTML = '<i class="fas fa-info-circle"></i>';
+            }
+
+            titleEl.textContent = title;
+            messageEl.textContent = message;
+
+            // Set actions
+            actionsEl.innerHTML = '';
+            actions.forEach(action => {
+                const btn = document.createElement('button');
+                btn.className = 'modal-btn ' + (action.type || 'secondary');
+                btn.textContent = action.text;
+                btn.onclick = action.callback;
+                actionsEl.appendChild(btn);
+            });
+
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+        }
+
+        function showConfirm(title, message, onConfirm) {
+            showModal('warning', title, message, [{
+                    text: 'Cancel',
+                    type: 'secondary',
+                    callback: closeModal
+                },
+                {
+                    text: 'Confirm',
+                    type: 'primary',
+                    callback: () => {
+                        closeModal();
+                        onConfirm();
+                    }
+                }
+            ]);
+        }
+
+        function showAlert(title, message, type = 'info') {
+            showModal(type, title, message, [{
+                text: 'OK',
+                type: 'primary',
+                callback: closeModal
+            }]);
+        }
+
+        // Close modal on overlay click
+        document.getElementById('modalOverlay').addEventListener('click', (e) => {
+            if (e.target.id === 'modalOverlay') {
+                closeModal();
+            }
+        });
 
         function togglePaymentButton() {
             const checkbox = document.getElementById('agreeTerms');
@@ -754,21 +966,24 @@ $_title = 'Payment Details - WorkSnyc Platform';
 
         function processPayment() {
             if (!document.getElementById('agreeTerms').checked) {
-                alert('Please agree to the terms and conditions first.');
+                showAlert('Agreement Required', 'Please agree to the terms and conditions first.', 'warning');
                 return;
             }
 
             if (walletBalance < totalAmount) {
-                alert('Insufficient wallet balance. Please top up your wallet.');
-                window.location.href = 'wallet.php';
+                showAlert('Insufficient Balance', 'Your wallet balance is insufficient. Please top up your wallet.', 'error');
                 return;
             }
 
-            // Confirm payment
-            if (!confirm('Confirm payment of RM ' + totalAmount.toFixed(2) + '? Funds will be held in escrow until work is completed and approved.')) {
-                return;
-            }
+            // Show confirmation modal
+            showConfirm(
+                'Confirm Payment',
+                'Confirm payment of RM ' + totalAmount.toFixed(2) + '? Funds will be held in escrow until work is completed and approved.',
+                processPaymentRequest
+            );
+        }
 
+        function processPaymentRequest() {
             // Show loading state
             const paymentBtn = document.getElementById('paymentBtn');
             paymentBtn.disabled = true;
@@ -809,12 +1024,14 @@ $_title = 'Payment Details - WorkSnyc Platform';
                             document.body.appendChild(form);
                             form.submit();
                         } else {
-                            alert(data.message);
-                            window.location.href = '../agreementListing.php';
+                            showAlert('Success', data.message, 'success');
+                            setTimeout(() => {
+                                window.location.href = '../agreementListing.php';
+                            }, 2000);
                         }
                     } else {
                         // Show error message
-                        alert('Payment failed: ' + data.message);
+                        showAlert('Payment Failed', data.message, 'error');
                         // Reset button
                         paymentBtn.disabled = false;
                         paymentBtn.innerHTML = '<i class="fas fa-lock"></i> Pay with Wallet';
@@ -824,7 +1041,7 @@ $_title = 'Payment Details - WorkSnyc Platform';
                 })
                 .catch(error => {
                     console.error('Payment error:', error);
-                    alert('An error occurred during payment processing. Please try again.');
+                    showAlert('Error', 'An error occurred during payment processing. Please try again.', 'error');
                     // Reset button
                     paymentBtn.disabled = false;
                     paymentBtn.innerHTML = '<i class="fas fa-lock"></i> Pay with Wallet';

@@ -517,6 +517,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $notification_stmt->execute();
         $notification_stmt->close();
 
+        // 11. Send agreement to freelancer via message
+        $conv_sql = "SELECT ConversationID FROM conversation 
+                     WHERE (User1ID = ? AND User1Type = 'client' AND User2ID = ? AND User2Type = 'freelancer') OR
+                            (User1ID = ? AND User1Type = 'freelancer' AND User2ID = ? AND User2Type = 'client')
+                     LIMIT 1";
+
+        $conv_stmt = $conn->prepare($conv_sql);
+        $conv_stmt->bind_param('iiii', $client_id, $freelancer_id, $freelancer_id, $client_id);
+        $conv_stmt->execute();
+        $conv_result = $conv_stmt->get_result();
+        $conversation = $conv_result->fetch_assoc();
+        $conv_stmt->close();
+
+        $conversation_id = null;
+
+        if (!$conversation) {
+            // Create new conversation
+            $insert_conv_sql = "INSERT INTO conversation (User1ID, User1Type, User2ID, User2Type, CreatedAt) VALUES (?, 'client', ?, 'freelancer', NOW())";
+            $insert_conv_stmt = $conn->prepare($insert_conv_sql);
+            $insert_conv_stmt->bind_param('ii', $client_id, $freelancer_id);
+            $insert_conv_stmt->execute();
+            $conversation_id = $insert_conv_stmt->insert_id;
+            $insert_conv_stmt->close();
+        } else {
+            $conversation_id = $conversation['ConversationID'];
+        }
+
+        // Send message to freelancer with agreement PDF
+        $message_sql = "INSERT INTO message (ConversationID, SenderID, ReceiverID, Content, AttachmentPath, AttachmentType, Timestamp, Status) 
+                        VALUES (?, ?, ?, ?, ?, ?, NOW(), 'unread')";
+
+        $sender_id = 'c' . $client_id;
+        $receiver_id = 'f' . $freelancer_id;
+        $message_text = 'New gig order: "' . $project_title . '" for RM ' . number_format($total_amount, 2) . '. Please review and sign the agreement to confirm.';
+        $attachment_path = $pdf_path_for_db;
+        $attachment_type = 'application/pdf';
+
+        $msg_stmt = $conn->prepare($message_sql);
+        $msg_stmt->bind_param('isssss', $conversation_id, $sender_id, $receiver_id, $message_text, $attachment_path, $attachment_type);
+        $msg_stmt->execute();
+        $msg_stmt->close();
+
         // Commit transaction
         $conn->commit();
 
