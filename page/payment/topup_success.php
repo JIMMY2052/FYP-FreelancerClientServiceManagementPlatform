@@ -237,11 +237,25 @@ $_title = 'Payment Success - WorkSnyc Platform';
             <h1>Top Up Successful!</h1>
             <div class="amount">+RM <?= number_format($amount, 2) ?></div>
             <p>Your wallet has been successfully topped up. The funds are now available in your account.</p>
-            <a href="wallet.php" class="btn-wallet">
-                <i class="fas fa-wallet"></i> View Wallet
-            </a>
-            <a href="<?= $_SESSION['user_type'] === 'client' ? '/client_home.php' : '/freelancer_home.php' ?>" class="btn-secondary">
-                <i class="fas fa-home"></i> Go Home
+            <?php
+            $return_to = isset($_SESSION['topup_return_to']) ? $_SESSION['topup_return_to'] : 'wallet';
+            $return_url = 'wallet.php';
+            
+            if ($return_to === 'payment_details' && isset($_SESSION['topup_gig_id']) && !empty($_SESSION['topup_gig_id'])) {
+                $gig_id = $_SESSION['topup_gig_id'];
+                $rush = isset($_SESSION['topup_rush']) ? $_SESSION['topup_rush'] : '';
+                $return_url = 'payment_details.php?gig_id=' . $gig_id . '&rush=' . $rush;
+                // Clear the session variables after use
+                unset($_SESSION['topup_return_to']);
+                unset($_SESSION['topup_gig_id']);
+                unset($_SESSION['topup_rush']);
+            } elseif ($return_to === 'wallet') {
+                $return_url = 'wallet.php';
+                unset($_SESSION['topup_return_to']);
+            }
+            ?>
+            <a href="<?= $return_url ?>" class="btn-wallet">
+                <i class="fas fa-arrow-right"></i> Continue
             </a>
         <?php else: ?>
             <div class="error-icon">

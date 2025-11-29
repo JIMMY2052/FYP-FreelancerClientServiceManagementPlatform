@@ -15,6 +15,9 @@ if (!isset($_POST['amount']) || empty($_POST['amount'])) {
 }
 
 $amount = floatval($_POST['amount']);
+$return_to = isset($_POST['return_to']) ? $_POST['return_to'] : (isset($_GET['return_to']) ? $_GET['return_to'] : 'wallet');
+$gig_id = isset($_POST['gig_id']) ? $_POST['gig_id'] : (isset($_GET['gig_id']) ? $_GET['gig_id'] : '');
+$rush = isset($_POST['rush']) ? $_POST['rush'] : (isset($_GET['rush']) ? $_GET['rush'] : '');
 
 // Validate amount
 if ($amount < 10) {
@@ -29,9 +32,12 @@ if ($amount > 10000) {
     exit();
 }
 
-// Store amount in session for success callback
+// Store amount and return info in session for success callback
 $_SESSION['topup_amount'] = $amount;
 $_SESSION['topup_user_id'] = $_SESSION['user_id'];
+$_SESSION['topup_return_to'] = $return_to;
+$_SESSION['topup_gig_id'] = $gig_id;
+$_SESSION['topup_rush'] = $rush;
 
 require_once '../../vendor/autoload.php';
 require_once '../config.php';

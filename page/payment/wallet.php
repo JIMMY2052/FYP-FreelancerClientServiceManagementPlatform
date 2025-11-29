@@ -590,6 +590,7 @@ $conn->close();
                 <p>Add funds to your wallet using Stripe payment gateway</p>
             </div>
             <form id="topupForm" method="POST" action="topup_checkout.php">
+                <input type="hidden" name="return_to" value="wallet">
                 <div class="form-group">
                     <label for="topup_amount">Amount (RM)</label>
                     <input type="number" id="topup_amount" name="amount" min="10" step="0.01" required placeholder="Enter amount">

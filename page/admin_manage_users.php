@@ -448,16 +448,17 @@ $conn->close();
         }
 
         .btn-edit {
-            background-color: #3b82f6;
-            color: white;
-            border: 1.5px solid #3b82f6;
+            background-color: white;
+            color: #1f2937;
+            border: 1.5px solid #1f2937;
         }
 
         .btn-edit:hover {
-            background-color: #2563eb;
-            border-color: #2563eb;
+            background-color: #1f2937;
+            color: white;
+            border-color: #1f2937;
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            box-shadow: 0 4px 12px rgba(31, 41, 55, 0.3);
         }
 
         .btn-edit:active {
@@ -465,16 +466,17 @@ $conn->close();
         }
 
         .btn-delete {
-            background-color: #ef4444;
-            color: white;
-            border: 1.5px solid #ef4444;
+            background-color: white;
+            color: #1f2937;
+            border: 1.5px solid #1f2937;
         }
 
         .btn-delete:hover {
-            background-color: #dc2626;
-            border-color: #dc2626;
+            background-color: #1f2937;
+            color: white;
+            border-color: #1f2937;
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+            box-shadow: 0 4px 12px rgba(31, 41, 55, 0.3);
         }
 
         .btn-delete:active {

@@ -156,6 +156,46 @@ if (empty($jobTitle) || empty($jobDescription) || empty($jobSalary) || empty($de
         font-size: 0.9rem;
         transition: all 0.3s ease;
         font-family: inherit;
+        box-sizing: border-box;
+    }
+
+    .form-group select {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        padding: 12px 40px 12px 16px;
+        cursor: pointer;
+        font-weight: 600;
+        color: #2c3e50;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%232c3e50' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 16px center;
+        background-size: 12px;
+    }
+
+    .form-group select:hover {
+        border-color: rgb(159, 232, 112);
+        background: white;
+        box-shadow: 0 2px 8px rgba(159, 232, 112, 0.2);
+    }
+
+    .form-group select:focus {
+        outline: none;
+        border-color: rgb(159, 232, 112);
+        box-shadow: 0 0 0 3px rgba(159, 232, 112, 0.15);
+        background: white;
+    }
+
+    .form-group select option {
+        padding: 12px;
+        background: white;
+        color: #2c3e50;
+        font-weight: 500;
+    }
+
+    .form-group select option:hover {
+        background: rgb(159, 232, 112);
     }
 
     .form-group textarea {
@@ -193,61 +233,106 @@ if (empty($jobTitle) || empty($jobDescription) || empty($jobSalary) || empty($de
 
     .options-container {
         margin-top: 15px;
-        padding: 15px;
+        padding: 20px;
         background: white;
-        border-radius: 8px;
-        border: 1px solid #e9ecef;
+        border-radius: 12px;
+        border: 2px solid #e9ecef;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
 
     .options-container h4 {
-        font-size: 0.9rem;
-        font-weight: 600;
+        font-size: 0.95rem;
+        font-weight: 700;
         color: #2c3e50;
-        margin: 0 0 12px 0;
+        margin: 0 0 16px 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .options-container h4::before {
+        content: "📝";
+        font-size: 1.1rem;
     }
 
     .option-item {
         display: flex;
-        gap: 10px;
-        margin-bottom: 10px;
+        gap: 12px;
+        margin-bottom: 12px;
         align-items: center;
+        position: relative;
+    }
+
+    .option-item::before {
+        content: "•";
+        color: rgb(159, 232, 112);
+        font-size: 1.5rem;
+        font-weight: 700;
+        line-height: 1;
     }
 
     .option-item input[type="text"] {
         flex: 1;
+        padding: 12px 16px;
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        background: #f8fafc;
+    }
+
+    .option-item input[type="text"]:hover {
+        border-color: rgb(159, 232, 112);
+        background: white;
+    }
+
+    .option-item input[type="text"]:focus {
+        outline: none;
+        border-color: rgb(159, 232, 112);
+        box-shadow: 0 0 0 3px rgba(159, 232, 112, 0.15);
+        background: white;
     }
 
     .remove-option-btn {
-        background: #6c757d;
-        color: white;
-        border: none;
-        padding: 8px 12px;
-        border-radius: 8px;
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+        padding: 10px 16px;
+        border-radius: 10px;
         cursor: pointer;
         font-size: 0.8rem;
         font-weight: 600;
         white-space: nowrap;
-    }
-
-    .remove-option-btn:hover {
-        background: #5a6268;
-    }
-
-    .add-option-btn {
-        background: rgb(159, 232, 112);
-        color: #2c3e50;
-        border: none;
-        padding: 8px 16px;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 0.85rem;
-        font-weight: 600;
-        margin-top: 10px;
         transition: all 0.3s ease;
     }
 
+    .remove-option-btn:hover {
+        background: #f1aeb5;
+        border-color: #ea868f;
+        transform: scale(1.05);
+    }
+
+    .add-option-btn {
+        background: linear-gradient(135deg, rgb(159, 232, 112) 0%, rgb(140, 210, 90) 100%);
+        color: #2c3e50;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        font-weight: 700;
+        margin-top: 12px;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        box-shadow: 0 2px 6px rgba(159, 232, 112, 0.3);
+    }
+
     .add-option-btn:hover {
-        background: rgb(140, 210, 90);
+        background: linear-gradient(135deg, rgb(140, 210, 90) 0%, rgb(120, 190, 70) 100%);
+        box-shadow: 0 4px 12px rgba(159, 232, 112, 0.4);
+        transform: translateY(-2px);
     }
 
     .add-question-btn {

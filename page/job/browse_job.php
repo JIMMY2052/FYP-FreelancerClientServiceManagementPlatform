@@ -26,6 +26,7 @@ $sort = $_GET['sort'] ?? 'newest';
 $sql = "SELECT JobID, ClientID, Title, Description, Budget, Deadline, Status, PostDate
         FROM job
         WHERE Status = 'available'
+        AND PostDate <= NOW()
         AND JobID NOT IN (
             SELECT JobID FROM job_application WHERE FreelancerID = ?
         )";

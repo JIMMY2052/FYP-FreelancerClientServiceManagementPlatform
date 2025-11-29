@@ -831,7 +831,7 @@ $_title = 'Payment Details - WorkSnyc Platform';
                             <div class="wallet-status insufficient">
                                 <i class="fas fa-exclamation-circle"></i> Insufficient balance - Please top up
                             </div>
-                            <a href="wallet.php" class="topup-link">
+                            <a href="topup_modal.php?return_to=payment_details&gig_id=<?= $gigId ?>&rush=<?= $rushDelivery ? '1' : '0' ?>" class="topup-link">
                                 <i class="fas fa-plus-circle"></i>
                                 Top up wallet
                             </a>

@@ -14,7 +14,6 @@ include '../../_head.php';
     $deliveryTime = $_POST["deliveryTime"] ?? '';
     $professionalField = $_POST["professionalField"] ?? '';
     $postDate = $_POST["postDate"] ?? '';
-    $postTime = $_POST["postTime"] ?? '';
     $deliveryPeriod = $_POST["deliveryPeriod"] ?? '';
     $postDateOption = $_POST["postDateOption"] ?? 'now';
     $questions = $_POST["questions"] ?? [];
@@ -41,18 +40,12 @@ include '../../_head.php';
         <p>Looking At</p>
         <input type="text" value="<?php echo htmlspecialchars($professionalField); ?>" disabled>
 
-        <p>Posting Date and Time</p>
-        <div style="display: flex; gap: 1rem;">
-            <input type="text" value="<?php echo htmlspecialchars($postDate); ?>" disabled style="flex: 1;">
-            <input type="text" value="<?php echo htmlspecialchars($postTime); ?>" disabled style="flex: 1;">
-        </div>
+        <p>Posting Date</p>
+        <input type="text" value="<?php echo htmlspecialchars($postDate); ?>" disabled>
         <input type="hidden" name="postDate" value="<?php echo htmlspecialchars($postDate); ?>">
-        <input type="hidden" name="postTime" value="<?php echo htmlspecialchars($postTime); ?>">
 
         <p>Deadline</p>
-        <div style="display: flex; gap: 1rem;">
-            <input type="text" value="<?php echo htmlspecialchars($deliveryPeriod); ?>" disabled style="flex: 1;">
-        </div>
+        <input type="text" value="<?php echo htmlspecialchars($deliveryPeriod); ?>" disabled>
         <input type="hidden" name="deadline" value="<?php echo htmlspecialchars($deliveryPeriod); ?>">
 
         <?php if (!empty($questions)): ?>

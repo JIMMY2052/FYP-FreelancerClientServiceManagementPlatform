@@ -4,7 +4,7 @@ session_start();
 
 // Check if user is logged in and is a client
 if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'client') {
-    header('Location: /index.php');
+    header('Location: /client_home.php');
     exit();
 }
 
@@ -17,17 +17,13 @@ $description = isset($_POST['description']) ? trim($_POST['description']) : '';
 $budget = isset($_POST['budget']) ? floatval($_POST['budget']) : 0;
 $deliveryTime = isset($_POST['deliveryTime']) ? intval($_POST['deliveryTime']) : 0;
 $postDate = isset($_POST['postDate']) ? trim($_POST['postDate']) : '';
-$postTime = isset($_POST['postTime']) ? trim($_POST['postTime']) : '';
 $deadline = isset($_POST['deadline']) ? trim($_POST['deadline']) : '';
 $questions = isset($_POST['questions']) ? $_POST['questions'] : [];
 
-// Combine postDate and postTime into a single datetime
-$postDateTime = $postDate . ' ' . $postTime;
-
 // Validate input
-if (empty($title) || empty($description) || empty($budget) || empty($deadline) || empty($postDate) || empty($postTime)) {
+if (empty($title) || empty($description) || empty($budget) || empty($deadline) || empty($postDate)) {
     $_SESSION['error'] = 'Please fill in all required fields.';
-    header('Location: /job/create/createJob.php?error=missing_fields');
+    header('Location: /job/createJob.php?error=missing_fields');
     exit();
 }
 
@@ -40,7 +36,7 @@ try {
     
     $stmt = $conn->prepare("INSERT INTO job (ClientID, Title, Description, Budget, DeliveryTime, Deadline, Status, PostDate) 
                             VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("issdisss", $clientID, $title, $description, $budget, $deliveryTime, $deadline, $status, $postDateTime);
+    $stmt->bind_param("issdisss", $clientID, $title, $description, $budget, $deliveryTime, $deadline, $status, $postDate);
     
     if ($stmt->execute()) {
         $jobID = $stmt->insert_id;

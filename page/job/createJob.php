@@ -31,9 +31,6 @@ include '../../_head.php';
         <div id="postDateTimeFields" class="date-time-fields" style="display: none;">
             <p>Posting Date</p>
             <input type="date" id="postDate" name="postDate">
-
-            <p>Posting Time</p>
-            <input type="time" id="postTime" name="postTime">
         </div>
 
         <p>Deadline</p>
@@ -51,7 +48,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const postDateNow = document.getElementById('postDateNow');
     const postDateTimeFields = document.getElementById('postDateTimeFields');
     const postDateInput = document.getElementById('postDate');
-    const postTimeInput = document.getElementById('postTime');
 
     // Toggle visibility based on checkbox state
     function togglePostDateFields() {
@@ -59,14 +55,11 @@ document.addEventListener('DOMContentLoaded', function() {
             // Checked = Post Now
             postDateTimeFields.style.display = 'none';
             postDateInput.required = false;
-            postTimeInput.required = false;
             postDateInput.value = '';
-            postTimeInput.value = '';
         } else {
             // Unchecked = Manual
             postDateTimeFields.style.display = 'block';
             postDateInput.required = true;
-            postTimeInput.required = true;
         }
     }
 
@@ -77,7 +70,41 @@ document.addEventListener('DOMContentLoaded', function() {
         if (postDateNow.checked) {
             const now = new Date();
             postDateInput.value = now.toISOString().split('T')[0];
-            postTimeInput.value = now.toTimeString().slice(0, 5);
+        }
+    });
+
+    // Make entire date/time input clickable
+    const dateTimeInputs = document.querySelectorAll('input[type="date"], input[type="time"]');
+    dateTimeInputs.forEach(input => {
+        input.addEventListener('click', function() {
+            this.showPicker();
+        });
+        
+        // Also trigger on focus for better UX
+        input.addEventListener('focus', function() {
+            this.showPicker();
+        });
+    });
+
+    // Set minimum date to tomorrow for postDate and deadline
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+    
+    postDateInput.setAttribute('min', tomorrowStr);
+    const deliveryPeriodInput = document.getElementById('deliveryPeriod');
+    deliveryPeriodInput.setAttribute('min', tomorrowStr);
+
+    // Update deadline minimum date when postDate changes
+    postDateInput.addEventListener('change', function() {
+        if (this.value) {
+            // Set deadline minimum to the selected post date
+            deliveryPeriodInput.setAttribute('min', this.value);
+            
+            // If deadline is already set but is before the new post date, clear it
+            if (deliveryPeriodInput.value && deliveryPeriodInput.value < this.value) {
+                deliveryPeriodInput.value = '';
+            }
         }
     });
 });
