@@ -234,12 +234,14 @@ $disputes_sql = "SELECT
     d.InitiatorID,
     d.InitiatorType,
     d.ReasonText,
+    d.EvidenceFile,
     d.Status,
     d.CreatedAt,
     a.ProjectTitle,
     a.PaymentAmount,
     a.FreelancerID,
     a.ClientID,
+    a.agreeementPath,
     CONCAT(f.FirstName, ' ', f.LastName) as FreelancerName,
     f.Email as FreelancerEmail,
     c.CompanyName as ClientName,
@@ -476,6 +478,23 @@ $conn->close();
 
         .resolve-btn:hover {
             background-color: #dc2626;
+            transform: translateY(-2px);
+        }
+
+        .details-btn {
+            padding: 8px 16px;
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .details-btn:hover {
+            background-color: #2563eb;
             transform: translateY(-2px);
         }
 
@@ -724,7 +743,10 @@ $conn->close();
                                 <?php foreach ($disputes as $dispute): ?>
                                     <tr>
                                         <td>
-                                            <strong><?php echo htmlspecialchars($dispute['ProjectTitle']); ?></strong>
+                                            <strong><a href="<?php echo htmlspecialchars($dispute['agreeementPath'] ?? '#'); ?>" target="_blank" style="color: #3b82f6; text-decoration: none; cursor: pointer;">
+                                                <?php echo htmlspecialchars($dispute['ProjectTitle']); ?>
+                                                <i class="fas fa-external-link-alt" style="font-size: 0.75rem; margin-left: 4px;"></i>
+                                            </a></strong>
                                             <div style="font-size: 0.875rem; color: #6b7280;">Agreement #<?php echo $dispute['AgreementID']; ?></div>
                                         </td>
                                         <td>
@@ -751,13 +773,16 @@ $conn->close();
                                             <?php echo date('M d, Y', strtotime($dispute['CreatedAt'])); ?>
                                         </td>
                                         <td>
-                                            <?php if (in_array($dispute['Status'], ['open', 'under_review'])): ?>
-                                                <button type="button" class="resolve-btn" onclick="openResolveModal(<?php echo $dispute['DisputeID']; ?>, <?php echo $dispute['AgreementID']; ?>, '<?php echo htmlspecialchars($dispute['ProjectTitle']); ?>', <?php echo $dispute['PaymentAmount']; ?>)">
-                                                    Resolve
+                                            <div style="display: flex; gap: 8px;">
+                                                <button type="button" class="resolve-btn" style="background-color: #3b82f6;" data-dispute-id="<?php echo $dispute['DisputeID']; ?>" data-reason="<?php echo htmlspecialchars($dispute['ReasonText'] ?? '', ENT_QUOTES); ?>" data-evidence="<?php echo htmlspecialchars($dispute['EvidenceFile'] ?? '', ENT_QUOTES); ?>" onclick="openDetailModalFromButton(this)">
+                                                    <i class="fas fa-eye"></i> Details
                                                 </button>
-                                            <?php else: ?>
-                                                <span style="color: #6b7280; font-size: 0.875rem;">Resolved</span>
-                                            <?php endif; ?>
+                                                <?php if (in_array($dispute['Status'], ['open', 'under_review'])): ?>
+                                                    <button type="button" class="resolve-btn" onclick="openResolveModal(<?php echo $dispute['DisputeID']; ?>, <?php echo $dispute['AgreementID']; ?>, '<?php echo htmlspecialchars(str_replace("'", "\\'", $dispute['ProjectTitle']), ENT_QUOTES); ?>', <?php echo $dispute['PaymentAmount']; ?>)">
+                                                        Resolve
+                                                    </button>
+                                                <?php endif; ?>
+                                            </div>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -773,6 +798,32 @@ $conn->close();
                 </div>
             </div>
         </main>
+    </div>
+
+    <!-- Dispute Details Modal -->
+    <div id="detailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Dispute Details</h2>
+                <p>View dispute reason and evidence</p>
+            </div>
+
+            <div class="form-group">
+                <label>Dispute Reason</label>
+                <div id="dispute_reason_display" style="background: #f3f4f6; padding: 12px; border-radius: 8px; border: 1px solid #e5e7eb; min-height: 80px; white-space: pre-wrap; word-break: break-word;"></div>
+            </div>
+
+            <div class="form-group">
+                <label>Evidence File</label>
+                <div id="evidence_display" style="background: #f3f4f6; padding: 12px; border-radius: 8px; border: 1px solid #e5e7eb; min-height: 60px;">
+                    <span id="evidence_text">No evidence file</span>
+                </div>
+            </div>
+
+            <div class="modal-buttons">
+                <button type="button" class="btn-cancel" onclick="closeDetailModal()">Close</button>
+            </div>
+        </div>
     </div>
 
     <!-- Resolve Dispute Modal -->
@@ -822,6 +873,57 @@ $conn->close();
     </div>
 
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const detailModal = document.getElementById('detailModal');
+            const resolveModal = document.getElementById('resolveModal');
+
+            if (detailModal) {
+                detailModal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        closeDetailModal();
+                    }
+                });
+            }
+
+            if (resolveModal) {
+                resolveModal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        closeResolveModal();
+                    }
+                });
+            }
+        });
+
+        function openDetailModalFromButton(button) {
+            const reasonText = button.getAttribute('data-reason');
+            const evidenceFile = button.getAttribute('data-evidence');
+
+            const detailModal = document.getElementById('detailModal');
+            if (!detailModal) {
+                console.error('Detail modal not found');
+                return;
+            }
+
+            document.getElementById('dispute_reason_display').textContent = reasonText || 'No reason provided';
+
+            const evidenceDisplay = document.getElementById('evidence_text');
+            if (evidenceFile && evidenceFile.trim() !== '') {
+                const fileName = evidenceFile.split('/').pop();
+                evidenceDisplay.innerHTML = `<i class="fas fa-file"></i> <a href="${evidenceFile}" target="_blank" style="color: #3b82f6; text-decoration: underline;">${fileName}</a>`;
+            } else {
+                evidenceDisplay.textContent = 'No evidence file';
+            }
+
+            detailModal.classList.add('show');
+        }
+
+        function closeDetailModal() {
+            const detailModal = document.getElementById('detailModal');
+            if (detailModal) {
+                detailModal.classList.remove('show');
+            }
+        }
+
         function openResolveModal(disputeId, agreementId, projectTitle, amount) {
             document.getElementById('dispute_id').value = disputeId;
             document.getElementById('dispute_agreement_id').value = agreementId;
@@ -833,13 +935,6 @@ $conn->close();
         function closeResolveModal() {
             document.getElementById('resolveModal').classList.remove('show');
         }
-
-        // Close modal when clicking outside
-        document.getElementById('resolveModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeResolveModal();
-            }
-        });
     </script>
 </body>
 

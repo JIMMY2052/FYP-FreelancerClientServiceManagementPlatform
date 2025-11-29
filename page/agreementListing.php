@@ -823,13 +823,16 @@ foreach ($all_agreements_for_count as $agreement) {
         .dispute-modal-content {
             background: white;
             border-radius: 12px;
-            padding: 30px;
-            max-width: 500px;
+            padding: 0;
+            max-width: 550px;
             width: 100%;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
             animation: slideUp 0.3s ease;
             max-height: 90vh;
             overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            border: 2px solid #22c55e;
         }
 
         @keyframes slideUp {
@@ -845,19 +848,23 @@ foreach ($all_agreements_for_count as $agreement) {
         }
 
         .dispute-modal-header {
-            margin-bottom: 25px;
+            padding: 25px 30px;
+            border-bottom: 3px solid #22c55e;
+            background: white;
+            border-radius: 12px 12px 0 0;
+            flex-shrink: 0;
         }
 
         .dispute-modal-title {
-            font-size: 20px;
+            font-size: 22px;
             font-weight: 700;
-            color: #2c3e50;
-            margin: 0 0 8px;
+            color: #22c55e;
+            margin: 0 0 5px;
         }
 
         .dispute-modal-subtitle {
             font-size: 13px;
-            color: #7f8c8d;
+            color: #666;
             margin: 0;
         }
 
@@ -867,69 +874,72 @@ foreach ($all_agreements_for_count as $agreement) {
 
         .dispute-form-label {
             display: block;
-            font-size: 13px;
-            font-weight: 600;
+            font-size: 12px;
+            font-weight: 700;
             color: #2c3e50;
             margin-bottom: 8px;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .dispute-form-select,
         .dispute-form-textarea,
         .dispute-form-file {
             width: 100%;
-            padding: 12px;
+            padding: 12px 15px;
             border: 1.5px solid #e0e6ed;
-            border-radius: 6px;
+            border-radius: 8px;
             font-size: 13px;
             font-family: inherit;
             transition: all 0.3s ease;
             box-sizing: border-box;
+            background: white;
         }
 
         .dispute-form-select:focus,
         .dispute-form-textarea:focus,
         .dispute-form-file:focus {
             outline: none;
-            border-color: #1ab394;
-            box-shadow: 0 0 0 3px rgba(26, 179, 148, 0.1);
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
         }
 
         .dispute-form-textarea {
-            min-height: 100px;
+            min-height: 120px;
             resize: vertical;
         }
 
         .file-upload-area {
             border: 2px dashed #e0e6ed;
             border-radius: 8px;
-            padding: 20px;
+            padding: 30px 20px;
             text-align: center;
             transition: all 0.3s ease;
-            background: #f9fafb;
+            background: #f8f9fa;
             cursor: pointer;
         }
 
         .file-upload-area:hover {
-            border-color: #1ab394;
-            background: #f0f9f7;
+            border-color: #667eea;
+            background: #f0f4ff;
         }
 
         .file-upload-area.dragover {
-            border-color: #1ab394;
-            background: #e8f8f4;
+            border-color: #667eea;
+            background: #e8edff;
             transform: scale(1.02);
         }
 
         .file-upload-icon {
-            font-size: 32px;
+            font-size: 40px;
             margin-bottom: 10px;
         }
 
         .file-upload-text {
             font-size: 13px;
-            color: #7f8c8d;
+            color: #2c3e50;
             margin: 0;
+            font-weight: 600;
         }
 
         .file-upload-hint {
@@ -940,29 +950,37 @@ foreach ($all_agreements_for_count as $agreement) {
 
         .file-name-display {
             margin-top: 10px;
-            padding: 10px;
+            padding: 12px;
             background: #d4edda;
             color: #155724;
             border-radius: 6px;
             font-size: 12px;
+            font-weight: 600;
             display: none;
+            border-left: 4px solid #28a745;
         }
 
         .dispute-modal-buttons {
             display: flex;
             gap: 10px;
             justify-content: flex-end;
-            margin-top: 25px;
+            padding: 20px 30px;
+            border-top: 1px solid #e0e6ed;
+            background: #f8f9fa;
+            border-radius: 0 0 12px 12px;
+            flex-shrink: 0;
         }
 
         .dispute-modal-btn {
-            padding: 12px 20px;
+            padding: 12px 24px;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             font-size: 13px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .dispute-modal-btn-cancel {
@@ -972,22 +990,32 @@ foreach ($all_agreements_for_count as $agreement) {
 
         .dispute-modal-btn-cancel:hover {
             background: #dee2e6;
+            transform: translateY(-1px);
         }
 
         .dispute-modal-btn-submit {
-            background: #e74c3c;
+            background: #22c55e;
             color: white;
+            font-weight: 700;
         }
 
         .dispute-modal-btn-submit:hover {
-            background: #c0392b;
-            transform: translateY(-1px);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
+            background: #16a34a;
         }
 
         .dispute-modal-btn-submit:disabled {
             background: #bdc3c7;
             cursor: not-allowed;
             transform: none;
+        }
+
+        /* Modal content wrapper for padding */
+        .dispute-modal-content>form {
+            padding: 30px;
+            flex: 1;
+            overflow-y: auto;
         }
 
         /* Dispute Notes Modal Styles */
@@ -1299,7 +1327,7 @@ foreach ($all_agreements_for_count as $agreement) {
 
         function openDisputeModal(agreementId, projectTitle) {
             currentDisputeAgreementId = agreementId;
-            document.getElementById('disputeProjectTitle').value = projectTitle;
+            document.getElementById('disputeProjectTitle').textContent = projectTitle;
             document.getElementById('disputeReason').value = '';
             document.getElementById('disputeDetails').value = '';
             document.getElementById('evidenceFile').value = '';
@@ -1313,47 +1341,49 @@ foreach ($all_agreements_for_count as $agreement) {
             currentDisputeAgreementId = null;
         }
 
-        // File upload handling
-        const fileUploadArea = document.getElementById('fileUploadArea');
-        const evidenceFile = document.getElementById('evidenceFile');
-        const fileNameDisplay = document.getElementById('fileNameDisplay');
+        // File upload handling - moved to DOMContentLoaded
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileUploadArea = document.getElementById('fileUploadArea');
+            const evidenceFile = document.getElementById('evidenceFile');
+            const fileNameDisplay = document.getElementById('fileNameDisplay');
 
-        if (fileUploadArea && evidenceFile) {
-            fileUploadArea.addEventListener('click', function() {
-                evidenceFile.click();
-            });
+            if (fileUploadArea && evidenceFile) {
+                fileUploadArea.addEventListener('click', function() {
+                    evidenceFile.click();
+                });
 
-            evidenceFile.addEventListener('change', function() {
-                if (this.files.length > 0) {
-                    const fileName = this.files[0].name;
-                    const fileSize = (this.files[0].size / 1024).toFixed(2);
-                    fileNameDisplay.innerHTML = `✓ ${fileName} (${fileSize} KB)`;
-                    fileNameDisplay.style.display = 'block';
-                }
-            });
+                evidenceFile.addEventListener('change', function() {
+                    if (this.files.length > 0) {
+                        const fileName = this.files[0].name;
+                        const fileSize = (this.files[0].size / 1024).toFixed(2);
+                        fileNameDisplay.innerHTML = `✓ ${fileName} (${fileSize} KB)`;
+                        fileNameDisplay.style.display = 'block';
+                    }
+                });
 
-            // Drag and drop
-            fileUploadArea.addEventListener('dragover', function(e) {
-                e.preventDefault();
-                this.classList.add('dragover');
-            });
+                // Drag and drop
+                fileUploadArea.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    this.classList.add('dragover');
+                });
 
-            fileUploadArea.addEventListener('dragleave', function() {
-                this.classList.remove('dragover');
-            });
+                fileUploadArea.addEventListener('dragleave', function() {
+                    this.classList.remove('dragover');
+                });
 
-            fileUploadArea.addEventListener('drop', function(e) {
-                e.preventDefault();
-                this.classList.remove('dragover');
-                if (e.dataTransfer.files.length > 0) {
-                    evidenceFile.files = e.dataTransfer.files;
-                    const event = new Event('change', {
-                        bubbles: true
-                    });
-                    evidenceFile.dispatchEvent(event);
-                }
-            });
-        }
+                fileUploadArea.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    this.classList.remove('dragover');
+                    if (e.dataTransfer.files.length > 0) {
+                        evidenceFile.files = e.dataTransfer.files;
+                        const event = new Event('change', {
+                            bubbles: true
+                        });
+                        evidenceFile.dispatchEvent(event);
+                    }
+                });
+            }
+        });
 
         function updateReasonText() {
             const reason = document.getElementById('disputeReason').value;
@@ -1826,21 +1856,28 @@ foreach ($all_agreements_for_count as $agreement) {
                 <form id="disputeForm" onsubmit="handleDisputeSubmit(event)">
                     <div class="dispute-form-group">
                         <label class="dispute-form-label">Project</label>
-                        <input type="text" id="disputeProjectTitle" readonly style="background: #f5f7fa; cursor: not-allowed;">
+                        <div id="disputeProjectTitle" style="background: white; color: #2c3e50; font-weight: 600; border: 1.5px solid #22c55e; padding: 12px 15px; border-radius: 8px; font-size: 13px;"></div>
                     </div>
 
                     <div class="dispute-form-group">
                         <label class="dispute-form-label">Dispute Reason *</label>
                         <select name="reason" id="disputeReason" class="dispute-form-select" required onchange="updateReasonText()">
                             <option value="">-- Select a reason --</option>
-                            <option value="Non-delivery of work">Non-delivery of work</option>
-                            <option value="Poor quality work">Poor quality work</option>
-                            <option value="Incomplete deliverables">Incomplete deliverables</option>
-                            <option value="Missed deadline">Missed deadline</option>
-                            <option value="Non-payment">Non-payment</option>
-                            <option value="Unprofessional conduct">Unprofessional conduct</option>
-                            <option value="Breach of agreement terms">Breach of agreement terms</option>
-                            <option value="Other">Other (specify below)</option>
+                            <?php if ($user_type === 'client'): ?>
+                                <!-- Client dispute reasons (against freelancer) -->
+                                <option value="Non-delivery of work">Non-delivery of work</option>
+                                <option value="Poor quality work">Poor quality work</option>
+                                <option value="Incomplete deliverables">Incomplete deliverables</option>
+                                <option value="Missed deadline">Missed deadline</option>
+                                <option value="Breach of agreement terms">Breach of agreement terms</option>
+                                <option value="Other">Other (specify below)</option>
+                            <?php else: ?>
+                                <!-- Freelancer dispute reasons (against client) -->
+                                <option value="Project scope change">Project scope change</option>
+                                <option value="Unreasonable demands">Unreasonable demands</option>
+                                <option value="Breach of agreement terms">Breach of agreement terms</option>
+                                <option value="Other">Other (specify below)</option>
+                            <?php endif; ?>
                         </select>
                     </div>
 
