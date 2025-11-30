@@ -77,7 +77,7 @@ require_once __DIR__ . '/page/config.php';
                                     // Display profile picture if exists
                                     // _head.php is in root, so the path is directly as stored in database
                                     if (!empty($profilePicture) && file_exists($_SERVER['DOCUMENT_ROOT'] . '/' . $profilePicture)) {
-                                        echo '<img src="/' . htmlspecialchars($profilePicture) . '" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block;">';
+                                        echo '<img src="' . htmlspecialchars($profilePicture) . '" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block;">';
                                     } else {
                                         // Show initials fallback
                                         if ($user_type === 'freelancer') {

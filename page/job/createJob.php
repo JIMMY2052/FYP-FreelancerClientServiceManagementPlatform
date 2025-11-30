@@ -19,9 +19,6 @@ include '../../_head.php';
         <p>Delivery Time (Days)</p>
         <input type="number" id="deliveryTime" name="deliveryTime" placeholder="Enter delivery time in days" min="1" step="1" required>
 
-        <p>Looking At</p>
-        <input type="text" id="professionalField" name="professionalField" placeholder="Enter professional field" required>
-
         <p>Posting Date</p>
         <label class="checkbox-label">
             <input type="checkbox" id="postDateNow" name="postDateOption" value="now" checked>

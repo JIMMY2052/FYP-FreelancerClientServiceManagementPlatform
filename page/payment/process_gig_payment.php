@@ -142,13 +142,15 @@
         $deliverables = "As described in the gig: " . substr($projectDetail, 0, 200);
 
         $sql = "INSERT INTO agreement (FreelancerID, ClientID, ClientName, FreelancerName, ProjectTitle, 
-                                   ProjectDetail, PaymentAmount, Status, ClientSignedDate, ExpiredDate, 
+                                   ProjectDetail, PaymentAmount, RemainingRevisions, Status, ClientSignedDate, ExpiredDate, 
                                    Terms, Scope, Deliverables, DeliveryTime) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         $stmt = $conn->prepare($sql);
+        // Use the gig's revision count
+        $gig_revisions = intval($gig['RevisionCount']);
         $stmt->bind_param(
-            'iissssdssssssi',
+            'iissssdiisssssi',
             $freelancerId,
             $clientId,
             $clientName,
@@ -156,6 +158,7 @@
             $projectTitle,
             $projectDetail,
             $totalAmount,
+            $gig_revisions,
             $status,
             $clientSignedDate,
             $expiredDate,

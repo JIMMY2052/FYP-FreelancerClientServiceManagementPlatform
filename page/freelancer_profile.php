@@ -43,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['profile_picture'])) 
             }
 
             // Update database with new picture path
-            $relative_path = 'uploads/profile_pictures/' . $new_filename;
+            $relative_path = '/uploads/profile_pictures/' . $new_filename;
             $stmt = $conn->prepare("UPDATE freelancer SET ProfilePicture = ? WHERE FreelancerID = ?");
             $stmt->bind_param("si", $relative_path, $freelancer_id);
             $stmt->execute();

@@ -81,8 +81,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $pdf_filename = 'agreement_' . $application_id . '_' . time() . '.pdf';
     $client_signature_path = '/uploads/agreements/signature_c' . $client_id . '_a' . $application_id . '_' . time() . '.png'; // Store signature file path
 
-    $agreement_sql = "INSERT INTO agreement (FreelancerID, ClientID, ClientName, FreelancerName, ProjectTitle, ProjectDetail, PaymentAmount, Status, ClientSignedDate, ExpiredDate, Terms, Scope, Deliverables, DeliveryTime, ClientSignaturePath, agreeementPath) 
-                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    $agreement_sql = "INSERT INTO agreement (FreelancerID, ClientID, ClientName, FreelancerName, ProjectTitle, ProjectDetail, PaymentAmount, RemainingRevisions, Status, ClientSignedDate, ExpiredDate, Terms, Scope, Deliverables, DeliveryTime, ClientSignaturePath, agreeementPath) 
+                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     $agreement_stmt = $conn->prepare($agreement_sql);
 
@@ -95,8 +95,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Prepare PDF path for database storage
     $pdf_path_for_db = '/uploads/agreements/' . $pdf_filename;
+    $default_revisions = 3; // Default number of revisions
 
-    $agreement_stmt->bind_param('iissssdssssissss', $freelancer_id, $client_id, $client_name, $freelancer_name, $job_title, $job_desc, $job_budget, $status, $client_signed_date, $expired_date, $terms, $scope, $deliverables, $delivery_time, $client_signature_path, $pdf_path_for_db);
+    $agreement_stmt->bind_param('iissssdiisssissss', $freelancer_id, $client_id, $client_name, $freelancer_name, $job_title, $job_desc, $job_budget, $default_revisions, $status, $client_signed_date, $expired_date, $terms, $scope, $deliverables, $delivery_time, $client_signature_path, $pdf_path_for_db);
 
     if (!$agreement_stmt->execute()) {
         $_SESSION['error'] = "Error creating agreement record: " . $agreement_stmt->error;

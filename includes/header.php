@@ -67,7 +67,7 @@
 
                         // Display profile picture if exists
                         if (!empty($profilePicture) && file_exists('../' . $profilePicture)) {
-                            echo '<img src="/' . htmlspecialchars($profilePicture) . '" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block;">';
+                            echo '<img src="' . htmlspecialchars($profilePicture) . '" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block;">';
                         } else {
                             // Show initials fallback
                             if ($user_type === 'freelancer') {

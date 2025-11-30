@@ -92,13 +92,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         // 1. Create agreement record
         $agreement_sql = "INSERT INTO agreement (FreelancerID, ClientID, ClientName, FreelancerName, ProjectTitle, 
-                                               ProjectDetail, PaymentAmount, Status, ClientSignedDate, ExpiredDate, 
+                                               ProjectDetail, PaymentAmount, RemainingRevisions, Status, ClientSignedDate, ExpiredDate, 
                                                Terms, Scope, Deliverables, DeliveryTime) 
-                          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         $agreement_stmt = $conn->prepare($agreement_sql);
+        // Use the gig's revision count
+        $gig_revisions = intval($gig['RevisionCount']);
         $agreement_stmt->bind_param(
-            'iissssdssssssi',
+            'iissssdiisssssi',
             $freelancer_id,
             $client_id,
             $client_name,
@@ -106,6 +108,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $project_title,
             $project_detail,
             $total_amount,
+            $gig_revisions,
             $status,
             $client_signed_date,
             $expired_date,

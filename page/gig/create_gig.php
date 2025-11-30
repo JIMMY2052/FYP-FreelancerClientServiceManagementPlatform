@@ -522,6 +522,84 @@ $categoryData = [
         cursor: pointer;
     }
 
+    /* Tags Input Styles */
+    .tags-input-container {
+        min-height: 120px;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: flex-start;
+        cursor: text;
+        transition: all 0.3s ease;
+    }
+
+    .tags-input-container:focus-within {
+        border-color: rgb(159, 232, 112);
+        box-shadow: 0 0 0 3px rgba(159, 232, 112, 0.1);
+    }
+
+    .tag-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        background: #e9ecef;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        color: #2c3e50;
+        font-weight: 500;
+    }
+
+    .tag-remove {
+        cursor: pointer;
+        background: none;
+        border: none;
+        color: #999;
+        font-size: 1.1rem;
+        line-height: 1;
+        padding: 0;
+        width: 18px;
+        height: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: all 0.2s ease;
+    }
+
+    .tag-remove:hover {
+        background: #dc3545;
+        color: white;
+    }
+
+    .tags-input-field {
+        border: none;
+        outline: none;
+        padding: 8px 4px;
+        font-size: 0.95rem;
+        flex: 1;
+        min-width: 200px;
+        font-family: inherit;
+    }
+
+    .tags-input-field::placeholder {
+        color: #999;
+    }
+
+    .tags-counter {
+        font-size: 0.85rem;
+        color: #666;
+        margin-top: 6px;
+    }
+
+    .tags-counter.limit-reached {
+        color: #dc3545;
+        font-weight: 600;
+    }
+
     /* Form Actions */
     .form-actions {
         display: flex;
@@ -675,8 +753,12 @@ $categoryData = [
                 <h3>Search Tags</h3>
                 <div class="form-group">
                     <label for="searchTags">Add up to 5 tags to help buyers find your gig *</label>
-                    <input type="text" id="searchTags" name="searchTags" placeholder="e.g., logo, branding, design" required>
-                    <div class="form-description">Separate tags with commas</div>
+                    <div class="tags-input-container" id="tagsContainer">
+                        <input type="text" class="tags-input-field" id="tagsInput" placeholder="Type a tag and press Enter" autocomplete="off">
+                    </div>
+                    <input type="hidden" id="searchTags" name="searchTags" required>
+                    <div class="tags-counter" id="tagsCounter">0 / 5 tags</div>
+                    <div class="form-description">Press Enter or comma to add a tag. Use letters and numbers only.</div>
                 </div>
             </div>
 
@@ -692,6 +774,10 @@ $categoryData = [
 <script>
     // Category Data
     const categoryData = <?php echo json_encode($categoryData); ?>;
+
+    // Tags management
+    let tags = [];
+    const MAX_TAGS = 5;
 
     // Milestone step pages
     const stepPages = {
@@ -731,6 +817,106 @@ $categoryData = [
             }
         });
     });
+
+    // Tags Input Functionality
+    const tagsInput = document.getElementById('tagsInput');
+    const tagsContainer = document.getElementById('tagsContainer');
+    const tagsCounter = document.getElementById('tagsCounter');
+    const searchTagsHidden = document.getElementById('searchTags');
+
+    // Focus input when clicking on container
+    tagsContainer.addEventListener('click', function() {
+        tagsInput.focus();
+    });
+
+    // Handle tag input
+    tagsInput.addEventListener('keydown', function(e) {
+        if ((e.key === 'Enter' || e.key === ',') && this.value.trim()) {
+            e.preventDefault();
+            addTag(this.value.trim());
+            this.value = '';
+        } else if (e.key === 'Backspace' && !this.value && tags.length > 0) {
+            removeTag(tags.length - 1);
+        }
+    });
+
+    // Handle blur to add tag
+    tagsInput.addEventListener('blur', function() {
+        if (this.value.trim()) {
+            addTag(this.value.trim());
+            this.value = '';
+        }
+    });
+
+    function addTag(tagText) {
+        // Clean the tag (remove special characters, keep only letters, numbers and spaces)
+        tagText = tagText.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim();
+        
+        if (!tagText) {
+            return;
+        }
+
+        // Check if already exists
+        if (tags.includes(tagText)) {
+            alert('This tag already exists!');
+            return;
+        }
+
+        // Check limit
+        if (tags.length >= MAX_TAGS) {
+            alert(`Maximum ${MAX_TAGS} tags allowed!`);
+            return;
+        }
+
+        // Add tag
+        tags.push(tagText);
+        renderTags();
+        updateTagsInput();
+    }
+
+    function removeTag(index) {
+        tags.splice(index, 1);
+        renderTags();
+        updateTagsInput();
+    }
+
+    function renderTags() {
+        // Remove existing tag items
+        const existingTags = tagsContainer.querySelectorAll('.tag-item');
+        existingTags.forEach(tag => tag.remove());
+
+        // Add tags before input field
+        tags.forEach((tag, index) => {
+            const tagElement = document.createElement('div');
+            tagElement.className = 'tag-item';
+            tagElement.innerHTML = `
+                ${tag}
+                <button type="button" class="tag-remove" onclick="removeTagByIndex(${index})" title="Remove tag">×</button>
+            `;
+            tagsContainer.insertBefore(tagElement, tagsInput);
+        });
+
+        // Update counter
+        tagsCounter.textContent = `${tags.length} / ${MAX_TAGS} tags`;
+        if (tags.length >= MAX_TAGS) {
+            tagsCounter.classList.add('limit-reached');
+            tagsInput.disabled = true;
+            tagsInput.placeholder = 'Maximum tags reached';
+        } else {
+            tagsCounter.classList.remove('limit-reached');
+            tagsInput.disabled = false;
+            tagsInput.placeholder = 'Type a tag and press Enter';
+        }
+    }
+
+    function updateTagsInput() {
+        searchTagsHidden.value = tags.join(',');
+    }
+
+    // Make removeTag accessible globally for onclick
+    window.removeTagByIndex = function(index) {
+        removeTag(index);
+    };
 
     function markCompletedSteps(formData) {
         // Mark overview as completed since we're on it
@@ -842,7 +1028,7 @@ $categoryData = [
             gigTitle: document.getElementById('gigTitle').value,
             gigCategory: document.getElementById('gigCategory').value,
             gigSubcategory: document.getElementById('gigSubcategory').value,
-            searchTags: document.getElementById('searchTags').value,
+            searchTags: tags.join(','),
             metadata: getMetadataValues()
         };
 

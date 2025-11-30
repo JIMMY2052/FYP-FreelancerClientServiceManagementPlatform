@@ -35,6 +35,7 @@ $sql = "SELECT
             a.ProjectDetail,
             a.PaymentAmount,
             a.Status as AgreementStatus,
+            a.RemainingRevisions,
             CONCAT(f.FirstName, ' ', f.LastName) as FreelancerName,
             f.Email as FreelancerEmail,
             f.FreelancerID
@@ -422,6 +423,19 @@ $conn->close();
         background: #e0e2e8;
     }
 
+    .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        background: #ccc !important;
+        color: #666 !important;
+    }
+
+    .btn:disabled:hover {
+        transform: none !important;
+        box-shadow: none !important;
+        background: #ccc !important;
+    }
+
     .review-history {
         background: #fff3cd;
         border: 2px solid #ffc107;
@@ -556,7 +570,7 @@ $conn->close();
                                 </div>
                                 <div class="file-actions">
                                     <a href="../<?= htmlspecialchars($file['FilePath']) ?>" class="btn-download" download>
-                                        ⬇️ Download
+                                        Download
                                     </a>
                                 </div>
                             </div>
@@ -573,9 +587,32 @@ $conn->close();
                 <div class="payment-amount">RM <?= number_format($submission['PaymentAmount'], 2) ?></div>
             </div>
 
+            <div class="card" style="margin-bottom: 20px;">
+                <h3>🔄 Revisions</h3>
+                <div class="info-item">
+                    <div class="info-label">Remaining Revisions</div>
+                    <?php 
+                    $remaining = $submission['RemainingRevisions'];
+                    $is_unlimited = ($remaining === null);
+                    ?>
+                    <div class="info-value" style="font-size: 1.5rem; color: <?= $is_unlimited ? '#1ab394' : ($remaining > 0 ? '#1ab394' : '#e74c3c') ?>;">
+                        <?= $is_unlimited ? 'Unlimited' : $remaining ?>
+                    </div>
+                    <?php if (!$is_unlimited && $remaining <= 0): ?>
+                        <p style="color: #e74c3c; font-size: 0.9rem; margin-top: 10px; font-weight: 600;">
+                            ⚠️ No revisions remaining. You can only accept the work.
+                        </p>
+                    <?php elseif (!$is_unlimited && $remaining <= 2 && $remaining > 0): ?>
+                        <p style="color: #856404; font-size: 0.9rem; margin-top: 10px; font-weight: 600;">
+                            ⚠️ Only <?= $remaining ?> revision(s) remaining.
+                        </p>
+                    <?php endif; ?>
+                </div>
+            </div>
+
             <?php if ($submission['Status'] === 'pending_review'): ?>
                 <div class="review-form">
-                    <h3>✅ Review Submission</h3>
+                    <h3>Review Submission</h3>
                     
                     <form id="reviewForm" method="POST" action="review_work_process.php">
                         <input type="hidden" name="submission_id" value="<?= $submission_id ?>">
@@ -589,19 +626,30 @@ $conn->close();
                                       placeholder="Add comments about the submission..."></textarea>
                         </div>
 
+                        <?php 
+                        $remaining = $submission['RemainingRevisions'];
+                        $is_unlimited = ($remaining === null);
+                        $can_request_revision = $is_unlimited || $remaining > 0;
+                        ?>
                         <div class="action-buttons">
                             <button type="button" class="btn btn-approve" onclick="submitReview('approve')">
-                                ✅ Accept Work
+                                Accept Work
                             </button>
-                            <button type="button" class="btn btn-reject" onclick="submitReview('reject')">
-                                ❌ Request Revision
+                            <button type="button" class="btn btn-reject" onclick="submitReview('reject')" 
+                                    <?= !$can_request_revision ? 'disabled' : '' ?>>
+                                Request Revision
                             </button>
                         </div>
+                        <?php if (!$can_request_revision): ?>
+                            <p style="color: #e74c3c; font-size: 0.9rem; margin-top: 15px; text-align: center; font-weight: 600;">
+                                ⚠️ No revisions remaining. You must accept the work or contact the freelancer separately.
+                            </p>
+                        <?php endif; ?>
                     </form>
                 </div>
             <?php else: ?>
                 <div class="card">
-                    <h3>📋 Review Status</h3>
+                    <h3>Review Status</h3>
                     <p style="color: #666; line-height: 1.6;">
                         <?php if ($submission['Status'] === 'approved'): ?>
                             This work has been approved and the payment has been processed.
@@ -613,7 +661,7 @@ $conn->close();
             <?php endif; ?>
 
             <div class="card" style="margin-top: 20px;">
-                <h3>ℹ️ Project Details</h3>
+                <h3>Project Details</h3>
                 <div class="info-grid">
                     <div class="info-item">
                         <div class="info-label">Agreement ID</div>
@@ -638,23 +686,37 @@ function submitReview(action) {
     const form = document.getElementById('reviewForm');
     const actionInput = document.getElementById('reviewAction');
     const reviewNotes = document.getElementById('reviewNotes').value.trim();
+    const remainingRevisions = <?= $submission['RemainingRevisions'] ?? 'null' ?>;
+    const isUnlimited = (remainingRevisions === null);
     
-    if (action === 'reject' && !reviewNotes) {
-        alert('Please provide review notes when requesting revisions so the freelancer knows what to improve.');
-        document.getElementById('reviewNotes').focus();
-        return;
+    if (action === 'reject') {
+        if (!isUnlimited && remainingRevisions <= 0) {
+            alert('No revisions remaining. You can only accept the work.');
+            return;
+        }
+        
+        if (!reviewNotes) {
+            alert('Please provide review notes when requesting revisions so the freelancer knows what to improve.');
+            document.getElementById('reviewNotes').focus();
+            return;
+        }
     }
     
-    const messages = {
-        'approve': 'Are you sure you want to accept this work? The payment will be released to the freelancer.',
-        'reject': 'Are you sure you want to request revisions? The freelancer will be able to resubmit their work.'
-    };
+    let confirmMessage = '';
+    if (action === 'approve') {
+        confirmMessage = 'Are you sure you want to accept this work? The payment will be released to the freelancer.';
+    } else {
+        if (isUnlimited) {
+            confirmMessage = 'Are you sure you want to request revisions? The freelancer will be able to resubmit their work.';
+        } else {
+            confirmMessage = `Are you sure you want to request revisions? You will have ${remainingRevisions - 1} revision(s) remaining after this.`;
+        }
+    }
     
-    if (confirm(messages[action])) {
+    if (confirm(confirmMessage)) {
         actionInput.value = action;
         form.submit();
     }
 }
 </script>
 
-<?php include '../_foot.php'; ?>

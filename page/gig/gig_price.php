@@ -518,6 +518,10 @@ include '../../_head.php';
                             <span id="summaryRevisions">-</span>
                         </div>
                         <div>
+                            <strong>Additional Revision Price:</strong><br>
+                            <span id="summaryAdditionalRevision">-</span>
+                        </div>
+                        <div>
                             <strong>Rush Delivery Option:</strong><br>
                             <span id="summaryRush">Not available</span>
                         </div>
@@ -575,6 +579,7 @@ include '../../_head.php';
         const rushDeliverySelect = document.getElementById('rushDeliveryDays');
         const rushDeliveryPriceInput = document.getElementById('rushDeliveryPrice');
         const revisionsSelect = document.getElementById('revisions');
+        const additionalRevisionPriceInput = document.getElementById('additionalRevisionPrice');
 
         priceInput.addEventListener('input', updateSummary);
         deliveryDaysInput.addEventListener('input', function() {
@@ -588,6 +593,7 @@ include '../../_head.php';
         });
         rushDeliveryPriceInput.addEventListener('input', updateSummary);
         revisionsSelect.addEventListener('change', updateSummary);
+        additionalRevisionPriceInput.addEventListener('input', updateSummary);
     }
 
     function updateRushDeliveryOptions() {
@@ -645,6 +651,7 @@ include '../../_head.php';
         const rushDeliveryDays = document.getElementById('rushDeliveryDays').value || '-';
         const rushDeliveryPrice = parseInt(document.getElementById('rushDeliveryPrice').value, 10) || 0;
         const revisions = document.getElementById('revisions').value || '-';
+        const additionalRevisionPrice = parseInt(document.getElementById('additionalRevisionPrice').value, 10) || 0;
 
         // Update price display
         document.getElementById('displayPrice').textContent = 'MYR ' + price;
@@ -653,6 +660,7 @@ include '../../_head.php';
         document.getElementById('summaryPrice').textContent = `MYR ${price}`;
         document.getElementById('summaryDelivery').textContent = deliveryDays === '-' ? '-' : `${deliveryDays} day(s)`;
         document.getElementById('summaryRevisions').textContent = revisions === '-' ? '-' : (revisions === 'unlimited' ? 'Unlimited' : revisions);
+        document.getElementById('summaryAdditionalRevision').textContent = additionalRevisionPrice > 0 ? `MYR ${additionalRevisionPrice}` : '-';
         
         if (rushDeliveryDays !== '-' && rushDeliveryPrice > 0) {
             document.getElementById('summaryRush').textContent = `${rushDeliveryDays} day(s) (+MYR ${rushDeliveryPrice})`;

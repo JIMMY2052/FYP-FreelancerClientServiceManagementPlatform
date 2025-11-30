@@ -662,5 +662,3 @@ $conn->close();
     // Initialize
     updateSubmitButton();
 </script>
-
-<?php include '../_foot.php'; ?>

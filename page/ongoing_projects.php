@@ -520,7 +520,7 @@ $conn->close();
             </a>
 
             <div class="page-header">
-                <h1>🚀 Ongoing Projects</h1>
+                <h1>Ongoing Projects</h1>
                 <p>Track and manage your active collaborations</p>
             </div>
 
@@ -541,7 +541,6 @@ $conn->close();
 
             <?php if (empty($ongoing_projects)): ?>
                 <div class="empty-state">
-                    <div class="empty-icon">📋</div>
                     <h3>No Ongoing Projects</h3>
                     <p>You don't have any active projects at the moment.</p>
                     <?php if ($user_type === 'client'): ?>
@@ -559,7 +558,7 @@ $conn->close();
                                     <h3>
                                         <?= htmlspecialchars($project['ProjectTitle']) ?>
                                         <span class="status-indicator status-<?= str_replace('_', '-', strtolower($project['Status'])) ?>">
-                                            <?= $project['Status'] === 'pending_review' ? '⏳ Pending Review' : '🚀 In Progress' ?>
+                                            <?= $project['Status'] === 'pending_review' ? 'Pending Review' : 'In Progress' ?>
                                         </span>
                                     </h3>
                                     <div class="project-id">Agreement #<?= $project['AgreementID'] ?></div>
@@ -631,7 +630,6 @@ $conn->close();
 
                             <?php if (!empty($project['EscrowAmount'])): ?>
                                 <div class="escrow-info">
-                                    <div class="escrow-icon">🔒</div>
                                     <div class="escrow-text">
                                         <div class="escrow-label">Funds in Escrow</div>
                                         <div class="escrow-amount">
@@ -644,19 +642,19 @@ $conn->close();
 
                             <div class="project-actions">
                                 <a href="<?= htmlspecialchars($project['agreeementPath']) ?>" target="_blank" class="btn btn-secondary">
-                                    📄 View Agreement
+                                    Agreement
                                 </a>
                                 <a href="messages.php?<?= $user_type === 'client' ? 'freelancer_id=' . $project['FreelancerID'] : 'client_id=' . $project['ClientID'] ?>" class="btn btn-primary">
-                                    💬 Message
+                                    Message
                                 </a>
                                 <?php if ($user_type === 'freelancer' && $project['Status'] === 'ongoing'): ?>
                                     <a href="submit_work.php?agreement_id=<?= $project['AgreementID'] ?>" class="btn btn-success">
-                                        ✅ Submit Work
+                                        Submit
                                     </a>
                                 <?php endif; ?>
                                 <?php if ($user_type === 'client' && $project['Status'] === 'pending_review' && !empty($project['SubmissionID'])): ?>
                                     <a href="review_work.php?submission_id=<?= $project['SubmissionID'] ?>" class="btn btn-warning">
-                                        👀 Review Work
+                                        Review
                                     </a>
                                 <?php endif; ?>
                             </div>

@@ -40,13 +40,10 @@ if ($action === 'reject' && empty($review_notes)) {
 $conn = getDBConnection();
 
 // Verify submission belongs to this client and is pending review
-$sql = "SELECT ws.SubmissionID, ws.Status, a.PaymentAmount, a.ProjectTitle, ja.JobID 
+$sql = "SELECT ws.SubmissionID, ws.Status, a.PaymentAmount, a.ProjectTitle, a.FreelancerID, a.RemainingRevisions
         FROM work_submissions ws
         JOIN agreement a ON ws.AgreementID = a.AgreementID
-        LEFT JOIN job_application ja ON ja.FreelancerID = ws.FreelancerID AND ja.Status = 'accepted'
-        WHERE ws.SubmissionID = ? AND ws.ClientID = ? AND ws.Status = 'pending_review'
-        ORDER BY ja.AppliedAt DESC
-        LIMIT 1";
+        WHERE ws.SubmissionID = ? AND ws.ClientID = ? AND ws.Status = 'pending_review'";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param('ii', $submission_id, $client_id);
 $stmt->execute();
@@ -63,7 +60,35 @@ if ($result->num_rows === 0) {
 $submission = $result->fetch_assoc();
 $payment_amount = $submission['PaymentAmount'];
 $project_title = $submission['ProjectTitle'];
-$job_id = $submission['JobID'];
+$agreement_freelancer_id = $submission['FreelancerID'];
+$remaining_revisions = $submission['RemainingRevisions'];
+$is_unlimited = ($remaining_revisions === null);
+$stmt->close();
+
+// Check if client is trying to request revision but no revisions remaining (and not unlimited)
+if ($action === 'reject' && !$is_unlimited && $remaining_revisions <= 0) {
+    $_SESSION['error'] = 'No revisions remaining. You can only accept the work.';
+    $conn->close();
+    header('Location: review_work.php?submission_id=' . $submission_id);
+    exit();
+}
+
+// Get JobID from job_application table
+$job_id = null;
+$sql = "SELECT ja.JobID 
+        FROM job_application ja
+        JOIN job j ON ja.JobID = j.JobID
+        WHERE ja.FreelancerID = ? AND ja.Status = 'accepted' AND j.ClientID = ?
+        ORDER BY ja.AppliedAt DESC
+        LIMIT 1";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param('ii', $agreement_freelancer_id, $client_id);
+$stmt->execute();
+$result = $stmt->get_result();
+if ($result->num_rows > 0) {
+    $job_data = $result->fetch_assoc();
+    $job_id = $job_data['JobID'];
+}
 $stmt->close();
 
 // Begin transaction
@@ -210,15 +235,31 @@ try {
         $stmt->execute();
         $stmt->close();
         
-        // 2. Update agreement status back to ongoing
+        // 2. Decrement remaining revisions in agreement (only if not unlimited)
+        if (!$is_unlimited) {
+            $sql = "UPDATE agreement SET RemainingRevisions = RemainingRevisions - 1 WHERE AgreementID = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param('i', $agreement_id);
+            $stmt->execute();
+            $stmt->close();
+        }
+        
+        // 3. Update agreement status back to ongoing
         $sql = "UPDATE agreement SET Status = 'ongoing' WHERE AgreementID = ?";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param('i', $agreement_id);
         $stmt->execute();
         $stmt->close();
         
-        // 3. Create notification for freelancer
-        $notification_msg = "Your work submission for '{$project_title}' needs revisions. Please check the client's feedback and resubmit.";
+        // 4. Create notification for freelancer
+        if ($is_unlimited) {
+            $revision_notice = "";
+            $notification_msg = "Your work submission for '{$project_title}' needs revisions. Please check the client's feedback and resubmit.";
+        } else {
+            $revisions_left = $remaining_revisions - 1;
+            $revision_notice = $revisions_left > 0 ? " You have {$revisions_left} revision(s) remaining." : " This is your final revision.";
+            $notification_msg = "Your work submission for '{$project_title}' needs revisions. Please check the client's feedback and resubmit.{$revision_notice}";
+        }
         $sql = "INSERT INTO notifications (UserID, UserType, Message, RelatedType, RelatedID, CreatedAt, IsRead) 
                 VALUES (?, 'freelancer', ?, 'work_revision', ?, NOW(), 0)";
         $stmt = $conn->prepare($sql);
@@ -226,7 +267,12 @@ try {
         $stmt->execute();
         $stmt->close();
         
-        $_SESSION['success'] = 'Revision requested. The freelancer has been notified and can resubmit their work.';
+        if ($is_unlimited) {
+            $_SESSION['success'] = "Revision requested. The freelancer has been notified.";
+        } else {
+            $revisions_left = $remaining_revisions - 1;
+            $_SESSION['success'] = "Revision requested. You have {$revisions_left} revision(s) remaining. The freelancer has been notified.";
+        }
     }
     
     // Commit transaction
