@@ -10,60 +10,51 @@ if (!isset($_SESSION['admin_id']) || !isset($_SESSION['is_admin'])) {
 $conn = getDBConnection();
 
 // Handle dispute resolution
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'resolve_dispute') {
-    $dispute_id = isset($_POST['dispute_id']) ? intval($_POST['dispute_id']) : null;
-    $agreement_id = isset($_POST['agreement_id']) ? intval($_POST['agreement_id']) : null;
-    $resolution = isset($_POST['resolution']) ? trim($_POST['resolution']) : '';
-    $resolution_notes = isset($_POST['resolution_notes']) ? trim($_POST['resolution_notes']) : '';
-    $admin_id = $_SESSION['admin_id'];
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+    if ($_POST['action'] === 'unresolve_dispute') {
+        // Unresolve a dispute back to open status and reverse the wallet transactions
+        $dispute_id = isset($_POST['dispute_id']) ? intval($_POST['dispute_id']) : null;
+        $agreement_id = isset($_POST['agreement_id']) ? intval($_POST['agreement_id']) : null;
 
-    if (!empty($dispute_id) && !empty($agreement_id) && !empty($resolution) && in_array($resolution, ['refund_client', 'release_to_freelancer', 'split_payment', 'rejected'])) {
-        // Update dispute status to resolved
-        $update_dispute_sql = "UPDATE dispute SET Status = 'resolved', ResolutionAction = ?, AdminNotesText = ?, ResolvedByAdminID = ?, ResolvedAt = NOW() WHERE DisputeID = ?";
-        $update_dispute_stmt = $conn->prepare($update_dispute_sql);
-        $update_dispute_stmt->bind_param('ssii', $resolution, $resolution_notes, $admin_id, $dispute_id);
-        $update_dispute_stmt->execute();
-        $update_dispute_stmt->close();
+        if (!empty($dispute_id) && !empty($agreement_id)) {
+            $conn->begin_transaction();
+            try {
+                // Get the previous resolution to reverse it
+                $dispute_sql = "SELECT ResolutionAction FROM dispute WHERE DisputeID = ?";
+                $dispute_stmt = $conn->prepare($dispute_sql);
+                $dispute_stmt->bind_param('i', $dispute_id);
+                $dispute_stmt->execute();
+                $dispute_result = $dispute_stmt->get_result();
+                $dispute_data = $dispute_result->fetch_assoc();
+                $dispute_stmt->close();
 
-        // Get agreement details for escrow and wallet operations
-        $agreement_sql = "SELECT * FROM agreement WHERE AgreementID = ?";
-        $agreement_stmt = $conn->prepare($agreement_sql);
-        $agreement_stmt->bind_param('i', $agreement_id);
-        $agreement_stmt->execute();
-        $agreement_result = $agreement_stmt->get_result();
-        $agreement = $agreement_result->fetch_assoc();
-        $agreement_stmt->close();
+                $previous_resolution = $dispute_data['ResolutionAction'] ?? null;
 
-        if ($agreement) {
-            $freelancer_id = $agreement['FreelancerID'];
-            $client_id = $agreement['ClientID'];
-            $amount = $agreement['PaymentAmount'];
+                // Get agreement details
+                $agreement_sql = "SELECT * FROM agreement WHERE AgreementID = ?";
+                $agreement_stmt = $conn->prepare($agreement_sql);
+                $agreement_stmt->bind_param('i', $agreement_id);
+                $agreement_stmt->execute();
+                $agreement_result = $agreement_stmt->get_result();
+                $agreement = $agreement_result->fetch_assoc();
+                $agreement_stmt->close();
 
-            // Get escrow record
-            $escrow_sql = "SELECT * FROM escrow WHERE OrderID = ? AND Status = 'hold'";
-            $escrow_stmt = $conn->prepare($escrow_sql);
-            $escrow_stmt->bind_param('i', $agreement_id);
-            $escrow_stmt->execute();
-            $escrow_result = $escrow_stmt->get_result();
-            $escrow = $escrow_result->fetch_assoc();
-            $escrow_stmt->close();
+                if ($agreement) {
+                    $freelancer_id = $agreement['FreelancerID'];
+                    $client_id = $agreement['ClientID'];
+                    $amount = $agreement['PaymentAmount'];
 
-            if ($escrow) {
-                $escrow_id = $escrow['EscrowID'];
-
-                // Handle different resolutions
-                if ($resolution === 'refund_client') {
-                    // Refund money to client
-                    $conn->begin_transaction();
-                    try {
-                        // Update escrow to refunded
-                        $escrow_update_sql = "UPDATE escrow SET Status = 'refunded', ReleasedAt = NOW() WHERE EscrowID = ?";
-                        $escrow_update_stmt = $conn->prepare($escrow_update_sql);
-                        $escrow_update_stmt->bind_param('i', $escrow_id);
-                        $escrow_update_stmt->execute();
-                        $escrow_update_stmt->close();
-
-                        // Get client wallet
+                    // Reverse the previous resolution
+                    if ($previous_resolution === 'resume_ongoing') {
+                        // Minor dispute was dismissed, just revert agreement status back to disputed
+                        $agreement_update_sql = "UPDATE agreement SET Status = 'disputed' WHERE AgreementID = ?";
+                        $agreement_update_stmt = $conn->prepare($agreement_update_sql);
+                        $agreement_update_stmt->bind_param('i', $agreement_id);
+                        $agreement_update_stmt->execute();
+                        $agreement_update_stmt->close();
+                        // No wallet changes needed for this resolution type
+                    } elseif ($previous_resolution === 'refund_client') {
+                        // Client received refund, deduct it back
                         $wallet_sql = "SELECT * FROM wallet WHERE UserID = ?";
                         $wallet_stmt = $conn->prepare($wallet_sql);
                         $wallet_stmt->bind_param('i', $client_id);
@@ -73,42 +64,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         $wallet_stmt->close();
 
                         if ($wallet) {
-                            $new_balance = $wallet['Balance'] + $amount;
-                            $new_locked = $wallet['LockedBalance'] - $amount;
-
-                            $wallet_update_sql = "UPDATE wallet SET Balance = ?, LockedBalance = ? WHERE WalletID = ?";
+                            $new_balance = max(0, $wallet['Balance'] - $amount); // Prevent negative balance
+                            $wallet_update_sql = "UPDATE wallet SET Balance = ? WHERE WalletID = ?";
                             $wallet_update_stmt = $conn->prepare($wallet_update_sql);
-                            $wallet_update_stmt->bind_param('ddi', $new_balance, $new_locked, $wallet['WalletID']);
+                            $wallet_update_stmt->bind_param('di', $new_balance, $wallet['WalletID']);
                             $wallet_update_stmt->execute();
                             $wallet_update_stmt->close();
 
-                            // Record transaction
-                            $trans_sql = "INSERT INTO wallet_transactions (WalletID, Type, Amount, Status, Description, ReferenceID) VALUES (?, 'refund', ?, 'completed', ?, ?)";
+                            // Record reversal transaction
+                            $trans_sql = "INSERT INTO wallet_transactions (WalletID, Type, Amount, Status, Description, ReferenceID) VALUES (?, 'deduction', ?, 'completed', ?, ?)";
                             $trans_stmt = $conn->prepare($trans_sql);
-                            $trans_desc = "Dispute refund for agreement #$agreement_id: $resolution_notes";
-                            $trans_ref = "dispute_refund_$agreement_id";
-                            $trans_stmt->bind_param('ids', $wallet['WalletID'], $amount, $trans_desc, $trans_ref);
+                            $wallet_id = $wallet['WalletID'];
+                            $trans_desc = "Dispute reversal: Refund deducted for agreement #$agreement_id";
+                            $trans_ref = "dispute_reverse_refund_$agreement_id";
+                            $trans_stmt->bind_param('idss', $wallet_id, $amount, $trans_desc, $trans_ref);
                             $trans_stmt->execute();
                             $trans_stmt->close();
                         }
-                        $conn->commit();
-                        $_SESSION['success'] = 'Dispute resolved: Funds refunded to client.';
-                    } catch (Exception $e) {
-                        $conn->rollback();
-                        $_SESSION['error'] = 'Error processing refund: ' . $e->getMessage();
-                    }
-                } elseif ($resolution === 'release_to_freelancer') {
-                    // Release money to freelancer
-                    $conn->begin_transaction();
-                    try {
-                        // Update escrow to released
-                        $escrow_update_sql = "UPDATE escrow SET Status = 'released', ReleasedAt = NOW() WHERE EscrowID = ?";
-                        $escrow_update_stmt = $conn->prepare($escrow_update_sql);
-                        $escrow_update_stmt->bind_param('i', $escrow_id);
-                        $escrow_update_stmt->execute();
-                        $escrow_update_stmt->close();
-
-                        // Get freelancer wallet
+                    } elseif ($previous_resolution === 'release_to_freelancer') {
+                        // Freelancer received payment, deduct it back
                         $wallet_sql = "SELECT * FROM wallet WHERE UserID = ?";
                         $wallet_stmt = $conn->prepare($wallet_sql);
                         $wallet_stmt->bind_param('i', $freelancer_id);
@@ -118,109 +92,285 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         $wallet_stmt->close();
 
                         if ($wallet) {
-                            $new_balance = $wallet['Balance'] + $amount;
-
+                            $new_balance = max(0, $wallet['Balance'] - $amount); // Prevent negative balance
                             $wallet_update_sql = "UPDATE wallet SET Balance = ? WHERE WalletID = ?";
                             $wallet_update_stmt = $conn->prepare($wallet_update_sql);
                             $wallet_update_stmt->bind_param('di', $new_balance, $wallet['WalletID']);
                             $wallet_update_stmt->execute();
                             $wallet_update_stmt->close();
 
-                            // Record transaction
-                            $trans_sql = "INSERT INTO wallet_transactions (WalletID, Type, Amount, Status, Description, ReferenceID) VALUES (?, 'earning', ?, 'completed', ?, ?)";
+                            // Record reversal transaction
+                            $trans_sql = "INSERT INTO wallet_transactions (WalletID, Type, Amount, Status, Description, ReferenceID) VALUES (?, 'deduction', ?, 'completed', ?, ?)";
                             $trans_stmt = $conn->prepare($trans_sql);
-                            $trans_desc = "Dispute resolution: Payment released for agreement #$agreement_id: $resolution_notes";
-                            $trans_ref = "dispute_release_$agreement_id";
-                            $trans_stmt->bind_param('ids', $wallet['WalletID'], $amount, $trans_desc, $trans_ref);
+                            $wallet_id = $wallet['WalletID'];
+                            $trans_desc = "Dispute reversal: Payment deducted for agreement #$agreement_id";
+                            $trans_ref = "dispute_reverse_release_$agreement_id";
+                            $trans_stmt->bind_param('idss', $wallet_id, $amount, $trans_desc, $trans_ref);
                             $trans_stmt->execute();
                             $trans_stmt->close();
                         }
-                        $conn->commit();
-                        $_SESSION['success'] = 'Dispute resolved: Funds released to freelancer.';
-                    } catch (Exception $e) {
-                        $conn->rollback();
-                        $_SESSION['error'] = 'Error processing payment: ' . $e->getMessage();
                     }
-                } elseif ($resolution === 'split_payment') {
-                    // Split payment 50-50
-                    $conn->begin_transaction();
+                }
+
+                // Revert escrow status back to hold if it exists
+                $escrow_sql = "UPDATE escrow SET Status = 'hold', ReleasedAt = NULL WHERE OrderID = ? AND Status IN ('released', 'refunded')";
+                $escrow_stmt = $conn->prepare($escrow_sql);
+                $escrow_stmt->bind_param('i', $agreement_id);
+                $escrow_stmt->execute();
+                $escrow_stmt->close();
+
+                // Update dispute status to open
+                $unresolve_sql = "UPDATE dispute SET Status = 'open', ResolutionAction = NULL, AdminNotesText = NULL, ResolvedByAdminID = NULL, ResolvedAt = NULL WHERE DisputeID = ?";
+                $unresolve_stmt = $conn->prepare($unresolve_sql);
+                $unresolve_stmt->bind_param('i', $dispute_id);
+                $unresolve_stmt->execute();
+                $unresolve_stmt->close();
+
+                $conn->commit();
+                $_SESSION['success'] = 'Dispute reverted to open status. Funds have been deducted back. You can now apply a new resolution.';
+            } catch (Exception $e) {
+                $conn->rollback();
+                $_SESSION['error'] = 'Error reverting dispute: ' . $e->getMessage();
+            }
+        }
+
+        header('Location: admin_manage_disputes.php');
+        exit();
+    }
+
+    if ($_POST['action'] === 'resolve_dispute') {
+        $dispute_id = isset($_POST['dispute_id']) ? intval($_POST['dispute_id']) : null;
+        $agreement_id = isset($_POST['agreement_id']) ? intval($_POST['agreement_id']) : null;
+        $resolution = isset($_POST['resolution']) ? trim($_POST['resolution']) : '';
+        $resolution_notes = isset($_POST['resolution_notes']) ? trim($_POST['resolution_notes']) : '';
+        $admin_id = $_SESSION['admin_id'];
+
+        if (!empty($dispute_id) && !empty($agreement_id) && !empty($resolution) && in_array($resolution, ['refund_client', 'release_to_freelancer', 'split_payment', 'rejected', 'resume_ongoing'])) {
+            // Update dispute status to resolved
+            $update_dispute_sql = "UPDATE dispute SET Status = 'resolved', ResolutionAction = ?, AdminNotesText = ?, ResolvedByAdminID = ?, ResolvedAt = NOW() WHERE DisputeID = ?";
+            $update_dispute_stmt = $conn->prepare($update_dispute_sql);
+            $update_dispute_stmt->bind_param('ssii', $resolution, $resolution_notes, $admin_id, $dispute_id);
+            $update_dispute_stmt->execute();
+            $update_dispute_stmt->close();
+
+            // Get agreement details for escrow and wallet operations
+            $agreement_sql = "SELECT * FROM agreement WHERE AgreementID = ?";
+            $agreement_stmt = $conn->prepare($agreement_sql);
+            $agreement_stmt->bind_param('i', $agreement_id);
+            $agreement_stmt->execute();
+            $agreement_result = $agreement_stmt->get_result();
+            $agreement = $agreement_result->fetch_assoc();
+            $agreement_stmt->close();
+
+            if ($agreement) {
+                $freelancer_id = $agreement['FreelancerID'];
+                $client_id = $agreement['ClientID'];
+                $amount = $agreement['PaymentAmount'];
+
+                // Get escrow record
+                $escrow_sql = "SELECT * FROM escrow WHERE OrderID = ? AND Status = 'hold'";
+                $escrow_stmt = $conn->prepare($escrow_sql);
+                $escrow_stmt->bind_param('i', $agreement_id);
+                $escrow_stmt->execute();
+                $escrow_result = $escrow_stmt->get_result();
+                $escrow = $escrow_result->fetch_assoc();
+                $escrow_stmt->close();
+
+                // Handle different resolutions (escrow check only needed for refund/release/split)
+                if ($resolution === 'resume_ongoing') {
+                    // Resume agreement as ongoing (minor dispute, no money changes)
                     try {
-                        $split_amount = $amount / 2;
+                        // Keep escrow as is (still holding the money)
+                        // Just update the agreement status back to ongoing
+                        $agreement_update_sql = "UPDATE agreement SET Status = 'ongoing' WHERE AgreementID = ?";
+                        $agreement_update_stmt = $conn->prepare($agreement_update_sql);
+                        $agreement_update_stmt->bind_param('i', $agreement_id);
+                        $agreement_update_stmt->execute();
+                        $agreement_update_stmt->close();
 
-                        // Update escrow to released
-                        $escrow_update_sql = "UPDATE escrow SET Status = 'released', ReleasedAt = NOW() WHERE EscrowID = ?";
-                        $escrow_update_stmt = $conn->prepare($escrow_update_sql);
-                        $escrow_update_stmt->bind_param('i', $escrow_id);
-                        $escrow_update_stmt->execute();
-                        $escrow_update_stmt->close();
-
-                        // Refund to client
-                        $client_wallet_sql = "SELECT * FROM wallet WHERE UserID = ?";
-                        $client_wallet_stmt = $conn->prepare($client_wallet_sql);
-                        $client_wallet_stmt->bind_param('i', $client_id);
-                        $client_wallet_stmt->execute();
-                        $client_wallet_result = $client_wallet_stmt->get_result();
-                        $client_wallet = $client_wallet_result->fetch_assoc();
-                        $client_wallet_stmt->close();
-
-                        if ($client_wallet) {
-                            $client_new_balance = $client_wallet['Balance'] + $split_amount;
-                            $client_new_locked = $client_wallet['LockedBalance'] - $amount;
-
-                            $client_wallet_update_sql = "UPDATE wallet SET Balance = ?, LockedBalance = ? WHERE WalletID = ?";
-                            $client_wallet_update_stmt = $conn->prepare($client_wallet_update_sql);
-                            $client_wallet_update_stmt->bind_param('ddi', $client_new_balance, $client_new_locked, $client_wallet['WalletID']);
-                            $client_wallet_update_stmt->execute();
-                            $client_wallet_update_stmt->close();
-
-                            $client_trans_sql = "INSERT INTO wallet_transactions (WalletID, Type, Amount, Status, Description, ReferenceID) VALUES (?, 'refund', ?, 'completed', ?, ?)";
-                            $client_trans_stmt = $conn->prepare($client_trans_sql);
-                            $client_trans_desc = "Dispute resolution (50% split): Partial refund for agreement #$agreement_id";
-                            $client_trans_ref = "dispute_split_client_$agreement_id";
-                            $client_trans_stmt->bind_param('ids', $client_wallet['WalletID'], $split_amount, $client_trans_desc, $client_trans_ref);
-                            $client_trans_stmt->execute();
-                            $client_trans_stmt->close();
-                        }
-
-                        // Pay to freelancer
-                        $freelancer_wallet_sql = "SELECT * FROM wallet WHERE UserID = ?";
-                        $freelancer_wallet_stmt = $conn->prepare($freelancer_wallet_sql);
-                        $freelancer_wallet_stmt->bind_param('i', $freelancer_id);
-                        $freelancer_wallet_stmt->execute();
-                        $freelancer_wallet_result = $freelancer_wallet_stmt->get_result();
-                        $freelancer_wallet = $freelancer_wallet_result->fetch_assoc();
-                        $freelancer_wallet_stmt->close();
-
-                        if ($freelancer_wallet) {
-                            $freelancer_new_balance = $freelancer_wallet['Balance'] + $split_amount;
-
-                            $freelancer_wallet_update_sql = "UPDATE wallet SET Balance = ? WHERE WalletID = ?";
-                            $freelancer_wallet_update_stmt = $conn->prepare($freelancer_wallet_update_sql);
-                            $freelancer_wallet_update_stmt->bind_param('di', $freelancer_new_balance, $freelancer_wallet['WalletID']);
-                            $freelancer_wallet_update_stmt->execute();
-                            $freelancer_wallet_update_stmt->close();
-
-                            $freelancer_trans_sql = "INSERT INTO wallet_transactions (WalletID, Type, Amount, Status, Description, ReferenceID) VALUES (?, 'earning', ?, 'completed', ?, ?)";
-                            $freelancer_trans_stmt = $conn->prepare($freelancer_trans_sql);
-                            $freelancer_trans_desc = "Dispute resolution (50% split): Partial payment for agreement #$agreement_id";
-                            $freelancer_trans_ref = "dispute_split_freelancer_$agreement_id";
-                            $freelancer_trans_stmt->bind_param('ids', $freelancer_wallet['WalletID'], $split_amount, $freelancer_trans_desc, $freelancer_trans_ref);
-                            $freelancer_trans_stmt->execute();
-                            $freelancer_trans_stmt->close();
-                        }
-                        $conn->commit();
-                        $_SESSION['success'] = 'Dispute resolved: Payment split 50-50 between both parties.';
+                        // Note: The resolution action is already stored by the initial UPDATE dispute statement above
+                        $_SESSION['success'] = 'Dispute dismissed: Agreement resumed as ongoing. The dispute was considered a minor case.';
                     } catch (Exception $e) {
-                        $conn->rollback();
-                        $_SESSION['error'] = 'Error processing split payment: ' . $e->getMessage();
+                        $_SESSION['error'] = 'Error resuming agreement: ' . $e->getMessage();
+                    }
+                } elseif ($escrow) {
+                    $escrow_id = $escrow['EscrowID'];
+
+                    // Handle different resolutions
+                    if ($resolution === 'refund_client') {
+                        // Refund money to client
+                        $conn->begin_transaction();
+                        try {
+                            // Update escrow to refunded
+                            $escrow_update_sql = "UPDATE escrow SET Status = 'refunded', ReleasedAt = NOW() WHERE EscrowID = ?";
+                            $escrow_update_stmt = $conn->prepare($escrow_update_sql);
+                            $escrow_update_stmt->bind_param('i', $escrow_id);
+                            $escrow_update_stmt->execute();
+                            $escrow_update_stmt->close();
+
+                            // Get client wallet
+                            $wallet_sql = "SELECT * FROM wallet WHERE UserID = ?";
+                            $wallet_stmt = $conn->prepare($wallet_sql);
+                            $wallet_stmt->bind_param('i', $client_id);
+                            $wallet_stmt->execute();
+                            $wallet_result = $wallet_stmt->get_result();
+                            $wallet = $wallet_result->fetch_assoc();
+                            $wallet_stmt->close();
+
+                            if ($wallet) {
+                                $new_balance = $wallet['Balance'] + $amount;
+                                $new_locked = $wallet['LockedBalance'] - $amount;
+
+                                $wallet_update_sql = "UPDATE wallet SET Balance = ?, LockedBalance = ? WHERE WalletID = ?";
+                                $wallet_update_stmt = $conn->prepare($wallet_update_sql);
+                                $wallet_update_stmt->bind_param('ddi', $new_balance, $new_locked, $wallet['WalletID']);
+                                $wallet_update_stmt->execute();
+                                $wallet_update_stmt->close();
+
+                                // Record transaction
+                                $trans_sql = "INSERT INTO wallet_transactions (WalletID, Type, Amount, Status, Description, ReferenceID) VALUES (?, 'refund', ?, 'completed', ?, ?)";
+                                $trans_stmt = $conn->prepare($trans_sql);
+                                $wallet_id = $wallet['WalletID'];
+                                $trans_desc = "Dispute refund for agreement #$agreement_id: $resolution_notes";
+                                $trans_ref = "dispute_refund_$agreement_id";
+                                $trans_stmt->bind_param('idss', $wallet_id, $amount, $trans_desc, $trans_ref);
+                                $trans_stmt->execute();
+                                $trans_stmt->close();
+                            }
+                            $conn->commit();
+                            $_SESSION['success'] = 'Dispute resolved: Funds refunded to client.';
+                        } catch (Exception $e) {
+                            $conn->rollback();
+                            $_SESSION['error'] = 'Error processing refund: ' . $e->getMessage();
+                        }
+                    } elseif ($resolution === 'release_to_freelancer') {
+                        // Release money to freelancer
+                        $conn->begin_transaction();
+                        try {
+                            // Update escrow to released
+                            $escrow_update_sql = "UPDATE escrow SET Status = 'released', ReleasedAt = NOW() WHERE EscrowID = ?";
+                            $escrow_update_stmt = $conn->prepare($escrow_update_sql);
+                            $escrow_update_stmt->bind_param('i', $escrow_id);
+                            $escrow_update_stmt->execute();
+                            $escrow_update_stmt->close();
+
+                            // Get freelancer wallet
+                            $wallet_sql = "SELECT * FROM wallet WHERE UserID = ?";
+                            $wallet_stmt = $conn->prepare($wallet_sql);
+                            $wallet_stmt->bind_param('i', $freelancer_id);
+                            $wallet_stmt->execute();
+                            $wallet_result = $wallet_stmt->get_result();
+                            $wallet = $wallet_result->fetch_assoc();
+                            $wallet_stmt->close();
+
+                            if ($wallet) {
+                                $new_balance = $wallet['Balance'] + $amount;
+
+                                $wallet_update_sql = "UPDATE wallet SET Balance = ? WHERE WalletID = ?";
+                                $wallet_update_stmt = $conn->prepare($wallet_update_sql);
+                                $wallet_update_stmt->bind_param('di', $new_balance, $wallet['WalletID']);
+                                $wallet_update_stmt->execute();
+                                $wallet_update_stmt->close();
+
+                                // Record transaction
+                                $trans_sql = "INSERT INTO wallet_transactions (WalletID, Type, Amount, Status, Description, ReferenceID) VALUES (?, 'earning', ?, 'completed', ?, ?)";
+                                $trans_stmt = $conn->prepare($trans_sql);
+                                $wallet_id = $wallet['WalletID'];
+                                $trans_desc = "Dispute resolution: Payment released for agreement #$agreement_id: $resolution_notes";
+                                $trans_ref = "dispute_release_$agreement_id";
+                                $trans_stmt->bind_param('idss', $wallet_id, $amount, $trans_desc, $trans_ref);
+                                $trans_stmt->execute();
+                                $trans_stmt->close();
+                            }
+                            $conn->commit();
+                            $_SESSION['success'] = 'Dispute resolved: Funds released to freelancer.';
+                        } catch (Exception $e) {
+                            $conn->rollback();
+                            $_SESSION['error'] = 'Error processing payment: ' . $e->getMessage();
+                        }
+                    } elseif ($resolution === 'split_payment') {
+                        // Split payment 50-50
+                        $conn->begin_transaction();
+                        try {
+                            $split_amount = $amount / 2;
+
+                            // Update escrow to released
+                            $escrow_update_sql = "UPDATE escrow SET Status = 'released', ReleasedAt = NOW() WHERE EscrowID = ?";
+                            $escrow_update_stmt = $conn->prepare($escrow_update_sql);
+                            $escrow_update_stmt->bind_param('i', $escrow_id);
+                            $escrow_update_stmt->execute();
+                            $escrow_update_stmt->close();
+
+                            // Refund to client
+                            $client_wallet_sql = "SELECT * FROM wallet WHERE UserID = ?";
+                            $client_wallet_stmt = $conn->prepare($client_wallet_sql);
+                            $client_wallet_stmt->bind_param('i', $client_id);
+                            $client_wallet_stmt->execute();
+                            $client_wallet_result = $client_wallet_stmt->get_result();
+                            $client_wallet = $client_wallet_result->fetch_assoc();
+                            $client_wallet_stmt->close();
+
+                            if ($client_wallet) {
+                                $client_new_balance = $client_wallet['Balance'] + $split_amount;
+                                $client_new_locked = $client_wallet['LockedBalance'] - $amount;
+
+                                $client_wallet_update_sql = "UPDATE wallet SET Balance = ?, LockedBalance = ? WHERE WalletID = ?";
+                                $client_wallet_update_stmt = $conn->prepare($client_wallet_update_sql);
+                                $client_wallet_update_stmt->bind_param('ddi', $client_new_balance, $client_new_locked, $client_wallet['WalletID']);
+                                $client_wallet_update_stmt->execute();
+                                $client_wallet_update_stmt->close();
+
+                                $client_trans_sql = "INSERT INTO wallet_transactions (WalletID, Type, Amount, Status, Description, ReferenceID) VALUES (?, 'refund', ?, 'completed', ?, ?)";
+                                $client_trans_stmt = $conn->prepare($client_trans_sql);
+                                $client_wallet_id = $client_wallet['WalletID'];
+                                $client_trans_desc = "Dispute resolution (50% split): Partial refund for agreement #$agreement_id";
+                                $client_trans_ref = "dispute_split_client_$agreement_id";
+                                $client_trans_stmt->bind_param('idss', $client_wallet_id, $split_amount, $client_trans_desc, $client_trans_ref);
+                                $client_trans_stmt->execute();
+                                $client_trans_stmt->close();
+                            }
+
+                            // Pay to freelancer
+                            $freelancer_wallet_sql = "SELECT * FROM wallet WHERE UserID = ?";
+                            $freelancer_wallet_stmt = $conn->prepare($freelancer_wallet_sql);
+                            $freelancer_wallet_stmt->bind_param('i', $freelancer_id);
+                            $freelancer_wallet_stmt->execute();
+                            $freelancer_wallet_result = $freelancer_wallet_stmt->get_result();
+                            $freelancer_wallet = $freelancer_wallet_result->fetch_assoc();
+                            $freelancer_wallet_stmt->close();
+
+                            if ($freelancer_wallet) {
+                                $freelancer_new_balance = $freelancer_wallet['Balance'] + $split_amount;
+
+                                $freelancer_wallet_update_sql = "UPDATE wallet SET Balance = ? WHERE WalletID = ?";
+                                $freelancer_wallet_update_stmt = $conn->prepare($freelancer_wallet_update_sql);
+                                $freelancer_wallet_update_stmt->bind_param('di', $freelancer_new_balance, $freelancer_wallet['WalletID']);
+                                $freelancer_wallet_update_stmt->execute();
+                                $freelancer_wallet_update_stmt->close();
+
+                                $freelancer_trans_sql = "INSERT INTO wallet_transactions (WalletID, Type, Amount, Status, Description, ReferenceID) VALUES (?, 'earning', ?, 'completed', ?, ?)";
+                                $freelancer_trans_stmt = $conn->prepare($freelancer_trans_sql);
+                                $freelancer_wallet_id = $freelancer_wallet['WalletID'];
+                                $freelancer_trans_desc = "Dispute resolution (50% split): Partial payment for agreement #$agreement_id";
+                                $freelancer_trans_ref = "dispute_split_freelancer_$agreement_id";
+                                $freelancer_trans_stmt->bind_param('idss', $freelancer_wallet_id, $split_amount, $freelancer_trans_desc, $freelancer_trans_ref);
+                                $freelancer_trans_stmt->execute();
+                                $freelancer_trans_stmt->close();
+                            }
+                            $conn->commit();
+                            $_SESSION['success'] = 'Dispute resolved: Payment split 50-50 between both parties.';
+                        } catch (Exception $e) {
+                            $conn->rollback();
+                            $_SESSION['error'] = 'Error processing split payment: ' . $e->getMessage();
+                        }
                     }
                 }
             }
         }
-    }
 
-    header('Location: admin_manage_disputes.php');
-    exit();
+        header('Location: admin_manage_disputes.php');
+        exit();
+    }
 }
 
 // Get filter and search parameters
@@ -237,6 +387,8 @@ $disputes_sql = "SELECT
     d.EvidenceFile,
     d.Status,
     d.CreatedAt,
+    d.ResolutionAction,
+    d.AdminNotesText,
     a.ProjectTitle,
     a.PaymentAmount,
     a.FreelancerID,
@@ -300,363 +452,7 @@ $conn->close();
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Momo+Trust+Display&display=swap">
     <link rel="stylesheet" href="../assets/css/admin.css">
-    <style>
-        body {
-            font-family: 'Momo Trust Display', sans-serif;
-        }
-
-        h1,
-        h2,
-        h3,
-        h4,
-        h5,
-        h6 {
-            font-family: 'Momo Trust Display', sans-serif;
-            font-weight: 500;
-        }
-
-        p,
-        .error-message,
-        .form-control,
-        select,
-        input[type="text"],
-        button,
-        a {
-            font-family: 'Inter', sans-serif;
-        }
-
-        table {
-            font-family: 'Inter', sans-serif;
-        }
-
-        .table-header h2 {
-            font-family: 'Momo Trust Display', sans-serif;
-            font-weight: 500;
-        }
-
-        .filter-section {
-            background: linear-gradient(135deg, #ffffff 0%, #f8fafb 100%);
-            padding: 24px;
-            border-radius: 12px;
-            margin-bottom: 24px;
-            border: 1px solid #e5e7eb;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        }
-
-        .filter-form {
-            display: flex;
-            gap: 16px;
-            width: 100%;
-            align-items: flex-end;
-            flex-wrap: wrap;
-        }
-
-        .filter-input-group {
-            flex: 1;
-            min-width: 200px;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .filter-input-label {
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: #374151;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .filter-input {
-            padding: 10px 14px;
-            border-radius: 8px;
-            border: 1.5px solid #e5e7eb;
-            font-size: 0.9375rem;
-            font-family: 'Inter', sans-serif;
-            background-color: #ffffff;
-            transition: all 0.3s ease;
-            color: #374151;
-            width: 100%;
-        }
-
-        .filter-input::placeholder {
-            color: #9ca3af;
-        }
-
-        .filter-input:focus {
-            outline: none;
-            border-color: rgb(159, 232, 112);
-            background-color: #ffffff;
-            box-shadow: 0 0 0 3px rgba(159, 232, 112, 0.1);
-        }
-
-        .filter-select {
-            padding: 10px 14px;
-            border-radius: 8px;
-            border: 1.5px solid #e5e7eb;
-            font-size: 0.9375rem;
-            font-family: 'Inter', sans-serif;
-            background-color: #ffffff;
-            transition: all 0.3s ease;
-            color: #374151;
-            cursor: pointer;
-            min-width: 160px;
-        }
-
-        .filter-select:focus {
-            outline: none;
-            border-color: rgb(159, 232, 112);
-            box-shadow: 0 0 0 3px rgba(159, 232, 112, 0.1);
-        }
-
-        .filter-select:hover {
-            border-color: rgb(159, 232, 112);
-        }
-
-        .filter-button {
-            padding: 10px 24px;
-            background: linear-gradient(135deg, rgb(159, 232, 112) 0%, rgb(139, 212, 92) 100%);
-            color: #ffffff;
-            border: none;
-            border-radius: 8px;
-            font-size: 0.9375rem;
-            font-weight: 600;
-            font-family: 'Inter', sans-serif;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            box-shadow: 0 4px 12px rgba(159, 232, 112, 0.3);
-            white-space: nowrap;
-        }
-
-        .filter-button:hover {
-            background: linear-gradient(135deg, rgb(139, 212, 92) 0%, rgb(119, 192, 72) 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(159, 232, 112, 0.4);
-        }
-
-        .dispute-badge {
-            display: inline-block;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.875rem;
-            font-weight: 600;
-        }
-
-        .badge-disputed {
-            background-color: #fee2e2;
-            color: #991b1b;
-        }
-
-        .badge-under-review {
-            background-color: #fef3c7;
-            color: #92400e;
-        }
-
-        .badge-resolved {
-            background-color: #dbeafe;
-            color: #1e40af;
-        }
-
-        .badge-rejected {
-            background-color: #f3e8e8;
-            color: #7c2d12;
-        }
-
-        .resolve-btn {
-            padding: 8px 16px;
-            background-color: #ef4444;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 0.875rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .resolve-btn:hover {
-            background-color: #dc2626;
-            transform: translateY(-2px);
-        }
-
-        .details-btn {
-            padding: 8px 16px;
-            background-color: #3b82f6;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 0.875rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .details-btn:hover {
-            background-color: #2563eb;
-            transform: translateY(-2px);
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 10000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal.show {
-            display: flex;
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: 12px;
-            padding: 32px;
-            max-width: 600px;
-            width: 90%;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            animation: slideUp 0.3s ease-out;
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .modal-header {
-            margin-bottom: 24px;
-        }
-
-        .modal-header h2 {
-            margin: 0 0 8px;
-            font-size: 1.5rem;
-            color: #1f2937;
-        }
-
-        .modal-header p {
-            margin: 0;
-            color: #6b7280;
-            font-size: 0.9375rem;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #374151;
-            font-size: 0.9375rem;
-        }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 10px 14px;
-            border: 1.5px solid #e5e7eb;
-            border-radius: 8px;
-            font-size: 0.9375rem;
-            font-family: 'Inter', sans-serif;
-            transition: all 0.3s ease;
-            box-sizing: border-box;
-        }
-
-        .form-group textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: rgb(159, 232, 112);
-            box-shadow: 0 0 0 3px rgba(159, 232, 112, 0.1);
-        }
-
-        .modal-buttons {
-            display: flex;
-            gap: 12px;
-            justify-content: flex-end;
-            margin-top: 24px;
-        }
-
-        .modal-buttons button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: 'Inter', sans-serif;
-        }
-
-        .btn-cancel {
-            background-color: #e5e7eb;
-            color: #374151;
-        }
-
-        .btn-cancel:hover {
-            background-color: #d1d5db;
-        }
-
-        .btn-submit {
-            background: linear-gradient(135deg, rgb(159, 232, 112) 0%, rgb(139, 212, 92) 100%);
-            color: white;
-        }
-
-        .btn-submit:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(159, 232, 112, 0.3);
-        }
-
-        @media (max-width: 768px) {
-            .filter-form {
-                flex-direction: column;
-                gap: 12px;
-                align-items: stretch;
-            }
-
-            .filter-input-group {
-                width: 100%;
-                min-width: unset;
-            }
-
-            .filter-select {
-                width: 100%;
-                min-width: unset;
-            }
-
-            .filter-button {
-                width: 100%;
-            }
-
-            .filter-section {
-                padding: 16px;
-            }
-
-            .modal-content {
-                padding: 20px;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="../assets/css/disputes.css">
 </head>
 
 <body class="admin-layout">
@@ -744,9 +540,9 @@ $conn->close();
                                     <tr>
                                         <td>
                                             <strong><a href="<?php echo htmlspecialchars($dispute['agreeementPath'] ?? '#'); ?>" target="_blank" style="color: #3b82f6; text-decoration: none; cursor: pointer;">
-                                                <?php echo htmlspecialchars($dispute['ProjectTitle']); ?>
-                                                <i class="fas fa-external-link-alt" style="font-size: 0.75rem; margin-left: 4px;"></i>
-                                            </a></strong>
+                                                    <?php echo htmlspecialchars($dispute['ProjectTitle']); ?>
+                                                    <i class="fas fa-external-link-alt" style="font-size: 0.75rem; margin-left: 4px;"></i>
+                                                </a></strong>
                                             <div style="font-size: 0.875rem; color: #6b7280;">Agreement #<?php echo $dispute['AgreementID']; ?></div>
                                         </td>
                                         <td>
@@ -773,14 +569,26 @@ $conn->close();
                                             <?php echo date('M d, Y', strtotime($dispute['CreatedAt'])); ?>
                                         </td>
                                         <td>
-                                            <div style="display: flex; gap: 8px;">
+                                            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                                                 <button type="button" class="resolve-btn" style="background-color: #3b82f6;" data-dispute-id="<?php echo $dispute['DisputeID']; ?>" data-reason="<?php echo htmlspecialchars($dispute['ReasonText'] ?? '', ENT_QUOTES); ?>" data-evidence="<?php echo htmlspecialchars($dispute['EvidenceFile'] ?? '', ENT_QUOTES); ?>" onclick="openDetailModalFromButton(this)">
                                                     <i class="fas fa-eye"></i> Details
                                                 </button>
                                                 <?php if (in_array($dispute['Status'], ['open', 'under_review'])): ?>
-                                                    <button type="button" class="resolve-btn" onclick="openResolveModal(<?php echo $dispute['DisputeID']; ?>, <?php echo $dispute['AgreementID']; ?>, '<?php echo htmlspecialchars(str_replace("'", "\\'", $dispute['ProjectTitle']), ENT_QUOTES); ?>', <?php echo $dispute['PaymentAmount']; ?>)">
+                                                    <button type="button" class="resolve-btn" data-dispute-id="<?php echo $dispute['DisputeID']; ?>" data-agreement-id="<?php echo $dispute['AgreementID']; ?>" data-project-title="<?php echo htmlspecialchars($dispute['ProjectTitle'], ENT_QUOTES); ?>" data-amount="<?php echo $dispute['PaymentAmount']; ?>" onclick="openResolveModalFromButton(this)">
                                                         Resolve
                                                     </button>
+                                                <?php elseif ($dispute['Status'] === 'resolved'): ?>
+                                                    <button type="button" class="resolve-btn" style="background-color: #10b981;" data-resolution-action="<?php echo htmlspecialchars($dispute['ResolutionAction'] ?? '', ENT_QUOTES); ?>" data-resolution-notes="<?php echo htmlspecialchars($dispute['AdminNotesText'] ?? '', ENT_QUOTES); ?>" onclick="openResolutionModalFromButton(this)">
+                                                        <i class="fas fa-check-circle"></i> View Resolution
+                                                    </button>
+                                                    <form method="POST" action="admin_manage_disputes.php" style="display: inline;">
+                                                        <input type="hidden" name="action" value="unresolve_dispute">
+                                                        <input type="hidden" name="dispute_id" value="<?php echo $dispute['DisputeID']; ?>">
+                                                        <input type="hidden" name="agreement_id" value="<?php echo $dispute['AgreementID']; ?>">
+                                                        <button type="submit" class="resolve-btn" style="background-color: #ef4444;" onclick="return confirm('Are you sure you want to revert this dispute to open status? Funds will be deducted back from wallets.');">
+                                                            <i class="fas fa-undo"></i> Unresolve
+                                                        </button>
+                                                    </form>
                                                 <?php endif; ?>
                                             </div>
                                         </td>
@@ -826,6 +634,30 @@ $conn->close();
         </div>
     </div>
 
+    <!-- Resolution Details Modal -->
+    <div id="resolutionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Resolution Details</h2>
+                <p>View how this dispute was resolved</p>
+            </div>
+
+            <div class="form-group">
+                <label>Resolution Action</label>
+                <div id="resolution_action_display" style="background: #f3f4f6; padding: 12px; border-radius: 8px; border: 1px solid #e5e7eb; min-height: 40px; display: flex; align-items: center; color: #374151; font-weight: 600;"></div>
+            </div>
+
+            <div class="form-group">
+                <label>Admin Notes</label>
+                <div id="resolution_notes_display" style="background: #f3f4f6; padding: 12px; border-radius: 8px; border: 1px solid #e5e7eb; min-height: 80px; white-space: pre-wrap; word-break: break-word;"></div>
+            </div>
+
+            <div class="modal-buttons">
+                <button type="button" class="btn-cancel" onclick="closeResolutionModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Resolve Dispute Modal -->
     <div id="resolveModal" class="modal">
         <div class="modal-content">
@@ -834,19 +666,19 @@ $conn->close();
                 <p>Choose a resolution for this dispute</p>
             </div>
 
-            <form method="POST" action="admin_manage_disputes.php">
+            <form method="POST" action="admin_manage_disputes.php" id="resolveForm">
                 <input type="hidden" name="action" value="resolve_dispute">
                 <input type="hidden" name="dispute_id" id="dispute_id">
                 <input type="hidden" name="agreement_id" id="dispute_agreement_id">
 
                 <div class="form-group">
                     <label>Project</label>
-                    <input type="text" id="dispute_project_title" readonly>
+                    <div id="dispute_project_title" style="background: #f3f4f6; padding: 10px 14px; border-radius: 8px; border: 1px solid #e5e7eb; min-height: 40px; display: flex; align-items: center; color: #374151;"></div>
                 </div>
 
                 <div class="form-group">
                     <label>Amount</label>
-                    <input type="text" id="dispute_amount" readonly>
+                    <div id="dispute_amount" style="background: #f3f4f6; padding: 10px 14px; border-radius: 8px; border: 1px solid #e5e7eb; min-height: 40px; display: flex; align-items: center; color: #374151;"></div>
                 </div>
 
                 <div class="form-group">
@@ -855,7 +687,7 @@ $conn->close();
                         <option value="">-- Select Resolution --</option>
                         <option value="refund_client">Refund Client (Full Amount)</option>
                         <option value="release_to_freelancer">Release to Freelancer (Full Amount)</option>
-                        <option value="split_payment">Split Payment (50-50)</option>
+                        <option value="resume_ongoing">Resume Agreement (Ongoing) - Minor Dispute</option>
                     </select>
                 </div>
 
@@ -876,6 +708,7 @@ $conn->close();
         document.addEventListener('DOMContentLoaded', function() {
             const detailModal = document.getElementById('detailModal');
             const resolveModal = document.getElementById('resolveModal');
+            const resolutionModal = document.getElementById('resolutionModal');
 
             if (detailModal) {
                 detailModal.addEventListener('click', function(e) {
@@ -889,6 +722,14 @@ $conn->close();
                 resolveModal.addEventListener('click', function(e) {
                     if (e.target === this) {
                         closeResolveModal();
+                    }
+                });
+            }
+
+            if (resolutionModal) {
+                resolutionModal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        closeResolutionModal();
                     }
                 });
             }
@@ -924,11 +765,49 @@ $conn->close();
             }
         }
 
-        function openResolveModal(disputeId, agreementId, projectTitle, amount) {
+        function openResolutionModalFromButton(button) {
+            const resolutionAction = button.getAttribute('data-resolution-action');
+            const resolutionNotes = button.getAttribute('data-resolution-notes');
+
+            const resolutionModal = document.getElementById('resolutionModal');
+            if (!resolutionModal) {
+                console.error('Resolution modal not found');
+                return;
+            }
+
+            // Format resolution action text
+            const actionText = resolutionAction ?
+                resolutionAction.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) :
+                'Unknown';
+
+            document.getElementById('resolution_action_display').textContent = actionText;
+            document.getElementById('resolution_notes_display').textContent = resolutionNotes || 'No notes provided';
+
+            resolutionModal.classList.add('show');
+        }
+
+        function closeResolutionModal() {
+            const resolutionModal = document.getElementById('resolutionModal');
+            if (resolutionModal) {
+                resolutionModal.classList.remove('show');
+            }
+        }
+
+        function openResolveModalFromButton(button) {
+            const disputeId = button.getAttribute('data-dispute-id');
+            const agreementId = button.getAttribute('data-agreement-id');
+            const projectTitle = button.getAttribute('data-project-title');
+            const amount = button.getAttribute('data-amount');
+
+            if (!disputeId || !agreementId) {
+                console.error('Missing required dispute or agreement ID');
+                return;
+            }
+
             document.getElementById('dispute_id').value = disputeId;
             document.getElementById('dispute_agreement_id').value = agreementId;
-            document.getElementById('dispute_project_title').value = projectTitle;
-            document.getElementById('dispute_amount').value = 'RM ' + parseFloat(amount).toFixed(2);
+            document.getElementById('dispute_project_title').textContent = projectTitle || 'Unknown Project';
+            document.getElementById('dispute_amount').textContent = 'RM ' + parseFloat(amount).toFixed(2);
             document.getElementById('resolveModal').classList.add('show');
         }
 
