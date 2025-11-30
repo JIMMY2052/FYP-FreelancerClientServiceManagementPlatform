@@ -63,6 +63,20 @@ $filter_type = $_GET['type'] ?? 'all';
 $search_query = $_GET['search'] ?? '';
 $sort_by = $_GET['sort'] ?? 'date_desc';
 
+// Count users by type for tabs
+$count_sql = "SELECT 'freelancer' as type, COUNT(*) as count FROM freelancer UNION ALL SELECT 'client' as type, COUNT(*) as count FROM client";
+$count_result = $conn->query($count_sql);
+$user_counts = ['all' => 0, 'freelancer' => 0, 'client' => 0];
+
+while ($row = $count_result->fetch_assoc()) {
+    if ($row['type'] === 'freelancer') {
+        $user_counts['freelancer'] += $row['count'];
+    } elseif ($row['type'] === 'client') {
+        $user_counts['client'] += $row['count'];
+    }
+    $user_counts['all'] += $row['count'];
+}
+
 // Build freelancer query
 $freelancer_query = "SELECT FreelancerID, FirstName, LastName, Email, Status, JoinedDate FROM freelancer";
 if (!empty($search_query)) {
@@ -559,11 +573,11 @@ $conn->close();
                     </div>
                 <?php endif; ?>
 
-                <!-- Filter Section -->
-                <div class="filter-section">
+                <!-- Search Bar -->
+                <div style="margin-bottom: 24px;">
                     <form method="GET" action="admin_manage_users.php" class="filter-form">
-                        <div class="filter-input-group" style="flex: 2;">
-                            <label class="filter-input-label">Search</label>
+                        <div class="filter-input-group" style="flex: 1;">
+                            <input type="hidden" name="type" value="<?php echo htmlspecialchars($filter_type); ?>">
                             <input
                                 type="text"
                                 name="search"
@@ -571,18 +585,21 @@ $conn->close();
                                 class="filter-input"
                                 value="<?php echo htmlspecialchars($search_query); ?>">
                         </div>
-
-                        <div class="filter-input-group">
-                            <label class="filter-input-label">User Type</label>
-                            <select name="type" class="filter-select">
-                                <option value="all" <?php echo $filter_type === 'all' ? 'selected' : ''; ?>>All Users</option>
-                                <option value="freelancer" <?php echo $filter_type === 'freelancer' ? 'selected' : ''; ?>>Freelancers</option>
-                                <option value="client" <?php echo $filter_type === 'client' ? 'selected' : ''; ?>>Clients</option>
-                            </select>
-                        </div>
-
-                        <button type="submit" class="filter-button"><i class="fas fa-search"></i> Filter</button>
+                        <button type="submit" class="filter-button" style="margin-top: 0;"><i class="fas fa-search"></i> Search</button>
                     </form>
+                </div>
+
+                <!-- Filter Tabs -->
+                <div style="display: flex; gap: 15px; margin: 30px 0; border-bottom: 2px solid #e5e7eb; padding-bottom: 0;">
+                    <a href="?type=all<?php echo !empty($search_query) ? '&search=' . htmlspecialchars($search_query) : ''; ?>" style="padding: 12px 20px; text-decoration: none; font-size: 14px; font-weight: 600; color: <?php echo $filter_type === 'all' ? '#22c55e' : '#7f8c8d'; ?>; border-bottom: 3px solid <?php echo $filter_type === 'all' ? '#22c55e' : 'transparent'; ?>; transition: all 0.3s ease;">
+                        All <span style="background: #e9ecef; color: #2c3e50; border-radius: 12px; padding: 2px 8px; margin-left: 6px; font-size: 12px; font-weight: 700;"><?php echo $user_counts['all']; ?></span>
+                    </a>
+                    <a href="?type=freelancer<?php echo !empty($search_query) ? '&search=' . htmlspecialchars($search_query) : ''; ?>" style="padding: 12px 20px; text-decoration: none; font-size: 14px; font-weight: 600; color: <?php echo $filter_type === 'freelancer' ? '#22c55e' : '#7f8c8d'; ?>; border-bottom: 3px solid <?php echo $filter_type === 'freelancer' ? '#22c55e' : 'transparent'; ?>; transition: all 0.3s ease;">
+                        Freelancer <span style="background: #e9ecef; color: #2c3e50; border-radius: 12px; padding: 2px 8px; margin-left: 6px; font-size: 12px; font-weight: 700;"><?php echo $user_counts['freelancer']; ?></span>
+                    </a>
+                    <a href="?type=client<?php echo !empty($search_query) ? '&search=' . htmlspecialchars($search_query) : ''; ?>" style="padding: 12px 20px; text-decoration: none; font-size: 14px; font-weight: 600; color: <?php echo $filter_type === 'client' ? '#22c55e' : '#7f8c8d'; ?>; border-bottom: 3px solid <?php echo $filter_type === 'client' ? '#22c55e' : 'transparent'; ?>; transition: all 0.3s ease;">
+                        Client <span style="background: #e9ecef; color: #2c3e50; border-radius: 12px; padding: 2px 8px; margin-left: 6px; font-size: 12px; font-weight: 700;"><?php echo $user_counts['client']; ?></span>
+                    </a>
                 </div>
 
                 <!-- Users Table -->

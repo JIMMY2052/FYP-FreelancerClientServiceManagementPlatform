@@ -385,6 +385,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 $filter_status = $_GET['status'] ?? 'open';
 $search_query = $_GET['search'] ?? '';
 
+// Count disputes by status for tabs
+$count_sql = "SELECT Status, COUNT(*) as count FROM dispute GROUP BY Status";
+$count_result = $conn->query($count_sql);
+$status_counts = ['all' => 0, 'open' => 0, 'resolved' => 0];
+
+while ($row = $count_result->fetch_assoc()) {
+    if ($row['Status'] === 'open') {
+        $status_counts['open'] += $row['count'];
+    } elseif ($row['Status'] === 'resolved') {
+        $status_counts['resolved'] += $row['count'];
+    }
+    $status_counts['all'] += $row['count'];
+}
+
 // Build query for disputed agreements
 $disputes_sql = "SELECT 
     d.DisputeID,
@@ -412,12 +426,10 @@ JOIN freelancer f ON a.FreelancerID = f.FreelancerID
 JOIN client c ON a.ClientID = c.ClientID
 WHERE 1=1";
 
-if ($filter_status === 'disputed') {
+if ($filter_status === 'open') {
     $disputes_sql .= " AND d.Status = 'open'";
 } elseif ($filter_status === 'resolved') {
     $disputes_sql .= " AND d.Status = 'resolved'";
-} elseif ($filter_status === 'under_review') {
-    $disputes_sql .= " AND d.Status = 'under_review'";
 }
 
 if (!empty($search_query)) {
@@ -480,14 +492,19 @@ $conn->close();
                     </div>
                 </div>
 
-                <?php if (isset($_SESSION['success'])): ?>
-                    <div class="error-message" style="background-color: #d1fae5; border-color: #6ee7b7; color: #065f46;">
-                        <?php
-                        echo htmlspecialchars($_SESSION['success']);
-                        unset($_SESSION['success']);
-                        ?>
-                    </div>
-                <?php endif; ?>
+                <!-- Filter Tabs -->
+                <div style="display: flex; gap: 15px; margin: 30px 0; border-bottom: 2px solid #e5e7eb; padding-bottom: 0;">
+                    <a href="?status=all" style="padding: 12px 20px; text-decoration: none; font-size: 14px; font-weight: 600; color: <?php echo $filter_status === 'all' ? '#22c55e' : '#7f8c8d'; ?>; border-bottom: 3px solid <?php echo $filter_status === 'all' ? '#22c55e' : 'transparent'; ?>; transition: all 0.3s ease;">
+                        All <span style="background: #e9ecef; color: #2c3e50; border-radius: 12px; padding: 2px 8px; margin-left: 6px; font-size: 12px; font-weight: 700;"><?php echo $status_counts['all']; ?></span>
+                    </a>
+                    <a href="?status=open" style="padding: 12px 20px; text-decoration: none; font-size: 14px; font-weight: 600; color: <?php echo $filter_status === 'open' ? '#22c55e' : '#7f8c8d'; ?>; border-bottom: 3px solid <?php echo $filter_status === 'open' ? '#22c55e' : 'transparent'; ?>; transition: all 0.3s ease;">
+                        Open <span style="background: #e9ecef; color: #2c3e50; border-radius: 12px; padding: 2px 8px; margin-left: 6px; font-size: 12px; font-weight: 700;"><?php echo $status_counts['open']; ?></span>
+                    </a>
+                    <a href="?status=resolved" style="padding: 12px 20px; text-decoration: none; font-size: 14px; font-weight: 600; color: <?php echo $filter_status === 'resolved' ? '#22c55e' : '#7f8c8d'; ?>; border-bottom: 3px solid <?php echo $filter_status === 'resolved' ? '#22c55e' : 'transparent'; ?>; transition: all 0.3s ease;">
+                        Resolved <span style="background: #e9ecef; color: #2c3e50; border-radius: 12px; padding: 2px 8px; margin-left: 6px; font-size: 12px; font-weight: 700;"><?php echo $status_counts['resolved']; ?></span>
+                    </a>
+                </div>
+
 
                 <?php if (isset($_SESSION['error'])): ?>
                     <div class="error-message">
@@ -497,33 +514,6 @@ $conn->close();
                         ?>
                     </div>
                 <?php endif; ?>
-
-                <!-- Filter Section -->
-                <div class="filter-section">
-                    <form method="GET" action="admin_manage_disputes.php" class="filter-form">
-                        <div class="filter-input-group" style="flex: 2;">
-                            <label class="filter-input-label">Search Project</label>
-                            <input
-                                type="text"
-                                name="search"
-                                placeholder="Search by project title, freelancer, or client..."
-                                class="filter-input"
-                                value="<?php echo htmlspecialchars($search_query); ?>">
-                        </div>
-
-                        <div class="filter-input-group">
-                            <label class="filter-input-label">Status</label>
-                            <select name="status" class="filter-select">
-                                <option value="open" <?php echo $filter_status === 'open' ? 'selected' : ''; ?>>Open</option>
-                                <option value="under_review" <?php echo $filter_status === 'under_review' ? 'selected' : ''; ?>>Under Review</option>
-                                <option value="resolved" <?php echo $filter_status === 'resolved' ? 'selected' : ''; ?>>Resolved</option>
-                                <option value="all" <?php echo $filter_status === 'all' ? 'selected' : ''; ?>>All</option>
-                            </select>
-                        </div>
-
-                        <button type="submit" class="filter-button"><i class="fas fa-search"></i> Filter</button>
-                    </form>
-                </div>
 
                 <!-- Disputes Table -->
                 <div class="table-container">
@@ -589,14 +579,9 @@ $conn->close();
                                                     <button type="button" class="resolve-btn" style="background-color: #10b981;" data-resolution-action="<?php echo htmlspecialchars($dispute['ResolutionAction'] ?? '', ENT_QUOTES); ?>" data-resolution-notes="<?php echo htmlspecialchars($dispute['AdminNotesText'] ?? '', ENT_QUOTES); ?>" onclick="openResolutionModalFromButton(this)">
                                                         <i class="fas fa-check-circle"></i> View Resolution
                                                     </button>
-                                                    <form method="POST" action="admin_manage_disputes.php" style="display: inline;">
-                                                        <input type="hidden" name="action" value="unresolve_dispute">
-                                                        <input type="hidden" name="dispute_id" value="<?php echo $dispute['DisputeID']; ?>">
-                                                        <input type="hidden" name="agreement_id" value="<?php echo $dispute['AgreementID']; ?>">
-                                                        <button type="submit" class="resolve-btn" style="background-color: #ef4444;" onclick="return confirm('Are you sure you want to revert this dispute to open status? Funds will be deducted back from wallets.');">
-                                                            <i class="fas fa-undo"></i> Unresolve
-                                                        </button>
-                                                    </form>
+                                                    <button type="button" class="resolve-btn" style="background-color: #ef4444;" data-dispute-id="<?php echo $dispute['DisputeID']; ?>" data-agreement-id="<?php echo $dispute['AgreementID']; ?>" onclick="openUnresolveConfirmationModal(this)">
+                                                        <i class="fas fa-undo"></i> Unresolve
+                                                    </button>
                                                 <?php endif; ?>
                                             </div>
                                         </td>
@@ -712,11 +697,74 @@ $conn->close();
         </div>
     </div>
 
+    <!-- Unresolve Confirmation Modal -->
+    <div id="unresolveConfirmationModal" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2>Confirm Unresolve</h2>
+                <p>Are you sure you want to revert this dispute?</p>
+            </div>
+
+            <div style="margin: 20px 0; padding: 16px; background: #fef2f2; border-left: 4px solid #ef4444; border-radius: 6px;">
+                <p style="margin: 0; color: #7f1d1d; font-size: 14px;">
+                    <i class="fas fa-exclamation-triangle" style="margin-right: 8px;"></i>
+                    This will revert the dispute to open status and deduct funds from wallets.
+                </p>
+            </div>
+
+            <div style="background: #f3f4f6; padding: 12px; border-radius: 8px; margin: 15px 0; font-size: 14px;">
+                <p style="margin: 8px 0;"><strong>Dispute ID:</strong> <span id="unresolve_dispute_id"></span></p>
+                <p style="margin: 8px 0; color: #7f1d1d; font-weight: 600;"><i class="fas fa-info-circle" style="margin-right: 6px;"></i>Funds will be deducted back from user wallets</p>
+            </div>
+
+            <div class="modal-buttons" style="gap: 10px;">
+                <button type="button" class="btn-cancel" onclick="closeUnresolveConfirmationModal()" style="flex: 1;">Cancel</button>
+                <button type="button" class="btn-submit" onclick="submitUnresolveForm()" style="flex: 1; background-color: #ef4444;">Yes, Unresolve</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden unresolve form -->
+    <form method="POST" action="admin_manage_disputes.php" id="unresolveForm" style="display: none;">
+        <input type="hidden" name="action" value="unresolve_dispute">
+        <input type="hidden" name="dispute_id" id="unresolve_dispute_id_input">
+        <input type="hidden" name="agreement_id" id="unresolve_agreement_id_input">
+    </form>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmationModal" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2>Confirm Resolution</h2>
+                <p>Are you sure you want to resolve this dispute?</p>
+            </div>
+
+            <div style="margin: 20px 0; padding: 16px; background: #f0f9ff; border-left: 4px solid #3b82f6; border-radius: 6px;">
+                <p style="margin: 0; color: #1e40af; font-size: 14px;">
+                    <i class="fas fa-info-circle" style="margin-right: 8px;"></i>
+                    This action cannot be easily undone. Please review your resolution choice carefully.
+                </p>
+            </div>
+
+            <div id="confirmation_details" style="background: #f3f4f6; padding: 12px; border-radius: 8px; margin: 15px 0; font-size: 14px;">
+                <p style="margin: 8px 0;"><strong>Resolution Type:</strong> <span id="confirm_resolution_type"></span></p>
+                <p style="margin: 8px 0;"><strong>Notes:</strong> <span id="confirm_resolution_notes"></span></p>
+            </div>
+
+            <div class="modal-buttons" style="gap: 10px;">
+                <button type="button" class="btn-cancel" onclick="closeConfirmationModal()" style="flex: 1;">Cancel</button>
+                <button type="button" class="btn-submit" onclick="submitResolveForm()" style="flex: 1; background-color: #22c55e;">Confirm & Resolve</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const detailModal = document.getElementById('detailModal');
             const resolveModal = document.getElementById('resolveModal');
             const resolutionModal = document.getElementById('resolutionModal');
+            const confirmationModal = document.getElementById('confirmationModal');
+            const unresolveConfirmationModal = document.getElementById('unresolveConfirmationModal');
 
             if (detailModal) {
                 detailModal.addEventListener('click', function(e) {
@@ -739,6 +787,31 @@ $conn->close();
                     if (e.target === this) {
                         closeResolutionModal();
                     }
+                });
+            }
+
+            if (confirmationModal) {
+                confirmationModal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        closeConfirmationModal();
+                    }
+                });
+            }
+
+            if (unresolveConfirmationModal) {
+                unresolveConfirmationModal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        closeUnresolveConfirmationModal();
+                    }
+                });
+            }
+
+            // Handle resolve form submission
+            const resolveForm = document.getElementById('resolveForm');
+            if (resolveForm) {
+                resolveForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    showConfirmationModal();
                 });
             }
         });
@@ -821,6 +894,61 @@ $conn->close();
 
         function closeResolveModal() {
             document.getElementById('resolveModal').classList.remove('show');
+        }
+
+        function showConfirmationModal() {
+            const resolutionSelect = document.getElementById('resolution');
+            const notesTextarea = document.getElementById('resolution_notes');
+            const confirmationModal = document.getElementById('confirmationModal');
+
+            if (!resolutionSelect.value) {
+                alert('Please select a resolution type');
+                return;
+            }
+
+            // Get the selected option text
+            const selectedOption = resolutionSelect.options[resolutionSelect.selectedIndex];
+            const resolutionText = selectedOption.text;
+            const notesText = notesTextarea.value || 'No notes provided';
+
+            // Update confirmation details
+            document.getElementById('confirm_resolution_type').textContent = resolutionText;
+            document.getElementById('confirm_resolution_notes').textContent = notesText;
+
+            // Show confirmation modal
+            confirmationModal.classList.add('show');
+        }
+
+        function closeConfirmationModal() {
+            document.getElementById('confirmationModal').classList.remove('show');
+        }
+
+        function submitResolveForm() {
+            document.getElementById('resolveForm').submit();
+        }
+
+        function openUnresolveConfirmationModal(button) {
+            const disputeId = button.getAttribute('data-dispute-id');
+            const agreementId = button.getAttribute('data-agreement-id');
+
+            if (!disputeId || !agreementId) {
+                console.error('Missing required dispute or agreement ID');
+                return;
+            }
+
+            document.getElementById('unresolve_dispute_id').textContent = disputeId;
+            document.getElementById('unresolve_dispute_id_input').value = disputeId;
+            document.getElementById('unresolve_agreement_id_input').value = agreementId;
+
+            document.getElementById('unresolveConfirmationModal').classList.add('show');
+        }
+
+        function closeUnresolveConfirmationModal() {
+            document.getElementById('unresolveConfirmationModal').classList.remove('show');
+        }
+
+        function submitUnresolveForm() {
+            document.getElementById('unresolveForm').submit();
         }
     </script>
 </body>
