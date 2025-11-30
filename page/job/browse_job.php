@@ -23,11 +23,13 @@ $max_budget = isset($_GET['max_budget']) && $_GET['max_budget'] !== '' ? floatva
 $sort = $_GET['sort'] ?? 'newest';
 
 // build query - only show available jobs that the freelancer hasn't applied to
-$sql = "SELECT JobID, ClientID, Title, Description, Budget, Deadline, Status, PostDate
-        FROM job
-        WHERE Status = 'available'
-        AND PostDate <= NOW()
-        AND JobID NOT IN (
+$sql = "SELECT j.JobID, j.ClientID, j.Title, j.Description, j.Budget, j.Deadline, j.Status, j.PostDate,
+               c.CompanyName, c.ProfilePicture
+        FROM job j
+        INNER JOIN client c ON j.ClientID = c.ClientID
+        WHERE j.Status = 'available'
+        AND j.PostDate <= NOW()
+        AND j.JobID NOT IN (
             SELECT JobID FROM job_application WHERE FreelancerID = ?
         )";
 
@@ -116,6 +118,21 @@ $jobs = $result->fetch_all(MYSQLI_ASSOC);
         <div class="browse-projects-grid">
             <?php foreach ($jobs as $job): ?>
                 <div class="project-card">
+                    <div class="client-info">
+                        <div class="client-avatar">
+                            <?php if (!empty($job['ProfilePicture']) && file_exists($_SERVER['DOCUMENT_ROOT'] . $job['ProfilePicture'])): ?>
+                                <img src="<?php echo htmlspecialchars($job['ProfilePicture']); ?>" alt="<?php echo htmlspecialchars($job['CompanyName']); ?>">
+                            <?php else: ?>
+                                <div class="avatar-placeholder">
+                                    <?php echo strtoupper(substr($job['CompanyName'], 0, 1)); ?>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                        <div class="client-details">
+                            <span class="client-name"><?php echo htmlspecialchars($job['CompanyName']); ?></span>
+                        </div>
+                    </div>
+                    
                     <div class="project-header">
                         <h3 class="project-title"><?php echo htmlspecialchars($job['Title']); ?></h3>
                         <span class="project-budget">$<?php echo number_format($job['Budget'], 2); ?></span>
@@ -124,7 +141,7 @@ $jobs = $result->fetch_all(MYSQLI_ASSOC);
                     <p class="project-description"><?php echo nl2br(htmlspecialchars(mb_strimwidth($job['Description'], 0, 300, '...'))); ?></p>
 
                     <div class="project-meta">
-                        <span class="meta-item">Posted: <?php echo date('M d, Y H:i', strtotime($job['PostDate'])); ?></span>
+                        <span class="meta-item">Posted: <?php echo date('M d, Y', strtotime($job['PostDate'])); ?></span>
                         <span class="meta-item">Deadline: <?php echo date('M d, Y', strtotime($job['Deadline'])); ?></span>
                     </div>
 
@@ -275,6 +292,57 @@ $jobs = $result->fetch_all(MYSQLI_ASSOC);
     .project-card:hover {
         box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
         transform: translateY(-3px);
+    }
+
+    .client-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 15px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .client-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        overflow: hidden;
+        flex-shrink: 0;
+        background: #f0f0f0;
+    }
+
+    .client-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .avatar-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, rgb(159, 232, 112) 0%, rgb(140, 210, 90) 100%);
+        color: white;
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+
+    .client-details {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .client-name {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #2c3e50;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .project-header {

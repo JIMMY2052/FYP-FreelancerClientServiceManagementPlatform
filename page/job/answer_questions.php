@@ -58,6 +58,26 @@ try {
     die('Database error');
 }
 
+// Check freelancer wallet balance
+$freelancerID = $_SESSION['user_id'];
+$jobBudget = floatval($job['Budget']);
+$walletBalance = 0;
+$hasInsufficientBalance = false;
+
+try {
+    $sqlWallet = "SELECT Balance FROM wallet WHERE UserID = :userId";
+    $stmtWallet = $pdo->prepare($sqlWallet);
+    $stmtWallet->execute([':userId' => $freelancerID]);
+    $wallet = $stmtWallet->fetch();
+    $walletBalance = $wallet ? floatval($wallet['Balance']) : 0;
+    
+    if ($walletBalance < $jobBudget) {
+        $hasInsufficientBalance = true;
+    }
+} catch (PDOException $e) {
+    error_log('[answer_questions] Wallet check failed: ' . $e->getMessage());
+}
+
 // Fetch screening questions for this job
 try {
     $sql = "SELECT QuestionID, QuestionText, QuestionType, IsRequired 
@@ -109,6 +129,19 @@ try {
             <?= htmlspecialchars($_SESSION['success']) ?>
         </div>
         <?php unset($_SESSION['success']); endif; ?>
+        
+        <?php if ($hasInsufficientBalance): ?>
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle"></i>
+            <div>
+                <strong>Insufficient Wallet Balance</strong><br>
+                Your current wallet balance (RM <?= number_format($walletBalance, 2) ?>) is less than the job budget (RM <?= number_format($jobBudget, 2) ?>).
+                You need to top up at least RM <?= number_format($jobBudget - $walletBalance, 2) ?> to apply for this job.
+                This security measure protects both parties in case of contract breach.
+                <a href="../payment/wallet.php" style="color: #0066cc; text-decoration: underline; margin-left: 10px;">Top up now</a>
+            </div>
+        </div>
+        <?php endif; ?>
         
         <div class="job-info-banner">
             <div class="job-info-item">
@@ -261,8 +294,28 @@ try {
         border: 1px solid #c3e6cb;
     }
 
+    .alert-warning {
+        background: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+    }
+
     .alert i {
         font-size: 1.2rem;
+        flex-shrink: 0;
+    }
+
+    .submit-btn:disabled {
+        background: #e9ecef;
+        color: #6c757d;
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+
+    .submit-btn:disabled:hover {
+        background: #e9ecef;
+        box-shadow: none;
+        transform: none;
     }
 
     .page-header {

@@ -59,7 +59,7 @@ try {
     $pdo->beginTransaction();
     
     // Check if job exists and is available
-    $sqlCheck = "SELECT JobID, Status FROM job WHERE JobID = :jobID";
+    $sqlCheck = "SELECT JobID, Status, Budget FROM job WHERE JobID = :jobID";
     $stmtCheck = $pdo->prepare($sqlCheck);
     $stmtCheck->execute([':jobID' => $jobID]);
     $job = $stmtCheck->fetch();
@@ -70,6 +70,19 @@ try {
     
     if ($job['Status'] !== 'available') {
         throw new Exception('This job is no longer available for applications.');
+    }
+    
+    // Check freelancer wallet balance
+    $jobBudget = floatval($job['Budget']);
+    $sqlWallet = "SELECT Balance FROM wallet WHERE UserID = :userId";
+    $stmtWallet = $pdo->prepare($sqlWallet);
+    $stmtWallet->execute([':userId' => $freelancerID]);
+    $wallet = $stmtWallet->fetch();
+    
+    $walletBalance = $wallet ? floatval($wallet['Balance']) : 0;
+    
+    if ($walletBalance < $jobBudget) {
+        throw new Exception('Insufficient wallet balance. Your wallet balance (RM ' . number_format($walletBalance, 2) . ') must be at least RM ' . number_format($jobBudget, 2) . ' to apply for this job. This ensures security for both parties in case of contract breach. Please top up your wallet.');
     }
     
     // Check if freelancer has already applied to this job

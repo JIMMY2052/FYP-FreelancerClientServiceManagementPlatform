@@ -15,6 +15,9 @@ $current_page = basename($_SERVER['PHP_SELF']);
         <a href="/page/agreementListing.php" class="nav-item <?php echo ($current_page === 'agreementListing.php') ? 'active' : ''; ?>">
             Manage Agreement
         </a>
+        <a href="/page/my_applications.php" class="nav-item <?php echo ($current_page === 'my_applications.php') ? 'active' : ''; ?>">
+            My Applications
+        </a>
         <a href="/page/payment/wallet.php" class="nav-item <?php echo ($current_page === 'wallet.php') ? 'active' : ''; ?>">
             Wallet
         </a>

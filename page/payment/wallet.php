@@ -58,6 +58,30 @@ while ($row = $result->fetch_assoc()) {
 }
 $stmt->close();
 $conn->close();
+
+// For freelancers, calculate reserved balance
+$reserved_balance = 0;
+if ($user_type === 'freelancer') {
+    $conn = getDBConnection();
+    
+    // Only count from agreements to avoid double counting
+    // (Agreements are created when job applications are accepted)
+    $sql = "SELECT COALESCE(SUM(PaymentAmount), 0) as reserved_amount 
+            FROM agreement 
+            WHERE FreelancerID = ? 
+            AND Status IN ('pending', 'ongoing', 'signed')";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('s', $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $agreement_data = $result->fetch_assoc();
+    $reserved_balance = floatval($agreement_data['reserved_amount']);
+    $stmt->close();
+    
+    $conn->close();
+}
+
+$available_balance = $wallet['Balance'] - $reserved_balance;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -510,8 +534,18 @@ $conn->close();
         <div class="wallet-grid">
             <!-- Wallet Balance Card -->
             <div class="wallet-card">
-                <div class="wallet-card-label">Available Balance</div>
+                <div class="wallet-card-label">Total Balance</div>
                 <div class="wallet-balance">RM <?= number_format($wallet['Balance'], 2) ?></div>
+                <?php if ($user_type === 'freelancer' && $reserved_balance > 0): ?>
+                <div style="background: rgba(255,255,255,0.2); padding: 12px; border-radius: 10px; margin-bottom: 15px;">
+                    <div style="font-size: 0.85rem; opacity: 0.9; margin-bottom: 5px;">Reserved for Ongoing Jobs:</div>
+                    <div style="font-size: 1.3rem; font-weight: 700;">RM <?= number_format($reserved_balance, 2) ?></div>
+                </div>
+                <div style="background: rgba(255,255,255,0.2); padding: 12px; border-radius: 10px; margin-bottom: 15px;">
+                    <div style="font-size: 0.85rem; opacity: 0.9; margin-bottom: 5px;">Available for Withdrawal:</div>
+                    <div style="font-size: 1.5rem; font-weight: 700;">RM <?= number_format($available_balance, 2) ?></div>
+                </div>
+                <?php endif; ?>
                 <div class="wallet-actions">
                     <button class="btn-withdraw" onclick="openWithdrawModal()">
                         <i class="fas fa-arrow-up"></i>
@@ -614,9 +648,15 @@ $conn->close();
             <form id="withdrawForm" method="POST" action="withdraw_process.php">
                 <div class="form-group">
                     <label for="withdraw_amount">Amount (RM)</label>
-                    <input type="number" id="withdraw_amount" name="amount" min="10" max="<?= number_format($wallet['Balance'], 2, '.', '') ?>" step="0.01" required placeholder="Enter amount">
+                    <input type="number" id="withdraw_amount" name="amount" min="10" max="<?= number_format($user_type === 'freelancer' ? $available_balance : $wallet['Balance'], 2, '.', '') ?>" step="0.01" required placeholder="Enter amount">
                     <div style="font-size: 0.85rem; color: #666; margin-top: 5px;">
-                        Available balance: RM <?= number_format($wallet['Balance'], 2) ?>
+                        <?php if ($user_type === 'freelancer' && $reserved_balance > 0): ?>
+                            Total Balance: RM <?= number_format($wallet['Balance'], 2) ?><br>
+                            Reserved for Jobs: RM <?= number_format($reserved_balance, 2) ?><br>
+                            <strong>Available for withdrawal: RM <?= number_format($available_balance, 2) ?></strong>
+                        <?php else: ?>
+                            Available balance: RM <?= number_format($wallet['Balance'], 2) ?>
+                        <?php endif; ?>
                     </div>
                 </div>
                 <div class="form-group">

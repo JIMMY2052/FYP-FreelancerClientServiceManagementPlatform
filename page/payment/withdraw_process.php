@@ -73,9 +73,36 @@ try {
     $current_balance = floatval($wallet['Balance']);
     $stmt->close();
 
-    // Check if user has sufficient balance
-    if ($current_balance < $amount) {
-        throw new Exception('Insufficient balance. Available: RM ' . number_format($current_balance, 2));
+    // For freelancers, calculate reserved balance from ongoing agreements
+    $reserved_balance = 0;
+    if ($_SESSION['user_type'] === 'freelancer') {
+        // Only count from agreements to avoid double counting
+        // (Agreements are created when job applications are accepted)
+        $sql = "SELECT COALESCE(SUM(PaymentAmount), 0) as reserved_amount 
+                FROM agreement 
+                WHERE FreelancerID = ? 
+                AND Status IN ('pending', 'ongoing', 'signed')";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param('s', $user_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $agreement_data = $result->fetch_assoc();
+        $reserved_balance = floatval($agreement_data['reserved_amount']);
+        $stmt->close();
+    }
+
+    // Calculate available balance (current balance minus reserved amount)
+    $available_balance = $current_balance - $reserved_balance;
+
+    // Check if user has sufficient available balance
+    if ($available_balance < $amount) {
+        $error_msg = 'Insufficient available balance. ';
+        $error_msg .= 'Current Balance: RM ' . number_format($current_balance, 2);
+        if ($reserved_balance > 0) {
+            $error_msg .= ' | Reserved for ongoing jobs: RM ' . number_format($reserved_balance, 2);
+            $error_msg .= ' | Available for withdrawal: RM ' . number_format($available_balance, 2);
+        }
+        throw new Exception($error_msg);
     }
 
     // Stripe configuration

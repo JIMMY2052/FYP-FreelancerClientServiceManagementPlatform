@@ -10,6 +10,11 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'client') {
 $_title = 'My Applications - WorkSnyc';
 require_once 'config.php';
 
+// Include header
+include '../includes/header.php';
+// Include sidebar
+include '../includes/client_sidebar.php';
+
 if (!function_exists('getPDOConnection')) {
     function getPDOConnection(): PDO
     {
@@ -396,7 +401,119 @@ foreach ($applications as &$app) {
     </div>
 </div>
 
+<link rel="stylesheet" href="/assets/css/app.css">
+<link rel="stylesheet" href="/assets/css/profile.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
 <style>
+    /* Header Styles */
+    .profile-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 30px;
+        background-color: #fff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+    }
+
+    .header-left {
+        display: flex;
+        align-items: center;
+        flex: 1;
+    }
+
+    .menu-toggle {
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px;
+        border-radius: 8px;
+        transition: background-color 0.3s ease;
+    }
+
+    .menu-toggle:hover {
+        background-color: #f0f0f0;
+    }
+
+    .menu-icon {
+        width: 24px;
+        height: 24px;
+    }
+
+    .header-logo {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+    }
+
+    .logo-img {
+        height: 40px;
+        width: auto;
+    }
+
+    .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        flex: 1;
+        justify-content: flex-end;
+    }
+
+    .notification-icon {
+        cursor: pointer;
+        color: #333;
+        transition: color 0.3s ease;
+    }
+
+    .notification-icon:hover {
+        color: #22c55e;
+    }
+
+    .profile-dropdown {
+        position: relative;
+    }
+
+    .dropdown-menu {
+        display: none;
+        position: absolute;
+        top: 100%;
+        right: 0;
+        margin-top: 8px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        min-width: 180px;
+        padding: 8px 0;
+        z-index: 1000;
+    }
+
+    .profile-dropdown:hover .dropdown-menu {
+        display: block;
+    }
+
+    .dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 20px;
+        color: #333;
+        text-decoration: none;
+        transition: background-color 0.3s ease;
+    }
+
+    .dropdown-item:hover {
+        background-color: #f8f9fa;
+    }
+
+    .dropdown-item svg {
+        width: 16px;
+        height: 16px;
+    }
+
     .container {
         max-width: 1200px;
         margin: 30px auto;
