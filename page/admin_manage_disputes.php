@@ -109,6 +109,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                             $trans_stmt->execute();
                             $trans_stmt->close();
                         }
+                    } else {
+                        // For other resolution types (refund_client, release_to_freelancer, split_payment, etc.)
+                        // Revert agreement back to disputed status
+                        $agreement_update_sql = "UPDATE agreement SET Status = 'disputed' WHERE AgreementID = ?";
+                        $agreement_update_stmt = $conn->prepare($agreement_update_sql);
+                        $agreement_update_stmt->bind_param('i', $agreement_id);
+                        $agreement_update_stmt->execute();
+                        $agreement_update_stmt->close();
                     }
                 }
 

@@ -54,6 +54,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $agreement = $verify_result->fetch_assoc();
     $verify_stmt->close();
 
+    // Check if a dispute already exists for this agreement
+    $check_dispute_sql = "SELECT DisputeID FROM dispute WHERE AgreementID = ?";
+    $check_dispute_stmt = $conn->prepare($check_dispute_sql);
+    $check_dispute_stmt->bind_param('i', $agreement_id);
+    $check_dispute_stmt->execute();
+    $check_dispute_result = $check_dispute_stmt->get_result();
+
+    if ($check_dispute_result->num_rows > 0) {
+        http_response_code(409);
+        echo json_encode(['success' => false, 'message' => 'A dispute already exists for this agreement. Please wait for admin resolution.']);
+        $check_dispute_stmt->close();
+        $conn->close();
+        exit();
+    }
+
+    $check_dispute_stmt->close();
+
     // Handle file upload
     $evidence_file = null;
     if (isset($_FILES['evidence_file']) && $_FILES['evidence_file']['error'] === UPLOAD_ERR_OK) {
