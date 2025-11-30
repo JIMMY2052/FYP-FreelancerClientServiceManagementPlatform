@@ -678,7 +678,11 @@ $available_balance = $wallet['Balance'] - $reserved_balance;
                 </div>
                 <div class="form-group">
                     <label for="account_number">Account Number</label>
-                    <input type="text" id="account_number" name="account_number" required placeholder="Enter your account number" pattern="[0-9]+" title="Please enter numbers only">
+                    <input type="text" id="account_number" name="account_number" required placeholder="0000 0000 0000 0000" maxlength="19" title="Please enter 16 digits">
+                    <input type="hidden" id="account_number_raw" name="account_number_raw">
+                    <div style="font-size: 0.85rem; color: #666; margin-top: 5px;">
+                        Enter 16-digit bank account number
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="account_holder">Account Holder Name</label>
@@ -741,6 +745,49 @@ $available_balance = $wallet['Balance'] - $reserved_balance;
         function closeWithdrawModal() {
             document.getElementById('withdrawModal').classList.remove('active');
         }
+
+        // Bank account number formatting and validation
+        const accountNumberInput = document.getElementById('account_number');
+        const accountNumberRaw = document.getElementById('account_number_raw');
+
+        accountNumberInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\s/g, ''); // Remove all spaces
+            let formattedValue = '';
+            
+            // Only allow numbers
+            value = value.replace(/\D/g, '');
+            
+            // Limit to 16 digits
+            if (value.length > 16) {
+                value = value.substring(0, 16);
+            }
+            
+            // Add space every 4 digits
+            for (let i = 0; i < value.length; i++) {
+                if (i > 0 && i % 4 === 0) {
+                    formattedValue += ' ';
+                }
+                formattedValue += value[i];
+            }
+            
+            e.target.value = formattedValue;
+            accountNumberRaw.value = value; // Store raw value without spaces
+        });
+
+        // Form validation before submit
+        document.getElementById('withdrawForm').addEventListener('submit', function(e) {
+            const rawValue = accountNumberRaw.value;
+            
+            if (rawValue.length !== 16) {
+                e.preventDefault();
+                alert('Bank account number must be exactly 16 digits.');
+                accountNumberInput.focus();
+                return false;
+            }
+            
+            // Update the hidden field to be submitted
+            return true;
+        });
 
         // Close modal on outside click
         document.getElementById('topupModal').addEventListener('click', function(e) {

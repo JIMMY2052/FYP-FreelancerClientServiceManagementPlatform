@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 // Validate form inputs
 $amount = floatval($_POST['amount'] ?? 0);
 $bank_name = trim($_POST['bank_name'] ?? '');
-$account_number = trim($_POST['account_number'] ?? '');
+$account_number = trim($_POST['account_number_raw'] ?? ''); // Use raw value without spaces
 $account_holder = trim($_POST['account_holder'] ?? '');
 
 // Validate amount
@@ -40,9 +40,9 @@ if (empty($bank_name) || empty($account_number) || empty($account_holder)) {
     exit();
 }
 
-// Validate account number (numbers only)
-if (!preg_match('/^[0-9]+$/', $account_number)) {
-    $_SESSION['error'] = 'Account number must contain only numbers.';
+// Validate account number (must be exactly 16 digits)
+if (!preg_match('/^[0-9]{16}$/', $account_number)) {
+    $_SESSION['error'] = 'Account number must be exactly 16 digits.';
     header('Location: wallet.php');
     exit();
 }

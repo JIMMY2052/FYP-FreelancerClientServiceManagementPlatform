@@ -150,7 +150,7 @@ $conn->close();
                 <div class="profile-header-section">
                     <div class="profile-image-container">
                         <?php if ($freelancer['ProfilePicture'] && file_exists('../' . $freelancer['ProfilePicture'])): ?>
-                            <img src="/<?php echo htmlspecialchars($freelancer['ProfilePicture']); ?>" alt="Profile Picture" class="profile-picture">
+                            <img src="<?php echo htmlspecialchars($freelancer['ProfilePicture']); ?>" alt="Profile Picture" class="profile-picture">
                         <?php else: ?>
                             <div class="avatar-large"><?php echo strtoupper(substr($freelancer['FirstName'] ?: 'F', 0, 1) . substr($freelancer['LastName'] ?: 'L', 0, 1)); ?></div>
                         <?php endif; ?>
