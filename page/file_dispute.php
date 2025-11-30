@@ -61,12 +61,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $check_dispute_stmt->execute();
     $check_dispute_result = $check_dispute_stmt->get_result();
 
+    $existing_dispute_id = null;
     if ($check_dispute_result->num_rows > 0) {
-        http_response_code(409);
-        echo json_encode(['success' => false, 'message' => 'A dispute already exists for this agreement. Please wait for admin resolution.']);
-        $check_dispute_stmt->close();
-        $conn->close();
-        exit();
+        $existing_dispute = $check_dispute_result->fetch_assoc();
+        $existing_dispute_id = $existing_dispute['DisputeID'];
     }
 
     $check_dispute_stmt->close();
@@ -116,34 +114,72 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $evidence_file = '/uploads/disputes/' . $filename;
     }
 
-    // Insert dispute record
-    $dispute_sql = "INSERT INTO dispute (AgreementID, InitiatorID, InitiatorType, ReasonText, EvidenceFile, Status, CreatedAt) 
-                    VALUES (?, ?, ?, ?, ?, 'open', NOW())";
-
-    $dispute_stmt = $conn->prepare($dispute_sql);
-
-    if (!$dispute_stmt) {
-        http_response_code(500);
-        echo json_encode(['success' => false, 'message' => 'Database error: ' . $conn->error]);
-        $conn->close();
-        exit();
-    }
-
-    // Combine reason and reason_text for storage
+    // Insert or update dispute record
     $full_reason = $reason . (empty($reason_text) ? '' : "\n\n" . $reason_text);
 
-    $dispute_stmt->bind_param('iisss', $agreement_id, $user_id, $user_type, $full_reason, $evidence_file);
+    if ($existing_dispute_id) {
+        // Update existing dispute back to open status
+        $dispute_sql = "UPDATE dispute 
+                        SET Status = 'open', 
+                            ReasonText = ?, 
+                            EvidenceFile = ?,
+                            ResolutionAction = NULL,
+                            AdminNotesText = NULL,
+                            ResolvedByAdminID = NULL,
+                            ResolvedAt = NULL,
+                            CreatedAt = NOW()
+                        WHERE DisputeID = ?";
 
-    if (!$dispute_stmt->execute()) {
-        http_response_code(500);
-        echo json_encode(['success' => false, 'message' => 'Failed to file dispute: ' . $dispute_stmt->error]);
+        $dispute_stmt = $conn->prepare($dispute_sql);
+
+        if (!$dispute_stmt) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'Database error: ' . $conn->error]);
+            $conn->close();
+            exit();
+        }
+
+        $dispute_stmt->bind_param('ssi', $full_reason, $evidence_file, $existing_dispute_id);
+
+        if (!$dispute_stmt->execute()) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'Failed to update dispute: ' . $dispute_stmt->error]);
+            $dispute_stmt->close();
+            $conn->close();
+            exit();
+        }
+
+        $dispute_id = $existing_dispute_id;
         $dispute_stmt->close();
-        $conn->close();
-        exit();
-    }
+        $action = 'updated';
+    } else {
+        // Create new dispute
+        $dispute_sql = "INSERT INTO dispute (AgreementID, InitiatorID, InitiatorType, ReasonText, EvidenceFile, Status, CreatedAt) 
+                        VALUES (?, ?, ?, ?, ?, 'open', NOW())";
 
-    $dispute_id = $conn->insert_id;
-    $dispute_stmt->close();
+        $dispute_stmt = $conn->prepare($dispute_sql);
+
+        if (!$dispute_stmt) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'Database error: ' . $conn->error]);
+            $conn->close();
+            exit();
+        }
+
+        $dispute_stmt->bind_param('iisss', $agreement_id, $user_id, $user_type, $full_reason, $evidence_file);
+
+        if (!$dispute_stmt->execute()) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'Failed to file dispute: ' . $dispute_stmt->error]);
+            $dispute_stmt->close();
+            $conn->close();
+            exit();
+        }
+
+        $dispute_id = $conn->insert_id;
+        $dispute_stmt->close();
+        $action = 'created';
+    }
 
     // Update agreement status to 'disputed'
     $update_agreement_sql = "UPDATE agreement SET Status = 'disputed' WHERE AgreementID = ?";
@@ -157,7 +193,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     http_response_code(200);
     echo json_encode([
         'success' => true,
-        'message' => 'Dispute filed successfully. Admin will review shortly.',
+        'message' => $action === 'updated'
+            ? 'Dispute reopened successfully. Admin will review it again shortly.'
+            : 'Dispute filed successfully. Admin will review shortly.',
         'dispute_id' => $dispute_id
     ]);
 } else {
