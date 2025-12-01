@@ -59,6 +59,44 @@ $completed_result = $stmt->get_result();
 $completed_count = $completed_result->fetch_assoc()['completed_count'] ?? 0;
 $stmt->close();
 
+// Check if current user (client) has collaborated with this freelancer
+$can_review = false;
+$has_reviewed = false;
+if (isset($_SESSION['user_id']) && $_SESSION['user_type'] === 'client') {
+    $client_id = $_SESSION['user_id'];
+    
+    // Check if client has any completed agreements with this freelancer
+    // This includes: gigs purchased or jobs where freelancer was hired
+    $stmt = $conn->prepare("
+        SELECT COUNT(*) as collab_count 
+        FROM agreement 
+        WHERE ClientID = ? AND FreelancerID = ? AND Status = 'completed'
+    ");
+    $stmt->bind_param("ii", $client_id, $freelancer_id);
+    $stmt->execute();
+    $collab_result = $stmt->get_result();
+    $collab_count = $collab_result->fetch_assoc()['collab_count'] ?? 0;
+    $stmt->close();
+    
+    if ($collab_count > 0) {
+        $can_review = true;
+        
+        // Check if client has already reviewed this freelancer
+        $stmt = $conn->prepare("
+            SELECT ReviewID 
+            FROM review 
+            WHERE ClientID = ? AND FreelancerID = ?
+        ");
+        $stmt->bind_param("ii", $client_id, $freelancer_id);
+        $stmt->execute();
+        $review_check = $stmt->get_result();
+        if ($review_check->num_rows > 0) {
+            $has_reviewed = true;
+        }
+        $stmt->close();
+    }
+}
+
 // Get reviews and ratings
 $stmt = $conn->prepare("
     SELECT r.ReviewID, r.Rating, r.Comment, r.ReviewDate, c.CompanyName, c.ClientID
@@ -635,6 +673,150 @@ $years_experience = $now->diff($member_since)->y + 1;
             font-weight: 600;
         }
 
+        /* Review Form */
+        .review-form-section {
+            background: white;
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            margin-bottom: 3rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        .review-form-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            color: #0f172a;
+        }
+
+        .review-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-label {
+            font-weight: 700;
+            color: #0f172a;
+            font-size: 0.95rem;
+        }
+
+        .star-rating {
+            display: flex;
+            gap: 0.5rem;
+            font-size: 2rem;
+        }
+
+        .star-rating i {
+            color: #cbd5e1;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .star-rating i:hover,
+        .star-rating i.active {
+            color: #facc15;
+            transform: scale(1.1);
+        }
+
+        .review-textarea {
+            padding: 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            resize: vertical;
+            min-height: 120px;
+            transition: border-color 0.2s ease;
+        }
+
+        .review-textarea:focus {
+            outline: none;
+            border-color: #16a34a;
+            box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
+        }
+
+        .btn-submit-review {
+            background: linear-gradient(135deg, #16a34a, #15803d);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            align-self: flex-start;
+        }
+
+        .btn-submit-review:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(22, 163, 74, 0.3);
+        }
+
+        .btn-submit-review:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .review-note {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 10px;
+            padding: 1rem;
+            color: #15803d;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: start;
+            gap: 0.75rem;
+        }
+
+        .review-note i {
+            margin-top: 0.2rem;
+        }
+
+        .review-note.warning {
+            background: #fef3c7;
+            border-color: #fde047;
+            color: #854d0e;
+        }
+
+        .review-note.info {
+            background: #dbeafe;
+            border-color: #93c5fd;
+            color: #1e40af;
+        }
+
+        .alert {
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 600;
+        }
+
+        .alert-success {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #15803d;
+        }
+
+        .alert-error {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+        }
+
         /* Gigs */
         .gigs-section {
             background: white;
@@ -819,6 +1001,23 @@ $years_experience = $now->diff($member_since)->y + 1;
     </div>
 
     <div class="profile-container">
+        <!-- Success/Error Messages -->
+        <?php if (isset($_SESSION['success'])): ?>
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle"></i>
+                <span><?= htmlspecialchars($_SESSION['success']) ?></span>
+            </div>
+            <?php unset($_SESSION['success']); ?>
+        <?php endif; ?>
+
+        <?php if (isset($_SESSION['error'])): ?>
+            <div class="alert alert-error">
+                <i class="fas fa-exclamation-circle"></i>
+                <span><?= htmlspecialchars($_SESSION['error']) ?></span>
+            </div>
+            <?php unset($_SESSION['error']); ?>
+        <?php endif; ?>
+
         <!-- Hero Section -->
         <div class="profile-hero">
             <div class="profile-avatar-large">
@@ -873,6 +1072,53 @@ $years_experience = $now->diff($member_since)->y + 1;
                 </div>
             </div>
         </div>
+
+        <!-- Review Form Section (Only for clients who have collaborated) -->
+        <?php if ($can_review && !$has_reviewed): ?>
+        <div class="review-form-section">
+            <h3 class="review-form-title">Leave a Review</h3>
+            <div class="review-note">
+                <i class="fas fa-check-circle"></i>
+                <span>You have worked with this freelancer and can leave a review.</span>
+            </div>
+            <form class="review-form" method="POST" action="submit_freelancer_review.php" id="reviewForm">
+                <input type="hidden" name="freelancer_id" value="<?= $freelancer_id ?>">
+                
+                <div class="form-group">
+                    <label class="form-label">Rating *</label>
+                    <div class="star-rating" id="starRating">
+                        <i class="far fa-star" data-rating="1"></i>
+                        <i class="far fa-star" data-rating="2"></i>
+                        <i class="far fa-star" data-rating="3"></i>
+                        <i class="far fa-star" data-rating="4"></i>
+                        <i class="far fa-star" data-rating="5"></i>
+                    </div>
+                    <input type="hidden" name="rating" id="ratingValue" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Your Review *</label>
+                    <textarea name="comment" class="review-textarea" placeholder="Share your experience working with this freelancer..." required></textarea>
+                </div>
+
+                <button type="submit" class="btn-submit-review">Submit Review</button>
+            </form>
+        </div>
+        <?php elseif ($has_reviewed): ?>
+        <div class="review-form-section">
+            <div class="review-note info">
+                <i class="fas fa-info-circle"></i>
+                <span>You have already submitted a review for this freelancer.</span>
+            </div>
+        </div>
+        <?php elseif (isset($_SESSION['user_id']) && $_SESSION['user_type'] === 'client'): ?>
+        <div class="review-form-section">
+            <div class="review-note warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>You need to complete at least one project with this freelancer before you can leave a review.</span>
+            </div>
+        </div>
+        <?php endif; ?>
 
         <!-- Rating Section -->
         <div class="rating-section">
@@ -1087,6 +1333,55 @@ $years_experience = $now->diff($member_since)->y + 1;
                 window.location.href = 'login.php?redirect=' + encodeURIComponent(window.location.href);
             <?php endif; ?>
         }
+
+        // Star rating functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const starRating = document.getElementById('starRating');
+            if (starRating) {
+                const stars = starRating.querySelectorAll('i');
+                const ratingValue = document.getElementById('ratingValue');
+                
+                stars.forEach(star => {
+                    star.addEventListener('click', function() {
+                        const rating = this.getAttribute('data-rating');
+                        ratingValue.value = rating;
+                        
+                        // Update star display
+                        stars.forEach((s, index) => {
+                            if (index < rating) {
+                                s.classList.remove('far');
+                                s.classList.add('fas', 'active');
+                            } else {
+                                s.classList.remove('fas', 'active');
+                                s.classList.add('far');
+                            }
+                        });
+                    });
+                    
+                    star.addEventListener('mouseenter', function() {
+                        const rating = this.getAttribute('data-rating');
+                        stars.forEach((s, index) => {
+                            if (index < rating) {
+                                s.classList.add('active');
+                            } else {
+                                s.classList.remove('active');
+                            }
+                        });
+                    });
+                });
+                
+                starRating.addEventListener('mouseleave', function() {
+                    const currentRating = ratingValue.value;
+                    stars.forEach((s, index) => {
+                        if (currentRating && index < currentRating) {
+                            s.classList.add('active');
+                        } else if (!s.classList.contains('fas')) {
+                            s.classList.remove('active');
+                        }
+                    });
+                });
+            }
+        });
     </script>
 </body>
 
