@@ -143,27 +143,27 @@ try {
             FROM gig g
             INNER JOIN freelancer f ON g.FreelancerID = f.FreelancerID
             WHERE g.Status = 'active'";
-    
+
     $params = [];
-    
+
     // Search by title
     if ($searchQuery !== '') {
         $sql .= " AND g.Title LIKE :search";
         $params[':search'] = '%' . $searchQuery . '%';
     }
-    
+
     // Filter by category
     if ($categoryFilter) {
         $sql .= " AND g.Category = :category";
         $params[':category'] = $categoryFilter;
     }
-    
+
     // Filter by subcategory
     if ($selectedSubcategory) {
         $sql .= " AND g.Subcategory = :subcategory";
         $params[':subcategory'] = $selectedSubcategory;
     }
-    
+
     // Filter by price range
     if ($minPrice !== null) {
         $sql .= " AND g.Price >= :minPrice";
@@ -173,7 +173,7 @@ try {
         $sql .= " AND g.Price <= :maxPrice";
         $params[':maxPrice'] = $maxPrice;
     }
-    
+
     // Sort
     if ($sortBy === 'price_low') {
         $sql .= " ORDER BY g.Price ASC, g.CreatedAt DESC";
@@ -184,17 +184,17 @@ try {
     } else { // newest (default)
         $sql .= " ORDER BY g.CreatedAt DESC";
     }
-    
+
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
     $gigs = $stmt->fetchAll();
-    
+
     // Process each gig to set default values
     foreach ($gigs as &$gig) {
         // Set default rating values
         $gig['Rating'] = 0;
         $gig['RatingCount'] = 0;
-        
+
         // Use Image1Path directly as thumbnail
         $gig['ThumbnailUrl'] = $gig['Image1Path'] ?? null;
     }
@@ -214,7 +214,7 @@ try {
         position: sticky;
         top: 0;
         z-index: 100;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
 
     .category-tab-wrapper {
@@ -277,7 +277,7 @@ try {
         background: #fff;
         border: 1px solid #e0e0e0;
         border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         min-width: 250px;
         padding: 8px 0;
         opacity: 0;
@@ -355,7 +355,7 @@ try {
     }
 
     .gig-card:hover {
-        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
         transform: translateY(-4px);
     }
 
@@ -386,6 +386,23 @@ try {
         border-radius: 50%;
         object-fit: cover;
         background: #e0e0e0;
+    }
+
+    .gig-freelancer-avatar-initial {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #16a34a, #15803d);
+        color: white;
+        font-weight: 800;
+        font-size: 16px;
+        text-transform: uppercase;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        top: 0;
+        left: 0;
     }
 
     .gig-freelancer-name {
@@ -673,7 +690,7 @@ try {
                 <span>All Categories</span>
             </a>
             <?php foreach ($categoryData as $key => $category): ?>
-                <?php 
+                <?php
                 $categoryParam = array_search($key, $categoryMap);
                 if (!$categoryParam) {
                     // Handle direct category keys
@@ -691,8 +708,8 @@ try {
                     <span><?php echo htmlspecialchars($category['name']); ?></span>
                     <div class="subcategory-dropdown">
                         <?php foreach ($category['subcategories'] as $subKey => $subName): ?>
-                            <a href="/page/gig/browse_gigs.php?category=<?php echo urlencode($categoryParam); ?>&subcategory=<?php echo urlencode($subKey); ?>" 
-                               class="subcategory-item <?php echo ($selectedSubcategory === $subKey && $isActive) ? 'active' : ''; ?>">
+                            <a href="/page/gig/browse_gigs.php?category=<?php echo urlencode($categoryParam); ?>&subcategory=<?php echo urlencode($subKey); ?>"
+                                class="subcategory-item <?php echo ($selectedSubcategory === $subKey && $isActive) ? 'active' : ''; ?>">
                                 <?php echo htmlspecialchars($subName); ?>
                             </a>
                         <?php endforeach; ?>
@@ -744,103 +761,115 @@ try {
             <?php endif; ?>
             <?php if ($selectedSubcategory): ?>
                 <span class="filter-badge">
-                    Subcategory: <?php 
-                        $subName = '';
-                        foreach ($categoryData as $cat) {
-                            if (isset($cat['subcategories'][$selectedSubcategory])) {
-                                $subName = $cat['subcategories'][$selectedSubcategory];
-                                break;
-                            }
-                        }
-                        echo htmlspecialchars($subName ?: $selectedSubcategory);
-                    ?>
+                    Subcategory: <?php
+                                    $subName = '';
+                                    foreach ($categoryData as $cat) {
+                                        if (isset($cat['subcategories'][$selectedSubcategory])) {
+                                            $subName = $cat['subcategories'][$selectedSubcategory];
+                                            break;
+                                        }
+                                    }
+                                    echo htmlspecialchars($subName ?: $selectedSubcategory);
+                                    ?>
                     <a href="/page/gig/browse_gigs.php<?php echo $categoryFilter ? '?category=' . urlencode($selectedCategory) : ''; ?>" class="remove">×</a>
                 </span>
             <?php endif; ?>
-        </div>
-    <?php endif; ?>
     </div>
+<?php endif; ?>
+</div>
 
-    <?php if (empty($gigs)): ?>
-        <div class="empty-state">
-            <div class="empty-state-icon">🔍</div>
-            <h2>No gigs found</h2>
-            <p><?php echo ($categoryFilter || $selectedSubcategory) ? 'Try adjusting your filters or browse all categories.' : 'There are no active gigs available at the moment.'; ?></p>
-            <?php if ($categoryFilter || $selectedSubcategory): ?>
-                <a href="/page/gig/browse_gigs.php" class="gig-view-btn">View All Gigs</a>
-            <?php endif; ?>
-        </div>
-    <?php else: ?>
-        <div class="gigs-grid">
-            <?php foreach ($gigs as $gig): ?>
-                <div class="gig-card" onclick="window.location.href='/page/gig/gig_details.php?id=<?php echo intval($gig['GigID']); ?>';" style="cursor: pointer;">
-                    <?php if (!empty($gig['ThumbnailUrl'])): ?>
-                        <img src="<?php echo htmlspecialchars($gig['ThumbnailUrl']); ?>" alt="<?php echo htmlspecialchars($gig['Title']); ?>" class="gig-thumbnail" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                        <div class="gig-thumbnail" style="display: none; align-items: center; justify-content: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-size: 3rem;">
-                            <?php 
-                            $categoryIcon = '💼';
-                            if (isset($categoryData[$gig['Category']])) {
-                                $categoryIcon = $categoryData[$gig['Category']]['icon'];
+<?php if (empty($gigs)): ?>
+    <div class="empty-state">
+        <div class="empty-state-icon">🔍</div>
+        <h2>No gigs found</h2>
+        <p><?php echo ($categoryFilter || $selectedSubcategory) ? 'Try adjusting your filters or browse all categories.' : 'There are no active gigs available at the moment.'; ?></p>
+        <?php if ($categoryFilter || $selectedSubcategory): ?>
+            <a href="/page/gig/browse_gigs.php" class="gig-view-btn">View All Gigs</a>
+        <?php endif; ?>
+    </div>
+<?php else: ?>
+    <div class="gigs-grid">
+        <?php foreach ($gigs as $gig): ?>
+            <div class="gig-card" onclick="window.location.href='/page/gig/gig_details.php?id=<?php echo intval($gig['GigID']); ?>';" style="cursor: pointer;">
+                <?php if (!empty($gig['ThumbnailUrl'])): ?>
+                    <img src="<?php echo htmlspecialchars($gig['ThumbnailUrl']); ?>" alt="<?php echo htmlspecialchars($gig['Title']); ?>" class="gig-thumbnail" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="gig-thumbnail" style="display: none; align-items: center; justify-content: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-size: 3rem;">
+                        <?php
+                        $categoryIcon = '💼';
+                        if (isset($categoryData[$gig['Category']])) {
+                            $categoryIcon = $categoryData[$gig['Category']]['icon'];
+                        }
+                        echo $categoryIcon;
+                        ?>
+                    </div>
+                <?php else: ?>
+                    <div class="gig-thumbnail" style="display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-size: 3rem;">
+                        <?php
+                        $categoryIcon = '💼';
+                        // Get icon from categoryData using the gig's category key
+                        if (isset($categoryData[$gig['Category']])) {
+                            $categoryIcon = $categoryData[$gig['Category']]['icon'];
+                        }
+                        echo $categoryIcon;
+                        ?>
+                    </div>
+                <?php endif; ?>
+
+                <div class="gig-card-body">
+                    <div class="gig-freelancer-info">
+                        <div style="position: relative; width: 40px; height: 40px;">
+                            <?php
+                            $profilePic = $gig['ProfilePicture'];
+
+                            // Add leading slash if missing
+                            if ($profilePic && !empty($profilePic) && strpos($profilePic, 'http') !== 0) {
+                                if (strpos($profilePic, '/') !== 0) {
+                                    $profilePic = '/' . $profilePic;
+                                }
                             }
-                            echo $categoryIcon;
+
+                            // Check if picture exists and display it or fallback to initial
+                            if ($profilePic && !empty($profilePic)):
                             ?>
-                        </div>
-                    <?php else: ?>
-                        <div class="gig-thumbnail" style="display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-size: 3rem;">
-                            <?php 
-                            $categoryIcon = '💼';
-                            // Get icon from categoryData using the gig's category key
-                            if (isset($categoryData[$gig['Category']])) {
-                                $categoryIcon = $categoryData[$gig['Category']]['icon'];
-                            }
-                            echo $categoryIcon;
-                            ?>
-                        </div>
-                    <?php endif; ?>
-                    
-                    <div class="gig-card-body">
-                        <div class="gig-freelancer-info">
-                            <?php if ($gig['ProfilePicture']): ?>
-                                <img src="<?php echo htmlspecialchars($gig['ProfilePicture']); ?>" alt="Freelancer" class="gig-freelancer-avatar">
-                            <?php else: ?>
-                                <div class="gig-freelancer-avatar" style="display: flex; align-items: center; justify-content: center; background: rgb(159, 232, 112); color: white; font-weight: bold;">
-                                    <?php echo strtoupper(substr($gig['FirstName'], 0, 1) . substr($gig['LastName'], 0, 1)); ?>
-                                </div>
+                                <img src="<?php echo htmlspecialchars($profilePic); ?>" alt="Freelancer" class="gig-freelancer-avatar" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                             <?php endif; ?>
-                            <span class="gig-freelancer-name"><?php echo htmlspecialchars($gig['FirstName'] . ' ' . $gig['LastName']); ?></span>
-                        </div>
-                        
-                        <h3 class="gig-title"><?php echo htmlspecialchars($gig['Title']); ?></h3>
-                        <p class="gig-description"><?php echo htmlspecialchars(mb_strimwidth($gig['Description'], 0, 150, '...')); ?></p>
-                        
-                        <div class="gig-meta">
-                            <?php if ($gig['Rating'] > 0): ?>
-                                <div class="gig-rating">
-                                    <span class="stars"><?php echo str_repeat('⭐', min(5, round($gig['Rating']))); ?></span>
-                                    <span><?php echo number_format($gig['Rating'], 1); ?> (<?php echo $gig['RatingCount']; ?>)</span>
-                                </div>
-                            <?php else: ?>
-                                <div class="gig-rating">
-                                    <span>New</span>
-                                </div>
-                            <?php endif; ?>
-                            <div class="gig-delivery">
-                                ⏱️ <?php echo intval($gig['DeliveryTime']); ?> day(s)
+                            <div class="gig-freelancer-avatar-initial" style="<?= ($profilePic && !empty($profilePic)) ? 'display:none;' : 'display:flex;' ?>">
+                                <?php echo strtoupper(substr($gig['FirstName'], 0, 1)); ?>
                             </div>
                         </div>
-                        
-                        <div class="gig-footer">
-                            <div class="gig-price">
-                                MYR <?php echo number_format($gig['Price'], 0); ?>
+                        <span class="gig-freelancer-name"><?php echo htmlspecialchars($gig['FirstName'] . ' ' . $gig['LastName']); ?></span>
+                    </div>
+
+                    <h3 class="gig-title"><?php echo htmlspecialchars($gig['Title']); ?></h3>
+                    <p class="gig-description"><?php echo htmlspecialchars(mb_strimwidth($gig['Description'], 0, 150, '...')); ?></p>
+
+                    <div class="gig-meta">
+                        <?php if ($gig['Rating'] > 0): ?>
+                            <div class="gig-rating">
+                                <span class="stars"><?php echo str_repeat('⭐', min(5, round($gig['Rating']))); ?></span>
+                                <span><?php echo number_format($gig['Rating'], 1); ?> (<?php echo $gig['RatingCount']; ?>)</span>
                             </div>
-                            <a href="/page/gig/gig_details.php?id=<?php echo intval($gig['GigID']); ?>" class="gig-view-btn">View Details</a>
+                        <?php else: ?>
+                            <div class="gig-rating">
+                                <span>New</span>
+                            </div>
+                        <?php endif; ?>
+                        <div class="gig-delivery">
+                            ⏱️ <?php echo intval($gig['DeliveryTime']); ?> day(s)
                         </div>
                     </div>
+
+                    <div class="gig-footer">
+                        <div class="gig-price">
+                            MYR <?php echo number_format($gig['Price'], 0); ?>
+                        </div>
+                        <a href="/page/gig/gig_details.php?id=<?php echo intval($gig['GigID']); ?>" class="gig-view-btn">View Details</a>
+                    </div>
                 </div>
-            <?php endforeach; ?>
-        </div>
-    <?php endif; ?>
+            </div>
+        <?php endforeach; ?>
+    </div>
+<?php endif; ?>
 </div>
 
 <?php include '../../_foot.php'; ?>
-
