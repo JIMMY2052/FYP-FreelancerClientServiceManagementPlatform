@@ -677,11 +677,28 @@ foreach ($all_agreements_for_count as $agreement) {
                                     <div class="party-avatar">
                                         <?php
                                         if ($user_type === 'client') {
-                                            echo strtoupper(substr($agreement['FreelancerName'], 0, 1));
+                                            $profilePic = $agreement['FreelancerProfilePic'];
+                                            $displayName = $agreement['FreelancerName'];
                                         } else {
-                                            echo strtoupper(substr($agreement['ClientName'], 0, 1));
+                                            $profilePic = $agreement['ClientProfilePic'];
+                                            $displayName = $agreement['ClientName'];
                                         }
+
+                                        // Add leading slash if missing
+                                        if ($profilePic && !empty($profilePic) && strpos($profilePic, 'http') !== 0) {
+                                            if (strpos($profilePic, '/') !== 0) {
+                                                $profilePic = '/' . $profilePic;
+                                            }
+                                        }
+
+                                        // Check if picture exists and display it or fallback to initial
+                                        if ($profilePic && !empty($profilePic)):
                                         ?>
+                                            <img src="<?= htmlspecialchars($profilePic) ?>" alt="<?= htmlspecialchars($displayName) ?>" class="party-avatar-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                        <?php endif; ?>
+                                        <div class="party-avatar-initial" style="<?= ($profilePic && !empty($profilePic)) ? 'display:none;' : 'display:flex;' ?>">
+                                            <?php echo strtoupper(substr($displayName, 0, 1)); ?>
+                                        </div>
                                     </div>
                                     <div class="party-details">
                                         <div class="party-label">
