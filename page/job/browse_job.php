@@ -60,29 +60,29 @@ if ($max_budget !== null) {
 if ($sort === 'highest') {
     $sql .= " ORDER BY Budget DESC, PostDate DESC";
 } else { // newest (default)
-// limit
-$sql .= " LIMIT 100";
+    // limit
+    $sql .= " LIMIT 100";
 
-// Prepare params array with freelancerID as first parameter
-$allParams = [$freelancerID];
-$allTypes = 'i';
+    // Prepare params array with freelancerID as first parameter
+    $allParams = [$freelancerID];
+    $allTypes = 'i';
 
-// Add filter params
-foreach ($params as $param) {
-    $allParams[] = $param;
-}
-$allTypes .= $types;
+    // Add filter params
+    foreach ($params as $param) {
+        $allParams[] = $param;
+    }
+    $allTypes .= $types;
 
-$stmt = $conn->prepare($sql);
-// bind dynamically
-$bind_names = [$allTypes];
-for ($i = 0; $i < count($allParams); $i++) {
-    $bind_name = 'bind' . $i;
-    $$bind_name = $allParams[$i];
-    $bind_names[] = &$$bind_name;
-}
-call_user_func_array([$stmt, 'bind_param'], $bind_names);
-$stmt->execute();
+    $stmt = $conn->prepare($sql);
+    // bind dynamically
+    $bind_names = [$allTypes];
+    for ($i = 0; $i < count($allParams); $i++) {
+        $bind_name = 'bind' . $i;
+        $$bind_name = $allParams[$i];
+        $bind_names[] = &$$bind_name;
+    }
+    call_user_func_array([$stmt, 'bind_param'], $bind_names);
+    $stmt->execute();
     call_user_func_array([$stmt, 'bind_param'], $bind_names);
 }
 $stmt->execute();
@@ -122,14 +122,14 @@ $jobs = $result->fetch_all(MYSQLI_ASSOC);
                         <div class="client-avatar">
                             <?php
                             $profilePic = $job['ProfilePicture'];
-                            
+
                             // Add leading slash if missing
                             if ($profilePic && !empty($profilePic) && strpos($profilePic, 'http') !== 0) {
                                 if (strpos($profilePic, '/') !== 0) {
                                     $profilePic = '/' . $profilePic;
                                 }
                             }
-                            
+
                             // Check if picture exists and display it or fallback to initial
                             if ($profilePic && !empty($profilePic)):
                             ?>
@@ -143,7 +143,7 @@ $jobs = $result->fetch_all(MYSQLI_ASSOC);
                             <span class="client-name"><?php echo htmlspecialchars($job['CompanyName']); ?></span>
                         </div>
                     </div>
-                    
+
                     <div class="project-header">
                         <h3 class="project-title"><?php echo htmlspecialchars($job['Title']); ?></h3>
                         <span class="project-budget">$<?php echo number_format($job['Budget'], 2); ?></span>

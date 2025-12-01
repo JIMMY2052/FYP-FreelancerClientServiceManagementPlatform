@@ -49,16 +49,15 @@ try {
             FROM job j
             INNER JOIN client c ON j.ClientID = c.ClientID
             WHERE j.JobID = :jobID AND j.Status = 'available'";
-    
+
     $stmt = $pdo->prepare($sql);
     $stmt->execute([':jobID' => $jobID]);
     $job = $stmt->fetch();
-    
+
     if (!$job) {
         header('Location: browse_job.php');
         exit();
     }
-    
 } catch (PDOException $e) {
     error_log('[job_details] Fetch failed: ' . $e->getMessage());
     die('Database error: ' . $e->getMessage());
@@ -69,6 +68,7 @@ try {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -99,7 +99,7 @@ try {
             background: white;
             border-radius: 12px;
             padding: 30px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         }
 
         .job-header {
@@ -195,7 +195,7 @@ try {
             border-radius: 12px;
             padding: 25px;
             margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             border: 1px solid #e9ecef;
         }
 
@@ -262,7 +262,7 @@ try {
             background: white;
             border-radius: 12px;
             padding: 25px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             border: 1px solid #e9ecef;
         }
 
@@ -275,12 +275,28 @@ try {
             border-bottom: 1px solid #e9ecef;
         }
 
+        .client-header a {
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            padding: 8px;
+            margin: -8px;
+        }
+
+        .client-header a:hover .client-info h3 {
+            color: rgb(159, 232, 112);
+        }
+
+        .client-header a:hover {
+            background: #f8f9fa;
+        }
+
         .client-avatar {
             width: 60px;
             height: 60px;
             border-radius: 50%;
             object-fit: cover;
             flex-shrink: 0;
+            background: #f0f0f0;
         }
 
         .client-info h3 {
@@ -364,6 +380,7 @@ try {
         }
     </style>
 </head>
+
 <body>
 
     <div class="container">
@@ -439,19 +456,32 @@ try {
                 <!-- Client Card -->
                 <div class="client-card">
                     <div class="client-header">
-                        <?php if (!empty($job['ProfilePicture'])): ?>
-                            <img src="<?= htmlspecialchars($job['ProfilePicture']) ?>" 
-                                 alt="<?= htmlspecialchars($job['CompanyName']) ?>" 
-                                 class="client-avatar">
-                        <?php else: ?>
-                            <div class="client-avatar" style="display: flex; align-items: center; justify-content: center; background: rgb(159, 232, 112); color: white; font-weight: bold; font-size: 24px;">
-                                <?= strtoupper(substr($job['CompanyName'], 0, 2)) ?>
+                        <a href="../view_client_profile.php?id=<?= $job['ClientID'] ?>" style="display: flex; gap: 15px; align-items: center; text-decoration: none; flex: 1;">
+                            <?php
+                            $profilePic = $job['ProfilePicture'];
+
+                            // Add leading slash if missing
+                            if ($profilePic && !empty($profilePic) && strpos($profilePic, 'http') !== 0) {
+                                if (strpos($profilePic, '/') !== 0) {
+                                    $profilePic = '/' . $profilePic;
+                                }
+                            }
+
+                            // Check if picture exists and display it or fallback to initial
+                            if ($profilePic && !empty($profilePic)):
+                            ?>
+                                <img src="<?= htmlspecialchars($profilePic) ?>"
+                                    alt="<?= htmlspecialchars($job['CompanyName']) ?>"
+                                    class="client-avatar" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            <?php endif; ?>
+                            <div class="client-avatar" style="<?= ($profilePic && !empty($profilePic)) ? 'display:none;' : 'display:flex;' ?> align-items: center; justify-content: center; background: linear-gradient(135deg, #16a34a, #15803d); color: white; font-weight: 800; font-size: 24px; border-radius: 50%;">
+                                <?= strtoupper(substr($job['CompanyName'], 0, 1)) ?>
                             </div>
-                        <?php endif; ?>
-                        <div class="client-info">
-                            <h3><?= htmlspecialchars($job['CompanyName']) ?></h3>
-                            <div class="client-email"><?= htmlspecialchars($job['ClientEmail']) ?></div>
-                        </div>
+                            <div class="client-info">
+                                <h3><?= htmlspecialchars($job['CompanyName']) ?></h3>
+                                <div class="client-email"><?= htmlspecialchars($job['ClientEmail']) ?></div>
+                            </div>
+                        </a>
                     </div>
 
                     <div class="client-stats">
@@ -466,9 +496,9 @@ try {
                     </div>
 
                     <?php if (!empty($job['ClientDescription'])): ?>
-                    <div class="client-description">
-                        <?= htmlspecialchars(substr($job['ClientDescription'], 0, 150)) ?><?= strlen($job['ClientDescription']) > 150 ? '...' : '' ?>
-                    </div>
+                        <div class="client-description">
+                            <?= htmlspecialchars(substr($job['ClientDescription'], 0, 150)) ?><?= strlen($job['ClientDescription']) > 150 ? '...' : '' ?>
+                        </div>
                     <?php endif; ?>
                 </div>
             </div>
@@ -478,4 +508,5 @@ try {
     <?php require_once '../../_foot.php'; ?>
 
 </body>
+
 </html>
