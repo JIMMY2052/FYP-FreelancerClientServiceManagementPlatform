@@ -115,6 +115,12 @@ $categoryMap = [
     'audio' => 'music-audio'
 ];
 
+// Get search and filter parameters
+$searchQuery = trim($_GET['q'] ?? '');
+$minPrice = isset($_GET['min_price']) && $_GET['min_price'] !== '' ? floatval($_GET['min_price']) : null;
+$maxPrice = isset($_GET['max_price']) && $_GET['max_price'] !== '' ? floatval($_GET['max_price']) : null;
+$sortBy = $_GET['sort'] ?? 'newest';
+
 // Get selected category from query parameter
 $selectedCategory = $_GET['category'] ?? '';
 $categoryFilter = '';
@@ -140,17 +146,44 @@ try {
     
     $params = [];
     
+    // Search by title
+    if ($searchQuery !== '') {
+        $sql .= " AND g.Title LIKE :search";
+        $params[':search'] = '%' . $searchQuery . '%';
+    }
+    
+    // Filter by category
     if ($categoryFilter) {
         $sql .= " AND g.Category = :category";
         $params[':category'] = $categoryFilter;
     }
     
+    // Filter by subcategory
     if ($selectedSubcategory) {
         $sql .= " AND g.Subcategory = :subcategory";
         $params[':subcategory'] = $selectedSubcategory;
     }
     
-    $sql .= " ORDER BY g.CreatedAt DESC";
+    // Filter by price range
+    if ($minPrice !== null) {
+        $sql .= " AND g.Price >= :minPrice";
+        $params[':minPrice'] = $minPrice;
+    }
+    if ($maxPrice !== null) {
+        $sql .= " AND g.Price <= :maxPrice";
+        $params[':maxPrice'] = $maxPrice;
+    }
+    
+    // Sort
+    if ($sortBy === 'price_low') {
+        $sql .= " ORDER BY g.Price ASC, g.CreatedAt DESC";
+    } elseif ($sortBy === 'price_high') {
+        $sql .= " ORDER BY g.Price DESC, g.CreatedAt DESC";
+    } elseif ($sortBy === 'delivery') {
+        $sql .= " ORDER BY g.DeliveryTime ASC, g.CreatedAt DESC";
+    } else { // newest (default)
+        $sql .= " ORDER BY g.CreatedAt DESC";
+    }
     
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
@@ -483,6 +516,94 @@ try {
         color: rgb(159, 232, 112);
     }
 
+    /* Search Filters (similar to browse_job.php) */
+    .search-filters {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 25px;
+        padding: 20px;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        box-sizing: border-box;
+    }
+
+    .filter-input {
+        flex: 1;
+        min-width: 200px;
+        padding: 11px 16px;
+        border-radius: 12px;
+        border: 1px solid #ddd;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+    }
+
+    .filter-input:focus {
+        outline: none;
+        border-color: rgb(159, 232, 112);
+        box-shadow: 0 0 0 3px rgba(159, 232, 112, 0.1);
+    }
+
+    .filter-select {
+        padding: 11px 16px;
+        border-radius: 12px;
+        border: 1px solid #ddd;
+        font-size: 0.9rem;
+        background: white;
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+        min-width: 180px;
+    }
+
+    .filter-select:focus {
+        outline: none;
+        border-color: rgb(159, 232, 112);
+        box-shadow: 0 0 0 3px rgba(159, 232, 112, 0.1);
+    }
+
+    .filter-search {
+        padding: 11px 24px;
+        border-radius: 16px;
+        background: rgb(159, 232, 112);
+        color: #333;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+        box-sizing: border-box;
+    }
+
+    .filter-search:hover {
+        background: rgb(140, 210, 90);
+        box-shadow: 0 4px 8px rgba(159, 232, 112, 0.3);
+    }
+
+    .filter-reset {
+        padding: 11px 24px;
+        border-radius: 16px;
+        background: #eee;
+        color: #333;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: inline-block;
+        font-size: 0.9rem;
+        box-sizing: border-box;
+    }
+
+    .filter-reset:hover {
+        background: #ddd;
+    }
+
+    .results-count {
+        color: #666;
+        margin-bottom: 20px;
+        font-weight: 500;
+    }
+
     /* Responsive Design */
     @media (max-width: 768px) {
         .category-tabs {
@@ -492,6 +613,25 @@ try {
         .category-tab-item {
             padding: 12px 16px;
             font-size: 0.9rem;
+        }
+
+        .search-filters {
+            flex-direction: column;
+            padding: 15px;
+        }
+
+        .filter-input {
+            min-width: 100%;
+        }
+
+        .filter-select {
+            width: 100%;
+        }
+
+        .filter-search,
+        .filter-reset {
+            width: 100%;
+            text-align: center;
         }
 
         .gigs-grid {
@@ -505,6 +645,22 @@ try {
 
         .page-header h1 {
             font-size: 2rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .browse-gigs-container {
+            padding: 15px 10px;
+        }
+
+        .search-filters {
+            padding: 12px;
+        }
+
+        .filter-input,
+        .filter-select {
+            padding: 10px 12px;
+            font-size: 0.85rem;
         }
     }
 </style>
@@ -552,33 +708,57 @@ try {
     <div class="page-header">
         <h1>Browse Gigs</h1>
         <p>Discover talented freelancers and their gigs</p>
-        
-        <?php if ($categoryFilter || $selectedSubcategory): ?>
-            <div style="margin-top: 15px;">
-                <strong>Active Filters:</strong>
-                <?php if ($categoryFilter): ?>
-                    <span class="filter-badge">
-                        Category: <?php echo htmlspecialchars($categoryData[$categoryFilter]['name'] ?? $categoryFilter); ?>
-                        <a href="/page/gig/browse_gigs.php<?php echo $selectedSubcategory ? '?subcategory=' . urlencode($selectedSubcategory) : ''; ?>" class="remove">×</a>
-                    </span>
-                <?php endif; ?>
-                <?php if ($selectedSubcategory): ?>
-                    <span class="filter-badge">
-                        Subcategory: <?php 
-                            $subName = '';
-                            foreach ($categoryData as $cat) {
-                                if (isset($cat['subcategories'][$selectedSubcategory])) {
-                                    $subName = $cat['subcategories'][$selectedSubcategory];
-                                    break;
-                                }
-                            }
-                            echo htmlspecialchars($subName ?: $selectedSubcategory);
-                        ?>
-                        <a href="/page/gig/browse_gigs.php<?php echo $categoryFilter ? '?category=' . urlencode($selectedCategory) : ''; ?>" class="remove">×</a>
-                    </span>
-                <?php endif; ?>
-            </div>
+    </div>
+
+    <!-- Search and Filter Form -->
+    <form method="get" class="search-filters">
+        <input type="text" name="q" value="<?php echo htmlspecialchars($searchQuery); ?>" placeholder="Search gigs by title..." class="filter-input">
+        <input type="number" name="min_price" value="<?php echo ($minPrice !== null) ? htmlspecialchars($minPrice) : ''; ?>" placeholder="Min price (MYR)" class="filter-input" step="1">
+        <input type="number" name="max_price" value="<?php echo ($maxPrice !== null) ? htmlspecialchars($maxPrice) : ''; ?>" placeholder="Max price (MYR)" class="filter-input" step="1">
+        <select name="sort" class="filter-select">
+            <option value="newest" <?php if ($sortBy === 'newest') echo 'selected'; ?>>Newest</option>
+            <option value="price_low" <?php if ($sortBy === 'price_low') echo 'selected'; ?>>Price: Low to High</option>
+            <option value="price_high" <?php if ($sortBy === 'price_high') echo 'selected'; ?>>Price: High to Low</option>
+            <option value="delivery" <?php if ($sortBy === 'delivery') echo 'selected'; ?>>Fastest Delivery</option>
+        </select>
+        <?php if ($categoryFilter): ?>
+            <input type="hidden" name="category" value="<?php echo htmlspecialchars($selectedCategory); ?>">
         <?php endif; ?>
+        <?php if ($selectedSubcategory): ?>
+            <input type="hidden" name="subcategory" value="<?php echo htmlspecialchars($selectedSubcategory); ?>">
+        <?php endif; ?>
+        <button type="submit" class="filter-search">Search</button>
+        <a href="/page/gig/browse_gigs.php" class="filter-reset">Reset</a>
+    </form>
+
+    <p class="results-count"><?php echo count($gigs); ?> gig(s) found</p>
+
+    <div style="margin-bottom: 20px;">
+        <?php if ($categoryFilter || $selectedSubcategory): ?>
+            <strong>Active Filters:</strong>
+            <?php if ($categoryFilter): ?>
+                <span class="filter-badge">
+                    Category: <?php echo htmlspecialchars($categoryData[$categoryFilter]['name'] ?? $categoryFilter); ?>
+                    <a href="/page/gig/browse_gigs.php<?php echo $selectedSubcategory ? '?subcategory=' . urlencode($selectedSubcategory) : ''; ?>" class="remove">×</a>
+                </span>
+            <?php endif; ?>
+            <?php if ($selectedSubcategory): ?>
+                <span class="filter-badge">
+                    Subcategory: <?php 
+                        $subName = '';
+                        foreach ($categoryData as $cat) {
+                            if (isset($cat['subcategories'][$selectedSubcategory])) {
+                                $subName = $cat['subcategories'][$selectedSubcategory];
+                                break;
+                            }
+                        }
+                        echo htmlspecialchars($subName ?: $selectedSubcategory);
+                    ?>
+                    <a href="/page/gig/browse_gigs.php<?php echo $categoryFilter ? '?category=' . urlencode($selectedCategory) : ''; ?>" class="remove">×</a>
+                </span>
+            <?php endif; ?>
+        </div>
+    <?php endif; ?>
     </div>
 
     <?php if (empty($gigs)): ?>
