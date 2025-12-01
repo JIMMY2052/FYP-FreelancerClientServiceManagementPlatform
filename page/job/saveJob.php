@@ -83,8 +83,8 @@ try {
         $_SESSION['new_job_id'] = $jobID;
         $conn->close();
         
-        // Redirect to my jobs page
-        header('Location: /page/my_jobs.php');
+        // Redirect to client home page
+        header('Location: /client_home.php');
         exit();
     } else {
         $_SESSION['error'] = 'Error creating job. Please try again.';
