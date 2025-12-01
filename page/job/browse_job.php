@@ -120,13 +120,24 @@ $jobs = $result->fetch_all(MYSQLI_ASSOC);
                 <div class="project-card">
                     <div class="client-info">
                         <div class="client-avatar">
-                            <?php if (!empty($job['ProfilePicture']) && file_exists($_SERVER['DOCUMENT_ROOT'] . $job['ProfilePicture'])): ?>
-                                <img src="<?php echo htmlspecialchars($job['ProfilePicture']); ?>" alt="<?php echo htmlspecialchars($job['CompanyName']); ?>">
-                            <?php else: ?>
-                                <div class="avatar-placeholder">
-                                    <?php echo strtoupper(substr($job['CompanyName'], 0, 1)); ?>
-                                </div>
+                            <?php
+                            $profilePic = $job['ProfilePicture'];
+                            
+                            // Add leading slash if missing
+                            if ($profilePic && !empty($profilePic) && strpos($profilePic, 'http') !== 0) {
+                                if (strpos($profilePic, '/') !== 0) {
+                                    $profilePic = '/' . $profilePic;
+                                }
+                            }
+                            
+                            // Check if picture exists and display it or fallback to initial
+                            if ($profilePic && !empty($profilePic)):
+                            ?>
+                                <img src="<?php echo htmlspecialchars($profilePic); ?>" alt="<?php echo htmlspecialchars($job['CompanyName']); ?>" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                             <?php endif; ?>
+                            <div class="avatar-placeholder" style="<?= ($profilePic && !empty($profilePic)) ? 'display:none;' : 'display:flex;' ?>">
+                                <?php echo strtoupper(substr($job['CompanyName'], 0, 1)); ?>
+                            </div>
                         </div>
                         <div class="client-details">
                             <span class="client-name"><?php echo htmlspecialchars($job['CompanyName']); ?></span>
@@ -310,6 +321,7 @@ $jobs = $result->fetch_all(MYSQLI_ASSOC);
         overflow: hidden;
         flex-shrink: 0;
         background: #f0f0f0;
+        position: relative;
     }
 
     .client-avatar img {
@@ -324,10 +336,15 @@ $jobs = $result->fetch_all(MYSQLI_ASSOC);
         display: flex;
         align-items: center;
         justify-content: center;
-        background: linear-gradient(135deg, rgb(159, 232, 112) 0%, rgb(140, 210, 90) 100%);
+        background: linear-gradient(135deg, #16a34a, #15803d);
         color: white;
-        font-weight: 700;
-        font-size: 1.1rem;
+        font-weight: 800;
+        font-size: 16px;
+        text-transform: uppercase;
+        position: absolute;
+        top: 0;
+        left: 0;
+        border-radius: 50%;
     }
 
     .client-details {
