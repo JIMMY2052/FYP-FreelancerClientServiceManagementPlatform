@@ -2,35 +2,35 @@
 <header class="profile-header">
     <div class="header-left">
         <?php if (isset($_SESSION['user_id']) && isset($_SESSION['user_type'])): ?>
-        <label for="sidebarToggle" class="menu-toggle" aria-label="Toggle sidebar">
-            <img src="/images/menu_.png" alt="Menu" class="menu-icon">
-        </label>
+            <label for="sidebarToggle" class="menu-toggle" aria-label="Toggle sidebar">
+                <img src="/images/menu_.png" alt="Menu" class="menu-icon">
+            </label>
         <?php endif; ?>
     </div>
-    
+
     <div class="header-logo">
         <a href="<?php
-            if (isset($_SESSION['user_id']) && isset($_SESSION['user_type'])) {
-                if ($_SESSION['user_type'] === 'freelancer') {
-                    echo '/freelancer_home.php';
-                } else {
-                    echo '/client_home.php';
-                }
-            } else {
-                echo '/index.php';
-            }
-        ?>">
+                    if (isset($_SESSION['user_id']) && isset($_SESSION['user_type'])) {
+                        if ($_SESSION['user_type'] === 'freelancer') {
+                            echo '/freelancer_home.php';
+                        } else {
+                            echo '/client_home.php';
+                        }
+                    } else {
+                        echo '/index.php';
+                    }
+                    ?>">
             <img src="/images/logo.png" alt="Logo" class="logo-img">
         </a>
     </div>
-    
+
     <div class="header-actions">
         <svg class="notification-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
             <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
         </svg>
         <div class="profile-dropdown">
-            <div class="profile-avatar" id="profileAvatar" style="width: 36px; height: 36px; border-radius: 50%; background-color: #22c55e; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; cursor: pointer; overflow: hidden; flex-shrink: 0;">
+            <div class="profile-avatar" id="profileAvatar" style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #16a34a, #15803d); display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; cursor: pointer; overflow: hidden; flex-shrink: 0;">
                 <?php
                 // Display user profile picture from database
                 if (isset($_SESSION['user_id']) && isset($_SESSION['user_type'])) {
@@ -65,20 +65,31 @@
                         $name1 = $user[$name_col1] ?? '';
                         $name2 = $name_col2 ? ($user[$name_col2] ?? '') : '';
 
+                        // Prepare profile picture source
+                        $profilePicSrc = '';
+                        if (!empty($profilePicture)) {
+                            $picPath = $profilePicture;
+                            // Add leading / if missing and not an absolute URL
+                            if (strpos($picPath, '/') !== 0 && strpos($picPath, 'http') !== 0) {
+                                $picPath = '/' . $picPath;
+                            }
+                            $profilePicSrc = $picPath;
+                        }
+
                         // Display profile picture if exists
-                        if (!empty($profilePicture) && file_exists('../' . $profilePicture)) {
-                            echo '<img src="' . htmlspecialchars($profilePicture) . '" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block;">';
+                        if (!empty($profilePicSrc)) {
+                            echo '<img src="' . htmlspecialchars($profilePicSrc) . '" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block;" onerror="this.style.display=\'none\'; this.parentElement.textContent = \'' . strtoupper(substr($name1 ?: 'U', 0, 1)) . '\';">';
                         } else {
                             // Show initials fallback
                             if ($user_type === 'freelancer') {
-                                $initials = strtoupper(substr($name1 ?: 'F', 0, 1) . substr($name2 ?: 'L', 0, 1));
+                                $initials = strtoupper(substr($name1 ?: 'F', 0, 1));
                             } else {
                                 $initials = strtoupper(substr($name1 ?: 'C', 0, 1));
                             }
                             echo $initials;
                         }
                     } else {
-                        echo '👤';
+                        echo 'U';
                     }
 
                     $stmt->close();

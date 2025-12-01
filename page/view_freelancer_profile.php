@@ -863,16 +863,6 @@ $years_experience = $now->diff($member_since)->y + 1;
 
                     <div class="stat-box">
                         <div class="stat-icon">
-                            <i class="fas fa-dollar-sign"></i>
-                        </div>
-                        <div class="stat-content">
-                            <div class="stat-value">RM<?= number_format($freelancer['TotalEarned'] ?? 0, 0) ?></div>
-                            <div class="stat-label">Total Earned</div>
-                        </div>
-                    </div>
-
-                    <div class="stat-box">
-                        <div class="stat-icon">
                             <i class="fas fa-calendar"></i>
                         </div>
                         <div class="stat-content">

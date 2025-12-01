@@ -39,7 +39,7 @@ require_once __DIR__ . '/page/config.php';
                     <!-- Show profile and notification when logged in -->
                     <span class="notification-icon">🔔</span>
                     <div class="profile-dropdown">
-                        <div class="profile-avatar" style="width: 36px; height: 36px; border-radius: 50%; background-color: #22c55e; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; cursor: pointer; overflow: hidden; flex-shrink: 0;">
+                        <div class="profile-avatar" style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #16a34a, #15803d); display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; cursor: pointer; overflow: hidden; flex-shrink: 0;">
                             <?php
                             // Display user profile picture from database
                             if (isset($_SESSION['user_id']) && isset($_SESSION['user_type'])) {
@@ -74,21 +74,31 @@ require_once __DIR__ . '/page/config.php';
                                     $name1 = $user[$name_col1] ?? '';
                                     $name2 = $name_col2 ? ($user[$name_col2] ?? '') : '';
 
+                                    // Prepare profile picture source
+                                    $profilePicSrc = '';
+                                    if (!empty($profilePicture)) {
+                                        $picPath = $profilePicture;
+                                        // Add leading / if missing and not an absolute URL
+                                        if (strpos($picPath, '/') !== 0 && strpos($picPath, 'http') !== 0) {
+                                            $picPath = '/' . $picPath;
+                                        }
+                                        $profilePicSrc = $picPath;
+                                    }
+
                                     // Display profile picture if exists
-                                    // _head.php is in root, so the path is directly as stored in database
-                                    if (!empty($profilePicture) && file_exists($_SERVER['DOCUMENT_ROOT'] . '/' . $profilePicture)) {
-                                        echo '<img src="' . htmlspecialchars($profilePicture) . '" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block;">';
+                                    if (!empty($profilePicSrc)) {
+                                        echo '<img src="' . htmlspecialchars($profilePicSrc) . '" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block;" onerror="this.style.display=\'none\'; this.parentElement.textContent = \'' . strtoupper(substr($name1 ?: 'U', 0, 1)) . '\';">';
                                     } else {
                                         // Show initials fallback
                                         if ($user_type === 'freelancer') {
-                                            $initials = strtoupper(substr($name1 ?: 'F', 0, 1) . substr($name2 ?: 'L', 0, 1));
+                                            $initials = strtoupper(substr($name1 ?: 'F', 0, 1));
                                         } else {
                                             $initials = strtoupper(substr($name1 ?: 'C', 0, 1));
                                         }
                                         echo $initials;
                                     }
                                 } else {
-                                    echo '👤';
+                                    echo 'U';
                                 }
 
                                 $stmt->close();

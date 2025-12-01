@@ -46,12 +46,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['profile_picture'])) 
             $relative_path = 'uploads/profile_pictures/' . $new_filename;
             $stmt = $conn->prepare("UPDATE client SET ProfilePicture = ? WHERE ClientID = ?");
             $stmt->bind_param("si", $relative_path, $client_id);
-            $stmt->execute();
-            $stmt->close();
 
-            $_SESSION['success'] = 'Profile picture updated successfully!';
-            header('Location: client_profile.php');
-            exit();
+            if ($stmt->execute()) {
+                $_SESSION['success'] = 'Profile picture updated successfully!';
+                $stmt->close();
+                $conn->close();
+                header('Location: client_profile.php');
+                exit();
+            } else {
+                $_SESSION['error'] = 'Failed to update database: ' . $stmt->error;
+                $stmt->close();
+            }
         } else {
             $_SESSION['error'] = 'Failed to upload profile picture.';
         }
@@ -231,19 +236,19 @@ $conn->close();
     <script>
         document.getElementById('profile_picture_input').addEventListener('change', function(e) {
             if (this.files[0]) {
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.enctype = 'multipart/form-data';
-                form.appendChild(this.files[0]);
-
-                const xhr = new XMLHttpRequest();
                 const formData = new FormData();
                 formData.append('profile_picture', this.files[0]);
 
+                const xhr = new XMLHttpRequest();
                 xhr.onload = function() {
                     if (xhr.status === 200) {
                         location.reload();
+                    } else {
+                        alert('Error uploading profile picture');
                     }
+                };
+                xhr.onerror = function() {
+                    alert('Error uploading profile picture');
                 };
                 xhr.open('POST', 'client_profile.php', true);
                 xhr.send(formData);
