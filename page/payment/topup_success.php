@@ -244,11 +244,16 @@ $_title = 'Payment Success - WorkSnyc Platform';
             if ($return_to === 'payment_details' && isset($_SESSION['topup_gig_id']) && !empty($_SESSION['topup_gig_id'])) {
                 $gig_id = $_SESSION['topup_gig_id'];
                 $rush = isset($_SESSION['topup_rush']) ? $_SESSION['topup_rush'] : '';
+                $extra_revisions = isset($_SESSION['topup_extra_revisions']) ? $_SESSION['topup_extra_revisions'] : '';
                 $return_url = 'payment_details.php?gig_id=' . $gig_id . '&rush=' . $rush;
+                if (!empty($extra_revisions)) {
+                    $return_url .= '&extra_revisions=' . $extra_revisions;
+                }
                 // Clear the session variables after use
                 unset($_SESSION['topup_return_to']);
                 unset($_SESSION['topup_gig_id']);
                 unset($_SESSION['topup_rush']);
+                unset($_SESSION['topup_extra_revisions']);
             } elseif ($return_to === 'wallet') {
                 $return_url = 'wallet.php';
                 unset($_SESSION['topup_return_to']);

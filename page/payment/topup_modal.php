@@ -10,6 +10,7 @@ if (!isset($_SESSION['user_id']) || !in_array($_SESSION['user_type'], ['client',
 $return_to = isset($_GET['return_to']) ? $_GET['return_to'] : 'wallet';
 $gig_id = isset($_GET['gig_id']) ? $_GET['gig_id'] : '';
 $rush = isset($_GET['rush']) ? $_GET['rush'] : '';
+$extra_revisions = isset($_GET['extra_revisions']) ? $_GET['extra_revisions'] : '';
 
 $_title = 'Top Up Wallet - WorkSnyc Platform';
 ?>
@@ -211,6 +212,7 @@ $_title = 'Top Up Wallet - WorkSnyc Platform';
             <input type="hidden" name="return_to" value="<?= htmlspecialchars($return_to) ?>">
             <input type="hidden" name="gig_id" value="<?= htmlspecialchars($gig_id) ?>">
             <input type="hidden" name="rush" value="<?= htmlspecialchars($rush) ?>">
+            <input type="hidden" name="extra_revisions" value="<?= htmlspecialchars($extra_revisions) ?>">
 
             <div class="quick-amount-grid">
                 <button type="button" class="quick-amount-btn" onclick="selectAmount(50)">RM 50</button>
@@ -232,7 +234,7 @@ $_title = 'Top Up Wallet - WorkSnyc Platform';
             </button>
         </form>
 
-        <a href="<?= $return_to === 'payment_details' && !empty($gig_id) ? 'payment_details.php?gig_id=' . htmlspecialchars($gig_id) . '&rush=' . htmlspecialchars($rush) : 'wallet.php' ?>" class="btn-cancel">
+        <a href="<?= $return_to === 'payment_details' && !empty($gig_id) ? 'payment_details.php?gig_id=' . htmlspecialchars($gig_id) . '&rush=' . htmlspecialchars($rush) . (!empty($extra_revisions) ? '&extra_revisions=' . htmlspecialchars($extra_revisions) : '') : 'wallet.php' ?>" class="btn-cancel">
             Cancel
         </a>
     </div>

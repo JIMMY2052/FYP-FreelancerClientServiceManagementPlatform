@@ -69,6 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $rushDelivery = intval($_POST['rush_delivery'] ?? 0);
     $rushDeliveryPrice = floatval($_POST['rush_delivery_price'] ?? 0);
     $revisionCount = intval($_POST['revision_count'] ?? 0);
+    $additionalRevisionPrice = floatval($_POST['additional_revision_price'] ?? 0);
     
     // Validation
     if (empty($title) || empty($description) || $price <= 0 || $deliveryTime <= 0) {
@@ -83,6 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 RushDelivery = :rush_delivery,
                 RushDeliveryPrice = :rush_delivery_price,
                 RevisionCount = :revision_count,
+                AdditionalRevision = :additional_revision_price,
                 UpdatedAt = NOW()
                 WHERE GigID = :gig_id AND FreelancerID = :freelancer_id");
             
@@ -94,6 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':rush_delivery' => $rushDelivery,
                 ':rush_delivery_price' => $rushDeliveryPrice,
                 ':revision_count' => $revisionCount,
+                ':additional_revision_price' => $additionalRevisionPrice,
                 ':gig_id' => $gigID,
                 ':freelancer_id' => $freelancerID
             ]);
@@ -115,8 +118,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <a href="my_gig.php">← Back to My Gigs</a>
     </div>
 
+    <h1 class="page-title">Edit Gig</h1>
+
     <div class="form-container">
-        <h1>Edit Gig</h1>
         
         <?php if (isset($_SESSION['success'])): ?>
             <div class="alert alert-success">
@@ -169,10 +173,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
             </div>
 
-            <div class="form-group">
-                <label for="revision_count">Number of Revisions</label>
-                <input type="number" id="revision_count" name="revision_count" value="<?= htmlspecialchars($gig['RevisionCount'] ?? 0) ?>" min="0" step="1">
-                <small class="form-hint">How many revisions are included</small>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="revision_count">Number of Revisions</label>
+                    <input type="number" id="revision_count" name="revision_count" value="<?= htmlspecialchars($gig['RevisionCount'] ?? 0) ?>" min="0" step="1">
+                    <small class="form-hint">How many revisions are included</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="additional_revision_price">Additional Revision Price (RM)</label>
+                    <input type="number" id="additional_revision_price" name="additional_revision_price" value="<?= htmlspecialchars($gig['AdditionalRevision'] ?? 0) ?>" min="0" step="0.01">
+                    <small class="form-hint">Price per extra revision beyond included count</small>
+                </div>
             </div>
 
             <div class="form-actions">
@@ -208,18 +220,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     color: rgb(159, 232, 112);
 }
 
+.page-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin: 20px 0 30px 0;
+}
+
 .form-container {
     background: white;
     border-radius: 12px;
     padding: 40px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-}
-
-.form-container h1 {
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: #2c3e50;
-    margin: 0 0 30px 0;
 }
 
 .alert {

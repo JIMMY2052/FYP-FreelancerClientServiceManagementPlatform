@@ -11,6 +11,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'client') {
 // Get order details from session or URL
 $gigId = isset($_GET['gig_id']) ? intval($_GET['gig_id']) : 0;
 $rushDelivery = isset($_GET['rush']) && $_GET['rush'] == '1';
+$extraRevisions = isset($_GET['extra_revisions']) ? intval($_GET['extra_revisions']) : 0;
 
 if (!$gigId) {
     header('Location: ../gig/browse_gigs.php');
@@ -78,8 +79,11 @@ try {
 // Calculate pricing
 $basePrice = floatval($orderData['Price']);
 $rushFee = ($rushDelivery && !empty($orderData['RushDeliveryPrice'])) ? floatval($orderData['RushDeliveryPrice']) : 0;
-$totalAmount = $basePrice + $rushFee;
+$additionalRevisionPrice = (!empty($orderData['AdditionalRevision'])) ? floatval($orderData['AdditionalRevision']) : 0;
+$revisionFee = ($extraRevisions > 0 && $additionalRevisionPrice > 0) ? ($extraRevisions * $additionalRevisionPrice) : 0;
+$totalAmount = $basePrice + $rushFee + $revisionFee;
 $deliveryTime = $rushDelivery && !empty($orderData['RushDelivery']) ? intval($orderData['RushDelivery']) : intval($orderData['DeliveryTime']);
+$totalRevisions = intval($orderData['RevisionCount']) + $extraRevisions;
 
 $_title = 'Payment Details - WorkSnyc Platform';
 ?>
@@ -746,13 +750,19 @@ $_title = 'Payment Details - WorkSnyc Platform';
                                 <span class="detail-value">RM <?= number_format($rushFee, 2) ?></span>
                             </div>
                         <?php endif; ?>
+                        <?php if ($extraRevisions > 0 && $revisionFee > 0): ?>
+                            <div class="detail-row">
+                                <span class="detail-label">Additional Revisions (<?= $extraRevisions ?> × RM<?= number_format($additionalRevisionPrice, 2) ?>)</span>
+                                <span class="detail-value">RM <?= number_format($revisionFee, 2) ?></span>
+                            </div>
+                        <?php endif; ?>
                         <div class="detail-row">
                             <span class="detail-label">Delivery Time</span>
                             <span class="detail-value"><?= $deliveryTime ?> day(s)</span>
                         </div>
                         <div class="detail-row">
-                            <span class="detail-label">Revisions Included</span>
-                            <span class="detail-value"><?= htmlspecialchars($orderData['RevisionCount']) ?></span>
+                            <span class="detail-label">Total Revisions</span>
+                            <span class="detail-value"><?= $totalRevisions ?> (<?= htmlspecialchars($orderData['RevisionCount']) ?> included<?= $extraRevisions > 0 ? ' + ' . $extraRevisions . ' extra' : '' ?>)</span>
                         </div>
                     </div>
 
@@ -761,7 +771,7 @@ $_title = 'Payment Details - WorkSnyc Platform';
                         <ul>
                             <li>The freelancer agrees to deliver the service as described within <?= $deliveryTime ?> day(s) from the order date.</li>
                             <li>The client agrees to pay the total amount of RM <?= number_format($totalAmount, 2) ?> upon order confirmation.</li>
-                            <li>The service includes <?= htmlspecialchars($orderData['RevisionCount']) ?> revision(s) as specified.</li>
+                            <li>The service includes <?= $totalRevisions ?> revision(s) total<?= $extraRevisions > 0 ? ' (' . $orderData['RevisionCount'] . ' included + ' . $extraRevisions . ' additional at RM' . number_format($additionalRevisionPrice, 2) . ' each)' : '' ?>.</li>
                             <li>Payment will be held in escrow and released to the freelancer upon successful delivery and client approval.</li>
                             <li>Both parties agree to communicate professionally and resolve any disputes amicably.</li>
                             <li>Cancellation policy: Orders can be cancelled within 24 hours for a full refund. After work has begun, cancellation terms will be discussed between both parties.</li>
@@ -803,9 +813,19 @@ $_title = 'Payment Details - WorkSnyc Platform';
                                 <span class="price-value">RM <?= number_format($rushFee, 2) ?></span>
                             </div>
                         <?php endif; ?>
+                        <?php if ($extraRevisions > 0 && $revisionFee > 0): ?>
+                            <div class="price-row">
+                                <span class="price-label"><i class="fas fa-redo"></i> Additional Revisions (<?= $extraRevisions ?>)</span>
+                                <span class="price-value">RM <?= number_format($revisionFee, 2) ?></span>
+                            </div>
+                        <?php endif; ?>
                         <div class="price-row">
                             <span class="price-label">Delivery</span>
                             <span class="price-value"><?= $deliveryTime ?> day(s)</span>
+                        </div>
+                        <div class="price-row">
+                            <span class="price-label">Total Revisions</span>
+                            <span class="price-value"><?= $totalRevisions ?></span>
                         </div>
                         <div class="price-row price-total">
                             <span class="price-label">Total</span>
@@ -831,7 +851,7 @@ $_title = 'Payment Details - WorkSnyc Platform';
                             <div class="wallet-status insufficient">
                                 <i class="fas fa-exclamation-circle"></i> Insufficient balance - Please top up
                             </div>
-                            <a href="topup_modal.php?return_to=payment_details&gig_id=<?= $gigId ?>&rush=<?= $rushDelivery ? '1' : '0' ?>" class="topup-link">
+                            <a href="topup_modal.php?return_to=payment_details&gig_id=<?= $gigId ?>&rush=<?= $rushDelivery ? '1' : '0' ?>&extra_revisions=<?= $extraRevisions ?>" class="topup-link">
                                 <i class="fas fa-plus-circle"></i>
                                 Top up wallet
                             </a>
@@ -880,6 +900,7 @@ $_title = 'Payment Details - WorkSnyc Platform';
         const walletBalance = <?= $walletBalance ?>;
         const gigId = <?= $gigId ?>;
         const rushDelivery = <?= $rushDelivery ? 1 : 0 ?>;
+        const extraRevisions = <?= $extraRevisions ?>;
 
         // Modal functions
         function showModal(type, title, message, actions = []) {
@@ -993,6 +1014,7 @@ $_title = 'Payment Details - WorkSnyc Platform';
             const formData = new FormData();
             formData.append('gig_id', gigId);
             formData.append('rush_delivery', rushDelivery);
+            formData.append('extra_revisions', extraRevisions);
             formData.append('agreed_terms', 1);
 
             fetch('process_gig_payment.php', {
@@ -1020,6 +1042,12 @@ $_title = 'Payment Details - WorkSnyc Platform';
                             input2.name = 'rush_delivery';
                             input2.value = data.rush_delivery;
                             form.appendChild(input2);
+
+                            const input3 = document.createElement('input');
+                            input3.type = 'hidden';
+                            input3.name = 'extra_revisions';
+                            input3.value = data.extra_revisions || 0;
+                            form.appendChild(input3);
 
                             document.body.appendChild(form);
                             form.submit();
