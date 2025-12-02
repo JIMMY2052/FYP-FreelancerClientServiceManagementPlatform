@@ -12,6 +12,46 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'freelancer') {
 require_once './page/checkUserStatus.php';
 
 $_title = 'Dashboard - WorkSnyc Freelancer Platform';
+
+// Fetch latest available jobs
+require_once './page/config.php';
+
+if (!function_exists('getPDOConnection')) {
+    function getPDOConnection(): PDO
+    {
+        $dsn = 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=utf8mb4';
+        $options = [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES => false,
+        ];
+        try {
+            return new PDO($dsn, DB_USER, DB_PASS, $options);
+        } catch (PDOException $e) {
+            die('Database connection error: ' . $e->getMessage());
+        }
+    }
+}
+
+$pdo = getPDOConnection();
+
+// Fetch latest 3 available jobs
+try {
+    $stmt = $pdo->prepare("
+        SELECT j.JobID, j.Title, j.Description, j.Budget, j.PostDate, c.CompanyName 
+        FROM job j
+        INNER JOIN client c ON j.ClientID = c.ClientID
+        WHERE j.Status = 'available'
+        ORDER BY j.PostDate DESC
+        LIMIT 3
+    ");
+    $stmt->execute();
+    $latestJobs = $stmt->fetchAll();
+} catch (PDOException $e) {
+    error_log('[freelancer_home] Failed to fetch jobs: ' . $e->getMessage());
+    $latestJobs = [];
+}
+
 include '_head.php';
 
 ?>
@@ -92,60 +132,50 @@ include '_head.php';
             <h2 class="section-title">Available Opportunities</h2>
             <p class="section-subtitle">New projects matching your skills</p>
         </div>
-        <div class="opportunities-grid">
-            <div class="opportunity-card">
-                <div class="opportunity-header">
-                    <h3 class="opportunity-title">Website Redesign Project</h3>
-                    <span class="opportunity-budget">$500 - $1000</span>
-                </div>
-                <p class="opportunity-description">We need a modern website redesign for our e-commerce platform. Must have experience with React and responsive design.</p>
-                <div class="opportunity-skills">
-                    <span class="skill-tag">React</span>
-                    <span class="skill-tag">UI/UX</span>
-                    <span class="skill-tag">JavaScript</span>
-                </div>
-                <div class="opportunity-footer">
-                    <span class="opportunity-time">Posted 2 hours ago</span>
-                    <a href="/page/project_details.php" class="btn-small">View Details</a>
-                </div>
+        <?php if (!empty($latestJobs)): ?>
+            <div class="opportunities-grid">
+                <?php foreach ($latestJobs as $job): ?>
+                    <div class="opportunity-card">
+                        <div class="opportunity-header">
+                            <h3 class="opportunity-title"><?= htmlspecialchars($job['Title']) ?></h3>
+                            <span class="opportunity-budget">RM <?= number_format($job['Budget'], 0) ?></span>
+                        </div>
+                        <p class="opportunity-description"><?= htmlspecialchars(mb_strimwidth($job['Description'], 0, 150, '...')) ?></p>
+                        <div class="opportunity-skills">
+                            <span class="skill-tag"><?= htmlspecialchars($job['CompanyName']) ?></span>
+                        </div>
+                        <div class="opportunity-footer">
+                            <span class="opportunity-time">
+                                <?php
+                                $postDate = new DateTime($job['PostDate']);
+                                $now = new DateTime();
+                                $interval = $now->diff($postDate);
+                                
+                                if ($interval->days == 0) {
+                                    if ($interval->h == 0) {
+                                        echo $interval->i . ' minute(s) ago';
+                                    } else {
+                                        echo $interval->h . ' hour(s) ago';
+                                    }
+                                } elseif ($interval->days == 1) {
+                                    echo '1 day ago';
+                                } else {
+                                    echo $interval->days . ' days ago';
+                                }
+                                ?>
+                            </span>
+                            <a href="/page/job/job_details.php?id=<?= $job['JobID'] ?>" class="btn-small">View Details</a>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
             </div>
-
-            <div class="opportunity-card">
-                <div class="opportunity-header">
-                    <h3 class="opportunity-title">Logo Design</h3>
-                    <span class="opportunity-budget">$200 - $500</span>
-                </div>
-                <p class="opportunity-description">Looking for a creative logo designer for our new tech startup. Modern, minimalist design preferred.</p>
-                <div class="opportunity-skills">
-                    <span class="skill-tag">Graphic Design</span>
-                    <span class="skill-tag">Adobe XD</span>
-                    <span class="skill-tag">Branding</span>
-                </div>
-                <div class="opportunity-footer">
-                    <span class="opportunity-time">Posted 4 hours ago</span>
-                    <a href="/page/project_details.php" class="btn-small">View Details</a>
-                </div>
+        <?php else: ?>
+            <div class="empty-opportunities">
+                <p>No available opportunities at the moment. Check back later!</p>
             </div>
-
-            <div class="opportunity-card">
-                <div class="opportunity-header">
-                    <h3 class="opportunity-title">Mobile App Development</h3>
-                    <span class="opportunity-budget">$2000 - $5000</span>
-                </div>
-                <p class="opportunity-description">Develop a cross-platform mobile app for iOS and Android. Flutter or React Native experience required.</p>
-                <div class="opportunity-skills">
-                    <span class="skill-tag">Flutter</span>
-                    <span class="skill-tag">Mobile Dev</span>
-                    <span class="skill-tag">API Integration</span>
-                </div>
-                <div class="opportunity-footer">
-                    <span class="opportunity-time">Posted 6 hours ago</span>
-                    <a href="/page/project_details.php" class="btn-small">View Details</a>
-                </div>
-            </div>
-        </div>
+        <?php endif; ?>
         <div class="view-all-section">
-            <a href="/page/browse_projects.php" class="btn-primary">View All Opportunities</a>
+            <a href="/page/job/browse_job.php" class="btn-primary">View All Opportunities</a>
         </div>
     </div>
 </section>
@@ -162,25 +192,21 @@ include '_head.php';
                 <div class="tool-icon">📋</div>
                 <h3 class="tool-title">Portfolio</h3>
                 <p class="tool-description">Showcase your best work and attract more clients with a professional portfolio.</p>
-                <a href="/page/portfolio.php" class="tool-link">Manage Portfolio →</a>
             </div>
             <div class="tool-item">
                 <div class="tool-icon">📄</div>
                 <h3 class="tool-title">Proposals</h3>
                 <p class="tool-description">Create and track all your project proposals in one place.</p>
-                <a href="/page/proposals.php" class="tool-link">View Proposals →</a>
             </div>
             <div class="tool-item">
                 <div class="tool-icon">🏆</div>
                 <h3 class="tool-title">Certifications</h3>
                 <p class="tool-description">Add certifications and badges to build trust with clients.</p>
-                <a href="/page/certifications.php" class="tool-link">Add Certifications →</a>
             </div>
             <div class="tool-item">
                 <div class="tool-icon">📈</div>
                 <h3 class="tool-title">Performance Analytics</h3>
                 <p class="tool-description">Track your profile views, project success rate, and earnings.</p>
-                <a href="/page/analytics.php" class="tool-link">View Analytics →</a>
             </div>
         </div>
     </div>

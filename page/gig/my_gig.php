@@ -160,7 +160,7 @@ include '../../_head.php';
 
                         <div class="card-actions">
                             <a href="/page/gig/edit_gig.php?id=<?php echo $service['GigID']; ?>" class="btn-small btn-edit">Edit</a>
-                            <form method="post" style="flex: 1;">
+                            <form method="post">
                                 <input type="hidden" name="action" value="toggle_status">
                                 <input type="hidden" name="gig_id" value="<?php echo $service['GigID']; ?>">
                                 <input type="hidden" name="current_status" value="<?php echo $service['Status']; ?>">
@@ -168,7 +168,7 @@ include '../../_head.php';
                                     <?php echo $service['Status'] === 'active' ? '⏸ Pause' : '▶ Resume'; ?>
                                 </button>
                             </form>
-                            <form method="post" style="flex: 1;">
+                            <form method="post">
                                 <input type="hidden" name="action" value="delete">
                                 <input type="hidden" name="gig_id" value="<?php echo $service['GigID']; ?>">
                                 <button type="submit" class="btn-small btn-delete" onclick="return confirm('Delete this service?');">Delete</button>
