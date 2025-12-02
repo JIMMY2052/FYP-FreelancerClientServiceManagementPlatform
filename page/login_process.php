@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Prepare and execute query
-    $stmt = $conn->prepare("SELECT $id_column, Email, Password, Status FROM $table WHERE Email = ?");
+    $stmt = $conn->prepare("SELECT $id_column, Email, Password, Status, isDelete FROM $table WHERE Email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -43,8 +43,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($result->num_rows === 1) {
         $user = $result->fetch_assoc();
 
+        // Check if user is deleted
+        if ($user['isDelete'] == 1) {
+            $_SESSION['error'] = 'Your account has been deleted. Please contact support.';
+        }
         // Verify password
-        if (password_verify($password, $user['Password'])) {
+        elseif (password_verify($password, $user['Password'])) {
             // Check if user is active
             if ($user['Status'] === 'active' || $user['Status'] === null || $user['Status'] === '') {
                 // Set session variables

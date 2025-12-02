@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $table = $user_type === 'freelancer' ? 'freelancer' : 'client';
         $id_column = $user_type === 'freelancer' ? 'FreelancerID' : 'ClientID';
 
-        $stmt = $conn->prepare("DELETE FROM $table WHERE $id_column = ?");
+        $stmt = $conn->prepare("UPDATE $table SET isDelete = 1 WHERE $id_column = ?");
         $stmt->bind_param("i", $user_id);
 
         if ($stmt->execute()) {
@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $user_type = $_POST['user_type'] ?? '';
     $status = $_POST['status'] ?? 'active';
 
-    if (!empty($user_id) && in_array($user_type, ['freelancer', 'client']) && in_array($status, ['active', 'inactive', 'suspended'])) {
+    if (!empty($user_id) && in_array($user_type, ['freelancer', 'client']) && in_array($status, ['active', 'inactive'])) {
         $table = $user_type === 'freelancer' ? 'freelancer' : 'client';
         $id_column = $user_type === 'freelancer' ? 'FreelancerID' : 'ClientID';
 
@@ -64,7 +64,7 @@ $search_query = $_GET['search'] ?? '';
 $sort_by = $_GET['sort'] ?? 'date_desc';
 
 // Count users by type for tabs
-$count_sql = "SELECT 'freelancer' as type, COUNT(*) as count FROM freelancer UNION ALL SELECT 'client' as type, COUNT(*) as count FROM client";
+$count_sql = "SELECT 'freelancer' as type, COUNT(*) as count FROM freelancer WHERE isDelete = 0 UNION ALL SELECT 'client' as type, COUNT(*) as count FROM client WHERE isDelete = 0";
 $count_result = $conn->query($count_sql);
 $user_counts = ['all' => 0, 'freelancer' => 0, 'client' => 0];
 
@@ -78,15 +78,15 @@ while ($row = $count_result->fetch_assoc()) {
 }
 
 // Build freelancer query
-$freelancer_query = "SELECT FreelancerID, FirstName, LastName, Email, Status, JoinedDate FROM freelancer";
+$freelancer_query = "SELECT FreelancerID, FirstName, LastName, Email, Status, JoinedDate FROM freelancer WHERE isDelete = 0";
 if (!empty($search_query)) {
-    $freelancer_query .= " WHERE FirstName LIKE '%$search_query%' OR LastName LIKE '%$search_query%' OR Email LIKE '%$search_query%'";
+    $freelancer_query .= " AND (FirstName LIKE '%$search_query%' OR LastName LIKE '%$search_query%' OR Email LIKE '%$search_query%')";
 }
 
 // Build client query
-$client_query = "SELECT ClientID, CompanyName as Name, Email, Status, JoinedDate FROM client";
+$client_query = "SELECT ClientID, CompanyName as Name, Email, Status, JoinedDate FROM client WHERE isDelete = 0";
 if (!empty($search_query)) {
-    $client_query .= " WHERE CompanyName LIKE '%$search_query%' OR Email LIKE '%$search_query%'";
+    $client_query .= " AND (CompanyName LIKE '%$search_query%' OR Email LIKE '%$search_query%')";
 }
 
 // Get data based on filter
@@ -644,16 +644,12 @@ $conn->close();
                                                 <select name="status" class="form-control" onchange="this.form.submit();">
                                                     <option value="active" <?php echo ($user['Status'] ?? '') === 'active' ? 'selected' : ''; ?>>Active</option>
                                                     <option value="inactive" <?php echo ($user['Status'] ?? '') === 'inactive' ? 'selected' : ''; ?>>Inactive</option>
-                                                    <option value="suspended" <?php echo ($user['Status'] ?? '') === 'suspended' ? 'selected' : ''; ?>>Suspended</option>
                                                 </select>
                                             </form>
                                         </td>
                                         <td><?php echo date('Y-m-d', strtotime($user['created'] ?? 'now')); ?></td>
                                         <td>
                                             <div class="action-buttons">
-                                                <a href="edit_user.php?id=<?php echo $user[$user['type'] === 'freelancer' ? 'FreelancerID' : 'ClientID']; ?>&type=<?php echo $user['type']; ?>" class="btn-sm btn-edit">
-                                                    <i class="fas fa-pencil-alt"></i> Edit
-                                                </a>
                                                 <form method="POST" action="admin_manage_users.php" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this user?');">
                                                     <input type="hidden" name="action" value="delete">
                                                     <input type="hidden" name="user_id" value="<?php echo $user[$user['type'] === 'freelancer' ? 'FreelancerID' : 'ClientID']; ?>">
