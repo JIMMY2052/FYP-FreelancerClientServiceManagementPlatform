@@ -23,6 +23,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $client_signature = isset($_POST['signature']) ? $_POST['signature'] : null;
     $client_signed_name = isset($_POST['client_name']) ? trim($_POST['client_name']) : null;
 
+    // Get revision info from session (set during payment_details.php)
+    $extra_revisions = isset($_SESSION['extra_revisions']) ? intval($_SESSION['extra_revisions']) : 0;
+    $additional_revision_price = isset($_SESSION['additional_revision_price']) ? floatval($_SESSION['additional_revision_price']) : 0;
+
     $client_id = $_SESSION['user_id'];
 
     // Validate required fields
@@ -65,7 +69,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Calculate amounts
     $base_price = floatval($gig['Price']);
     $rush_fee = ($rush_delivery && !empty($gig['RushDeliveryPrice'])) ? floatval($gig['RushDeliveryPrice']) : 0;
-    $total_amount = $base_price + $rush_fee;
+    $revision_fee = ($extra_revisions > 0 && $additional_revision_price > 0) ? ($extra_revisions * $additional_revision_price) : 0;
+    $total_amount = $base_price + $rush_fee + $revision_fee;
+    $total_revisions = intval($gig['RevisionCount']) + $extra_revisions;
     $delivery_time = $rush_delivery && !empty($gig['RushDelivery']) ? intval($gig['RushDelivery']) : intval($gig['DeliveryTime']);
 
     // Prepare agreement data
@@ -80,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $terms = "• The freelancer will deliver the gig-based service as described within {$delivery_time} day(s).\n";
     $terms .= "• The client will pay RM " . number_format($total_amount, 2) . " which is held in escrow.\n";
     $terms .= "• Payment will be released upon successful delivery and client approval.\n";
-    $terms .= "• The service includes {$gig['RevisionCount']} revision(s).\n";
+    $terms .= "• The service includes {$total_revisions} revision(s).\n";
     $terms .= "• Both parties agree to maintain professional conduct throughout the engagement.";
 
     $scope = "Gig-based service: " . $project_title;
@@ -97,8 +103,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         $agreement_stmt = $conn->prepare($agreement_sql);
-        // Use the gig's revision count
-        $gig_revisions = intval($gig['RevisionCount']);
+        // Use the total revision count (including additional revisions)
         $agreement_stmt->bind_param(
             'iissssdissssssi',
             $freelancer_id,
@@ -108,7 +113,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $project_title,
             $project_detail,
             $total_amount,
-            $gig_revisions,
+            $total_revisions,
             $status,
             $client_signed_date,
             $expired_date,
@@ -351,8 +356,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pdf->SetLineWidth(0);
         $pdf->SetFillColor(255, 255, 255);
         $deliverableText = 'Delivery Time: ' . $delivery_time . ' day(s)' . "\n" .
-            'Revisions Included: ' . $gig['RevisionCount'] . "\n" .
-            'The date that need to be complete will be calculated from the date the freelancer accepts this agreement.';
+            'Revisions Included: ' . $gig['RevisionCount'] . "\n";
+        if ($extra_revisions > 0) {
+            $deliverableText .= 'Additional Revisions: ' . $extra_revisions . "\n" .
+                'Total Revisions: ' . $total_revisions . "\n";
+        }
+        $deliverableText .= 'The date that need to be complete will be calculated from the date the freelancer accepts this agreement.';
         $pdf->MultiCell(0, 5, $deliverableText, 0, 'L', false);
         $pdf->Ln(5);
 

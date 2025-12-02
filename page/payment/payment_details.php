@@ -85,6 +85,10 @@ $totalAmount = $basePrice + $rushFee + $revisionFee;
 $deliveryTime = $rushDelivery && !empty($orderData['RushDelivery']) ? intval($orderData['RushDelivery']) : intval($orderData['DeliveryTime']);
 $totalRevisions = intval($orderData['RevisionCount']) + $extraRevisions;
 
+// Store revision info in session for gigAgreement_process.php
+$_SESSION['extra_revisions'] = $extraRevisions;
+$_SESSION['additional_revision_price'] = $additionalRevisionPrice;
+
 $_title = 'Payment Details - WorkSnyc Platform';
 ?>
 <!DOCTYPE html>

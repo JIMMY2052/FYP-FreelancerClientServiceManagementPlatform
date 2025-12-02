@@ -17,6 +17,7 @@ $_title = 'Review & Sign Gig Agreement';
 $client_id = $_SESSION['user_id'];
 $gig_id = isset($_POST['gig_id']) ? intval($_POST['gig_id']) : null;
 $rush_delivery = isset($_POST['rush_delivery']) ? intval($_POST['rush_delivery']) : 0;
+$extra_revisions = isset($_POST['extra_revisions']) ? intval($_POST['extra_revisions']) : 0;
 
 require_once 'config.php';
 
@@ -54,12 +55,19 @@ if ($gig_id) {
     if ($result->num_rows > 0) {
         $gig_data = $result->fetch_assoc();
 
+        // Get additional revision data from SESSION
+        $additional_revision_price = isset($_SESSION['additional_revision_price']) ? floatval($_SESSION['additional_revision_price']) : 0;
+        $extra_revisions = isset($_SESSION['extra_revisions']) ? intval($_SESSION['extra_revisions']) : 0;
         // Calculate totals
         $base_price = floatval($gig_data['Price']);
         $rush_fee = ($rush_delivery && !empty($gig_data['RushDeliveryPrice'])) ? floatval($gig_data['RushDeliveryPrice']) : 0;
-        $gig_data['TotalAmount'] = $base_price + $rush_fee;
+        $revision_fee = ($extra_revisions > 0 && $additional_revision_price > 0) ? ($extra_revisions * $additional_revision_price) : 0;
+        $gig_data['TotalAmount'] = $base_price + $rush_fee + $revision_fee;
         $gig_data['RushDeliverySelected'] = $rush_delivery;
         $gig_data['FinalDeliveryTime'] = $rush_delivery && !empty($gig_data['RushDelivery']) ? intval($gig_data['RushDelivery']) : intval($gig_data['DeliveryTime']);
+        $gig_data['TotalRevisions'] = intval($gig_data['RevisionCount']) + $extra_revisions;
+        $gig_data['AdditionalRevisions'] = $extra_revisions;
+        $gig_data['AdditionalRevisionPrice'] = $additional_revision_price;
 
         // Store freelancer ID in session for process file
         $_SESSION['agreement_freelancer_id'] = $gig_data['FreelancerID'];
@@ -154,8 +162,7 @@ if ($gig_id) {
                     <div class="section-content">
                         <div id="pDeliver" class="section-content">
                             <strong>Delivery Time:</strong> <?= $gig_data['FinalDeliveryTime'] ?> day(s)<br>
-                            <strong>Revisions Included:</strong> <?= $gig_data['RevisionCount'] ?> revision(s)<br>
-                            <strong>Delivery Method:</strong> As specified in the gig description
+                            <strong>Revisions Included:</strong> <?= $gig_data['TotalRevisions'] ?> revision(s)<br>
                         </div>
                     </div>
                 </div>
@@ -190,7 +197,7 @@ if ($gig_id) {
                                 <li>The freelancer will deliver the service as described within <?= $gig_data['FinalDeliveryTime'] ?> day(s)</li>
                                 <li>The client will pay RM <?= number_format($gig_data['TotalAmount'], 2) ?> which is held in escrow</li>
                                 <li>Payment will be released upon successful delivery and client approval</li>
-                                <li>The service includes <?= $gig_data['RevisionCount'] ?> revision(s)</li>
+                                <li>The service includes <?= $gig_data['TotalRevisions'] ?> revision(s)</li>
                                 <li>Both parties agree to maintain professional conduct throughout the engagement</li>
                             </ul>
                         </div>
@@ -249,11 +256,22 @@ if ($gig_id) {
                         <input type="number" name="rush_fee" id="rushFee" class="readonly-field" value="<?= $gig_data['RushDeliveryPrice'] ?>" step="0.01" readonly>
                     <?php endif; ?>
 
-                    <label for="totalPrice">Total Amount (RM)</label>
-                    <input type="number" name="total_amount" id="totalPrice" class="readonly-field" value="<?= $gig_data['TotalAmount'] ?>" step="0.01" readonly style="font-weight: bold; color: #1ab394; font-size: 16px;">
+
+
+
+                    <?php if (isset($additional_revision_price) && $additional_revision_price > 0): ?>
+                        <label for="additionalRevisions">Additional Revisions</label>
+                        <input type="number" name="additional_revisions" id="additionalRevisions" class="readonly-field" value="<?= $gig_data['AdditionalRevisions'] ?>" readonly>
+
+                        <label for="additionalRevisionPrice">Additional Revision Price (RM)</label>
+                        <input type="number" name="additional_revision_price" id="additionalRevisionPrice" class="readonly-field" value="<?= $additional_revision_price  ?>" step="0.01" readonly>
+                    <?php endif; ?>
 
                     <label for="revisions">Revisions Included</label>
-                    <input type="number" name="revisions" id="revisions" class="readonly-field" value="<?= $gig_data['RevisionCount'] ?>" readonly>
+                    <input type="number" name="revisions" id="revisions" class="readonly-field" value="<?= $gig_data['TotalRevisions'] ?>" readonly>
+
+                    <label for="totalPrice">Total Amount (RM)</label>
+                    <input type="number" name="total_amount" id="totalPrice" class="readonly-field" value="<?= $gig_data['TotalAmount'] ?>" step="0.01" readonly style="font-weight: bold; color: #1ab394; font-size: 16px;">
 
                     <!-- SIGNATURE SECTION -->
                     <div class="signature-section">
