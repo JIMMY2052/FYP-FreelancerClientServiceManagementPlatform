@@ -36,12 +36,13 @@ $sql = "SELECT j.JobID, j.ClientID, j.Title, j.Description, j.Budget, j.Deadline
 $params = [];
 $types = '';
 
-// keyword search - search by title only, partial match
+// keyword search - search by title and client company name, partial match
 if ($q !== '') {
-    $sql .= " AND Title LIKE ?";
+    $sql .= " AND (j.Title LIKE ? OR c.CompanyName LIKE ?)";
     $like = '%' . $q . '%';
     $params[] = $like;
-    $types .= 's';
+    $params[] = $like;
+    $types .= 'ss';
 }
 
 // budget range
@@ -97,7 +98,7 @@ $jobs = $result->fetch_all(MYSQLI_ASSOC);
     </div>
 
     <form method="get" class="search-filters">
-        <input type="text" name="q" value="<?php echo htmlspecialchars($q); ?>" placeholder="Search by job title..." class="filter-input">
+        <input type="text" name="q" value="<?php echo htmlspecialchars($q); ?>" placeholder="Search by job title or client name..." class="filter-input">
         <input type="number" name="min_budget" value="<?php echo ($min_budget !== null) ? htmlspecialchars($min_budget) : ''; ?>" placeholder="Min budget" class="filter-input">
         <input type="number" name="max_budget" value="<?php echo ($max_budget !== null) ? htmlspecialchars($max_budget) : ''; ?>" placeholder="Max budget" class="filter-input">
         <select name="sort" class="filter-select">

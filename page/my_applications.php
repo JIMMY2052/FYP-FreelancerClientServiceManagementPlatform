@@ -104,7 +104,7 @@ if ($statusFilter && in_array($statusFilter, ['pending', 'accepted', 'rejected',
     $params[':status'] = $statusFilter;
 }
 
-$sql .= " ORDER BY ja.AppliedAt DESC";
+$sql .= " ORDER BY ja.ApplicationID DESC";
 
 // Debug: Log the SQL query and parameters
 error_log('[my_applications] SQL: ' . $sql);
@@ -228,11 +228,7 @@ foreach ($applications as &$app) {
                                 <div class="freelancer-stats">
                                     <span class="stat-item">
                                         <i class="fas fa-star"></i>
-                                        <?= $app['Rating'] ? number_format($app['Rating'], 1) : 'N/A' ?>
-                                    </span>
-                                    <span class="stat-item">
-                                        <i class="fas fa-dollar-sign"></i>
-                                        RM <?= $app['TotalEarned'] ? number_format($app['TotalEarned'], 0) : '0' ?> earned
+                                        <span style="color: rgb(159, 232, 112); font-weight: 700;"><?= $app['Rating'] ? number_format($app['Rating'], 1) : 'N/A' ?></span>
                                     </span>
                                 </div>
                             </div>

@@ -146,10 +146,11 @@ try {
 
     $params = [];
 
-    // Search by title
+    // Search by title and freelancer name
     if ($searchQuery !== '') {
-        $sql .= " AND g.Title LIKE :search";
+        $sql .= " AND (g.Title LIKE :search OR CONCAT(f.FirstName, ' ', f.LastName) LIKE :search2)";
         $params[':search'] = '%' . $searchQuery . '%';
+        $params[':search2'] = '%' . $searchQuery . '%';
     }
 
     // Filter by category
@@ -825,7 +826,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     <!-- Search and Filter Form -->
     <form method="get" class="search-filters">
-        <input type="text" name="q" value="<?php echo htmlspecialchars($searchQuery); ?>" placeholder="Search gigs by title..." class="filter-input">
+        <input type="text" name="q" value="<?php echo htmlspecialchars($searchQuery); ?>" placeholder="Search by gig title or freelancer name..." class="filter-input">
         <input type="number" name="min_price" value="<?php echo ($minPrice !== null) ? htmlspecialchars($minPrice) : ''; ?>" placeholder="Min price (MYR)" class="filter-input" step="1">
         <input type="number" name="max_price" value="<?php echo ($maxPrice !== null) ? htmlspecialchars($maxPrice) : ''; ?>" placeholder="Max price (MYR)" class="filter-input" step="1">
         <select name="sort" class="filter-select">

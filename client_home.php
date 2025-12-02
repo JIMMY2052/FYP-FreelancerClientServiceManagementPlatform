@@ -10,6 +10,24 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'client') {
 
 $_title = 'Dashboard - WorkSnyc Freelancer Platform';
 include '_head.php';
+require_once 'page/config.php';
+
+$clientID = $_SESSION['user_id'];
+$conn = getDBConnection();
+
+// Fetch latest 3 projects for this client
+$sql = "SELECT JobID, Title, Description, Budget, Deadline, Status, PostDate 
+        FROM job 
+        WHERE ClientID = ? AND Status != 'deleted'
+        ORDER BY PostDate DESC 
+        LIMIT 3";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param('i', $clientID);
+$stmt->execute();
+$result = $stmt->get_result();
+$projects = $result->fetch_all(MYSQLI_ASSOC);
+$stmt->close();
+$conn->close();
 
 ?>
 
@@ -87,58 +105,65 @@ include '_head.php';
             <h2 class="section-title">Your Active Projects</h2>
             <p class="section-subtitle">Manage and track your projects</p>
         </div>
-        <div class="projects-grid">
-            <div class="project-card">
-                <div class="project-header">
-                    <h3 class="project-title">E-commerce Website Development</h3>
-                    <span class="project-status status-in-progress">In Progress</span>
-                </div>
-                <p class="project-description">Full-stack e-commerce platform development</p>
-                <div class="project-info">
-                    <span class="project-budget">Budget: $3,000</span>
-                    <span class="project-progress">60% Complete</span>
-                </div>
-                <div class="project-footer">
-                    <span class="project-time">Due: Dec 15, 2025</span>
-                    <a href="/page/project_details.php" class="btn-small">View Project</a>
-                </div>
+        <?php if (empty($projects)): ?>
+            <div class="empty-projects-state">
+                <div class="empty-icon">📋</div>
+                <h3>No Projects Yet</h3>
+                <p>Start by posting your first project to find talented freelancers</p>
+                <a href="/page/job/createJob.php" class="btn-create-project">Post Your First Project</a>
             </div>
-
-            <div class="project-card">
-                <div class="project-header">
-                    <h3 class="project-title">Brand Identity Design</h3>
-                    <span class="project-status status-in-progress">In Progress</span>
-                </div>
-                <p class="project-description">Complete brand identity including logo and guidelines</p>
-                <div class="project-info">
-                    <span class="project-budget">Budget: $800</span>
-                    <span class="project-progress">40% Complete</span>
-                </div>
-                <div class="project-footer">
-                    <span class="project-time">Due: Dec 20, 2025</span>
-                    <a href="/page/project_details.php" class="btn-small">View Project</a>
-                </div>
+        <?php else: ?>
+            <div class="projects-grid">
+                <?php foreach ($projects as $project): ?>
+                    <?php
+                    // Calculate days until deadline
+                    $deadline = new DateTime($project['Deadline']);
+                    $today = new DateTime();
+                    $daysLeft = $today->diff($deadline)->days;
+                    $isPast = $deadline < $today;
+                    
+                    // Determine status display
+                    $statusClass = 'status-' . strtolower($project['Status']);
+                    $statusText = ucfirst($project['Status']);
+                    
+                    // Mock progress (in real app, calculate from milestones/tasks)
+                    $progress = ($project['Status'] === 'available') ? 0 : (($project['Status'] === 'processing') ? 50 : 100);
+                    ?>
+                    <div class="project-card">
+                        <div class="project-status-badge <?= $statusClass ?>">
+                            <?= $statusText ?>
+                        </div>
+                        <div class="project-header">
+                            <h3 class="project-title"><?= htmlspecialchars($project['Title']) ?></h3>
+                        </div>
+                        <p class="project-description"><?= htmlspecialchars(mb_strimwidth($project['Description'], 0, 100, '...')) ?></p>
+                        <div class="project-progress-bar">
+                            <div class="progress-fill" style="width: <?= $progress ?>%"></div>
+                        </div>
+                        <div class="project-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">Budget</span>
+                                <span class="stat-value">RM <?= number_format($project['Budget'], 0) ?></span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Progress</span>
+                                <span class="stat-value"><?= $progress ?>%</span>
+                            </div>
+                        </div>
+                        <div class="project-footer">
+                            <div class="project-due">
+                                <i class="fas fa-calendar"></i>
+                                <span><?= $isPast ? 'Past due' : 'Due: ' . date('M d, Y', strtotime($project['Deadline'])) ?></span>
+                            </div>
+                            <a href="/page/job/client_job_details.php?id=<?= $project['JobID'] ?>" class="btn-view-project">View Project →</a>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
             </div>
-
-            <div class="project-card">
-                <div class="project-header">
-                    <h3 class="project-title">Social Media Content</h3>
-                    <span class="project-status status-pending">Pending</span>
-                </div>
-                <p class="project-description">Monthly social media content creation and management</p>
-                <div class="project-info">
-                    <span class="project-budget">Budget: $500/month</span>
-                    <span class="project-progress">Awaiting Start</span>
-                </div>
-                <div class="project-footer">
-                    <span class="project-time">Starts: Dec 1, 2025</span>
-                    <a href="/page/project_details.php" class="btn-small">View Project</a>
-                </div>
+            <div class="view-all-section">
+                <a href="/page/job/my_jobs.php" class="btn-view-all">View All Projects</a>
             </div>
-        </div>
-        <div class="view-all-section">
-            <a href="/page/my_projects.php" class="btn-primary">View All Projects</a>
-        </div>
+        <?php endif; ?>
     </div>
 </section>
 
@@ -173,65 +198,6 @@ include '_head.php';
                 <h3 class="tool-title">Reports & Analytics</h3>
                 <p class="tool-description">Get insights on project performance and spending.</p>
                 <a href="/page/reports.php" class="tool-link">View Reports →</a>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Recent Freelancer Recommendations -->
-<section class="recommendations-section">
-    <div class="container">
-        <div class="section-header">
-            <h2 class="section-title">Recommended Freelancers</h2>
-            <p class="section-subtitle">Top-rated professionals matching your needs</p>
-        </div>
-        <div class="freelancer-cards-grid">
-            <div class="freelancer-card">
-                <div class="freelancer-header">
-                    <img src="https://via.placeholder.com/100" alt="Freelancer" class="freelancer-avatar">
-                    <h3 class="freelancer-name">Alex Johnson</h3>
-                    <p class="freelancer-title">Full Stack Developer</p>
-                </div>
-                <div class="freelancer-rating">
-                    <span class="stars">⭐⭐⭐⭐⭐</span>
-                    <span class="rating-count">4.9 (128 reviews)</span>
-                </div>
-                <p class="freelancer-description">Expert in React, Node.js, and MongoDB with 8+ years experience</p>
-                <div class="freelancer-footer">
-                    <a href="/page/freelancer_profile.php" class="btn-small">View Profile</a>
-                </div>
-            </div>
-
-            <div class="freelancer-card">
-                <div class="freelancer-header">
-                    <img src="https://via.placeholder.com/100" alt="Freelancer" class="freelancer-avatar">
-                    <h3 class="freelancer-name">Maria Garcia</h3>
-                    <p class="freelancer-title">UI/UX Designer</p>
-                </div>
-                <div class="freelancer_rating">
-                    <span class="stars">⭐⭐⭐⭐⭐</span>
-                    <span class="rating-count">4.8 (95 reviews)</span>
-                </div>
-                <p class="freelancer-description">Specializes in web and mobile app design with modern aesthetics</p>
-                <div class="freelancer-footer">
-                    <a href="/page/freelancer_profile.php" class="btn-small">View Profile</a>
-                </div>
-            </div>
-
-            <div class="freelancer-card">
-                <div class="freelancer-header">
-                    <img src="https://via.placeholder.com/100" alt="Freelancer" class="freelancer-avatar">
-                    <h3 class="freelancer-name">David Chen</h3>
-                    <p class="freelancer-title">Digital Marketing Specialist</p>
-                </div>
-                <div class="freelancer_rating">
-                    <span class="stars">⭐⭐⭐⭐⭐</span>
-                    <span class="rating-count">4.7 (112 reviews)</span>
-                </div>
-                <p class="freelancer-description">Expert in SEO, SEM, and social media marketing strategy</p>
-                <div class="freelancer-footer">
-                    <a href="/page/freelancer_profile.php" class="btn-small">View Profile</a>
-                </div>
             </div>
         </div>
     </div>

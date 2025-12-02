@@ -627,7 +627,7 @@ $available_balance = $wallet['Balance'] - $reserved_balance;
                 <input type="hidden" name="return_to" value="wallet">
                 <div class="form-group">
                     <label for="topup_amount">Amount (RM)</label>
-                    <input type="number" id="topup_amount" name="amount" min="10" step="0.01" required placeholder="Enter amount">
+                    <input type="number" id="topup_amount" name="amount" min="10" step="0.01" required placeholder="Enter amount" onkeydown="return event.key !== '-' && event.key !== '+' && event.key !== 'e' && event.key !== 'E'">
                 </div>
                 <button type="submit" class="btn-submit">
                     <i class="fas fa-credit-card"></i>
@@ -648,7 +648,7 @@ $available_balance = $wallet['Balance'] - $reserved_balance;
             <form id="withdrawForm" method="POST" action="withdraw_process.php">
                 <div class="form-group">
                     <label for="withdraw_amount">Amount (RM)</label>
-                    <input type="number" id="withdraw_amount" name="amount" min="10" max="<?= number_format($user_type === 'freelancer' ? $available_balance : $wallet['Balance'], 2, '.', '') ?>" step="0.01" required placeholder="Enter amount">
+                    <input type="number" id="withdraw_amount" name="amount" min="10" max="<?= number_format($user_type === 'freelancer' ? $available_balance : $wallet['Balance'], 2, '.', '') ?>" step="0.01" required placeholder="Enter amount" onkeydown="return event.key !== '-' && event.key !== '+' && event.key !== 'e' && event.key !== 'E'">
                     <div style="font-size: 0.85rem; color: #666; margin-top: 5px;">
                         <?php if ($user_type === 'freelancer' && $reserved_balance > 0): ?>
                             Total Balance: RM <?= number_format($wallet['Balance'], 2) ?><br>
@@ -686,7 +686,7 @@ $available_balance = $wallet['Balance'] - $reserved_balance;
                 </div>
                 <div class="form-group">
                     <label for="account_holder">Account Holder Name</label>
-                    <input type="text" id="account_holder" name="account_holder" required placeholder="As per bank account">
+                    <input type="text" id="account_holder" name="account_holder" required placeholder="As per bank account" pattern="[A-Za-z\s]+" title="Only alphabetic characters and spaces are allowed">
                 </div>
                 <button type="submit" class="btn-submit">
                     <i class="fas fa-university"></i>
@@ -745,6 +745,14 @@ $available_balance = $wallet['Balance'] - $reserved_balance;
         function closeWithdrawModal() {
             document.getElementById('withdrawModal').classList.remove('active');
         }
+
+        // Account holder name validation (only alphabetic characters and spaces)
+        const accountHolderInput = document.getElementById('account_holder');
+        
+        accountHolderInput.addEventListener('input', function(e) {
+            // Remove any non-alphabetic characters except spaces
+            e.target.value = e.target.value.replace(/[^A-Za-z\s]/g, '');
+        });
 
         // Bank account number formatting and validation
         const accountNumberInput = document.getElementById('account_number');

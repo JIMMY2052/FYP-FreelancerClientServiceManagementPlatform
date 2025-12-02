@@ -130,7 +130,7 @@ try {
     // Record withdrawal transaction
     $description = "Withdrawal to {$bank_name} - {$account_holder} (****" . substr($account_number, -4) . ")";
     $transaction_type = "withdrawal";
-    $status = "processing"; // Would be "processing" until confirmed by Stripe
+    $status = "completed";
 
     $sql = "INSERT INTO wallet_transactions (WalletID, Type, Amount, Description, Status) 
             VALUES (?, ?, ?, ?, ?)";

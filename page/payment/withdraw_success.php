@@ -70,7 +70,11 @@ $_title = 'Withdrawal Request - WorkSnyc Platform';
 
         .success-icon i {
             font-size: 2.5rem;
-            color: #3b82f6;
+            color: #22c55e;
+        }
+        
+        .success-icon {
+            background: rgba(34, 197, 94, 0.1);
         }
 
         h1 {
@@ -211,11 +215,11 @@ $_title = 'Withdrawal Request - WorkSnyc Platform';
 <body>
     <div class="success-container">
         <div class="success-icon">
-            <i class="fas fa-clock"></i>
+            <i class="fas fa-check"></i>
         </div>
-        <h1>Withdrawal Request Submitted</h1>
+        <h1>Withdrawal Successful</h1>
         <div class="amount">RM <?= number_format($amount, 2) ?></div>
-        <p>Your withdrawal request has been submitted successfully and is being processed.</p>
+        <p>Your withdrawal has been completed successfully.</p>
 
         <div class="details-box">
             <h3>Withdrawal Details</h3>
@@ -239,14 +243,6 @@ $_title = 'Withdrawal Request - WorkSnyc Platform';
                 <span class="detail-label">Transaction ID</span>
                 <span class="detail-value">#<?= $transaction_id ?></span>
             </div>
-        </div>
-
-        <div class="info-notice">
-            <p>
-                <i class="fas fa-info-circle"></i>
-                <strong>Processing Time:</strong> Withdrawals typically take 3-5 business days to reach your bank account. 
-                You will receive a notification once the funds have been transferred.
-            </p>
         </div>
 
         <a href="wallet.php" class="btn-wallet">
