@@ -97,7 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $pdf_path_for_db = '/uploads/agreements/' . $pdf_filename;
     $default_revisions = 3; // Default number of revisions
 
-    $agreement_stmt->bind_param('iissssdiisssissss', $freelancer_id, $client_id, $client_name, $freelancer_name, $job_title, $job_desc, $job_budget, $default_revisions, $status, $client_signed_date, $expired_date, $terms, $scope, $deliverables, $delivery_time, $client_signature_path, $pdf_path_for_db);
+    $agreement_stmt->bind_param('iissssdissssissss', $freelancer_id, $client_id, $client_name, $freelancer_name, $job_title, $job_desc, $job_budget, $default_revisions, $status, $client_signed_date, $expired_date, $terms, $scope, $deliverables, $delivery_time, $client_signature_path, $pdf_path_for_db);
 
     if (!$agreement_stmt->execute()) {
         $_SESSION['error'] = "Error creating agreement record: " . $agreement_stmt->error;
