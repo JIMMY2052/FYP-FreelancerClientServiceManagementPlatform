@@ -211,7 +211,7 @@ foreach ($applications as &$app) {
                         <div class="freelancer-info">
                             <div class="freelancer-avatar">
                                 <?php if (!empty($app['ProfilePicture'])): ?>
-                                    <img src="<?= htmlspecialchars($app['ProfilePicture']) ?>"
+                                    <img src="/<?= htmlspecialchars($app['ProfilePicture']) ?>"
                                         alt="<?= htmlspecialchars($app['FirstName']) ?>">
                                 <?php else: ?>
                                     <div class="avatar-placeholder">
