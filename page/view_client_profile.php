@@ -89,9 +89,9 @@ if ($profilePic && !empty($profilePic) && strpos($profilePic, 'http') !== 0) {
     <div class="container">
         <!-- Back Button -->
         <div style="margin-bottom: 2rem;">
-            <a href="<?= isset($_SESSION['job_id']) ? 'job/job_details.php?id=' . intval($_SESSION['job_id']) : 'job/browse_job.php' ?>" style="display: inline-flex; align-items: center; gap: 0.5rem; color: #16a34a; text-decoration: none; font-weight: 600; transition: all 0.3s ease; hover: opacity 0.8;">
+            <a href="<?= isset($_GET['source']) && $_GET['source'] === 'messages' ? 'messages.php' : (isset($_SESSION['job_id']) ? 'job/job_details.php?id=' . intval($_SESSION['job_id']) : 'job/browse_job.php') ?>" style="display: inline-flex; align-items: center; gap: 0.5rem; color: #16a34a; text-decoration: none; font-weight: 600; transition: all 0.3s ease;">
                 <i class="fas fa-arrow-left"></i>
-                Back to Browse
+                Back
             </a>
         </div>
 

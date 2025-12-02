@@ -165,7 +165,7 @@ $years_experience = $now->diff($member_since)->y + 1;
 
     <div class="profile-breadcrumb">
         <div class="breadcrumb-container">
-            <a href="gig/browse_gigs.php"><i class="fas fa-arrow-left"></i> Back to Browse</a>
+            <a href="<?= isset($_GET['source']) && $_GET['source'] === 'messages' ? 'messages.php' : 'gig/browse_gigs.php' ?>"><i class="fas fa-arrow-left"></i> Back</a>
         </div>
     </div>
 

@@ -530,6 +530,36 @@ elseif ($target_client_id && $user_type === 'freelancer') {
                 }
             }
         });
+
+        // View Profile functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const viewProfileBtn = document.getElementById('viewProfileBtn');
+
+            if (viewProfileBtn) {
+                viewProfileBtn.addEventListener('click', function() {
+                    // Get the current chat's other user info from window chatApp
+                    if (window.chatApp && window.chatApp.currentChat) {
+                        const currentUserType = window.currentUserData.type;
+                        const chatOtherUserId = window.chatApp.currentOtherId;
+                        const chatOtherUserType = window.chatApp.currentOtherType;
+
+                        if (chatOtherUserId && chatOtherUserType) {
+                            if (currentUserType === 'freelancer' && chatOtherUserType === 'client') {
+                                // Freelancer viewing client profile
+                                window.location.href = 'view_client_profile.php?id=' + chatOtherUserId + '&source=messages';
+                            } else if (currentUserType === 'client' && chatOtherUserType === 'freelancer') {
+                                // Client viewing freelancer profile
+                                window.location.href = 'view_freelancer_profile.php?id=' + chatOtherUserId + '&source=messages';
+                            }
+                        } else {
+                            alert('Please select a conversation first');
+                        }
+                    } else {
+                        alert('Please select a conversation first');
+                    }
+                });
+            }
+        });
     </script>
 
     <style>
