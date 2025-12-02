@@ -34,37 +34,51 @@ $categoryData = [
             'brand-style-guide' => [
                 'pages_included' => ['5-10', '10-20', '20-30', '30+'],
                 'elements_included' => ['Logo', 'Color Palette', 'Typography', 'Icons', 'Imagery Style'],
-                'file_format' => ['PDF', 'Figma', 'Adobe XD', 'Sketch']
+                'file_format' => ['PDF', 'Figma', 'Adobe XD', 'Sketch'],
+                'revisions' => ['0', '1', '2', '3', '5', 'Unlimited']
             ],
             'game-art' => [
                 'art_type' => ['Character Design', '2D Art', '3D Art', 'Animation', 'Concept Art'],
                 'style' => ['Realistic', 'Cartoon', 'Pixel Art', 'Anime', 'Low Poly'],
-                'deliverables' => ['Artwork Only', 'With PSD/Source Files', 'Unlimited Revisions']
+                'deliverables' => ['Artwork Only', 'With PSD/Source Files', 'Unlimited Revisions'],
+                'revisions' => ['0', '1', '2', '3', '5', 'Unlimited']
             ],
             'graphics-streamers' => [
                 'graphics_type' => ['Stream Overlay', 'Emotes', 'Stream Alerts', 'Panels', 'Banners'],
                 'resolution' => ['720p', '1080p', '2K', '4K'],
-                'animated' => ['No', 'Yes - Simple', 'Yes - Complex']
+                'animated' => ['No', 'Yes - Simple', 'Yes - Complex'],
+                'revisions' => ['0', '1', '2', '3', '5', 'Unlimited']
+            ],
+            'business-cards' => [
+                'design_type' => ['Business Cards', 'Stationery (Letterhead, Envelope, etc.)'],
+                'quantity' => ['Digital Only', '50 Cards', '100 Cards', '250 Cards', '500 Cards'],
+                'sided' => ['Single-sided', 'Double-sided'],
+                'file_format' => ['PNG', 'PDF', 'AI', 'PSD'],
+                'revisions' => ['0', '1', '2', '3', '5', 'Unlimited']
             ],
             'website-design' => [
                 'pages' => ['1-3', '3-5', '5-10', '10+'],
                 'features' => ['Responsive', 'E-commerce', 'Blog', 'Contact Form', 'SEO Optimized'],
-                'design_tool' => ['Figma', 'Adobe XD', 'Sketch', 'Photoshop', 'Webflow']
+                'design_tool' => ['Figma', 'Adobe XD', 'Sketch', 'Photoshop', 'Webflow'],
+                'revisions' => ['0', '1', '2', '3', '5', 'Unlimited']
             ],
             'app-design' => [
                 'platform' => ['iOS', 'Android', 'Cross-platform'],
                 'screens' => ['5-10', '10-20', '20-30', '30+'],
-                'features' => ['UI Kit', 'Prototype', 'Animation', 'Icon Design']
+                'features' => ['UI Kit', 'Prototype', 'Animation', 'Icon Design'],
+                'revisions' => ['0', '1', '2', '3', '5', 'Unlimited']
             ],
             'ux-design' => [
                 'deliverables' => ['Wireframes', 'Prototypes', 'User Research', 'Usability Testing'],
                 'scope' => ['Single Flow', 'Multiple Flows', 'Full App', 'Full Website'],
-                'tools' => ['Figma', 'Adobe XD', 'Sketch', 'Framer']
+                'tools' => ['Figma', 'Adobe XD', 'Sketch', 'Framer'],
+                'revisions' => ['0', '1', '2', '3', '5', 'Unlimited']
             ],
             'landing-page-design' => [
                 'sections' => ['3-5', '5-8', '8-12', '12+'],
                 'features' => ['Responsive', 'CTA Buttons', 'Forms', 'Animation', 'SEO Ready'],
-                'include_copywriting' => ['Design Only', 'With Copy', 'With Copy & Images']
+                'include_copywriting' => ['Design Only', 'With Copy', 'With Copy & Images'],
+                'revisions' => ['0', '1', '2', '3', '5', 'Unlimited']
             ]
         ]
     ],
@@ -85,42 +99,50 @@ $categoryData = [
                 'type' => ['Static Website', 'Dynamic Website', 'E-commerce', 'CMS Website'],
                 'pages' => ['1-5', '5-10', '10-20', '20+'],
                 'technologies' => ['HTML/CSS', 'WordPress', 'React', 'Vue', 'Next.js', 'Custom'],
-                'hosting' => ['Not Included', 'Included', 'Help with Setup']
+                'hosting' => ['Not Included', 'Included', 'Help with Setup'],
+                'revisions' => ['0', '1', '2', '3', '5', 'Unlimited']
             ],
             'website-maintenance' => [
                 'services' => ['Bug Fixes', 'Updates', 'Backups', 'Security', 'Performance'],
                 'response_time' => ['24 hours', '12 hours', '4 hours', 'Real-time'],
-                'hours_per_month' => ['5', '10', '20', '40+']
+                'hours_per_month' => ['5', '10', '20', '40+'],
+                'revisions' => ['0', '1', '2', '3', '5', 'Unlimited']
             ],
             'software-development' => [
                 'project_type' => ['Desktop App', 'Web App', 'Backend API', 'Full Stack'],
                 'tech_stack' => ['Python', 'JavaScript', 'Java', 'C#', '.NET', 'Go', 'Rust'],
-                'scope' => ['Small Project', 'Medium Project', 'Large Project', 'Enterprise']
+                'scope' => ['Small Project', 'Medium Project', 'Large Project', 'Enterprise'],
+                'revisions' => ['0', '1', '2', '3', '5', 'Unlimited']
             ],
             'game-development' => [
                 'game_type' => ['2D Game', '3D Game', 'Mobile Game', 'VR Game'],
                 'engine' => ['Unity', 'Unreal Engine', 'Godot', 'Custom'],
-                'features' => ['Mechanics Only', 'With Graphics', 'Multiplayer', 'Full Game']
+                'features' => ['Mechanics Only', 'With Graphics', 'Multiplayer', 'Full Game'],
+                'revisions' => ['0', '1', '2', '3', '5', 'Unlimited']
             ],
             'ai-development' => [
                 'ai_type' => ['Machine Learning', 'Deep Learning', 'NLP', 'Computer Vision', 'Chatbot AI'],
                 'framework' => ['TensorFlow', 'PyTorch', 'Scikit-learn', 'OpenAI API'],
-                'deliverables' => ['Model Only', 'With Integration', 'With Documentation']
+                'deliverables' => ['Model Only', 'With Integration', 'With Documentation'],
+                'revisions' => ['0', '1', '2', '3', '5', 'Unlimited']
             ],
             'chatbot-development' => [
                 'platform' => ['Discord', 'Telegram', 'Slack', 'Custom Platform', 'Multi-platform'],
                 'ai_level' => ['Rule-based', 'Basic AI', 'Advanced AI', 'GPT Integration'],
-                'features' => ['Text Only', 'With Voice', 'With Actions', 'With Database']
+                'features' => ['Text Only', 'With Voice', 'With Actions', 'With Database'],
+                'revisions' => ['0', '1', '2', '3', '5', 'Unlimited']
             ],
             'cloud-computing' => [
                 'service' => ['Infrastructure Setup', 'Migration', 'Optimization', 'Security'],
                 'provider' => ['AWS', 'Google Cloud', 'Azure', 'DigitalOcean', 'Heroku'],
-                'scope' => ['Single Service', 'Full Stack', 'Multi-region', 'Enterprise Setup']
+                'scope' => ['Single Service', 'Full Stack', 'Multi-region', 'Enterprise Setup'],
+                'revisions' => ['0', '1', '2', '3', '5', 'Unlimited']
             ],
             'mobile-app-dev' => [
                 'platform' => ['iOS', 'Android', 'Cross-platform (React Native)', 'Cross-platform (Flutter)'],
                 'features' => ['UI/UX', 'Backend Integration', 'Database', 'Authentication'],
-                'complexity' => ['Simple', 'Medium', 'Complex', 'Enterprise']
+                'complexity' => ['Simple', 'Medium', 'Complex', 'Enterprise'],
+                'revisions' => ['0', '1', '2', '3', '5', 'Unlimited']
             ]
         ]
     ],
@@ -137,27 +159,32 @@ $categoryData = [
             'seo' => [
                 'scope' => ['On-page SEO', 'Technical SEO', 'Link Building', 'Full SEO Audit'],
                 'keywords' => ['1-5', '5-10', '10-20', '20+'],
-                'reporting' => ['Monthly', 'Bi-weekly', 'Weekly']
+                'reporting' => ['Monthly', 'Bi-weekly', 'Weekly'],
+                'revisions' => ['0', '1', '2', '3', '5', 'Unlimited']
             ],
             'social-media' => [
                 'platforms' => ['1 Platform', '2-3 Platforms', '4-5 Platforms', 'All Platforms'],
                 'content_type' => ['Posts Only', 'Posts & Stories', 'Posts & Videos', 'Full Content'],
-                'frequency' => ['2 per week', '4 per week', 'Daily', 'Custom']
+                'frequency' => ['2 per week', '4 per week', 'Daily', 'Custom'],
+                'revisions' => ['0', '1', '2', '3', '5', 'Unlimited']
             ],
             'ppc' => [
                 'platform' => ['Google Ads', 'Facebook Ads', 'Instagram Ads', 'Multiple Platforms'],
                 'budget' => ['$100-500', '$500-1000', '$1000-5000', '$5000+'],
-                'management' => ['Setup Only', 'Management & Optimization']
+                'management' => ['Setup Only', 'Management & Optimization'],
+                'revisions' => ['0', '1', '2', '3', '5', 'Unlimited']
             ],
             'email-marketing' => [
                 'type' => ['Campaign Creation', 'List Building', 'Automation', 'Full Service'],
                 'emails' => ['5-10', '10-20', '20-50', '50+'],
-                'personalization' => ['Basic', 'Intermediate', 'Advanced']
+                'personalization' => ['Basic', 'Intermediate', 'Advanced'],
+                'revisions' => ['0', '1', '2', '3', '5', 'Unlimited']
             ],
             'content-marketing' => [
                 'content_type' => ['Blog Posts', 'Videos', 'Infographics', 'Whitepapers', 'Case Studies'],
                 'quantity' => ['1', '3', '5', '10+'],
-                'seo_optimized' => ['No', 'Yes']
+                'seo_optimized' => ['No', 'Yes'],
+                'revisions' => ['0', '1', '2', '3', '5', 'Unlimited']
             ]
         ]
     ],
@@ -175,28 +202,32 @@ $categoryData = [
                 'length' => ['Under 500 words', '500-1000 words', '1000-2000 words', '2000+ words'],
                 'topics' => ['Technology', 'Lifestyle', 'Business', 'Health', 'Entertainment'],
                 'seo_optimized' => ['No', 'Yes'],
-                'research_included' => ['No', 'Yes']
+                'research_included' => ['No', 'Yes'],
+                'revisions' => ['0', '1', '2', '3', '5', 'Unlimited']
             ],
             'copywriting' => [
                 'type' => ['Product Description', 'Ad Copy', 'Landing Page', 'Email Copy', 'Social Media'],
                 'length' => ['Short', 'Medium', 'Long'],
-                'revisions' => ['1', '2', '3', '5']
+                'revisions' => ['0', '1', '2', '3', '5', 'Unlimited']
             ],
             'technical-writing' => [
                 'document_type' => ['User Manual', 'API Documentation', 'Guide', 'Help Articles'],
                 'length' => ['Short', 'Medium', 'Long', 'Extensive'],
-                'diagrams_included' => ['No', 'Yes']
+                'diagrams_included' => ['No', 'Yes'],
+                'revisions' => ['0', '1', '2', '3', '5', 'Unlimited']
             ],
             'translation' => [
                 'source_language' => ['English', 'Spanish', 'French', 'German', 'Chinese', 'Japanese'],
                 'target_language' => ['English', 'Spanish', 'French', 'German', 'Chinese', 'Japanese'],
                 'word_count' => ['Up to 500', '500-1000', '1000-5000', '5000+'],
-                'type' => ['Document', 'Website', 'Software', 'Marketing']
+                'type' => ['Document', 'Website', 'Software', 'Marketing'],
+                'revisions' => ['0', '1', '2', '3', '5', 'Unlimited']
             ],
             'proofreading' => [
                 'document_type' => ['Academic', 'Business', 'Creative', 'Technical'],
                 'word_count' => ['Up to 500', '500-1000', '1000-5000', '5000+'],
-                'level' => ['Basic', 'Standard', 'Professional']
+                'level' => ['Basic', 'Standard', 'Professional'],
+                'revisions' => ['0', '1', '2', '3', '5', 'Unlimited']
             ]
         ]
     ]
@@ -966,9 +997,26 @@ $categoryData = [
                 // Format label (convert kebab-case to Title Case)
                 const label = key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 
-                // Check if this is revisions field (should be radio button)
-                const isRevisionsField = key === 'revisions';
-                const inputType = isRevisionsField ? 'radio' : 'checkbox';
+                // Determine if field should be radio (single choice) or checkbox (multiple choice)
+                // RADIO FIELDS (single choice only):
+                const singleChoiceFields = [
+                    'revisions', 'length', 'quantity', 'word_count', 'pages', 'screens', 
+                    'emails', 'sections', 'hours_per_month', 'keywords', 'sided', 'animated',
+                    'seo_optimized', 'research_included', 'diagrams_included', 'design_type',
+                    'resolution', 'scope', 'type', 'project_type', 'game_type', 'ai_type',
+                    'ai_level', 'platform', 'complexity', 'reporting', 'frequency', 
+                    'personalization', 'budget', 'management', 'response_time', 'hosting',
+                    'include_copywriting', 'source_language', 'target_language', 'level',
+                    'pages_included', 'design_tool', 'engine'
+                ];
+                
+                // CHECKBOX FIELDS (multiple choice allowed):
+                // features, file_format, elements_included, deliverables, graphics_type,
+                // art_type, style, technologies, services, tech_stack, framework, 
+                // service, provider, content_type, topics, document_type
+                
+                const isRadioField = singleChoiceFields.includes(key);
+                const inputType = isRadioField ? 'radio' : 'checkbox';
                 
                 metadataItem.innerHTML = `
                     <label>${label} <span class="required">*</span></label>
