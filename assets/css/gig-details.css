@@ -15,17 +15,55 @@ body {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 20px;
-    overflow-x: auto;
-    scrollbar-width: thin;
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
-.category-nav-container::-webkit-scrollbar {
-    height: 4px;
+.scroll-arrow {
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid #e0e0e0;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+}
+
+.scroll-arrow:hover {
+    background: rgb(159, 232, 112);
+    border-color: rgb(159, 232, 112);
+    color: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.scroll-arrow:active {
+    transform: scale(0.95);
+}
+
+.scroll-arrow.hidden {
+    opacity: 0;
+    pointer-events: none;
 }
 
 .category-list {
     display: flex;
     gap: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+}
+
+.category-list::-webkit-scrollbar {
+    display: none;
 }
 
 .category-item {
@@ -713,6 +751,12 @@ body {
 }
 
 @media (max-width: 1024px) {
+    .scroll-arrow {
+        width: 32px;
+        height: 32px;
+        font-size: 0.9rem;
+    }
+
     .gig-layout {
         grid-template-columns: 1fr;
     }

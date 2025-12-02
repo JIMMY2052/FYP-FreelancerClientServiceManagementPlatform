@@ -221,23 +221,55 @@ try {
         max-width: 1200px;
         margin: 0 auto;
         padding: 0 20px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 10px;
     }
 
     .category-tabs {
         display: flex;
         gap: 0;
         overflow-x: auto;
-        scrollbar-width: thin;
+        scrollbar-width: none;
         -webkit-overflow-scrolling: touch;
+        scroll-behavior: smooth;
     }
 
     .category-tabs::-webkit-scrollbar {
-        height: 4px;
+        display: none;
     }
 
-    .category-tabs::-webkit-scrollbar-thumb {
-        background: #ccc;
-        border-radius: 2px;
+    .scroll-arrow {
+        background: rgba(255, 255, 255, 0.95);
+        border: 1px solid #e0e0e0;
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        flex-shrink: 0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        z-index: 10;
+    }
+
+    .scroll-arrow:hover {
+        background: rgb(159, 232, 112);
+        border-color: rgb(159, 232, 112);
+        color: white;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .scroll-arrow:active {
+        transform: scale(0.95);
+    }
+
+    .scroll-arrow.hidden {
+        opacity: 0;
+        pointer-events: none;
     }
 
     .category-tab-item {
@@ -623,7 +655,13 @@ try {
 
     /* Responsive Design */
     @media (max-width: 768px) {
-        .category-tabs {
+        .scroll-arrow {
+            width: 32px;
+            height: 32px;
+            font-size: 0.9rem;
+        }
+
+        .category-tab-wrapper {
             padding: 0 10px;
         }
 
@@ -685,7 +723,10 @@ try {
 <!-- Category Tab Section -->
 <div class="category-tab-container">
     <div class="category-tab-wrapper">
-        <div class="category-tabs">
+        <div class="scroll-arrow scroll-left" onclick="scrollCategories('left')">
+            ◀
+        </div>
+        <div class="category-tabs" id="categoryTabs">
             <a href="/page/gig/browse_gigs.php" class="category-tab-item <?php echo empty($selectedCategory) ? 'active' : ''; ?>">
                 <span>All Categories</span>
             </a>
@@ -717,8 +758,63 @@ try {
                 </a>
             <?php endforeach; ?>
         </div>
+        <div class="scroll-arrow scroll-right" onclick="scrollCategories('right')">
+            ▶
+        </div>
     </div>
 </div>
+
+<script>
+function scrollCategories(direction) {
+    const container = document.getElementById('categoryTabs');
+    const scrollAmount = 300;
+    
+    if (direction === 'left') {
+        container.scrollLeft -= scrollAmount;
+    } else {
+        container.scrollLeft += scrollAmount;
+    }
+    
+    setTimeout(updateArrowVisibility, 100);
+}
+
+function updateArrowVisibility() {
+    const container = document.getElementById('categoryTabs');
+    const leftArrow = document.querySelector('.scroll-left');
+    const rightArrow = document.querySelector('.scroll-right');
+    
+    if (!container || !leftArrow || !rightArrow) return;
+    
+    const isAtStart = container.scrollLeft <= 0;
+    const isAtEnd = container.scrollLeft + container.clientWidth >= container.scrollWidth - 1;
+    
+    if (isAtStart) {
+        leftArrow.classList.add('hidden');
+    } else {
+        leftArrow.classList.remove('hidden');
+    }
+    
+    if (isAtEnd) {
+        rightArrow.classList.add('hidden');
+    } else {
+        rightArrow.classList.remove('hidden');
+    }
+}
+
+// Initialize arrow visibility on page load
+document.addEventListener('DOMContentLoaded', function() {
+    updateArrowVisibility();
+    
+    // Update on scroll
+    const container = document.getElementById('categoryTabs');
+    if (container) {
+        container.addEventListener('scroll', updateArrowVisibility);
+    }
+    
+    // Update on window resize
+    window.addEventListener('resize', updateArrowVisibility);
+});
+</script>
 
 <!-- Browse Gigs Content -->
 <div class="browse-gigs-container">
@@ -750,8 +846,8 @@ try {
 
     <p class="results-count"><?php echo count($gigs); ?> gig(s) found</p>
 
-    <div style="margin-bottom: 20px;">
-        <?php if ($categoryFilter || $selectedSubcategory): ?>
+    <?php if ($categoryFilter || $selectedSubcategory): ?>
+        <div style="margin-bottom: 20px;">
             <strong>Active Filters:</strong>
             <?php if ($categoryFilter): ?>
                 <span class="filter-badge">
@@ -774,11 +870,10 @@ try {
                     <a href="/page/gig/browse_gigs.php<?php echo $categoryFilter ? '?category=' . urlencode($selectedCategory) : ''; ?>" class="remove">×</a>
                 </span>
             <?php endif; ?>
-    </div>
-<?php endif; ?>
-</div>
+        </div>
+    <?php endif; ?>
 
-<?php if (empty($gigs)): ?>
+    <?php if (empty($gigs)): ?>
     <div class="empty-state">
         <div class="empty-state-icon">🔍</div>
         <h2>No gigs found</h2>

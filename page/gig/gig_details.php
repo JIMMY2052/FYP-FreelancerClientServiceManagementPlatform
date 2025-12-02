@@ -128,7 +128,10 @@ $categoryData = [
     <!-- Category Navigation -->
     <nav class="category-nav">
         <div class="category-nav-container">
-            <div class="category-list">
+            <div class="scroll-arrow scroll-left" onclick="scrollCategories('left')">
+                ◀
+            </div>
+            <div class="category-list" id="categoryList">
                 <?php foreach ($categoryData as $catSlug => $catInfo): ?>
                     <a href="browse_gigs.php?category=<?= urlencode($catSlug) ?>"
                         class="category-item <?= ($gig['Category'] === $catSlug) ? 'active' : '' ?>">
@@ -136,8 +139,68 @@ $categoryData = [
                     </a>
                 <?php endforeach; ?>
             </div>
+            <div class="scroll-arrow scroll-right" onclick="scrollCategories('right')">
+                ▶
+            </div>
         </div>
     </nav>
+
+    <script>
+    function scrollCategories(direction) {
+        const container = document.getElementById('categoryList');
+        const scrollAmount = 300;
+        
+        if (direction === 'left') {
+            container.scrollLeft -= scrollAmount;
+        } else {
+            container.scrollLeft += scrollAmount;
+        }
+        
+        setTimeout(updateArrowVisibility, 100);
+    }
+
+    function updateArrowVisibility() {
+        const container = document.getElementById('categoryList');
+        const leftArrow = document.querySelector('.scroll-left');
+        const rightArrow = document.querySelector('.scroll-right');
+        
+        if (!container || !leftArrow || !rightArrow) return;
+        
+        const isAtStart = container.scrollLeft <= 0;
+        const isAtEnd = container.scrollLeft + container.clientWidth >= container.scrollWidth - 1;
+        
+        if (isAtStart) {
+            leftArrow.classList.add('hidden');
+        } else {
+            leftArrow.classList.remove('hidden');
+        }
+        
+        if (isAtEnd) {
+            rightArrow.classList.add('hidden');
+        } else {
+            rightArrow.classList.remove('hidden');
+        }
+    }
+
+    // Initialize arrow visibility
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            updateArrowVisibility();
+            const container = document.getElementById('categoryList');
+            if (container) {
+                container.addEventListener('scroll', updateArrowVisibility);
+            }
+            window.addEventListener('resize', updateArrowVisibility);
+        });
+    } else {
+        updateArrowVisibility();
+        const container = document.getElementById('categoryList');
+        if (container) {
+            container.addEventListener('scroll', updateArrowVisibility);
+        }
+        window.addEventListener('resize', updateArrowVisibility);
+    }
+    </script>
 
     <div class="container">
         <div class="gig-layout">

@@ -32,42 +32,6 @@ include '_head.php';
     </div>
 </section>
 
-<!-- Client Quick Stats Section -->
-<section class="quick-stats-section">
-    <div class="container">
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon">📊</div>
-                <div class="stat-info">
-                    <div class="stat-number">8</div>
-                    <div class="stat-label">Active Projects</div>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">👥</div>
-                <div class="stat-info">
-                    <div class="stat-number">12</div>
-                    <div class="stat-label">Hired Freelancers</div>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">💰</div>
-                <div class="stat-info">
-                    <div class="stat-number">$15,200</div>
-                    <div class="stat-label">Total Spent</div>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">✅</div>
-                <div class="stat-info">
-                    <div class="stat-number">28</div>
-                    <div class="stat-label">Completed Projects</div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
 <!-- Browse Freelancer Categories Section -->
 <section class="categories-section">
     <div class="container">

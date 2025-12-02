@@ -7,8 +7,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'freelancer') {
     exit();
 }
 
-$_title = 'My Gigs';
-include '../../_head.php';
 require_once '../config.php';
 
 if (!function_exists('getPDOConnection')) {
@@ -29,6 +27,35 @@ if (!function_exists('getPDOConnection')) {
 }
 
 $pdo = getPDOConnection();
+
+// Handle pause/resume gig
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'toggle_status') {
+    $gigID = intval($_POST['gig_id'] ?? 0);
+    $currentStatus = $_POST['current_status'] ?? '';
+    $freelancerID = $_SESSION['user_id'];
+
+    if ($gigID > 0 && in_array($currentStatus, ['active', 'paused'])) {
+        try {
+            $newStatus = ($currentStatus === 'active') ? 'paused' : 'active';
+            $stmt = $pdo->prepare("UPDATE gig SET Status = :new_status WHERE GigID = :gig_id AND FreelancerID = :freelancer_id");
+            $stmt->execute([
+                ':new_status' => $newStatus,
+                ':gig_id' => $gigID,
+                ':freelancer_id' => $freelancerID
+            ]);
+            if ($stmt->rowCount() > 0) {
+                $_SESSION['success'] = $newStatus === 'paused' ? 'Gig paused successfully. It is now hidden from clients.' : 'Gig resumed successfully. It is now visible to clients.';
+                header('Location: /page/gig/my_gig.php');
+                exit();
+            } else {
+                $_SESSION['error'] = 'Failed to update gig status.';
+            }
+        } catch (PDOException $e) {
+            $_SESSION['error'] = 'Database error.';
+            error_log('[my_gig] Toggle status failed: ' . $e->getMessage());
+        }
+    }
+}
 
 // Handle delete service (soft delete - change status to deleted)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delete') {
@@ -56,10 +83,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delet
     }
 }
 
-// Fetch freelancer services (only active status)
+// Fetch freelancer services (active and paused status)
 $freelancerID = $_SESSION['user_id'];
 try {
-    $stmt = $pdo->prepare("SELECT GigID, Title, Description, Price, DeliveryTime, RushDelivery, RushDeliveryPrice, CreatedAt FROM gig WHERE FreelancerID = :freelancer_id AND Status = 'active' ORDER BY CreatedAt DESC");
+    $stmt = $pdo->prepare("SELECT GigID, Title, Description, Price, DeliveryTime, RushDelivery, RushDeliveryPrice, Status, CreatedAt FROM gig WHERE FreelancerID = :freelancer_id AND Status IN ('active', 'paused') ORDER BY CreatedAt DESC");
     $stmt->execute([':freelancer_id' => $freelancerID]);
     $services = $stmt->fetchAll();
 } catch (PDOException $e) {
@@ -67,6 +94,9 @@ try {
     $_SESSION['error'] = 'Failed to load your gigs.';
     error_log('[my_gig] Fetch failed: ' . $e->getMessage());
 }
+
+$_title = 'My Gigs';
+include '../../_head.php';
 ?>
 
 <div class="container">
@@ -91,9 +121,14 @@ try {
             
             <div class="services-grid">
                 <?php foreach ($services as $service): ?>
-                    <div class="service-card">
+                    <div class="service-card <?php echo $service['Status'] === 'paused' ? 'paused-card' : ''; ?>">
                         <div class="card-header">
-                            <h3><?php echo htmlspecialchars($service['Title']); ?></h3>
+                            <h3>
+                                <?php echo htmlspecialchars($service['Title']); ?>
+                                <?php if ($service['Status'] === 'paused'): ?>
+                                    <span class="status-badge paused-badge">Paused</span>
+                                <?php endif; ?>
+                            </h3>
                             <span class="service-price">
                                 MYR <?php echo number_format($service['Price'], 0); ?>
                             </span>
@@ -120,6 +155,14 @@ try {
 
                         <div class="card-actions">
                             <a href="/page/gig/edit_gig.php?id=<?php echo $service['GigID']; ?>" class="btn-small btn-edit">Edit</a>
+                            <form method="post" style="flex: 1;">
+                                <input type="hidden" name="action" value="toggle_status">
+                                <input type="hidden" name="gig_id" value="<?php echo $service['GigID']; ?>">
+                                <input type="hidden" name="current_status" value="<?php echo $service['Status']; ?>">
+                                <button type="submit" class="btn-small btn-pause">
+                                    <?php echo $service['Status'] === 'active' ? '⏸ Pause' : '▶ Resume'; ?>
+                                </button>
+                            </form>
                             <form method="post" style="flex: 1;">
                                 <input type="hidden" name="action" value="delete">
                                 <input type="hidden" name="gig_id" value="<?php echo $service['GigID']; ?>">
@@ -265,6 +308,35 @@ include '../../_foot.php';
     color: #2c3e50;
     margin: 0;
     flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.status-badge {
+    font-size: 0.7rem;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.paused-badge {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.paused-card {
+    opacity: 0.85;
+    background: #f8f9fa;
+    border-color: #dee2e6;
+}
+
+.paused-card:hover {
+    opacity: 1;
 }
 
 .service-price {
@@ -329,6 +401,17 @@ include '../../_foot.php';
 
 .btn-edit:hover {
     background: rgb(140, 210, 90);
+}
+
+.btn-pause {
+    background: #ffc107;
+    color: #333;
+}
+
+.btn-pause:hover {
+    background: #ffb300;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
 }
 
 .btn-delete {

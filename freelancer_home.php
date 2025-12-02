@@ -34,42 +34,6 @@ include '_head.php';
     </div>
 </section>
 
-<!-- Quick Stats Section -->
-<section class="quick-stats-section">
-    <div class="container">
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon">📊</div>
-                <div class="stat-info">
-                    <div class="stat-number">12</div>
-                    <div class="stat-label">Active Projects</div>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">⭐</div>
-                <div class="stat-info">
-                    <div class="stat-number">4.8</div>
-                    <div class="stat-label">Rating</div>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">💰</div>
-                <div class="stat-info">
-                    <div class="stat-number">$2,450</div>
-                    <div class="stat-label">Monthly Earnings</div>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">✅</div>
-                <div class="stat-info">
-                    <div class="stat-number">45</div>
-                    <div class="stat-label">Completed Jobs</div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
 <!-- Freelancer Specializations Section -->
 <section class="specializations-section">
     <div class="container">
