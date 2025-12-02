@@ -85,7 +85,7 @@ require_once '../../_head.php';
 
 <div class="container">
     <div class="breadcrumb">
-        <a href="../my_jobs.php">← Back to My Jobs</a>
+        <a href="my_jobs.php">← Back to My Jobs</a>
     </div>
 
     <div class="job-details-layout">
@@ -328,7 +328,7 @@ require_once '../../_head.php';
 .job-header-top {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: center;
     margin-bottom: 20px;
     padding-bottom: 20px;
     border-bottom: 1px solid #e9ecef;
@@ -338,6 +338,7 @@ require_once '../../_head.php';
     display: flex;
     align-items: center;
     gap: 15px;
+    flex: 1;
 }
 
 .job-title {
@@ -383,33 +384,42 @@ require_once '../../_head.php';
 
 .btn-edit,
 .btn-delete {
-    padding: 10px 18px;
+    padding: 10px 20px;
     border-radius: 8px;
-    font-size: 0.85rem;
+    font-size: 0.875rem;
     font-weight: 600;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     transition: all 0.3s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .btn-edit {
     background: rgb(159, 232, 112);
     color: #2c3e50;
+    border: 2px solid rgb(159, 232, 112);
 }
 
 .btn-edit:hover {
     background: rgb(140, 210, 90);
+    border-color: rgb(140, 210, 90);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 
 .btn-delete {
     background: #dc3545;
     color: white;
+    border: 2px solid #dc3545;
 }
 
 .btn-delete:hover {
     background: #c82333;
+    border-color: #c82333;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 
 .job-meta {

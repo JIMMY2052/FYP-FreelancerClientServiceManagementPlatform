@@ -21,8 +21,8 @@ include '_head.php';
                 <h1 class="hero-title">Post. Match. Complete.</h1>
                 <p class="hero-subtitle">Find talented freelancers and manage your projects efficiently</p>
                 <div class="hero-buttons">
-                    <a href="/page/job/createJob.php" class="btn-hero btn-hero-primary">Post a Project</a>
-                    <a href="/page/gig/browse_gigs.php" class="btn-hero btn-hero-secondary">Browse Gigs</a>
+                    <a href="/page/gig/browse_gigs.php" class="btn-hero btn-hero-primary">Browse Gigs</a>
+                    <a href="/page/job/my_jobs.php" class="btn-hero btn-hero-secondary">My Projects</a>
                 </div>
             </div>
             <div class="hero-image-wrapper">
