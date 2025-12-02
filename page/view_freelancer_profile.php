@@ -64,7 +64,7 @@ $can_review = false;
 $has_reviewed = false;
 if (isset($_SESSION['user_id']) && $_SESSION['user_type'] === 'client') {
     $client_id = $_SESSION['user_id'];
-    
+
     // Check if client has any completed agreements with this freelancer
     // This includes: gigs purchased or jobs where freelancer was hired
     $stmt = $conn->prepare("
@@ -77,10 +77,10 @@ if (isset($_SESSION['user_id']) && $_SESSION['user_type'] === 'client') {
     $collab_result = $stmt->get_result();
     $collab_count = $collab_result->fetch_assoc()['collab_count'] ?? 0;
     $stmt->close();
-    
+
     if ($collab_count > 0) {
         $can_review = true;
-        
+
         // Check if client has already reviewed this freelancer
         $stmt = $conn->prepare("
             SELECT ReviewID 
@@ -156,839 +156,8 @@ $years_experience = $now->diff($member_since)->y + 1;
     <title><?= htmlspecialchars($freelancer['FirstName'] . ' ' . $freelancer['LastName']) ?> - Freelancer Profile</title>
     <link rel="stylesheet" href="../assets/css/style.css">
     <link rel="stylesheet" href="../assets/css/client.css">
+    <link rel="stylesheet" href="../assets/css/freelancer-profile.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-            color: #1e293b;
-            line-height: 1.6;
-        }
-
-        .profile-breadcrumb {
-            background: white;
-            padding: 1.2rem 0;
-            border-bottom: 1px solid #e2e8f0;
-            position: sticky;
-            top: 70px;
-            z-index: 50;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-        }
-
-        .breadcrumb-container {
-            max-width: 1300px;
-            margin: 0 auto;
-            padding: 0 2rem;
-        }
-
-        .breadcrumb-container a {
-            color: #16a34a;
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 0.95rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: color 0.2s ease;
-        }
-
-        .breadcrumb-container a:hover {
-            color: #15803d;
-        }
-
-        .profile-container {
-            max-width: 1300px;
-            margin: 0 auto;
-            padding: 3rem 2rem;
-        }
-
-        /* Hero Section */
-        .profile-hero {
-            background: white;
-            border-radius: 16px;
-            padding: 3.5rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-            margin-bottom: 3rem;
-            display: grid;
-            grid-template-columns: 180px 1fr;
-            gap: 3rem;
-            align-items: start;
-            border: 1px solid #e2e8f0;
-        }
-
-        .profile-avatar-large {
-            width: 180px;
-            height: 180px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #16a34a, #15803d);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: 4.5rem;
-            flex-shrink: 0;
-            box-shadow: 0 8px 24px rgba(22, 163, 74, 0.25);
-            overflow: hidden;
-            border: 4px solid white;
-        }
-
-        .profile-avatar-large img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .profile-info-header {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-        }
-
-        .profile-name-title {
-            display: flex;
-            align-items: baseline;
-            gap: 1rem;
-        }
-
-        .profile-name {
-            font-size: 2.75rem;
-            font-weight: 800;
-            color: #0f172a;
-            letter-spacing: -0.5px;
-        }
-
-        .profile-bio {
-            color: #64748b;
-            font-size: 1.1rem;
-            line-height: 1.7;
-            max-width: 700px;
-        }
-
-        .profile-stats-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 2rem;
-            margin-top: 1.5rem;
-            padding-top: 2rem;
-            border-top: 2px solid #f1f5f9;
-        }
-
-        .stat-box {
-            display: flex;
-            gap: 1.2rem;
-            align-items: center;
-        }
-
-        .stat-icon {
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #16a34a;
-            font-size: 1.8rem;
-            flex-shrink: 0;
-            border: 1px solid #bbf7d0;
-        }
-
-        .stat-content {
-            display: flex;
-            flex-direction: column;
-            gap: 0.3rem;
-        }
-
-        .stat-value {
-            font-size: 1.65rem;
-            font-weight: 800;
-            color: #0f172a;
-        }
-
-        .stat-label {
-            font-size: 0.8rem;
-            color: #78909c;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-        }
-
-        /* Rating Section */
-        .rating-section {
-            background: white;
-            border-radius: 16px;
-            padding: 3rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-            margin-bottom: 3rem;
-            border: 1px solid #e2e8f0;
-        }
-
-        .rating-header {
-            display: flex;
-            align-items: center;
-            gap: 2.5rem;
-            margin-bottom: 3rem;
-            padding-bottom: 2.5rem;
-            border-bottom: 2px solid #f1f5f9;
-        }
-
-        .rating-display {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.75rem;
-            min-width: 140px;
-            padding: 1.5rem;
-            background: linear-gradient(135deg, #f0fdf4, #f5fff5);
-            border-radius: 12px;
-            border: 1px solid #bbf7d0;
-        }
-
-        .rating-number {
-            font-size: 3.5rem;
-            font-weight: 900;
-            color: #16a34a;
-            line-height: 1;
-        }
-
-        .rating-stars {
-            display: flex;
-            gap: 0.35rem;
-            color: #facc15;
-            font-size: 1.4rem;
-        }
-
-        .rating-count {
-            font-size: 0.85rem;
-            color: #64748b;
-            font-weight: 600;
-        }
-
-        .rating-info {
-            flex: 1;
-        }
-
-        .rating-info p {
-            color: #64748b;
-            margin-bottom: 0.75rem;
-            font-size: 1rem;
-        }
-
-        .rating-info p:first-child {
-            font-weight: 700;
-            color: #0f172a;
-            font-size: 1.05rem;
-        }
-
-        /* Reviews */
-        .reviews-section {
-            background: white;
-            border-radius: 16px;
-            padding: 3rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-            margin-bottom: 3rem;
-            border: 1px solid #e2e8f0;
-        }
-
-        .reviews-title {
-            font-size: 1.6rem;
-            font-weight: 800;
-            margin-bottom: 2.5rem;
-            color: #0f172a;
-        }
-
-        .review-item {
-            padding: 2rem;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            margin-bottom: 1.5rem;
-            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-            transition: all 0.3s ease;
-        }
-
-        .review-item:hover {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            border-color: #cbd5e1;
-        }
-
-        .review-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: start;
-            margin-bottom: 1.2rem;
-        }
-
-        .review-author {
-            font-weight: 700;
-            color: #0f172a;
-            font-size: 1rem;
-        }
-
-        .review-date {
-            font-size: 0.8rem;
-            color: #94a3b8;
-            font-weight: 500;
-        }
-
-        .review-rating {
-            display: flex;
-            gap: 0.2rem;
-            color: #facc15;
-            font-size: 1.1rem;
-        }
-
-        .review-comment {
-            color: #475569;
-            line-height: 1.8;
-            margin-top: 1rem;
-            font-size: 0.95rem;
-        }
-
-        .no-reviews {
-            text-align: center;
-            padding: 3rem 2rem;
-            color: #94a3b8;
-            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-            border-radius: 12px;
-            border: 1px dashed #cbd5e1;
-        }
-
-        /* Main Content Grid */
-        .profile-main {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 2.5rem;
-        }
-
-        /* About Section */
-        .about-section {
-            background: white;
-            border-radius: 16px;
-            padding: 2.5rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-            border: 1px solid #e2e8f0;
-            margin-bottom: 2rem;
-        }
-
-        .section-title {
-            font-size: 1.4rem;
-            font-weight: 800;
-            color: #0f172a;
-            margin-bottom: 2rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .section-title i {
-            color: #16a34a;
-            font-size: 1.2rem;
-        }
-
-        .about-item {
-            margin-bottom: 2rem;
-            padding-bottom: 2rem;
-            border-bottom: 1px solid #f1f5f9;
-        }
-
-        .about-item:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
-        }
-
-        .about-label {
-            font-weight: 700;
-            color: #0f172a;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            font-size: 1.05rem;
-        }
-
-        .about-label i {
-            color: #16a34a;
-            font-size: 1.1rem;
-        }
-
-        .about-text {
-            color: #64748b;
-            line-height: 1.8;
-            font-size: 0.95rem;
-        }
-
-        /* Skills */
-        .skills-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-
-        .skill-tag {
-            background: linear-gradient(135deg, #f0fdf4, #f5fff5);
-            color: #16a34a;
-            padding: 0.65rem 1.3rem;
-            border-radius: 24px;
-            font-size: 0.9rem;
-            border: 1.5px solid #bbf7d0;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            cursor: default;
-        }
-
-        .skill-tag:hover {
-            background: linear-gradient(135deg, #dcfce7, #f5fff5);
-            border-color: #86efac;
-            transform: translateY(-2px);
-        }
-
-        /* Sidebar */
-        .sidebar {
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
-        }
-
-        .contact-card {
-            background: white;
-            border-radius: 16px;
-            padding: 2.5rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-            border: 1px solid #e2e8f0;
-        }
-
-        .contact-item {
-            display: flex;
-            gap: 1.2rem;
-            align-items: flex-start;
-            margin-bottom: 1.8rem;
-            padding-bottom: 1.8rem;
-            border-bottom: 1px solid #f1f5f9;
-        }
-
-        .contact-item:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
-        }
-
-        .contact-icon {
-            color: #16a34a;
-            font-size: 1.4rem;
-            width: 32px;
-            text-align: center;
-            flex-shrink: 0;
-            margin-top: 0.3rem;
-        }
-
-        .contact-content {
-            flex: 1;
-        }
-
-        .contact-label {
-            font-weight: 700;
-            color: #0f172a;
-            font-size: 0.8rem;
-            margin-bottom: 0.4rem;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-        }
-
-        .contact-value {
-            color: #64748b;
-            font-size: 0.95rem;
-            word-break: break-word;
-        }
-
-        .contact-value a {
-            color: #16a34a;
-            text-decoration: none;
-            font-weight: 600;
-            transition: color 0.2s ease;
-        }
-
-        .contact-value a:hover {
-            color: #15803d;
-        }
-
-        .btn-message {
-            width: 100%;
-            background: linear-gradient(135deg, #16a34a, #15803d);
-            color: white;
-            border: none;
-            padding: 1.2rem;
-            border-radius: 10px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 1.5rem;
-            font-size: 1rem;
-            letter-spacing: 0.3px;
-            box-shadow: 0 4px 12px rgba(22, 163, 74, 0.15);
-        }
-
-        .btn-message:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(22, 163, 74, 0.3);
-        }
-
-        .btn-message:active {
-            transform: translateY(-1px);
-        }
-
-        /* Member Badge */
-        .member-badge {
-            background: linear-gradient(135deg, #f0fdf4, #f5fff5);
-            border: 2px solid #bbf7d0;
-            border-radius: 12px;
-            padding: 2rem 1.5rem;
-            text-align: center;
-        }
-
-        .member-badge i {
-            color: #16a34a;
-            font-size: 2.5rem;
-            margin-bottom: 0.75rem;
-            display: block;
-        }
-
-        .member-title {
-            font-weight: 800;
-            color: #0f172a;
-            margin-bottom: 0.5rem;
-            font-size: 1.05rem;
-        }
-
-        .member-date {
-            font-size: 0.8rem;
-            color: #64748b;
-            font-weight: 600;
-        }
-
-        /* Review Form */
-        .review-form-section {
-            background: white;
-            border-radius: 16px;
-            padding: 2.5rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-            margin-bottom: 3rem;
-            border: 1px solid #e2e8f0;
-        }
-
-        .review-form-title {
-            font-size: 1.4rem;
-            font-weight: 800;
-            margin-bottom: 1.5rem;
-            color: #0f172a;
-        }
-
-        .review-form {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .form-label {
-            font-weight: 700;
-            color: #0f172a;
-            font-size: 0.95rem;
-        }
-
-        .star-rating {
-            display: flex;
-            gap: 0.5rem;
-            font-size: 2rem;
-        }
-
-        .star-rating i {
-            color: #cbd5e1;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .star-rating i:hover,
-        .star-rating i.active {
-            color: #facc15;
-            transform: scale(1.1);
-        }
-
-        .review-textarea {
-            padding: 1rem;
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            font-family: inherit;
-            font-size: 0.95rem;
-            resize: vertical;
-            min-height: 120px;
-            transition: border-color 0.2s ease;
-        }
-
-        .review-textarea:focus {
-            outline: none;
-            border-color: #16a34a;
-            box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
-        }
-
-        .btn-submit-review {
-            background: linear-gradient(135deg, #16a34a, #15803d);
-            color: white;
-            border: none;
-            padding: 1rem 2rem;
-            border-radius: 10px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 1rem;
-            align-self: flex-start;
-        }
-
-        .btn-submit-review:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(22, 163, 74, 0.3);
-        }
-
-        .btn-submit-review:disabled {
-            background: #cbd5e1;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .review-note {
-            background: #f0fdf4;
-            border: 1px solid #bbf7d0;
-            border-radius: 10px;
-            padding: 1rem;
-            color: #15803d;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: start;
-            gap: 0.75rem;
-        }
-
-        .review-note i {
-            margin-top: 0.2rem;
-        }
-
-        .review-note.warning {
-            background: #fef3c7;
-            border-color: #fde047;
-            color: #854d0e;
-        }
-
-        .review-note.info {
-            background: #dbeafe;
-            border-color: #93c5fd;
-            color: #1e40af;
-        }
-
-        .alert {
-            padding: 1rem 1.5rem;
-            border-radius: 10px;
-            margin-bottom: 2rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            font-weight: 600;
-        }
-
-        .alert-success {
-            background: #f0fdf4;
-            border: 1px solid #bbf7d0;
-            color: #15803d;
-        }
-
-        .alert-error {
-            background: #fef2f2;
-            border: 1px solid #fecaca;
-            color: #dc2626;
-        }
-
-        /* Gigs */
-        .gigs-section {
-            background: white;
-            border-radius: 16px;
-            padding: 2.5rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-            grid-column: 1 / -1;
-            border: 1px solid #e2e8f0;
-        }
-
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-            padding-bottom: 1.5rem;
-            border-bottom: 2px solid #f1f5f9;
-        }
-
-        .section-header .section-title {
-            margin-bottom: 0;
-        }
-
-        .view-all-link {
-            color: #16a34a;
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 0.9rem;
-            transition: color 0.2s ease;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-        }
-
-        .view-all-link:hover {
-            color: #15803d;
-        }
-
-        .gigs-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-            gap: 1.8rem;
-        }
-
-        .gig-card {
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 1.8rem;
-            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-            transition: all 0.3s ease;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .gig-card:hover {
-            border-color: #16a34a;
-            box-shadow: 0 8px 24px rgba(22, 163, 74, 0.12);
-            transform: translateY(-4px);
-            background: white;
-        }
-
-        .gig-card-title {
-            font-weight: 700;
-            color: #0f172a;
-            margin-bottom: 0.75rem;
-            line-height: 1.5;
-            font-size: 1.05rem;
-            flex-grow: 1;
-        }
-
-        .gig-card-category {
-            display: inline-block;
-            background: #dbeafe;
-            color: #0369a1;
-            font-size: 0.75rem;
-            padding: 0.4rem 0.85rem;
-            border-radius: 8px;
-            font-weight: 700;
-            margin-bottom: 1.2rem;
-            text-transform: uppercase;
-            letter-spacing: 0.2px;
-        }
-
-        .gig-card-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-top: 1.2rem;
-            border-top: 1px solid #e2e8f0;
-            font-weight: 700;
-            color: #16a34a;
-            font-size: 1.1rem;
-        }
-
-        @media (max-width: 1024px) {
-            .profile-hero {
-                grid-template-columns: 1fr;
-                padding: 2.5rem;
-                gap: 2rem;
-            }
-
-            .profile-main {
-                grid-template-columns: 1fr;
-                gap: 2rem;
-            }
-
-            .profile-avatar-large {
-                width: 140px;
-                height: 140px;
-                font-size: 3.5rem;
-                margin: 0 auto;
-            }
-
-            .profile-info-header {
-                text-align: center;
-            }
-
-            .profile-name {
-                font-size: 2.2rem;
-            }
-
-            .gigs-grid {
-                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            }
-        }
-
-        @media (max-width: 768px) {
-            .profile-container {
-                padding: 1.5rem;
-            }
-
-            .profile-hero {
-                padding: 1.5rem;
-                gap: 1.5rem;
-            }
-
-            .profile-name {
-                font-size: 1.8rem;
-            }
-
-            .profile-stats-row {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 1.5rem;
-            }
-
-            .stat-icon {
-                width: 50px;
-                height: 50px;
-                font-size: 1.5rem;
-            }
-
-            .stat-value {
-                font-size: 1.4rem;
-            }
-
-            .gigs-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .rating-header {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .rating-section,
-            .reviews-section,
-            .about-section,
-            .contact-card,
-            .gigs-section {
-                padding: 1.5rem;
-            }
-        }
-    </style>
 </head>
 
 <body>
@@ -1075,49 +244,49 @@ $years_experience = $now->diff($member_since)->y + 1;
 
         <!-- Review Form Section (Only for clients who have collaborated) -->
         <?php if ($can_review && !$has_reviewed): ?>
-        <div class="review-form-section">
-            <h3 class="review-form-title">Leave a Review</h3>
-            <div class="review-note">
-                <i class="fas fa-check-circle"></i>
-                <span>You have worked with this freelancer and can leave a review.</span>
-            </div>
-            <form class="review-form" method="POST" action="submit_freelancer_review.php" id="reviewForm">
-                <input type="hidden" name="freelancer_id" value="<?= $freelancer_id ?>">
-                
-                <div class="form-group">
-                    <label class="form-label">Rating *</label>
-                    <div class="star-rating" id="starRating">
-                        <i class="far fa-star" data-rating="1"></i>
-                        <i class="far fa-star" data-rating="2"></i>
-                        <i class="far fa-star" data-rating="3"></i>
-                        <i class="far fa-star" data-rating="4"></i>
-                        <i class="far fa-star" data-rating="5"></i>
+            <div class="review-form-section">
+                <h3 class="review-form-title">Leave a Review</h3>
+                <div class="review-note">
+                    <i class="fas fa-check-circle"></i>
+                    <span>You have worked with this freelancer and can leave a review.</span>
+                </div>
+                <form class="review-form" method="POST" action="submit_freelancer_review.php" id="reviewForm">
+                    <input type="hidden" name="freelancer_id" value="<?= $freelancer_id ?>">
+
+                    <div class="form-group">
+                        <label class="form-label">Rating *</label>
+                        <div class="star-rating" id="starRating">
+                            <i class="far fa-star" data-rating="1"></i>
+                            <i class="far fa-star" data-rating="2"></i>
+                            <i class="far fa-star" data-rating="3"></i>
+                            <i class="far fa-star" data-rating="4"></i>
+                            <i class="far fa-star" data-rating="5"></i>
+                        </div>
+                        <input type="hidden" name="rating" id="ratingValue" required>
                     </div>
-                    <input type="hidden" name="rating" id="ratingValue" required>
-                </div>
 
-                <div class="form-group">
-                    <label class="form-label">Your Review *</label>
-                    <textarea name="comment" class="review-textarea" placeholder="Share your experience working with this freelancer..." required></textarea>
-                </div>
+                    <div class="form-group">
+                        <label class="form-label">Your Review *</label>
+                        <textarea name="comment" class="review-textarea" placeholder="Share your experience working with this freelancer..." required></textarea>
+                    </div>
 
-                <button type="submit" class="btn-submit-review">Submit Review</button>
-            </form>
-        </div>
+                    <button type="submit" class="btn-submit-review">Submit Review</button>
+                </form>
+            </div>
         <?php elseif ($has_reviewed): ?>
-        <div class="review-form-section">
-            <div class="review-note info">
-                <i class="fas fa-info-circle"></i>
-                <span>You have already submitted a review for this freelancer.</span>
+            <div class="review-form-section">
+                <div class="review-note info">
+                    <i class="fas fa-info-circle"></i>
+                    <span>You have already submitted a review for this freelancer.</span>
+                </div>
             </div>
-        </div>
         <?php elseif (isset($_SESSION['user_id']) && $_SESSION['user_type'] === 'client'): ?>
-        <div class="review-form-section">
-            <div class="review-note warning">
-                <i class="fas fa-exclamation-triangle"></i>
-                <span>You need to complete at least one project with this freelancer before you can leave a review.</span>
+            <div class="review-form-section">
+                <div class="review-note warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>You need to complete at least one project with this freelancer before you can leave a review.</span>
+                </div>
             </div>
-        </div>
         <?php endif; ?>
 
         <!-- Rating Section -->
@@ -1340,12 +509,12 @@ $years_experience = $now->diff($member_since)->y + 1;
             if (starRating) {
                 const stars = starRating.querySelectorAll('i');
                 const ratingValue = document.getElementById('ratingValue');
-                
+
                 stars.forEach(star => {
                     star.addEventListener('click', function() {
                         const rating = this.getAttribute('data-rating');
                         ratingValue.value = rating;
-                        
+
                         // Update star display
                         stars.forEach((s, index) => {
                             if (index < rating) {
@@ -1357,7 +526,7 @@ $years_experience = $now->diff($member_since)->y + 1;
                             }
                         });
                     });
-                    
+
                     star.addEventListener('mouseenter', function() {
                         const rating = this.getAttribute('data-rating');
                         stars.forEach((s, index) => {
@@ -1369,7 +538,7 @@ $years_experience = $now->diff($member_since)->y + 1;
                         });
                     });
                 });
-                
+
                 starRating.addEventListener('mouseleave', function() {
                     const currentRating = ratingValue.value;
                     stars.forEach((s, index) => {

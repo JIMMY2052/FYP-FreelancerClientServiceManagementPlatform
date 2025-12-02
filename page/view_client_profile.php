@@ -87,67 +87,69 @@ if ($profilePic && !empty($profilePic) && strpos($profilePic, 'http') !== 0) {
     <?php include '../includes/freelancer_sidebar.php'; ?>
 
     <div class="container">
+        <!-- Back Button -->
+        <div style="margin-bottom: 2rem;">
+            <a href="<?= isset($_SESSION['job_id']) ? 'job/job_details.php?id=' . intval($_SESSION['job_id']) : 'job/browse_job.php' ?>" style="display: inline-flex; align-items: center; gap: 0.5rem; color: #16a34a; text-decoration: none; font-weight: 600; transition: all 0.3s ease; hover: opacity 0.8;">
+                <i class="fas fa-arrow-left"></i>
+                Back to Browse
+            </a>
+        </div>
+
         <!-- Hero Section -->
         <div class="profile-hero">
-            <div class="hero-content">
-                <div class="hero-avatar-section">
-                    <?php if ($profilePic && !empty($profilePic)): ?>
-                        <img src="<?= htmlspecialchars($profilePic) ?>" alt="<?= htmlspecialchars($client['CompanyName']) ?>" class="hero-avatar" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                    <?php endif; ?>
-                    <div class="hero-avatar-initial" style="<?= ($profilePic && !empty($profilePic)) ? 'display:none;' : 'display:flex;' ?>">
-                        <?= strtoupper(substr($client['CompanyName'], 0, 1)) ?>
-                    </div>
-                </div>
-
-                <div class="hero-info">
-                    <h1 class="hero-name"><?= htmlspecialchars($client['CompanyName']) ?></h1>
-                    <?php if (!empty($client['Description'])): ?>
-                        <p class="hero-description"><?= htmlspecialchars($client['Description']) ?></p>
-                    <?php endif; ?>
-
-                    <div class="hero-meta">
-                        <?php if (!empty($client['PhoneNo'])): ?>
-                            <div class="meta-item">
-                                <i class="fas fa-phone"></i>
-                                <span><?= htmlspecialchars($client['PhoneNo']) ?></span>
-                            </div>
-                        <?php endif; ?>
-                        <?php if (!empty($client['Email'])): ?>
-                            <div class="meta-item">
-                                <i class="fas fa-envelope"></i>
-                                <span><?= htmlspecialchars($client['Email']) ?></span>
-                            </div>
-                        <?php endif; ?>
-                        <?php if (!empty($client['Address'])): ?>
-                            <div class="meta-item">
-                                <i class="fas fa-map-marker-alt"></i>
-                                <span><?= htmlspecialchars($client['Address']) ?></span>
-                            </div>
-                        <?php endif; ?>
-                    </div>
-
-                    <!-- Stats -->
-                    <div class="stats-section">
-                        <div class="stat-box">
-                            <div class="stat-value"><?= $job_count ?></div>
-                            <div class="stat-label">Active Projects</div>
-                        </div>
-                        <div class="stat-box">
-                            <div class="stat-value"><?= $completed_count ?></div>
-                            <div class="stat-label">Completed Projects</div>
-                        </div>
-                    </div>
+            <div class="hero-avatar-section">
+                <?php if ($profilePic && !empty($profilePic)): ?>
+                    <img src="<?= htmlspecialchars($profilePic) ?>" alt="<?= htmlspecialchars($client['CompanyName']) ?>" class="hero-avatar" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <?php endif; ?>
+                <div class="hero-avatar-initial" style="<?= ($profilePic && !empty($profilePic)) ? 'display:none;' : 'display:flex;' ?>">
+                    <?= strtoupper(substr($client['CompanyName'], 0, 1)) ?>
                 </div>
             </div>
 
-            <!-- Action Buttons -->
-            <div class="action-buttons">
-                <a href="messages.php?client_id=<?= $clientID ?>" class="action-btn btn-contact">
-                    <i class="fas fa-comment-dots"></i> Send Message
-                </a>
-                <a href="browse_job.php" class="action-btn btn-browse">
-                    <i class="fas fa-briefcase"></i> Browse Their Projects
-                </a>
+            <div class="hero-info">
+                <h1 class="hero-name"><?= htmlspecialchars($client['CompanyName']) ?></h1>
+                <?php if (!empty($client['Description'])): ?>
+                    <p class="hero-description"><?= htmlspecialchars($client['Description']) ?></p>
+                <?php endif; ?>
+
+                <!-- Stats Section -->
+                <div class="stats-container" style="display: flex; gap: 2rem; margin-top: 2rem; flex-wrap: wrap;">
+                    <!-- Active Projects Stat -->
+                    <div class="stat-card" style="flex: 1; min-width: 180px; background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); padding: 2rem; border-radius: 16px; box-shadow: 0 4px 15px rgba(22, 163, 74, 0.2); color: white; transition: transform 0.3s ease, box-shadow 0.3s ease;">
+                        <div style="display: flex; align-items: flex-start; justify-content: space-between;">
+                            <div>
+                                <div style="font-size: 2.5rem; font-weight: 900; line-height: 1; margin-bottom: 0.5rem;"><?= $job_count ?></div>
+                                <div style="font-size: 0.95rem; opacity: 0.9; font-weight: 500;">Active Projects</div>
+                            </div>
+                            <div style="font-size: 2.5rem; opacity: 0.3;">
+                                <i class="fas fa-briefcase"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Completed Projects Stat -->
+                    <div class="stat-card" style="flex: 1; min-width: 180px; background: linear-gradient(135deg, #0f766e 0%, #0d5f59 100%); padding: 2rem; border-radius: 16px; box-shadow: 0 4px 15px rgba(15, 118, 110, 0.2); color: white; transition: transform 0.3s ease, box-shadow 0.3s ease;">
+                        <div style="display: flex; align-items: flex-start; justify-content: space-between;">
+                            <div>
+                                <div style="font-size: 2.5rem; font-weight: 900; line-height: 1; margin-bottom: 0.5rem;"><?= $completed_count ?></div>
+                                <div style="font-size: 0.95rem; opacity: 0.9; font-weight: 500;">Completed Projects</div>
+                            </div>
+                            <div style="font-size: 2.5rem; opacity: 0.3;">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <a href="messages.php?client_id=<?= $clientID ?>" class="action-btn btn-contact">
+                        <i class="fas fa-comment-dots"></i> Send Message
+                    </a>
+                    <a href="job/browse_job.php" class="action-btn btn-browse">
+                        <i class="fas fa-briefcase"></i> Browse Their Projects
+                    </a>
+                </div>
             </div>
         </div>
 
@@ -170,14 +172,6 @@ if ($profilePic && !empty($profilePic) && strpos($profilePic, 'http') !== 0) {
                             <a href="tel:<?= htmlspecialchars($client['PhoneNo']) ?>" class="contact-link">
                                 <?= htmlspecialchars($client['PhoneNo']) ?>
                             </a>
-                        </div>
-                    </div>
-                <?php endif; ?>
-                <?php if (!empty($client['Address'])): ?>
-                    <div class="contact-item">
-                        <div class="contact-label">Address</div>
-                        <div class="contact-value">
-                            <?= htmlspecialchars($client['Address']) ?>
                         </div>
                     </div>
                 <?php endif; ?>

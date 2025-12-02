@@ -384,6 +384,14 @@ try {
 <body>
 
     <div class="container">
+        <!-- Back Button -->
+        <div style="margin-bottom: 2rem;">
+            <a href="browse_job.php" style="display: inline-flex; align-items: center; gap: 0.5rem; color: rgb(159, 232, 112); text-decoration: none; font-weight: 600; transition: all 0.3s ease;">
+                <i class="fas fa-arrow-left"></i>
+                Back to Browse
+            </a>
+        </div>
+
         <div class="job-layout">
             <!-- Left Column: Job Details -->
             <div class="job-main-content">
@@ -456,6 +464,7 @@ try {
                 <!-- Client Card -->
                 <div class="client-card">
                     <div class="client-header">
+                        <?php $_SESSION['job_id'] = $job['JobID']; ?>
                         <a href="../view_client_profile.php?id=<?= $job['ClientID'] ?>" style="display: flex; gap: 15px; align-items: center; text-decoration: none; flex: 1;">
                             <?php
                             $profilePic = $job['ProfilePicture'];
