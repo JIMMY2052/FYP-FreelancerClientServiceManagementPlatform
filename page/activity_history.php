@@ -7,10 +7,13 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_type'])) {
     exit();
 }
 
+// Check if user is deleted
+require_once 'checkUserStatus.php';
+
 $_title = 'Activity History';
 $user_id = $_SESSION['user_id'];
 $user_type = $_SESSION['user_type'];
- 
+
 require_once 'config.php';
 
 $conn = getDBConnection();
@@ -20,7 +23,7 @@ $activities = [];
 
 if ($user_type === 'client') {
     // Fetch client activities
-    
+
     // Jobs posted
     $sql = "SELECT 'job_posted' as type, JobID as id, Title as title, PostDate as date, Status as status, Budget as amount
             FROM job 
@@ -34,7 +37,7 @@ if ($user_type === 'client') {
         $activities[] = $row;
     }
     $stmt->close();
-    
+
     // Agreements created
     $sql = "SELECT 'agreement_created' as type, AgreementID as id, ProjectTitle as title, ClientSignedDate as date, Status as status, PaymentAmount as amount
             FROM agreement 
@@ -48,7 +51,7 @@ if ($user_type === 'client') {
         $activities[] = $row;
     }
     $stmt->close();
-    
+
     // Work submissions reviewed
     $sql = "SELECT 'work_reviewed' as type, ws.SubmissionID as id, a.ProjectTitle as title, ws.ReviewedAt as date, ws.Status as status, a.PaymentAmount as amount
             FROM work_submissions ws
@@ -63,7 +66,7 @@ if ($user_type === 'client') {
         $activities[] = $row;
     }
     $stmt->close();
-    
+
     // Wallet transactions
     $sql = "SELECT 'wallet_transaction' as type, TransactionID as id, Description as title, CreatedAt as date, Type as status, Amount as amount
             FROM wallet_transactions wt
@@ -79,10 +82,9 @@ if ($user_type === 'client') {
         $activities[] = $row;
     }
     $stmt->close();
-    
 } else {
     // Fetch freelancer activities
-    
+
     // Job applications
     $sql = "SELECT 'job_application' as type, ja.ApplicationID as id, j.Title as title, ja.AppliedAt as date, ja.Status as status, ja.ProposedBudget as amount
             FROM job_application ja
@@ -97,7 +99,7 @@ if ($user_type === 'client') {
         $activities[] = $row;
     }
     $stmt->close();
-    
+
     // Agreements signed
     $sql = "SELECT 'agreement_signed' as type, AgreementID as id, ProjectTitle as title, FreelancerSignedDate as date, Status as status, PaymentAmount as amount
             FROM agreement 
@@ -111,7 +113,7 @@ if ($user_type === 'client') {
         $activities[] = $row;
     }
     $stmt->close();
-    
+
     // Work submissions
     $sql = "SELECT 'work_submitted' as type, ws.SubmissionID as id, a.ProjectTitle as title, ws.SubmittedAt as date, ws.Status as status, a.PaymentAmount as amount
             FROM work_submissions ws
@@ -126,7 +128,7 @@ if ($user_type === 'client') {
         $activities[] = $row;
     }
     $stmt->close();
-    
+
     // Wallet transactions
     $sql = "SELECT 'wallet_transaction' as type, TransactionID as id, Description as title, CreatedAt as date, Type as status, Amount as amount
             FROM wallet_transactions wt
@@ -147,12 +149,13 @@ if ($user_type === 'client') {
 $conn->close();
 
 // Sort all activities by date
-usort($activities, function($a, $b) {
+usort($activities, function ($a, $b) {
     return strtotime($b['date']) - strtotime($a['date']);
 });
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -261,24 +264,44 @@ usort($activities, function($a, $b) {
             font-weight: 700;
         }
 
-        .timeline-icon.job-posted { background: #3498db; }
-        .timeline-icon.job-application { background: #9b59b6; }
-        .timeline-icon.agreement-created { background: #e74c3c; }
-        .timeline-icon.agreement-signed { background: #2ecc71; }
-        .timeline-icon.work-submitted { background: #f39c12; }
-        .timeline-icon.work-reviewed { background: #1abc9c; }
-        .timeline-icon.wallet-transaction { background: #34495e; }
+        .timeline-icon.job-posted {
+            background: #3498db;
+        }
+
+        .timeline-icon.job-application {
+            background: #9b59b6;
+        }
+
+        .timeline-icon.agreement-created {
+            background: #e74c3c;
+        }
+
+        .timeline-icon.agreement-signed {
+            background: #2ecc71;
+        }
+
+        .timeline-icon.work-submitted {
+            background: #f39c12;
+        }
+
+        .timeline-icon.work-reviewed {
+            background: #1abc9c;
+        }
+
+        .timeline-icon.wallet-transaction {
+            background: #34495e;
+        }
 
         .timeline-content {
             background: white;
             padding: 20px;
             border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             transition: all 0.3s ease;
         }
 
         .timeline-content:hover {
-            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
             transform: translateY(-2px);
         }
 
@@ -328,26 +351,77 @@ usort($activities, function($a, $b) {
             margin-top: 10px;
         }
 
-        .status-available { background: #d4edda; color: #155724; }
-        .status-processing { background: #fff3cd; color: #856404; }
-        .status-completed { background: #d1ecf1; color: #0c5460; }
-        .status-pending { background: #fff3cd; color: #856404; }
-        .status-accepted { background: #d4edda; color: #155724; }
-        .status-rejected { background: #f8d7da; color: #721c24; }
-        .status-ongoing { background: #d1ecf1; color: #0c5460; }
-        .status-approved { background: #d4edda; color: #155724; }
-        .status-pending_review { background: #e2e3e5; color: #383d41; }
-        .status-to_accept { background: #fff3cd; color: #856404; }
-        .status-payment { background: #f8d7da; color: #721c24; }
-        .status-credit { background: #d4edda; color: #155724; }
-        .status-withdrawn { background: #e2e3e5; color: #383d41; }
+        .status-available {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-processing {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-completed {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-accepted {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-rejected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-ongoing {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-approved {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-pending_review {
+            background: #e2e3e5;
+            color: #383d41;
+        }
+
+        .status-to_accept {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-payment {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-credit {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-withdrawn {
+            background: #e2e3e5;
+            color: #383d41;
+        }
 
         .empty-state {
             text-align: center;
             padding: 80px 20px;
             background: white;
             border-radius: 16px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         }
 
         .empty-icon {
@@ -387,8 +461,9 @@ usort($activities, function($a, $b) {
         }
     </style>
 </head>
+
 <body>
-    <?php 
+    <?php
     include '../includes/header.php';
     if ($user_type === 'client') {
         include '../includes/client_sidebar.php';
@@ -398,111 +473,112 @@ usort($activities, function($a, $b) {
     ?>
     <div class="main-content">
         <div class="main-container">
-        <?php 
-        if ($user_type === 'client') {
-            include '../includes/client_sidebar.php';
-        } else {
-            include '../includes/freelancer_sidebar.php';
-        }
-        ?>
+            <?php
+            if ($user_type === 'client') {
+                include '../includes/client_sidebar.php';
+            } else {
+                include '../includes/freelancer_sidebar.php';
+            }
+            ?>
 
-        <div class="content">
-            <div class="page-header">
-                <h1>📋 Activity History</h1>
-                <p>Track all your activities and transactions</p>
-            </div>
+            <div class="content">
+                <div class="page-header">
+                    <h1>📋 Activity History</h1>
+                    <p>Track all your activities and transactions</p>
+                </div>
 
-            <div class="filter-tabs">
-                <button class="filter-btn active" onclick="filterActivities('all')">All Activities</button>
-                <?php if ($user_type === 'client'): ?>
-                    <button class="filter-btn" onclick="filterActivities('job_posted')">Jobs Posted</button>
-                    <button class="filter-btn" onclick="filterActivities('agreement_created')">Agreements</button>
-                    <button class="filter-btn" onclick="filterActivities('work_reviewed')">Reviews</button>
+                <div class="filter-tabs">
+                    <button class="filter-btn active" onclick="filterActivities('all')">All Activities</button>
+                    <?php if ($user_type === 'client'): ?>
+                        <button class="filter-btn" onclick="filterActivities('job_posted')">Jobs Posted</button>
+                        <button class="filter-btn" onclick="filterActivities('agreement_created')">Agreements</button>
+                        <button class="filter-btn" onclick="filterActivities('work_reviewed')">Reviews</button>
+                    <?php else: ?>
+                        <button class="filter-btn" onclick="filterActivities('job_application')">Applications</button>
+                        <button class="filter-btn" onclick="filterActivities('agreement_signed')">Agreements</button>
+                        <button class="filter-btn" onclick="filterActivities('work_submitted')">Submissions</button>
+                    <?php endif; ?>
+                    <button class="filter-btn" onclick="filterActivities('wallet_transaction')">Wallet</button>
+                </div>
+
+                <?php if (empty($activities)): ?>
+                    <div class="empty-state">
+                        <div class="empty-icon">📋</div>
+                        <h3>No Activity Yet</h3>
+                        <p>Your activity history will appear here as you use the platform.</p>
+                    </div>
                 <?php else: ?>
-                    <button class="filter-btn" onclick="filterActivities('job_application')">Applications</button>
-                    <button class="filter-btn" onclick="filterActivities('agreement_signed')">Agreements</button>
-                    <button class="filter-btn" onclick="filterActivities('work_submitted')">Submissions</button>
-                <?php endif; ?>
-                <button class="filter-btn" onclick="filterActivities('wallet_transaction')">Wallet</button>
-            </div>
-
-            <?php if (empty($activities)): ?>
-                <div class="empty-state">
-                    <div class="empty-icon">📋</div>
-                    <h3>No Activity Yet</h3>
-                    <p>Your activity history will appear here as you use the platform.</p>
-                </div>
-            <?php else: ?>
-                <div class="history-timeline">
-                    <?php foreach ($activities as $activity): ?>
-                        <div class="timeline-item" data-type="<?= $activity['type'] ?>">
-                            <div class="timeline-icon <?= str_replace('_', '-', $activity['type']) ?>">
-                                <?php
-                                $icons = [
-                                    'job_posted' => '📝',
-                                    'job_application' => '📬',
-                                    'agreement_created' => '📄',
-                                    'agreement_signed' => '✍️',
-                                    'work_submitted' => '📤',
-                                    'work_reviewed' => '✅',
-                                    'wallet_transaction' => '💰'
-                                ];
-                                echo $icons[$activity['type']] ?? '📌';
-                                ?>
-                            </div>
-
-                            <div class="timeline-content">
-                                <div class="activity-header">
-                                    <div class="activity-title">
-                                        <div class="activity-type">
-                                            <?= ucwords(str_replace('_', ' ', $activity['type'])) ?>
-                                        </div>
-                                        <div class="activity-name"><?= htmlspecialchars($activity['title']) ?></div>
-                                        <div class="activity-date">
-                                            <?= date('F d, Y - g:i A', strtotime($activity['date'])) ?>
-                                        </div>
-                                    </div>
-                                    <?php if (!empty($activity['amount'])): ?>
-                                        <div class="activity-amount">
-                                            <?php if ($activity['type'] === 'wallet_transaction' && $activity['status'] === 'payment'): ?>
-                                                -RM <?= number_format($activity['amount'], 2) ?>
-                                            <?php else: ?>
-                                                RM <?= number_format($activity['amount'], 2) ?>
-                                            <?php endif; ?>
-                                        </div>
-                                    <?php endif; ?>
+                    <div class="history-timeline">
+                        <?php foreach ($activities as $activity): ?>
+                            <div class="timeline-item" data-type="<?= $activity['type'] ?>">
+                                <div class="timeline-icon <?= str_replace('_', '-', $activity['type']) ?>">
+                                    <?php
+                                    $icons = [
+                                        'job_posted' => '📝',
+                                        'job_application' => '📬',
+                                        'agreement_created' => '📄',
+                                        'agreement_signed' => '✍️',
+                                        'work_submitted' => '📤',
+                                        'work_reviewed' => '✅',
+                                        'wallet_transaction' => '💰'
+                                    ];
+                                    echo $icons[$activity['type']] ?? '📌';
+                                    ?>
                                 </div>
-                                
-                                <span class="activity-status status-<?= str_replace('_', '-', strtolower($activity['status'])) ?>">
-                                    <?= ucwords(str_replace('_', ' ', $activity['status'])) ?>
-                                </span>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-            <?php endif; ?>
-        </div>
-    </div>
 
-    <script>
-        function filterActivities(type) {
-            const items = document.querySelectorAll('.timeline-item');
-            const buttons = document.querySelectorAll('.filter-btn');
-            
-            // Update active button
-            buttons.forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            // Filter items
-            items.forEach(item => {
-                if (type === 'all' || item.dataset.type === type) {
-                    item.style.display = 'block';
-                } else {
-                    item.style.display = 'none';
-                }
-            });
-        }
-    </script>
+                                <div class="timeline-content">
+                                    <div class="activity-header">
+                                        <div class="activity-title">
+                                            <div class="activity-type">
+                                                <?= ucwords(str_replace('_', ' ', $activity['type'])) ?>
+                                            </div>
+                                            <div class="activity-name"><?= htmlspecialchars($activity['title']) ?></div>
+                                            <div class="activity-date">
+                                                <?= date('F d, Y - g:i A', strtotime($activity['date'])) ?>
+                                            </div>
+                                        </div>
+                                        <?php if (!empty($activity['amount'])): ?>
+                                            <div class="activity-amount">
+                                                <?php if ($activity['type'] === 'wallet_transaction' && $activity['status'] === 'payment'): ?>
+                                                    -RM <?= number_format($activity['amount'], 2) ?>
+                                                <?php else: ?>
+                                                    RM <?= number_format($activity['amount'], 2) ?>
+                                                <?php endif; ?>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
+
+                                    <span class="activity-status status-<?= str_replace('_', '-', strtolower($activity['status'])) ?>">
+                                        <?= ucwords(str_replace('_', ' ', $activity['status'])) ?>
+                                    </span>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <script>
+            function filterActivities(type) {
+                const items = document.querySelectorAll('.timeline-item');
+                const buttons = document.querySelectorAll('.filter-btn');
+
+                // Update active button
+                buttons.forEach(btn => btn.classList.remove('active'));
+                event.target.classList.add('active');
+
+                // Filter items
+                items.forEach(item => {
+                    if (type === 'all' || item.dataset.type === type) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            }
+        </script>
     </div>
 </body>
+
 </html>

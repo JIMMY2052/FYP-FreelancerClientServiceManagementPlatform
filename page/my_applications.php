@@ -7,6 +7,9 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'client') {
     exit();
 }
 
+// Check if user is deleted
+require_once 'checkUserStatus.php';
+
 $_title = 'My Applications - WorkSnyc';
 require_once 'config.php';
 

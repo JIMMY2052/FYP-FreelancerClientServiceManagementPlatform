@@ -7,6 +7,9 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'freelancer') {
     exit();
 }
 
+// Check if user is deleted
+require_once '../checkUserStatus.php';
+
 $_title = 'Create Gig - Overview';
 include '../../_head.php';
 
@@ -342,7 +345,7 @@ $categoryData = [
         font-weight: 300;
     }
 
-    .milestone-step.completed ~ .milestone-separator {
+    .milestone-step.completed~.milestone-separator {
         color: rgb(140, 210, 90);
     }
 
@@ -700,35 +703,45 @@ $categoryData = [
         <div class="milestone-stepper">
             <div class="milestone-step active" data-step="overview">
                 <div class="milestone-circle">1</div>
-                <div class="milestone-label-wrapper"><div class="milestone-label">Overview</div></div>
+                <div class="milestone-label-wrapper">
+                    <div class="milestone-label">Overview</div>
+                </div>
             </div>
 
             <div class="milestone-separator">›</div>
 
             <div class="milestone-step" data-step="pricing">
                 <div class="milestone-circle">2</div>
-                <div class="milestone-label-wrapper"><div class="milestone-label">Pricing</div></div>
+                <div class="milestone-label-wrapper">
+                    <div class="milestone-label">Pricing</div>
+                </div>
             </div>
 
             <div class="milestone-separator">›</div>
 
             <div class="milestone-step" data-step="description">
                 <div class="milestone-circle">3</div>
-                <div class="milestone-label-wrapper"><div class="milestone-label">Description</div></div>
+                <div class="milestone-label-wrapper">
+                    <div class="milestone-label">Description</div>
+                </div>
             </div>
 
             <div class="milestone-separator">›</div>
 
             <div class="milestone-step" data-step="gallery">
                 <div class="milestone-circle">4</div>
-                <div class="milestone-label-wrapper"><div class="milestone-label">Gallery</div></div>
+                <div class="milestone-label-wrapper">
+                    <div class="milestone-label">Gallery</div>
+                </div>
             </div>
 
             <div class="milestone-separator">›</div>
 
             <div class="milestone-step" data-step="publish">
                 <div class="milestone-circle">5</div>
-                <div class="milestone-label-wrapper"><div class="milestone-label">Publish</div></div>
+                <div class="milestone-label-wrapper">
+                    <div class="milestone-label">Publish</div>
+                </div>
             </div>
         </div>
     </div>
@@ -822,7 +835,7 @@ $categoryData = [
     // Initialize milestone
     document.addEventListener('DOMContentLoaded', function() {
         const milestoneSteps = document.querySelectorAll('.milestone-step');
-        
+
         // Get stored form data to mark completed steps
         const storedData = localStorage.getItem('gigFormData');
         if (storedData) {
@@ -882,7 +895,7 @@ $categoryData = [
     function addTag(tagText) {
         // Clean the tag (remove special characters, keep only letters, numbers and spaces)
         tagText = tagText.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim();
-        
+
         if (!tagText) {
             return;
         }
@@ -989,7 +1002,7 @@ $categoryData = [
 
         if (categoryKey && subcategoryKey && categoryData[categoryKey].metadata[subcategoryKey]) {
             const metadata = categoryData[categoryKey].metadata[subcategoryKey];
-            
+
             for (const [key, options] of Object.entries(metadata)) {
                 const metadataItem = document.createElement('div');
                 metadataItem.className = 'metadata-item';
@@ -1000,24 +1013,24 @@ $categoryData = [
                 // Determine if field should be radio (single choice) or checkbox (multiple choice)
                 // RADIO FIELDS (single choice only):
                 const singleChoiceFields = [
-                    'revisions', 'length', 'quantity', 'word_count', 'pages', 'screens', 
+                    'revisions', 'length', 'quantity', 'word_count', 'pages', 'screens',
                     'emails', 'sections', 'hours_per_month', 'keywords', 'sided', 'animated',
                     'seo_optimized', 'research_included', 'diagrams_included', 'design_type',
                     'resolution', 'scope', 'type', 'project_type', 'game_type', 'ai_type',
-                    'ai_level', 'platform', 'complexity', 'reporting', 'frequency', 
+                    'ai_level', 'platform', 'complexity', 'reporting', 'frequency',
                     'personalization', 'budget', 'management', 'response_time', 'hosting',
                     'include_copywriting', 'source_language', 'target_language', 'level',
                     'pages_included', 'design_tool', 'engine'
                 ];
-                
+
                 // CHECKBOX FIELDS (multiple choice allowed):
                 // features, file_format, elements_included, deliverables, graphics_type,
                 // art_type, style, technologies, services, tech_stack, framework, 
                 // service, provider, content_type, topics, document_type
-                
+
                 const isRadioField = singleChoiceFields.includes(key);
                 const inputType = isRadioField ? 'radio' : 'checkbox';
-                
+
                 metadataItem.innerHTML = `
                     <label>${label} <span class="required">*</span></label>
                     <div class="checkbox-group" data-group="${key}">
@@ -1039,7 +1052,7 @@ $categoryData = [
 
     function validateAndContinue() {
         const form = document.getElementById('overviewForm');
-        
+
         if (!form.checkValidity()) {
             alert('Please fill in all required fields');
             form.reportValidity();
@@ -1055,7 +1068,7 @@ $categoryData = [
             const groupName = group.getAttribute('data-group');
             const inputs = group.querySelectorAll('input[type="checkbox"], input[type="radio"]');
             const checked = Array.from(inputs).some(input => input.checked);
-            
+
             if (!checked) {
                 hasError = true;
                 const label = groupName.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
@@ -1101,7 +1114,7 @@ $categoryData = [
         const metadata = {};
         const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
         const radios = document.querySelectorAll('input[type="radio"]:checked');
-        
+
         checkboxes.forEach(checkbox => {
             const key = checkbox.name;
             if (!metadata[key]) {

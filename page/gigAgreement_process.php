@@ -8,6 +8,9 @@ if (!isset($_SESSION['user_type']) || $_SESSION['user_type'] !== 'client') {
     exit();
 }
 
+// Check if user is deleted
+require_once 'checkUserStatus.php';
+
 // Include database configuration
 include 'config.php';
 

@@ -8,6 +8,9 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'freelancer') {
     exit();
 }
 
+// Check if user is deleted
+require_once 'checkUserStatus.php';
+
 // Check if request is POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     error_log("Invalid request method: " . $_SERVER['REQUEST_METHOD']);
@@ -37,7 +40,7 @@ require_once 'config.php';
 
 try {
     $conn = getDBConnection();
-    
+
     // Start transaction
     $conn->begin_transaction();
 
@@ -118,7 +121,7 @@ try {
             $update_wallet_sql = "UPDATE wallet SET Balance = ?, LockedBalance = ? WHERE WalletID = ?";
             $update_wallet_stmt = $conn->prepare($update_wallet_sql);
             $update_wallet_stmt->bind_param('ddi', $new_balance, $new_locked, $wallet_id);
-            
+
             if (!$update_wallet_stmt->execute()) {
                 throw new Exception("Error updating wallet: " . $update_wallet_stmt->error);
             }
@@ -134,7 +137,7 @@ try {
                                VALUES (?, ?, ?, ?, ?, ?, NOW())";
             $transaction_stmt = $conn->prepare($transaction_sql);
             $transaction_stmt->bind_param('isdsss', $wallet_id, $transaction_type, $escrow_amount, $transaction_status, $transaction_desc, $transaction_ref);
-            
+
             if (!$transaction_stmt->execute()) {
                 throw new Exception("Error creating transaction: " . $transaction_stmt->error);
             }
@@ -144,7 +147,7 @@ try {
             $update_escrow_sql = "UPDATE escrow SET Status = 'refunded' WHERE EscrowID = ?";
             $update_escrow_stmt = $conn->prepare($update_escrow_sql);
             $update_escrow_stmt->bind_param('i', $escrow_id);
-            
+
             if (!$update_escrow_stmt->execute()) {
                 throw new Exception("Error updating escrow: " . $update_escrow_stmt->error);
             }

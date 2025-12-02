@@ -7,6 +7,9 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_type'])) {
     exit();
 }
 
+// Check if user is deleted
+require_once 'checkUserStatus.php';
+
 // Redirect to appropriate edit profile page based on user type
 if ($_SESSION['user_type'] === 'freelancer') {
     header('Location: edit_freelancer_profile.php');
@@ -14,5 +17,3 @@ if ($_SESSION['user_type'] === 'freelancer') {
     header('Location: edit_client_profile.php');
 }
 exit();
-?>
-

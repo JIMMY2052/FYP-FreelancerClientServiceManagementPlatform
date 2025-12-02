@@ -7,6 +7,9 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'freelancer') {
     exit('Unauthorized');
 }
 
+// Check if user is deleted
+require_once 'checkUserStatus.php';
+
 require_once 'config.php';
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../vendor/tecnickcom/tcpdf/tcpdf.php';

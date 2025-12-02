@@ -7,6 +7,9 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'freelancer') {
     exit();
 }
 
+// Check if user is deleted
+require_once 'checkUserStatus.php';
+
 $_title = 'Submit Work';
 $freelancer_id = $_SESSION['user_id'];
 $agreement_id = isset($_GET['agreement_id']) ? intval($_GET['agreement_id']) : null;
@@ -62,19 +65,19 @@ $conn->close();
         border-radius: 8px;
         font-weight: 500;
     }
-    
+
     .alert-success {
         background: #d4edda;
         border: 1px solid #c3e6cb;
         color: #155724;
     }
-    
+
     .alert-error {
         background: #f8d7da;
         border: 1px solid #f5c6cb;
         color: #721c24;
     }
-    
+
     .submit-container {
         max-width: 900px;
         margin: 40px auto;
@@ -475,31 +478,31 @@ $conn->close();
 
             <div class="form-section">
                 <h3>📝 Submission Details</h3>
-                
+
                 <div class="form-group">
                     <label class="form-label required">Submission Title</label>
-                    <input type="text" name="submission_title" class="form-input" 
-                           placeholder="e.g., Final Project Deliverables" required>
+                    <input type="text" name="submission_title" class="form-input"
+                        placeholder="e.g., Final Project Deliverables" required>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label required">Description / Notes</label>
-                    <textarea name="submission_notes" class="form-textarea" 
-                              placeholder="Describe what you're submitting, any special instructions, or notes for the client..." required></textarea>
+                    <textarea name="submission_notes" class="form-textarea"
+                        placeholder="Describe what you're submitting, any special instructions, or notes for the client..." required></textarea>
                 </div>
             </div>
 
             <div class="form-section">
                 <h3>📎 Upload Files</h3>
-                
+
                 <div class="file-upload-area" id="uploadArea">
                     <div class="upload-icon">📁</div>
                     <div class="upload-text">Click to browse or drag & drop files here</div>
                     <div class="upload-hint">
                         Support: ZIP, RAR, PDF, DOC, DOCX, Images, Videos (Max 50MB per file)
                     </div>
-                    <input type="file" name="submission_files[]" id="fileInput" class="file-input" multiple 
-                           accept=".zip,.rar,.pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.mp4,.mov,.avi">
+                    <input type="file" name="submission_files[]" id="fileInput" class="file-input" multiple
+                        accept=".zip,.rar,.pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.mp4,.mov,.avi">
                 </div>
 
                 <div class="selected-files" id="selectedFiles"></div>
@@ -588,14 +591,14 @@ $conn->close();
         }
 
         selectedFilesContainer.innerHTML = '<h4 style="margin-bottom: 15px; font-size: 0.95rem; color: #2c3e50;">Selected Files (' + selectedFiles.length + ')</h4>';
-        
+
         selectedFiles.forEach((file, index) => {
             const fileItem = document.createElement('div');
             fileItem.className = 'file-item';
-            
+
             const fileIcon = getFileIcon(file.name);
             const fileSize = formatFileSize(file.size);
-            
+
             fileItem.innerHTML = `
                 <div class="file-info">
                     <div class="file-icon">${fileIcon}</div>
@@ -606,7 +609,7 @@ $conn->close();
                 </div>
                 <button type="button" class="file-remove" onclick="removeFile(${index})">Remove</button>
             `;
-            
+
             selectedFilesContainer.appendChild(fileItem);
         });
 
@@ -629,11 +632,18 @@ $conn->close();
     function getFileIcon(filename) {
         const ext = filename.split('.').pop().toLowerCase();
         const icons = {
-            'zip': '🗜️', 'rar': '🗜️',
+            'zip': '🗜️',
+            'rar': '🗜️',
             'pdf': '📄',
-            'doc': '📝', 'docx': '📝',
-            'jpg': '🖼️', 'jpeg': '🖼️', 'png': '🖼️', 'gif': '🖼️',
-            'mp4': '🎥', 'mov': '🎥', 'avi': '🎥'
+            'doc': '📝',
+            'docx': '📝',
+            'jpg': '🖼️',
+            'jpeg': '🖼️',
+            'png': '🖼️',
+            'gif': '🖼️',
+            'mp4': '🎥',
+            'mov': '🎥',
+            'avi': '🎥'
         };
         return icons[ext] || '📎';
     }

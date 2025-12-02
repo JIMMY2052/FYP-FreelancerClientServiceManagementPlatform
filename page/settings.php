@@ -7,6 +7,9 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_type'])) {
     exit();
 }
 
+// Check if user is deleted
+require_once 'checkUserStatus.php';
+
 $user_id = $_SESSION['user_id'];
 $user_type = $_SESSION['user_type'];
 $user_email = $_SESSION['email'] ?? '';

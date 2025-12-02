@@ -1,11 +1,14 @@
 <?php
 session_start();
 
-// only freelancers can browse projects
+// only freelancers can browse jobs
 if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'freelancer') {
     header('Location: /index.php');
     exit();
 }
+
+// Check if user is deleted
+require_once '../checkUserStatus.php';
 
 $_title = 'Browse Jobs';
 include '../../_head.php';

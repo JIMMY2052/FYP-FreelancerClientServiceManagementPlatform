@@ -7,6 +7,9 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'freelancer') {
     exit();
 }
 
+// Check if user is deleted
+require_once 'checkUserStatus.php';
+
 $conn = getDBConnection();
 $freelancer_id = $_SESSION['user_id'];
 

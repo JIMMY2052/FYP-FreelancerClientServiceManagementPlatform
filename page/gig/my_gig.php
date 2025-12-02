@@ -7,6 +7,9 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'freelancer') {
     exit();
 }
 
+// Check if user is deleted
+require_once '../checkUserStatus.php';
+
 require_once '../config.php';
 
 if (!function_exists('getPDOConnection')) {
@@ -105,10 +108,12 @@ include '../../_head.php';
     </div>
 
     <?php if (!empty($_SESSION['success'])): ?>
-        <div class="alert alert-success"><?php echo htmlspecialchars($_SESSION['success']); unset($_SESSION['success']); ?></div>
+        <div class="alert alert-success"><?php echo htmlspecialchars($_SESSION['success']);
+                                            unset($_SESSION['success']); ?></div>
     <?php endif; ?>
     <?php if (!empty($_SESSION['error'])): ?>
-        <div class="alert alert-error"><?php echo htmlspecialchars($_SESSION['error']); unset($_SESSION['error']); ?></div>
+        <div class="alert alert-error"><?php echo htmlspecialchars($_SESSION['error']);
+                                        unset($_SESSION['error']); ?></div>
     <?php endif; ?>
 
     <?php if (!empty($services)): ?>
@@ -118,7 +123,7 @@ include '../../_head.php';
                 <h2>Your Gigs (<?php echo count($services); ?>)</h2>
                 <a href="/page/gig/create_gig.php" class="btn-add-new">+ Add New Gig</a>
             </div>
-            
+
             <div class="services-grid">
                 <?php foreach ($services as $service): ?>
                     <div class="service-card <?php echo $service['Status'] === 'paused' ? 'paused-card' : ''; ?>">
@@ -133,16 +138,16 @@ include '../../_head.php';
                                 MYR <?php echo number_format($service['Price'], 0); ?>
                             </span>
                         </div>
-                        
+
                         <p class="service-description"><?php echo nl2br(htmlspecialchars(mb_strimwidth($service['Description'], 0, 200, '...'))); ?></p>
-                        
+
                         <div class="service-meta">
                             <span class="meta-item">
                                 <strong>Delivery:</strong> <?php echo intval($service['DeliveryTime']); ?> day(s)
                             </span>
                             <?php if (!empty($service['RushDelivery']) && $service['RushDelivery'] > 0): ?>
                                 <span class="meta-item">
-                                    <strong>Rush Delivery:</strong> <?php echo intval($service['RushDelivery']); ?> day(s) 
+                                    <strong>Rush Delivery:</strong> <?php echo intval($service['RushDelivery']); ?> day(s)
                                     <?php if (!empty($service['RushDeliveryPrice']) && $service['RushDeliveryPrice'] > 0): ?>
                                         <span style="color: rgb(159, 232, 112); font-weight: 700;">(+RM<?php echo number_format($service['RushDeliveryPrice'], 0); ?>)</span>
                                     <?php endif; ?>
@@ -190,338 +195,338 @@ include '../../_foot.php';
 ?>
 
 <style>
-/* My Service Page */
-.container {
-    max-width: 1000px;
-    margin: 30px auto;
-    padding: 0 16px;
-}
+    /* My Service Page */
+    .container {
+        max-width: 1000px;
+        margin: 30px auto;
+        padding: 0 16px;
+    }
 
-.my-service-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
-    padding-bottom: 20px;
-    border-bottom: 2px solid #f0f0f0;
-}
-
-.my-service-header h1 {
-    font-size: 2rem;
-    font-weight: 700;
-    color: #2c3e50;
-    margin: 0;
-}
-
-/* Alert Messages */
-.alert {
-    padding: 14px 18px;
-    border-radius: 12px;
-    margin-bottom: 24px;
-    font-weight: 500;
-}
-
-.alert-success {
-    background: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
-}
-
-.alert-error {
-    background: #f8d7da;
-    color: #842029;
-    border: 1px solid #f5c2c7;
-}
-
-/* Services List */
-.services-section {
-    background: white;
-    padding: 30px;
-    border-radius: 16px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-}
-
-.services-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-.services-top h2 {
-    font-size: 1.3rem;
-    font-weight: 700;
-    color: #2c3e50;
-    margin: 0;
-}
-
-.btn-add-new {
-    background: rgb(159, 232, 112);
-    color: #333;
-    padding: 10px 20px;
-    border-radius: 20px;
-    text-decoration: none;
-    font-weight: 700;
-    font-size: 0.9rem;
-    transition: all 0.3s ease;
-}
-
-.btn-add-new:hover {
-    background: rgb(140, 210, 90);
-    box-shadow: 0 4px 12px rgba(159, 232, 112, 0.3);
-}
-
-.services-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 20px;
-}
-
-/* Service Card */
-.service-card {
-    background: #f8f9fa;
-    padding: 20px;
-    border-radius: 16px;
-    border: 1px solid #e9ecef;
-    transition: all 0.3s ease;
-    display: flex;
-    flex-direction: column;
-}
-
-.service-card:hover {
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-    transform: translateY(-3px);
-    border-color: rgb(159, 232, 112);
-}
-
-.card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 12px;
-    margin-bottom: 12px;
-}
-
-.card-header h3 {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: #2c3e50;
-    margin: 0;
-    flex: 1;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
-.status-badge {
-    font-size: 0.7rem;
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.paused-badge {
-    background: #fff3cd;
-    color: #856404;
-    border: 1px solid #ffeaa7;
-}
-
-.paused-card {
-    opacity: 0.85;
-    background: #f8f9fa;
-    border-color: #dee2e6;
-}
-
-.paused-card:hover {
-    opacity: 1;
-}
-
-.service-price {
-    background: rgb(159, 232, 112);
-    color: #333;
-    padding: 6px 12px;
-    border-radius: 12px;
-    font-weight: 700;
-    font-size: 0.85rem;
-    white-space: nowrap;
-}
-
-.service-description {
-    color: #555;
-    font-size: 0.9rem;
-    line-height: 1.5;
-    margin: 0 0 12px 0;
-    flex: 1;
-}
-
-.service-meta {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    padding: 12px 0;
-    border-top: 1px solid #e9ecef;
-    border-bottom: 1px solid #e9ecef;
-    margin-bottom: 12px;
-}
-
-.meta-item {
-    color: #666;
-    font-size: 0.85rem;
-}
-
-.meta-item strong {
-    color: #2c3e50;
-}
-
-.card-actions {
-    display: flex;
-    gap: 10px;
-}
-
-.btn-small {
-    flex: 1;
-    padding: 10px 14px;
-    border-radius: 12px;
-    text-decoration: none;
-    font-size: 0.85rem;
-    font-weight: 600;
-    text-align: center;
-    transition: all 0.3s ease;
-    border: none;
-    cursor: pointer;
-}
-
-.btn-edit {
-    background: rgb(159, 232, 112);
-    color: #333;
-}
-
-.btn-edit:hover {
-    background: rgb(140, 210, 90);
-}
-
-.btn-pause {
-    background: #ffc107;
-    color: #333;
-}
-
-.btn-pause:hover {
-    background: #ffb300;
-    transform: translateY(-2px);
-    box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
-}
-
-.btn-delete {
-    background: white;
-    color: #333;
-    border: 1px solid #333;
-}
-
-.btn-delete:hover {
-    background: #f5f5f5;
-    border-color: #333;
-}
-
-/* Empty State */
-.empty-state {
-    text-align: center;
-    padding: 80px 40px;
-    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-    border-radius: 16px;
-    border: 2px dashed #dee2e6;
-    margin: 40px 0;
-}
-
-.empty-icon {
-    font-size: 4rem;
-    margin-bottom: 20px;
-}
-
-.empty-state h2 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #2c3e50;
-    margin: 0 0 12px 0;
-}
-
-.empty-state p {
-    font-size: 1rem;
-    color: #666;
-    margin: 0 0 24px 0;
-    max-width: 500px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.btn-add-first {
-    background: rgb(159, 232, 112);
-    color: #333;
-    padding: 14px 32px;
-    border-radius: 20px;
-    text-decoration: none;
-    font-weight: 700;
-    font-size: 0.95rem;
-    display: inline-block;
-    transition: all 0.3s ease;
-}
-
-.btn-add-first:hover {
-    background: rgb(140, 210, 90);
-    box-shadow: 0 4px 12px rgba(159, 232, 112, 0.3);
-    transform: translateY(-2px);
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
     .my-service-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .my-service-header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin: 0;
+    }
+
+    /* Alert Messages */
+    .alert {
+        padding: 14px 18px;
+        border-radius: 12px;
+        margin-bottom: 24px;
+        font-weight: 500;
+    }
+
+    .alert-success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .alert-error {
+        background: #f8d7da;
+        color: #842029;
+        border: 1px solid #f5c2c7;
+    }
+
+    /* Services List */
+    .services-section {
+        background: white;
+        padding: 30px;
+        border-radius: 16px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
     }
 
     .services-top {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .services-top h2 {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin: 0;
+    }
+
+    .btn-add-new {
+        background: rgb(159, 232, 112);
+        color: #333;
+        padding: 10px 20px;
+        border-radius: 20px;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn-add-new:hover {
+        background: rgb(140, 210, 90);
+        box-shadow: 0 4px 12px rgba(159, 232, 112, 0.3);
     }
 
     .services-grid {
-        grid-template-columns: 1fr;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 20px;
     }
 
-    .empty-state {
-        padding: 60px 30px;
-    }
-
-    .empty-icon {
-        font-size: 3rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .my-service-header h1 {
-        font-size: 1.4rem;
-    }
-
-    .services-section {
-        padding: 20px;
-    }
-
+    /* Service Card */
     .service-card {
-        padding: 16px;
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 16px;
+        border: 1px solid #e9ecef;
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .service-card:hover {
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        transform: translateY(-3px);
+        border-color: rgb(159, 232, 112);
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 12px;
     }
 
     .card-header h3 {
-        font-size: 1rem;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin: 0;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
     }
 
-    .empty-state {
-        padding: 50px 20px;
+    .status-badge {
+        font-size: 0.7rem;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
-}
+
+    .paused-badge {
+        background: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+    }
+
+    .paused-card {
+        opacity: 0.85;
+        background: #f8f9fa;
+        border-color: #dee2e6;
+    }
+
+    .paused-card:hover {
+        opacity: 1;
+    }
+
+    .service-price {
+        background: rgb(159, 232, 112);
+        color: #333;
+        padding: 6px 12px;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 0.85rem;
+        white-space: nowrap;
+    }
+
+    .service-description {
+        color: #555;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        margin: 0 0 12px 0;
+        flex: 1;
+    }
+
+    .service-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 12px 0;
+        border-top: 1px solid #e9ecef;
+        border-bottom: 1px solid #e9ecef;
+        margin-bottom: 12px;
+    }
+
+    .meta-item {
+        color: #666;
+        font-size: 0.85rem;
+    }
+
+    .meta-item strong {
+        color: #2c3e50;
+    }
+
+    .card-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .btn-small {
+        flex: 1;
+        padding: 10px 14px;
+        border-radius: 12px;
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-align: center;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-edit {
+        background: rgb(159, 232, 112);
+        color: #333;
+    }
+
+    .btn-edit:hover {
+        background: rgb(140, 210, 90);
+    }
+
+    .btn-pause {
+        background: #ffc107;
+        color: #333;
+    }
+
+    .btn-pause:hover {
+        background: #ffb300;
+        transform: translateY(-2px);
+        box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
+    }
+
+    .btn-delete {
+        background: white;
+        color: #333;
+        border: 1px solid #333;
+    }
+
+    .btn-delete:hover {
+        background: #f5f5f5;
+        border-color: #333;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 80px 40px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        border-radius: 16px;
+        border: 2px dashed #dee2e6;
+        margin: 40px 0;
+    }
+
+    .empty-icon {
+        font-size: 4rem;
+        margin-bottom: 20px;
+    }
+
+    .empty-state h2 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin: 0 0 12px 0;
+    }
+
+    .empty-state p {
+        font-size: 1rem;
+        color: #666;
+        margin: 0 0 24px 0;
+        max-width: 500px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .btn-add-first {
+        background: rgb(159, 232, 112);
+        color: #333;
+        padding: 14px 32px;
+        border-radius: 20px;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 0.95rem;
+        display: inline-block;
+        transition: all 0.3s ease;
+    }
+
+    .btn-add-first:hover {
+        background: rgb(140, 210, 90);
+        box-shadow: 0 4px 12px rgba(159, 232, 112, 0.3);
+        transform: translateY(-2px);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .my-service-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .services-top {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .services-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .empty-state {
+            padding: 60px 30px;
+        }
+
+        .empty-icon {
+            font-size: 3rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .my-service-header h1 {
+            font-size: 1.4rem;
+        }
+
+        .services-section {
+            padding: 20px;
+        }
+
+        .service-card {
+            padding: 16px;
+        }
+
+        .card-header h3 {
+            font-size: 1rem;
+        }
+
+        .empty-state {
+            padding: 50px 20px;
+        }
+    }
 </style>
 
 <?php

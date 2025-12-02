@@ -3,9 +3,12 @@ session_start();
 
 // Check if user is logged in and is a freelancer
 if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'freelancer') {
-    header('Location: login.php');
+    header('Location: ../index.php');
     exit();
 }
+
+// Check if user is deleted
+require_once 'checkUserStatus.php';
 
 $_title = 'Review & Sign Agreement';
 $freelancer_id = $_SESSION['user_id'];

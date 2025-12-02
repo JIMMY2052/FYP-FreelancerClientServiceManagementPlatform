@@ -8,6 +8,9 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'client') {
     exit();
 }
 
+// Check if user is deleted
+require_once './page/checkUserStatus.php';
+
 $_title = 'Dashboard - WorkSnyc Freelancer Platform';
 include '_head.php';
 require_once 'page/config.php';
@@ -121,11 +124,11 @@ $conn->close();
                     $today = new DateTime();
                     $daysLeft = $today->diff($deadline)->days;
                     $isPast = $deadline < $today;
-                    
+
                     // Determine status display
                     $statusClass = 'status-' . strtolower($project['Status']);
                     $statusText = ucfirst($project['Status']);
-                    
+
                     // Mock progress (in real app, calculate from milestones/tasks)
                     $progress = ($project['Status'] === 'available') ? 0 : (($project['Status'] === 'processing') ? 50 : 100);
                     ?>
@@ -247,5 +250,3 @@ $conn->close();
 include '_foot.php';
 
 ?>
-
-

@@ -1,4 +1,4 @@
-<?php 
+<?php
 session_start();
 
 // Only freelancers can answer job questions
@@ -6,6 +6,9 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'freelancer') {
     header('Location: ../login.php');
     exit();
 }
+
+// Check if user is deleted
+require_once '../checkUserStatus.php';
 
 $_title = 'Answer Screening Questions';
 include '../../_head.php';
@@ -20,7 +23,8 @@ if (!$jobID) {
 }
 
 if (!function_exists('getPDOConnection')) {
-    function getPDOConnection(): PDO {
+    function getPDOConnection(): PDO
+    {
         $dsn = 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=utf8mb4';
         $options = [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
@@ -43,11 +47,11 @@ try {
             FROM job j
             INNER JOIN client c ON j.ClientID = c.ClientID
             WHERE j.JobID = :jobID AND j.Status = 'available'";
-    
+
     $stmt = $pdo->prepare($sql);
     $stmt->execute([':jobID' => $jobID]);
     $job = $stmt->fetch();
-    
+
     if (!$job) {
         $_SESSION['error'] = 'Job not found or no longer available.';
         header('Location: browse_job.php');
@@ -70,7 +74,7 @@ try {
     $stmtWallet->execute([':userId' => $freelancerID]);
     $wallet = $stmtWallet->fetch();
     $walletBalance = $wallet ? floatval($wallet['Balance']) : 0;
-    
+
     if ($walletBalance < $jobBudget) {
         $hasInsufficientBalance = true;
     }
@@ -84,11 +88,11 @@ try {
             FROM job_question 
             WHERE JobID = :jobID 
             ORDER BY QuestionID ASC";
-    
+
     $stmt = $pdo->prepare($sql);
     $stmt->execute([':jobID' => $jobID]);
     $questions = $stmt->fetchAll();
-    
+
     // Fetch options for each question
     for ($i = 0; $i < count($questions); $i++) {
         if ($questions[$i]['QuestionType'] === 'multiple_choice') {
@@ -96,7 +100,7 @@ try {
                        FROM job_question_option 
                        WHERE QuestionID = :questionID 
                        ORDER BY DisplayOrder ASC";
-            
+
             $stmtOpt = $pdo->prepare($sqlOpt);
             $stmtOpt->execute([':questionID' => $questions[$i]['QuestionID']]);
             $questions[$i]['options'] = $stmtOpt->fetchAll();
@@ -104,7 +108,6 @@ try {
             $questions[$i]['options'] = [];
         }
     }
-    
 } catch (PDOException $e) {
     error_log('[answer_questions] Questions fetch failed: ' . $e->getMessage());
     $questions = [];
@@ -115,34 +118,36 @@ try {
 <div class="form-container">
     <div class="page-header">
         <h1>Screening Questions</h1>
-        
+
         <?php if (isset($_SESSION['error'])): ?>
-        <div class="alert alert-error">
-            <i class="fas fa-exclamation-circle"></i>
-            <?= htmlspecialchars($_SESSION['error']) ?>
-        </div>
-        <?php unset($_SESSION['error']); endif; ?>
-        
-        <?php if (isset($_SESSION['success'])): ?>
-        <div class="alert alert-success">
-            <i class="fas fa-check-circle"></i>
-            <?= htmlspecialchars($_SESSION['success']) ?>
-        </div>
-        <?php unset($_SESSION['success']); endif; ?>
-        
-        <?php if ($hasInsufficientBalance): ?>
-        <div class="alert alert-warning">
-            <i class="fas fa-exclamation-triangle"></i>
-            <div>
-                <strong>Insufficient Wallet Balance</strong><br>
-                Your current wallet balance (RM <?= number_format($walletBalance, 2) ?>) is less than the job budget (RM <?= number_format($jobBudget, 2) ?>).
-                You need to top up at least RM <?= number_format($jobBudget - $walletBalance, 2) ?> to apply for this job.
-                This security measure protects both parties in case of contract breach.
-                <a href="../payment/wallet.php" style="color: #0066cc; text-decoration: underline; margin-left: 10px;">Top up now</a>
+            <div class="alert alert-error">
+                <i class="fas fa-exclamation-circle"></i>
+                <?= htmlspecialchars($_SESSION['error']) ?>
             </div>
-        </div>
+        <?php unset($_SESSION['error']);
+        endif; ?>
+
+        <?php if (isset($_SESSION['success'])): ?>
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle"></i>
+                <?= htmlspecialchars($_SESSION['success']) ?>
+            </div>
+        <?php unset($_SESSION['success']);
+        endif; ?>
+
+        <?php if ($hasInsufficientBalance): ?>
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div>
+                    <strong>Insufficient Wallet Balance</strong><br>
+                    Your current wallet balance (RM <?= number_format($walletBalance, 2) ?>) is less than the job budget (RM <?= number_format($jobBudget, 2) ?>).
+                    You need to top up at least RM <?= number_format($jobBudget - $walletBalance, 2) ?> to apply for this job.
+                    This security measure protects both parties in case of contract breach.
+                    <a href="../payment/wallet.php" style="color: #0066cc; text-decoration: underline; margin-left: 10px;">Top up now</a>
+                </div>
+            </div>
         <?php endif; ?>
-        
+
         <div class="job-info-banner">
             <div class="job-info-item">
                 <i class="fas fa-briefcase"></i>
@@ -158,110 +163,110 @@ try {
             </div>
         </div>
         <?php if (!empty($questions)): ?>
-        <p class="subtitle">Please answer the following questions to complete your application.</p>
+            <p class="subtitle">Please answer the following questions to complete your application.</p>
         <?php else: ?>
-        <p class="subtitle">No screening questions for this job. You can proceed directly to apply.</p>
+            <p class="subtitle">No screening questions for this job. You can proceed directly to apply.</p>
         <?php endif; ?>
     </div>
 
     <?php if (!empty($questions)): ?>
-    <form method="POST" action="applyJob.php" class="answers-form" id="answersForm">
-        <input type="hidden" name="job_id" value="<?= $jobID ?>">
-        
-        <?php if (!empty($questions)): ?>
-        <!-- Screening Questions Section -->
-        <div class="screening-questions-section">
-            <h3 class="section-title">
-                <i class="fas fa-clipboard-question"></i>
-                Screening Questions
-            </h3>
-        </div>
-        <?php endif; ?>
-        
-        <div class="questions-container">
-            <?php foreach ($questions as $index => $question): ?>
-            <div class="question-card">
-                <div class="question-header">
-                    <span class="question-number">Question <?= $index + 1 ?></span>
-                    <?php if ($question['IsRequired']): ?>
-                    <span class="required-badge">Required</span>
-                    <?php endif; ?>
-                </div>
-                
-                <div class="question-text">
-                    <?= nl2br(htmlspecialchars($question['QuestionText'])) ?>
-                </div>
-                
-                <div class="answer-section">
-                    <?php if ($question['QuestionType'] === 'yes_no'): ?>
-                        <!-- Yes/No Question -->
-                        <div class="radio-group">
-                            <label class="radio-option">
-                                <input type="radio" 
-                                       name="answers[<?= $question['QuestionID'] ?>]" 
-                                       value="yes" 
-                                       <?= $question['IsRequired'] ? 'required' : '' ?>>
-                                <span class="radio-label">Yes</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" 
-                                       name="answers[<?= $question['QuestionID'] ?>]" 
-                                       value="no" 
-                                       <?= $question['IsRequired'] ? 'required' : '' ?>>
-                                <span class="radio-label">No</span>
-                            </label>
-                        </div>
-                    <?php else: ?>
-                        <!-- Multiple Choice Question -->
-                        <div class="radio-group">
-                            <?php foreach ($question['options'] as $option): ?>
-                            <label class="radio-option">
-                                <input type="radio" 
-                                       name="answers[<?= $question['QuestionID'] ?>]" 
-                                       value="<?= $option['OptionID'] ?>" 
-                                       <?= $question['IsRequired'] ? 'required' : '' ?>>
-                                <span class="radio-label"><?= htmlspecialchars($option['OptionText']) ?></span>
-                            </label>
-                            <?php endforeach; ?>
-                        </div>
-                    <?php endif; ?>
-                </div>
-            </div>
-            <?php endforeach; ?>
-        </div>
+        <form method="POST" action="applyJob.php" class="answers-form" id="answersForm">
+            <input type="hidden" name="job_id" value="<?= $jobID ?>">
 
-        <div class="form-buttons">
-            <a href="javascript:history.back()" class="back-btn">
-                <i class="fas fa-arrow-left"></i>
-                Back
-            </a>
-            <button type="submit" class="submit-btn">
-                <i class="fas fa-paper-plane"></i>
-                Submit Application
-            </button>
-        </div>
-    </form>
+            <?php if (!empty($questions)): ?>
+                <!-- Screening Questions Section -->
+                <div class="screening-questions-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-clipboard-question"></i>
+                        Screening Questions
+                    </h3>
+                </div>
+            <?php endif; ?>
+
+            <div class="questions-container">
+                <?php foreach ($questions as $index => $question): ?>
+                    <div class="question-card">
+                        <div class="question-header">
+                            <span class="question-number">Question <?= $index + 1 ?></span>
+                            <?php if ($question['IsRequired']): ?>
+                                <span class="required-badge">Required</span>
+                            <?php endif; ?>
+                        </div>
+
+                        <div class="question-text">
+                            <?= nl2br(htmlspecialchars($question['QuestionText'])) ?>
+                        </div>
+
+                        <div class="answer-section">
+                            <?php if ($question['QuestionType'] === 'yes_no'): ?>
+                                <!-- Yes/No Question -->
+                                <div class="radio-group">
+                                    <label class="radio-option">
+                                        <input type="radio"
+                                            name="answers[<?= $question['QuestionID'] ?>]"
+                                            value="yes"
+                                            <?= $question['IsRequired'] ? 'required' : '' ?>>
+                                        <span class="radio-label">Yes</span>
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio"
+                                            name="answers[<?= $question['QuestionID'] ?>]"
+                                            value="no"
+                                            <?= $question['IsRequired'] ? 'required' : '' ?>>
+                                        <span class="radio-label">No</span>
+                                    </label>
+                                </div>
+                            <?php else: ?>
+                                <!-- Multiple Choice Question -->
+                                <div class="radio-group">
+                                    <?php foreach ($question['options'] as $option): ?>
+                                        <label class="radio-option">
+                                            <input type="radio"
+                                                name="answers[<?= $question['QuestionID'] ?>]"
+                                                value="<?= $option['OptionID'] ?>"
+                                                <?= $question['IsRequired'] ? 'required' : '' ?>>
+                                            <span class="radio-label"><?= htmlspecialchars($option['OptionText']) ?></span>
+                                        </label>
+                                    <?php endforeach; ?>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+
+            <div class="form-buttons">
+                <a href="javascript:history.back()" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                    Back
+                </a>
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-paper-plane"></i>
+                    Submit Application
+                </button>
+            </div>
+        </form>
     <?php else: ?>
-    <!-- No questions, show application form only -->
-    <form method="POST" action="applyJob.php" class="answers-form" id="answersForm">
-        <input type="hidden" name="job_id" value="<?= $jobID ?>">
-        
-        <div class="no-questions-message">
-            <i class="fas fa-info-circle"></i>
-            <p>This job has no screening questions.</p>
-        </div>
-        
-        <div class="form-buttons">
-            <a href="javascript:history.back()" class="back-btn">
-                <i class="fas fa-arrow-left"></i>
-                Back
-            </a>
-            <button type="submit" class="submit-btn">
-                <i class="fas fa-paper-plane"></i>
-                Submit Application
-            </button>
-        </div>
-    </form>
+        <!-- No questions, show application form only -->
+        <form method="POST" action="applyJob.php" class="answers-form" id="answersForm">
+            <input type="hidden" name="job_id" value="<?= $jobID ?>">
+
+            <div class="no-questions-message">
+                <i class="fas fa-info-circle"></i>
+                <p>This job has no screening questions.</p>
+            </div>
+
+            <div class="form-buttons">
+                <a href="javascript:history.back()" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                    Back
+                </a>
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-paper-plane"></i>
+                    Submit Application
+                </button>
+            </div>
+        </form>
     <?php endif; ?>
 </div>
 
@@ -362,7 +367,7 @@ try {
         background: white;
         border-radius: 16px;
         padding: 30px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     }
 
     /* Application Details Section */
@@ -521,7 +526,7 @@ try {
         accent-color: rgb(159, 232, 112);
     }
 
-    .radio-option input[type="radio"]:checked + .radio-label {
+    .radio-option input[type="radio"]:checked+.radio-label {
         color: rgb(159, 232, 112);
         font-weight: 600;
     }
@@ -590,7 +595,7 @@ try {
         border-radius: 16px;
         padding: 60px 30px;
         text-align: center;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         margin-bottom: 20px;
     }
 
@@ -656,43 +661,46 @@ try {
 </style>
 
 <script>
-// Form validation
-document.getElementById('answersForm')?.addEventListener('submit', function(e) {
-    // Validate required screening questions
-    const requiredQuestions = document.querySelectorAll('.question-card:has(.required-badge)');
-    let isValid = true;
-    let errorMessage = '';
-    
-    requiredQuestions.forEach(questionCard => {
-        const radios = questionCard.querySelectorAll('input[type="radio"]');
-        const isAnswered = Array.from(radios).some(radio => radio.checked);
-        
-        if (!isAnswered) {
-            isValid = false;
-            errorMessage += 'Please answer all required screening questions.\\n';
-            questionCard.style.borderColor = '#dc3545';
-            setTimeout(() => {
-                questionCard.style.borderColor = '#e9ecef';
-            }, 2000);
+    // Form validation
+    document.getElementById('answersForm')?.addEventListener('submit', function(e) {
+        // Validate required screening questions
+        const requiredQuestions = document.querySelectorAll('.question-card:has(.required-badge)');
+        let isValid = true;
+        let errorMessage = '';
+
+        requiredQuestions.forEach(questionCard => {
+            const radios = questionCard.querySelectorAll('input[type="radio"]');
+            const isAnswered = Array.from(radios).some(radio => radio.checked);
+
+            if (!isAnswered) {
+                isValid = false;
+                errorMessage += 'Please answer all required screening questions.\\n';
+                questionCard.style.borderColor = '#dc3545';
+                setTimeout(() => {
+                    questionCard.style.borderColor = '#e9ecef';
+                }, 2000);
+            }
+        });
+
+        if (!isValid) {
+            e.preventDefault();
+            alert(errorMessage);
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
         }
     });
-    
-    if (!isValid) {
-        e.preventDefault();
-        alert(errorMessage);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-});
 
-// Reset border color when radio is selected
-document.querySelectorAll('input[type="radio"]').forEach(radio => {
-    radio.addEventListener('change', function() {
-        const questionCard = this.closest('.question-card');
-        questionCard.style.borderColor = '#e9ecef';
+    // Reset border color when radio is selected
+    document.querySelectorAll('input[type="radio"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            const questionCard = this.closest('.question-card');
+            questionCard.style.borderColor = '#e9ecef';
+        });
     });
-});
 </script>
 
-<?php 
-include '../../_foot.php'; 
+<?php
+include '../../_foot.php';
 ?>

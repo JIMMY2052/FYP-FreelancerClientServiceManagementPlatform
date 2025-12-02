@@ -7,6 +7,9 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'freelancer') {
     exit();
 }
 
+// Check if user is deleted
+require_once '../checkUserStatus.php';
+
 $_title = 'Edit Gig';
 include '../../_head.php';
 require_once '../config.php';
@@ -22,7 +25,8 @@ if (!$gigID) {
 }
 
 if (!function_exists('getPDOConnection')) {
-    function getPDOConnection(): PDO {
+    function getPDOConnection(): PDO
+    {
         $dsn = 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=utf8mb4';
         $options = [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
@@ -47,7 +51,7 @@ try {
         ':freelancer_id' => $freelancerID
     ]);
     $gig = $stmt->fetch();
-    
+
     if (!$gig) {
         $_SESSION['error'] = 'Gig not found or you do not have permission to edit it.';
         header('Location: my_gig.php');
@@ -70,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $rushDeliveryPrice = floatval($_POST['rush_delivery_price'] ?? 0);
     $revisionCount = intval($_POST['revision_count'] ?? 0);
     $additionalRevisionPrice = floatval($_POST['additional_revision_price'] ?? 0);
-    
+
     // Validation
     if (empty($title) || empty($description) || $price <= 0 || $deliveryTime <= 0) {
         $_SESSION['error'] = 'Please fill in all required fields.';
@@ -87,7 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 AdditionalRevision = :additional_revision_price,
                 UpdatedAt = NOW()
                 WHERE GigID = :gig_id AND FreelancerID = :freelancer_id");
-            
+
             $stmt->execute([
                 ':title' => $title,
                 ':description' => $description,
@@ -100,7 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':gig_id' => $gigID,
                 ':freelancer_id' => $freelancerID
             ]);
-            
+
             $_SESSION['success'] = 'Gig updated successfully!';
             header('Location: my_gig.php');
             exit();
@@ -121,7 +125,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <h1 class="page-title">Edit Gig</h1>
 
     <div class="form-container">
-        
+
         <?php if (isset($_SESSION['success'])): ?>
             <div class="alert alert-success">
                 <?= htmlspecialchars($_SESSION['success']) ?>
@@ -196,190 +200,190 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </div>
 
 <style>
-.container {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 20px;
-}
+    .container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+    }
 
-.breadcrumb {
-    margin-bottom: 20px;
-}
+    .breadcrumb {
+        margin-bottom: 20px;
+    }
 
-.breadcrumb a {
-    color: #666;
-    text-decoration: none;
-    font-size: 0.9rem;
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    transition: color 0.3s;
-}
+    .breadcrumb a {
+        color: #666;
+        text-decoration: none;
+        font-size: 0.9rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        transition: color 0.3s;
+    }
 
-.breadcrumb a:hover {
-    color: rgb(159, 232, 112);
-}
+    .breadcrumb a:hover {
+        color: rgb(159, 232, 112);
+    }
 
-.page-title {
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: #2c3e50;
-    margin: 20px 0 30px 0;
-}
+    .page-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin: 20px 0 30px 0;
+    }
 
-.form-container {
-    background: white;
-    border-radius: 12px;
-    padding: 40px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-}
-
-.alert {
-    padding: 16px 20px;
-    border-radius: 12px;
-    margin-bottom: 25px;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.alert-success {
-    background: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
-}
-
-.alert-success::before {
-    content: "✓";
-    font-weight: 700;
-    font-size: 1.2rem;
-}
-
-.alert-error {
-    background: #f8d7da;
-    color: #842029;
-    border: 1px solid #f5c2c7;
-}
-
-.alert-error::before {
-    content: "✕";
-    font-weight: 700;
-    font-size: 1.2rem;
-}
-
-.edit-gig-form {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-}
-
-.form-group label {
-    font-weight: 600;
-    color: #2c3e50;
-    margin-bottom: 8px;
-    font-size: 0.95rem;
-}
-
-.form-group input,
-.form-group textarea {
-    padding: 12px 16px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    font-size: 0.95rem;
-    font-family: inherit;
-    transition: all 0.3s ease;
-}
-
-.form-group input:focus,
-.form-group textarea:focus {
-    outline: none;
-    border-color: rgb(159, 232, 112);
-    box-shadow: 0 0 0 3px rgba(159, 232, 112, 0.1);
-}
-
-.form-group textarea {
-    resize: vertical;
-    min-height: 120px;
-}
-
-.form-hint {
-    font-size: 0.85rem;
-    color: #666;
-    margin-top: 5px;
-}
-
-.form-actions {
-    display: flex;
-    gap: 12px;
-    margin-top: 20px;
-    justify-content: flex-end;
-}
-
-.btn-cancel,
-.btn-submit {
-    padding: 14px 32px;
-    border-radius: 12px;
-    font-size: 1rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    border: none;
-    text-decoration: none;
-    display: inline-block;
-}
-
-.btn-cancel {
-    background: #f8f9fa;
-    color: #2c3e50;
-    border: 2px solid #e9ecef;
-}
-
-.btn-cancel:hover {
-    background: #fff;
-    border-color: #ddd;
-}
-
-.btn-submit {
-    background: rgb(159, 232, 112);
-    color: #2c3e50;
-}
-
-.btn-submit:hover {
-    background: rgb(140, 210, 90);
-    box-shadow: 0 4px 12px rgba(159, 232, 112, 0.3);
-    transform: translateY(-2px);
-}
-
-@media (max-width: 768px) {
     .form-container {
-        padding: 25px;
+        background: white;
+        border-radius: 12px;
+        padding: 40px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .alert {
+        padding: 16px 20px;
+        border-radius: 12px;
+        margin-bottom: 25px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .alert-success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .alert-success::before {
+        content: "✓";
+        font-weight: 700;
+        font-size: 1.2rem;
+    }
+
+    .alert-error {
+        background: #f8d7da;
+        color: #842029;
+        border: 1px solid #f5c2c7;
+    }
+
+    .alert-error::before {
+        content: "✕";
+        font-weight: 700;
+        font-size: 1.2rem;
+    }
+
+    .edit-gig-form {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
     }
 
     .form-row {
-        grid-template-columns: 1fr;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+    }
+
+    .form-group input,
+    .form-group textarea {
+        padding: 12px 16px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        font-family: inherit;
+        transition: all 0.3s ease;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: rgb(159, 232, 112);
+        box-shadow: 0 0 0 3px rgba(159, 232, 112, 0.1);
+    }
+
+    .form-group textarea {
+        resize: vertical;
+        min-height: 120px;
+    }
+
+    .form-hint {
+        font-size: 0.85rem;
+        color: #666;
+        margin-top: 5px;
     }
 
     .form-actions {
-        flex-direction: column;
+        display: flex;
+        gap: 12px;
+        margin-top: 20px;
+        justify-content: flex-end;
     }
 
     .btn-cancel,
     .btn-submit {
-        width: 100%;
+        padding: 14px 32px;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: none;
+        text-decoration: none;
+        display: inline-block;
     }
-}
+
+    .btn-cancel {
+        background: #f8f9fa;
+        color: #2c3e50;
+        border: 2px solid #e9ecef;
+    }
+
+    .btn-cancel:hover {
+        background: #fff;
+        border-color: #ddd;
+    }
+
+    .btn-submit {
+        background: rgb(159, 232, 112);
+        color: #2c3e50;
+    }
+
+    .btn-submit:hover {
+        background: rgb(140, 210, 90);
+        box-shadow: 0 4px 12px rgba(159, 232, 112, 0.3);
+        transform: translateY(-2px);
+    }
+
+    @media (max-width: 768px) {
+        .form-container {
+            padding: 25px;
+        }
+
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .btn-cancel,
+        .btn-submit {
+            width: 100%;
+        }
+    }
 </style>
 
 <?php include '../../_foot.php'; ?>

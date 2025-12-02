@@ -7,6 +7,9 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'client') {
     exit();
 }
 
+// Check if user is deleted
+require_once 'checkUserStatus.php';
+
 $_title = 'Review Submitted Work';
 $client_id = $_SESSION['user_id'];
 $submission_id = isset($_GET['submission_id']) ? intval($_GET['submission_id']) : null;
@@ -86,13 +89,13 @@ $conn->close();
         border-radius: 8px;
         font-weight: 500;
     }
-    
+
     .alert-success {
         background: #d4edda;
         border: 1px solid #c3e6cb;
         color: #155724;
     }
-    
+
     .alert-error {
         background: #f8d7da;
         border: 1px solid #f5c6cb;
@@ -543,7 +546,7 @@ $conn->close();
             <div class="files-section">
                 <div class="card">
                     <h3>📎 Submitted Files (<?= count($files) ?>)</h3>
-                    
+
                     <div class="file-list">
                         <?php foreach ($files as $file): ?>
                             <div class="file-item">
@@ -551,11 +554,18 @@ $conn->close();
                                     <div class="file-icon">
                                         <?php
                                         $icons = [
-                                            'zip' => '🗜️', 'rar' => '🗜️',
+                                            'zip' => '🗜️',
+                                            'rar' => '🗜️',
                                             'pdf' => '📄',
-                                            'doc' => '📝', 'docx' => '📝',
-                                            'jpg' => '🖼️', 'jpeg' => '🖼️', 'png' => '🖼️', 'gif' => '🖼️',
-                                            'mp4' => '🎥', 'mov' => '🎥', 'avi' => '🎥'
+                                            'doc' => '📝',
+                                            'docx' => '📝',
+                                            'jpg' => '🖼️',
+                                            'jpeg' => '🖼️',
+                                            'png' => '🖼️',
+                                            'gif' => '🖼️',
+                                            'mp4' => '🎥',
+                                            'mov' => '🎥',
+                                            'avi' => '🎥'
                                         ];
                                         echo $icons[$file['FileType']] ?? '📎';
                                         ?>
@@ -563,7 +573,7 @@ $conn->close();
                                     <div class="file-details">
                                         <div class="file-name"><?= htmlspecialchars($file['OriginalFileName']) ?></div>
                                         <div class="file-meta">
-                                            <?= number_format($file['FileSize'] / 1024, 2) ?> KB • 
+                                            <?= number_format($file['FileSize'] / 1024, 2) ?> KB •
                                             Uploaded <?= date('M j, Y g:i A', strtotime($file['UploadedAt'])) ?>
                                         </div>
                                     </div>
@@ -591,7 +601,7 @@ $conn->close();
                 <h3>🔄 Revisions</h3>
                 <div class="info-item">
                     <div class="info-label">Remaining Revisions</div>
-                    <?php 
+                    <?php
                     $remaining = $submission['RemainingRevisions'];
                     $is_unlimited = ($remaining === null);
                     ?>
@@ -613,7 +623,7 @@ $conn->close();
             <?php if ($submission['Status'] === 'pending_review'): ?>
                 <div class="review-form">
                     <h3>Review Submission</h3>
-                    
+
                     <form id="reviewForm" method="POST" action="review_work_process.php">
                         <input type="hidden" name="submission_id" value="<?= $submission_id ?>">
                         <input type="hidden" name="agreement_id" value="<?= $submission['AgreementID'] ?>">
@@ -622,11 +632,11 @@ $conn->close();
 
                         <div class="form-group">
                             <label class="form-label">Review Notes (Optional)</label>
-                            <textarea name="review_notes" id="reviewNotes" class="form-textarea" 
-                                      placeholder="Add comments about the submission..."></textarea>
+                            <textarea name="review_notes" id="reviewNotes" class="form-textarea"
+                                placeholder="Add comments about the submission..."></textarea>
                         </div>
 
-                        <?php 
+                        <?php
                         $remaining = $submission['RemainingRevisions'];
                         $is_unlimited = ($remaining === null);
                         $can_request_revision = $is_unlimited || $remaining > 0;
@@ -635,8 +645,8 @@ $conn->close();
                             <button type="button" class="btn btn-approve" onclick="submitReview('approve')">
                                 Accept Work
                             </button>
-                            <button type="button" class="btn btn-reject" onclick="submitReview('reject')" 
-                                    <?= !$can_request_revision ? 'disabled' : '' ?>>
+                            <button type="button" class="btn btn-reject" onclick="submitReview('reject')"
+                                <?= !$can_request_revision ? 'disabled' : '' ?>>
                                 Request Revision
                             </button>
                         </div>
@@ -682,41 +692,40 @@ $conn->close();
 </div>
 
 <script>
-function submitReview(action) {
-    const form = document.getElementById('reviewForm');
-    const actionInput = document.getElementById('reviewAction');
-    const reviewNotes = document.getElementById('reviewNotes').value.trim();
-    const remainingRevisions = <?= $submission['RemainingRevisions'] ?? 'null' ?>;
-    const isUnlimited = (remainingRevisions === null);
-    
-    if (action === 'reject') {
-        if (!isUnlimited && remainingRevisions <= 0) {
-            alert('No revisions remaining. You can only accept the work.');
-            return;
-        }
-        
-        if (!reviewNotes) {
-            alert('Please provide review notes when requesting revisions so the freelancer knows what to improve.');
-            document.getElementById('reviewNotes').focus();
-            return;
-        }
-    }
-    
-    let confirmMessage = '';
-    if (action === 'approve') {
-        confirmMessage = 'Are you sure you want to accept this work? The payment will be released to the freelancer.';
-    } else {
-        if (isUnlimited) {
-            confirmMessage = 'Are you sure you want to request revisions? The freelancer will be able to resubmit their work.';
-        } else {
-            confirmMessage = `Are you sure you want to request revisions? You will have ${remainingRevisions - 1} revision(s) remaining after this.`;
-        }
-    }
-    
-    if (confirm(confirmMessage)) {
-        actionInput.value = action;
-        form.submit();
-    }
-}
-</script>
+    function submitReview(action) {
+        const form = document.getElementById('reviewForm');
+        const actionInput = document.getElementById('reviewAction');
+        const reviewNotes = document.getElementById('reviewNotes').value.trim();
+        const remainingRevisions = <?= $submission['RemainingRevisions'] ?? 'null' ?>;
+        const isUnlimited = (remainingRevisions === null);
 
+        if (action === 'reject') {
+            if (!isUnlimited && remainingRevisions <= 0) {
+                alert('No revisions remaining. You can only accept the work.');
+                return;
+            }
+
+            if (!reviewNotes) {
+                alert('Please provide review notes when requesting revisions so the freelancer knows what to improve.');
+                document.getElementById('reviewNotes').focus();
+                return;
+            }
+        }
+
+        let confirmMessage = '';
+        if (action === 'approve') {
+            confirmMessage = 'Are you sure you want to accept this work? The payment will be released to the freelancer.';
+        } else {
+            if (isUnlimited) {
+                confirmMessage = 'Are you sure you want to request revisions? The freelancer will be able to resubmit their work.';
+            } else {
+                confirmMessage = `Are you sure you want to request revisions? You will have ${remainingRevisions - 1} revision(s) remaining after this.`;
+            }
+        }
+
+        if (confirm(confirmMessage)) {
+            actionInput.value = action;
+            form.submit();
+        }
+    }
+</script>
