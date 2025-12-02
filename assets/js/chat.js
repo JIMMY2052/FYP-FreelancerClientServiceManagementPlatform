@@ -279,8 +279,21 @@ class ChatApp {
                 const initials = this.getInitials(chat.name);
                 const time = this.formatTime(chat.lastMessageTime);
 
+                // Create avatar HTML - with profile picture if available
+                let avatarHTML = `<div class="chat-item-avatar">${initials}</div>`;
+                if (chat.profilePicture) {
+                    avatarHTML = `
+                        <div class="chat-item-avatar" style="background-color: transparent; overflow: hidden;">
+                            <img src="/${this.escapeHtml(chat.profilePicture)}" 
+                                 alt="${this.escapeHtml(chat.name)}" 
+                                 style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block;"
+                                 onerror="this.style.display='none'; this.parentElement.textContent='${initials}';">
+                        </div>
+                    `;
+                }
+
                 chatItem.innerHTML = `
-                    <div class="chat-item-avatar">${initials}</div>
+                    ${avatarHTML}
                     <div class="chat-item-content">
                         <h3 class="chat-item-name">${this.escapeHtml(chat.name)}</h3>
                         <p class="chat-item-preview">${this.escapeHtml(chat.lastMessage)}</p>
@@ -339,7 +352,8 @@ class ChatApp {
             headerStatus.textContent = '';
         }
         if (headerAvatar) {
-            headerAvatar.textContent = this.getInitials(chatName);
+            // Fetch and display profile picture
+            this.loadHeaderProfilePicture(headerAvatar, this.currentOtherId, this.currentOtherType, chatName);
         }
 
         // Update active state
@@ -683,6 +697,35 @@ class ChatApp {
     getInitials(name) {
         if (!name) return '?';
         return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    }
+
+    async loadHeaderProfilePicture(headerAvatarElement, userId, userType, userName) {
+        if (!userId || !userType || !headerAvatarElement) return;
+
+        try {
+            const response = await fetch(`../page/get_user_profile.php?user_id=${userId}&user_type=${userType}`);
+            const data = await response.json();
+
+            if (data.success && data.profilePicture) {
+                // Display profile picture
+                const profilePic = data.profilePicture;
+                const imgPath = profilePic.startsWith('/') ? profilePic : '/' + profilePic;
+
+                headerAvatarElement.innerHTML = `
+                    <img src="${this.escapeHtml(imgPath)}" 
+                         alt="${this.escapeHtml(userName)}" 
+                         style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block;"
+                         onerror="this.style.display='none'; this.parentElement.textContent='${this.getInitials(userName)}';">
+                `;
+            } else {
+                // Fallback to initials
+                headerAvatarElement.textContent = this.getInitials(userName);
+            }
+        } catch (error) {
+            console.error('Error loading profile picture:', error);
+            // Fallback to initials
+            headerAvatarElement.textContent = this.getInitials(userName);
+        }
     }
 
     formatTime(dateString) {

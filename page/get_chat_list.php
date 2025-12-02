@@ -26,6 +26,7 @@ if ($user_type === 'freelancer') {
         SELECT 
             c.ClientID as user_id,
             c.CompanyName as name,
+            c.ProfilePicture as profilePicture,
             'client' as user_type,
             conv.ConversationID as conversation_id,
             (SELECT m.Content FROM message m 
@@ -64,6 +65,7 @@ if ($user_type === 'freelancer') {
             'userId' => $row['user_id'],
             'userType' => 'client',
             'name' => $row['name'],
+            'profilePicture' => $row['profilePicture'] ?? null,
             'lastMessage' => $preview ?? 'No messages yet',
             'lastMessageTime' => $row['lastMessageTime'],
             'unreadCount' => 0
@@ -79,6 +81,7 @@ if ($user_type === 'freelancer') {
         SELECT 
             f.FreelancerID as user_id,
             CONCAT(f.FirstName, ' ', f.LastName) as name,
+            f.ProfilePicture as profilePicture,
             'freelancer' as user_type,
             conv.ConversationID as conversation_id,
             (SELECT m.Content FROM message m 
@@ -117,6 +120,7 @@ if ($user_type === 'freelancer') {
             'userId' => $row['user_id'],
             'userType' => 'freelancer',
             'name' => $row['name'],
+            'profilePicture' => $row['profilePicture'] ?? null,
             'lastMessage' => $preview ?? 'No messages yet',
             'lastMessageTime' => $row['lastMessageTime'],
             'unreadCount' => 0
