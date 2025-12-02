@@ -259,7 +259,7 @@ if ($gig_id) {
 
 
 
-                    <?php if (isset($additional_revision_price) && $additional_revision_price > 0): ?>
+                    <?php if (isset($additional_revision_price) && $extra_revisions > 0): ?>
                         <label for="additionalRevisions">Additional Revisions</label>
                         <input type="number" name="additional_revisions" id="additionalRevisions" class="readonly-field" value="<?= $gig_data['AdditionalRevisions'] ?>" readonly>
 
