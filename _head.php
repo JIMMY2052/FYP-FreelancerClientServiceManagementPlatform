@@ -14,6 +14,64 @@ require_once __DIR__ . '/page/config.php';
     <link rel="stylesheet" href="/assets/css/app.css">
     <link rel="stylesheet" href="/assets/css/freelancer.css">
     <link rel="stylesheet" href="/assets/css/client.css">
+    <script>
+        // Global handler to prevent +, -, and e characters in numeric inputs
+        
+        // Reusable function to apply numeric input restrictions
+        function restrictNumericInput(input) {
+            // Prevent typing +, -, and e characters
+            input.addEventListener('keydown', function(e) {
+                // List of keys to block: +, -, e, E
+                const invalidKeys = ['+', '-', 'e', 'E'];
+                
+                if (invalidKeys.includes(e.key)) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+            
+            // Also prevent pasting invalid characters
+            input.addEventListener('paste', function(e) {
+                setTimeout(function() {
+                    // Remove any +, -, or e characters that were pasted
+                    input.value = input.value.replace(/[+\-eE]/g, '');
+                }, 0);
+            });
+        }
+        
+        // Apply to all existing numeric inputs on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const numericInputs = document.querySelectorAll('input[type="number"]');
+            numericInputs.forEach(restrictNumericInput);
+        });
+        
+        // Watch for dynamically added numeric inputs
+        if (typeof MutationObserver !== 'undefined') {
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    mutation.addedNodes.forEach(function(node) {
+                        if (node.nodeType === 1) { // Element node
+                            // Check if the added node itself is a numeric input
+                            if (node.tagName === 'INPUT' && node.type === 'number') {
+                                restrictNumericInput(node);
+                            }
+                            // Check for numeric inputs within the added node
+                            if (node.querySelectorAll) {
+                                const numericInputs = node.querySelectorAll('input[type="number"]');
+                                numericInputs.forEach(restrictNumericInput);
+                            }
+                        }
+                    });
+                });
+            });
+            
+            // Start observing the document body for added nodes
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+        }
+    </script>
 </head>
 
 <body>

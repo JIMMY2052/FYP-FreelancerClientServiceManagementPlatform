@@ -40,7 +40,7 @@ $pdo = getPDOConnection();
 try {
     $sql = "SELECT g.*, 
                    f.FreelancerID, f.FirstName, f.LastName, f.ProfilePicture, 
-                   f.Bio
+                   f.Bio, f.Rating
             FROM gig g
             INNER JOIN freelancer f ON g.FreelancerID = f.FreelancerID
             WHERE g.GigID = :gigID";
@@ -53,6 +53,24 @@ try {
         header('Location: browse_gigs.php');
         exit();
     }
+
+    // Fetch review count for the freelancer
+    $reviewCountSql = "SELECT COUNT(*) as review_count FROM review WHERE FreelancerID = :freelancer_id";
+    $reviewStmt = $pdo->prepare($reviewCountSql);
+    $reviewStmt->execute([':freelancer_id' => $gig['FreelancerID']]);
+    $reviewData = $reviewStmt->fetch();
+    $reviewCount = $reviewData ? intval($reviewData['review_count']) : 0;
+    
+    // Get average rating (from database or default to 0)
+    $averageRating = !empty($gig['Rating']) ? floatval($gig['Rating']) : 0;
+
+    // Count completed orders for this freelancer
+    $orderCountSql = "SELECT COUNT(*) as order_count FROM agreement 
+                      WHERE FreelancerID = :freelancer_id AND Status = 'completed'";
+    $orderStmt = $pdo->prepare($orderCountSql);
+    $orderStmt->execute([':freelancer_id' => $gig['FreelancerID']]);
+    $orderData = $orderStmt->fetch();
+    $orderCount = $orderData ? intval($orderData['order_count']) : 0;
 
     // Parse gallery images and video from new schema columns
     $galleryImages = [];
@@ -130,8 +148,8 @@ $categoryData = [
                     <h1 class="gig-title"><?= htmlspecialchars($gig['Title']) ?></h1>
                     <div class="gig-meta">
                         <div class="gig-meta-item">
-                            <i class="fas fa-star"></i>
-                            <span>0.0 (0 reviews)</span>
+                            <i class="fas fa-star" style="color: <?= $averageRating > 0 ? '#ffc107' : '#ddd' ?>;"></i>
+                            <span><?= number_format($averageRating, 1) ?> (<?= $reviewCount ?> review<?= $reviewCount !== 1 ? 's' : '' ?>)</span>
                         </div>
                         <div class="gig-meta-item">
                             <i class="fas fa-folder"></i>
@@ -270,11 +288,14 @@ $categoryData = [
 
                         <div class="freelancer-stats">
                             <div class="stat-item">
-                                <div class="stat-value">0</div>
-                                <div class="stat-label">Orders</div>
+                                <div class="stat-value"><?= $orderCount ?></div>
+                                <div class="stat-label">Order<?= $orderCount !== 1 ? 's' : '' ?></div>
                             </div>
                             <div class="stat-item">
-                                <div class="stat-value">0.0</div>
+                                <div class="stat-value" style="color: <?= $averageRating > 0 ? '#ffc107' : '#999' ?>;">
+                                    <i class="fas fa-star" style="font-size: 0.8em; margin-right: 2px;"></i>
+                                    <?= number_format($averageRating, 1) ?>
+                                </div>
                                 <div class="stat-label">Rating</div>
                             </div>
                         </div>
@@ -311,6 +332,10 @@ $categoryData = [
                         <span class="order-summary-label">Rush Delivery Fee</span>
                         <span class="order-summary-value" id="rushDeliveryFeeDisplay">+RM0.00</span>
                     </div>
+                    <div id="additionalRevisionSummary" style="display: none;" class="order-summary-item">
+                        <span class="order-summary-label">Additional Revisions</span>
+                        <span class="order-summary-value" id="additionalRevisionFeeDisplay">+RM0.00</span>
+                    </div>
                     <div class="order-summary-item order-total">
                         <span class="order-summary-label">Total Amount</span>
                         <span class="order-summary-value" id="totalAmount">RM<?= number_format($gig['Price'], 2) ?></span>
@@ -337,6 +362,25 @@ $categoryData = [
                     </div>
                 <?php endif; ?>
 
+                <?php if (!empty($gig['AdditionalRevision']) && $gig['AdditionalRevision'] > 0): ?>
+                    <div class="additional-revision-option" id="additionalRevisionOption">
+                        <div class="additional-revision-header">
+                            <div class="additional-revision-title">
+                                <i class="fas fa-redo"></i>
+                                Additional Revisions
+                            </div>
+                            <div class="additional-revision-desc">
+                                <?= htmlspecialchars($gig['RevisionCount']) ?> revision(s) included. Add more for RM<?= number_format($gig['AdditionalRevision'], 2) ?> each.
+                            </div>
+                        </div>
+                        <div class="revision-selector">
+                            <button type="button" class="revision-btn" onclick="decreaseRevisions()">-</button>
+                            <input type="number" id="additionalRevisionCount" value="0" min="0" max="10" readonly class="revision-count">
+                            <button type="button" class="revision-btn" onclick="increaseRevisions()">+</button>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
                 <div class="modal-actions">
                     <button class="modal-btn modal-btn-secondary" onclick="closeOrderModal()">Cancel</button>
                     <button class="modal-btn modal-btn-primary" onclick="confirmOrder()">Confirm Order</button>
@@ -351,6 +395,8 @@ $categoryData = [
         const gigPrice = <?= $gig['Price'] ?>;
         const rushDeliveryPrice = <?= !empty($gig['RushDeliveryPrice']) ? $gig['RushDeliveryPrice'] : 0 ?>;
         const rushDeliveryDays = <?= !empty($gig['RushDelivery']) ? $gig['RushDelivery'] : 0 ?>;
+        const additionalRevisionPrice = <?= !empty($gig['AdditionalRevision']) ? $gig['AdditionalRevision'] : 0 ?>;
+        const includedRevisions = <?= !empty($gig['RevisionCount']) ? $gig['RevisionCount'] : 0 ?>;
 
         // Modal functions
         function openOrderModal() {
@@ -381,28 +427,81 @@ $categoryData = [
             const checkbox = document.getElementById('rushDeliveryCheckbox');
             const option = document.getElementById('rushDeliveryOption');
             const rushSummary = document.getElementById('rushDeliverySummary');
-            const totalAmountEl = document.getElementById('totalAmount');
             const rushFeeDisplay = document.getElementById('rushDeliveryFeeDisplay');
 
             if (checkbox.checked) {
                 option.classList.add('selected');
                 rushSummary.style.display = 'flex';
                 rushFeeDisplay.textContent = '+RM' + rushDeliveryPrice.toFixed(2);
-                const total = gigPrice + rushDeliveryPrice;
-                totalAmountEl.textContent = 'RM' + total.toFixed(2);
             } else {
                 option.classList.remove('selected');
                 rushSummary.style.display = 'none';
-                totalAmountEl.textContent = 'RM' + gigPrice.toFixed(2);
             }
+            updateTotalAmount();
+        }
+
+        // Revision selector functions
+        function increaseRevisions() {
+            const input = document.getElementById('additionalRevisionCount');
+            const currentValue = parseInt(input.value) || 0;
+            if (currentValue < 10) {
+                input.value = currentValue + 1;
+                updateTotalAmount();
+            }
+        }
+
+        function decreaseRevisions() {
+            const input = document.getElementById('additionalRevisionCount');
+            const currentValue = parseInt(input.value) || 0;
+            if (currentValue > 0) {
+                input.value = currentValue - 1;
+                updateTotalAmount();
+            }
+        }
+
+        // Update total amount calculation
+        function updateTotalAmount() {
+            const totalAmountEl = document.getElementById('totalAmount');
+            const additionalRevisionSummary = document.getElementById('additionalRevisionSummary');
+            const additionalRevisionFeeDisplay = document.getElementById('additionalRevisionFeeDisplay');
+            
+            let total = gigPrice;
+            
+            // Add rush delivery if selected
+            const rushCheckbox = document.getElementById('rushDeliveryCheckbox');
+            if (rushCheckbox && rushCheckbox.checked) {
+                total += rushDeliveryPrice;
+            }
+            
+            // Add additional revisions
+            const revisionInput = document.getElementById('additionalRevisionCount');
+            if (revisionInput) {
+                const revisionCount = parseInt(revisionInput.value) || 0;
+                const revisionFee = revisionCount * additionalRevisionPrice;
+                
+                if (revisionCount > 0) {
+                    additionalRevisionSummary.style.display = 'flex';
+                    additionalRevisionFeeDisplay.textContent = '+RM' + revisionFee.toFixed(2) + ' (' + revisionCount + ' × RM' + additionalRevisionPrice.toFixed(2) + ')';
+                    total += revisionFee;
+                } else {
+                    additionalRevisionSummary.style.display = 'none';
+                }
+            }
+            
+            totalAmountEl.textContent = 'RM' + total.toFixed(2);
         }
 
         // Confirm order
         function confirmOrder() {
             const rushDeliveryEnabled = document.getElementById('rushDeliveryCheckbox')?.checked || false;
+            const additionalRevisions = parseInt(document.getElementById('additionalRevisionCount')?.value || 0);
 
             // Redirect to payment details page
-            window.location.href = '../payment/payment_details.php?gig_id=<?= $gig['GigID'] ?>&rush=' + (rushDeliveryEnabled ? '1' : '0');
+            let url = '../payment/payment_details.php?gig_id=<?= $gig['GigID'] ?>&rush=' + (rushDeliveryEnabled ? '1' : '0');
+            if (additionalRevisions > 0) {
+                url += '&extra_revisions=' + additionalRevisions;
+            }
+            window.location.href = url;
         }
 
         // Gallery navigation

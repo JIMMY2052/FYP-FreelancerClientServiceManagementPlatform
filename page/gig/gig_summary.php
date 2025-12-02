@@ -45,6 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $deliveryDays = intval($_POST['deliveryDays'] ?? 0);
     $standardDays = intval($_POST['standardDays'] ?? 0);
     $rushDeliveryDays = trim($_POST['rushDeliveryDays'] ?? '');
+    $rushDeliveryPrice = isset($_POST['rushDeliveryPrice']) ? floatval($_POST['rushDeliveryPrice']) : 0;
     $revisions = trim($_POST['revisions'] ?? '');
     $additionalRevisionPrice = isset($_POST['additionalRevisionPrice']) ? floatval($_POST['additionalRevisionPrice']) : 0;
     $gigDescription = trim($_POST['gigDescription'] ?? '');
@@ -86,11 +87,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $status = 'active';
         $createdAt = date('Y-m-d H:i:s');
         $rushDeliveryValue = ($rushDeliveryDays !== '') ? intval($rushDeliveryDays) : null;
+        $rushDeliveryPriceValue = ($rushDeliveryPrice > 0) ? intval($rushDeliveryPrice) : null;
         $additionalRevisionValue = ($additionalRevisionPrice !== '' && $additionalRevisionPrice !== null) ? intval($additionalRevisionPrice) : 0;
         $priceValue = intval($price);
 
         try {
-            $stmt = $pdo->prepare("INSERT INTO gig (FreelancerID, Title, Category, Subcategory, SearchTags, Description, Price, DeliveryTime, RushDelivery, AdditionalRevision, RevisionCount, Image1Path, Image2Path, Image3Path, VideoPath, Status, CreatedAt, UpdatedAt) VALUES (:freelancer_id, :title, :category, :subcategory, :search_tags, :description, :price, :delivery_time, :rush_delivery, :additional_revision, :revision_count, :image1_path, :image2_path, :image3_path, :video_path, :status, :created_at, :updated_at)");
+            $stmt = $pdo->prepare("INSERT INTO gig (FreelancerID, Title, Category, Subcategory, SearchTags, Description, Price, DeliveryTime, RushDelivery, RushDeliveryPrice, AdditionalRevision, RevisionCount, Image1Path, Image2Path, Image3Path, VideoPath, Status, CreatedAt, UpdatedAt) VALUES (:freelancer_id, :title, :category, :subcategory, :search_tags, :description, :price, :delivery_time, :rush_delivery, :rush_delivery_price, :additional_revision, :revision_count, :image1_path, :image2_path, :image3_path, :video_path, :status, :created_at, :updated_at)");
             $stmt->execute([
                 ':freelancer_id' => $freelancerID,
                 ':title' => $gigTitle,
@@ -101,6 +103,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':price' => $priceValue,
                 ':delivery_time' => $deliveryTime,
                 ':rush_delivery' => $rushDeliveryValue,
+                ':rush_delivery_price' => $rushDeliveryPriceValue,
                 ':additional_revision' => $additionalRevisionValue,
                 ':revision_count' => $revisionCount,
                 ':image1_path' => $image1Path,
@@ -520,6 +523,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <input type="hidden" name="deliveryDays" id="inputDeliveryDays">
             <input type="hidden" name="standardDays" id="inputStandardDays">
             <input type="hidden" name="rushDeliveryDays" id="inputRushDeliveryDays">
+            <input type="hidden" name="rushDeliveryPrice" id="inputRushDeliveryPrice">
             <input type="hidden" name="revisions" id="inputRevisions">
             <input type="hidden" name="additionalRevisionPrice" id="inputAdditionalRevisionPrice">
             <input type="hidden" name="gigDescription" id="inputGigDescription">
@@ -592,6 +596,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         const deliveryDays = pricing.deliveryDays || '';
         const standardDays = pricing.standardDays || '';
         const rushDays = pricing.rushDeliveryDays || '';
+        const rushPrice = parseInt(pricing.rushDeliveryPrice || 0, 10);
         const revisions = pricing.revisions || '';
         const additionalRevisionPrice = parseInt(pricing.additionalRevisionPrice || 0, 10);
         const descriptionText = description.description || '';
@@ -604,7 +609,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         document.getElementById('summaryPrice').textContent = `MYR ${price}`;
         document.getElementById('summaryDeliveryTime').textContent = deliveryDays || standardDays || '-';
         document.getElementById('summaryRevisionsIncluded').textContent = revisions ? (revisions === 'unlimited' ? 'Unlimited' : revisions) : '-';
-        document.getElementById('summaryRushDelivery').textContent = rushDays ? `${rushDays} day(s)` : 'Not available';
+        document.getElementById('summaryRushDelivery').textContent = rushDays ? (rushPrice > 0 ? `${rushDays} day(s) (+MYR ${rushPrice})` : `${rushDays} day(s)`) : 'Not available';
         document.getElementById('summaryAdditionalRevision').textContent = additionalRevisionPrice ? `MYR ${additionalRevisionPrice}` : 'Not set';
         document.getElementById('summaryDescription').textContent = descriptionText || 'No description provided yet.';
 
@@ -616,6 +621,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         document.getElementById('inputDeliveryDays').value = deliveryDays || '';
         document.getElementById('inputStandardDays').value = standardDays || '';
         document.getElementById('inputRushDeliveryDays').value = rushDays || '';
+        document.getElementById('inputRushDeliveryPrice').value = rushPrice || '';
         document.getElementById('inputRevisions').value = revisions || '';
         document.getElementById('inputAdditionalRevisionPrice').value = additionalRevisionPrice || '';
         document.getElementById('inputGigDescription').value = descriptionText || '';
