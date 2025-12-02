@@ -100,7 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Use the gig's revision count
         $gig_revisions = intval($gig['RevisionCount']);
         $agreement_stmt->bind_param(
-            'iissssdisissssi',
+            'iissssdissssssi',
             $freelancer_id,
             $client_id,
             $client_name,

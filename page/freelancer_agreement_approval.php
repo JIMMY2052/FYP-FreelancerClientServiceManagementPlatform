@@ -373,6 +373,141 @@ $conn->close();
         }
     }
 
+    /* Confirmation Modal Styles */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(4px);
+        z-index: 9999;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .modal-overlay.active {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-content {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        max-width: 500px;
+        width: 90%;
+        padding: 40px;
+        text-align: center;
+        animation: slideUp 0.3s ease;
+    }
+
+    .modal-icon {
+        font-size: 48px;
+        margin-bottom: 20px;
+    }
+
+    .modal-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 15px;
+    }
+
+    .modal-message {
+        font-size: 15px;
+        color: #555;
+        line-height: 1.6;
+        margin-bottom: 10px;
+    }
+
+    .modal-warning {
+        background: #fff3cd;
+        border-left: 4px solid #ffc107;
+        padding: 12px;
+        border-radius: 6px;
+        margin: 20px 0;
+        text-align: left;
+        font-size: 14px;
+        color: #856404;
+    }
+
+    .modal-warning strong {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 15px;
+    }
+
+    .modal-warning ul {
+        margin: 0;
+        padding-left: 20px;
+    }
+
+    .modal-warning li {
+        margin-bottom: 6px;
+    }
+
+    .modal-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 30px;
+    }
+
+    .modal-btn {
+        flex: 1;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 6px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .modal-btn-confirm {
+        background: #1ab394;
+        color: white;
+    }
+
+    .modal-btn-confirm:hover {
+        background: #158a74;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(26, 179, 148, 0.3);
+    }
+
+    .modal-btn-cancel {
+        background: #e9ecef;
+        color: #2c3e50;
+    }
+
+    .modal-btn-cancel:hover {
+        background: #dee2e6;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    @keyframes slideUp {
+        from {
+            transform: translateY(30px);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
     @media (max-width: 768px) {
         .agreement-details {
             grid-template-columns: 1fr;
@@ -503,7 +638,7 @@ $conn->close();
                     <input type="hidden" id="signatureData" name="signature_data" value="">
 
                     <div style="display: flex; gap: 10px;">
-                        <button type="submit" class="btn btn-primary" onclick="return captureSignature()">
+                        <button type="button" class="btn btn-primary" onclick="showConfirmationModal()">
                             <i class="fas fa-check-circle"></i> Sign & Submit Agreement
                         </button>
                         <a href="agreementListing.php" class="btn btn-secondary">
@@ -536,6 +671,40 @@ $conn->close();
                 </div>
             </div>
         <?php endif; ?>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmationModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-icon">⚠️</div>
+            <div class="modal-title">Confirm Agreement Submission</div>
+            <div class="modal-message">
+                You are about to sign this agreement. Please read the following carefully:
+            </div>
+
+            <div class="modal-warning">
+                <strong>📌 Important Terms:</strong>
+                <ul>
+                    <li><strong>Active Agreement:</strong> Once you sign, the agreement becomes active and binding</li>
+                    <li><strong>Termination Penalty:</strong> If you wish to terminate before completion, you may be required to refund the payment to the client</li>
+                    <li><strong>Payment Locked:</strong> Client's payment is held in escrow and will be released upon successful delivery</li>
+                    <li><strong>Commitment:</strong> You are committing to deliver as per the agreed timeline and specifications</li>
+                </ul>
+            </div>
+
+            <div class="modal-message" style="font-weight: 600; color: #dc3545;">
+                Do you understand and agree to proceed with signing this agreement?
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="modal-btn modal-btn-confirm" onclick="proceedWithSignature()">
+                    Yes, I Agree & Sign
+                </button>
+                <button type="button" class="modal-btn modal-btn-cancel" onclick="closeConfirmationModal()">
+                    Cancel
+                </button>
+            </div>
+        </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -630,6 +799,42 @@ $conn->close();
             document.getElementById('signatureData').value = signatureImage;
             return true;
         }
+
+        // Modal Functions
+        function showConfirmationModal() {
+            if (!hasSignature) {
+                alert('Please sign before submitting the agreement');
+                return false;
+            }
+            document.getElementById('confirmationModal').classList.add('active');
+        }
+
+        function closeConfirmationModal() {
+            document.getElementById('confirmationModal').classList.remove('active');
+        }
+
+        function proceedWithSignature() {
+            // Capture signature data
+            const signatureImage = canvas.toDataURL('image/png');
+            document.getElementById('signatureData').value = signatureImage;
+
+            // Submit the form
+            document.getElementById('signatureForm').submit();
+        }
+
+        // Close modal when clicking outside of it
+        document.getElementById('confirmationModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeConfirmationModal();
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeConfirmationModal();
+            }
+        });
     </script>
 
     </body>
