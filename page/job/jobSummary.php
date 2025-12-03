@@ -37,9 +37,6 @@ include '../../_head.php';
         <input type="text" value="<?php echo htmlspecialchars($deliveryTime); ?>" disabled>
         <input type="hidden" name="deliveryTime" value="<?php echo htmlspecialchars($deliveryTime); ?>">
 
-        <p>Looking At</p>
-        <input type="text" value="<?php echo htmlspecialchars($professionalField); ?>" disabled>
-
         <p>Posting Date</p>
         <input type="text" value="<?php echo htmlspecialchars($postDate); ?>" disabled>
         <input type="hidden" name="postDate" value="<?php echo htmlspecialchars($postDate); ?>">
