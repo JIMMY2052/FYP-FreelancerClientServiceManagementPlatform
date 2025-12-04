@@ -16,20 +16,20 @@ require_once __DIR__ . '/page/config.php';
     <link rel="stylesheet" href="/assets/css/client.css">
     <script>
         // Global handler to prevent +, -, and e characters in numeric inputs
-        
+
         // Reusable function to apply numeric input restrictions
         function restrictNumericInput(input) {
             // Prevent typing +, -, and e characters
             input.addEventListener('keydown', function(e) {
                 // List of keys to block: +, -, e, E
                 const invalidKeys = ['+', '-', 'e', 'E'];
-                
+
                 if (invalidKeys.includes(e.key)) {
                     e.preventDefault();
                     return false;
                 }
             });
-            
+
             // Also prevent pasting invalid characters
             input.addEventListener('paste', function(e) {
                 setTimeout(function() {
@@ -38,13 +38,13 @@ require_once __DIR__ . '/page/config.php';
                 }, 0);
             });
         }
-        
+
         // Apply to all existing numeric inputs on page load
         document.addEventListener('DOMContentLoaded', function() {
             const numericInputs = document.querySelectorAll('input[type="number"]');
             numericInputs.forEach(restrictNumericInput);
         });
-        
+
         // Watch for dynamically added numeric inputs
         if (typeof MutationObserver !== 'undefined') {
             const observer = new MutationObserver(function(mutations) {
@@ -64,7 +64,7 @@ require_once __DIR__ . '/page/config.php';
                     });
                 });
             });
-            
+
             // Start observing the document body for added nodes
             observer.observe(document.body, {
                 childList: true,
@@ -94,8 +94,6 @@ require_once __DIR__ . '/page/config.php';
             </div>
             <nav class="header-nav">
                 <?php if (isset($_SESSION['user_id']) && isset($_SESSION['user_type'])): ?>
-                    <!-- Show profile and notification when logged in -->
-                    <span class="notification-icon">🔔</span>
                     <div class="profile-dropdown">
                         <div class="profile-avatar" style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #16a34a, #15803d); display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; cursor: pointer; overflow: hidden; flex-shrink: 0;">
                             <?php
