@@ -13,11 +13,15 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_type'])) {
 // Get form data and error from session
 $hasError = isset($_SESSION['error']);
 $error_message = $_SESSION['error'] ?? '';
+$fieldErrors = $_SESSION['errors'] ?? [];
 $form_data = $_SESSION['form_data'] ?? ['email' => '', 'user_type' => 'freelancer'];
 
 // Clear session variables after retrieving them
 if ($hasError) {
     unset($_SESSION['error']);
+}
+if (isset($_SESSION['errors'])) {
+    unset($_SESSION['errors']);
 }
 if (isset($_SESSION['form_data'])) {
     unset($_SESSION['form_data']);
@@ -123,10 +127,13 @@ if (isset($_SESSION['form_data'])) {
                         type="email"
                         id="email"
                         name="email"
-                        class="form-control<?php echo $hasError ? ' error' : ''; ?>"
+                        class="form-control<?php echo isset($fieldErrors['email']) ? ' error' : ''; ?>"
                         placeholder="Enter your email"
                         value="<?php echo htmlspecialchars($form_data['email']); ?>"
                         required>
+                    <?php if (isset($fieldErrors['email'])): ?>
+                        <small class="field-error"><?php echo htmlspecialchars($fieldErrors['email']); ?></small>
+                    <?php endif; ?>
                 </div>
 
                 <div class="form-group">
@@ -135,9 +142,12 @@ if (isset($_SESSION['form_data'])) {
                         type="password"
                         id="password"
                         name="password"
-                        class="form-control<?php echo $hasError ? ' error' : ''; ?>"
+                        class="form-control<?php echo isset($fieldErrors['password']) ? ' error' : ''; ?>"
                         placeholder="Enter your password"
                         required>
+                    <?php if (isset($fieldErrors['password'])): ?>
+                        <small class="field-error"><?php echo htmlspecialchars($fieldErrors['password']); ?></small>
+                    <?php endif; ?>
                 </div>
 
                 <div class="form-options">

@@ -7,9 +7,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['password'] ?? '';
     $remember_me = isset($_POST['remember_me']);
 
-    // Validate input
-    if (empty($user_type) || empty($email) || empty($password)) {
-        $_SESSION['error'] = 'Please fill in all fields.';
+    // Validate input with field-specific errors
+    $errors = [];
+    if (empty($user_type)) {
+        $errors['user_type'] = 'Please select a user type.';
+    }
+    if (empty($email)) {
+        $errors['email'] = 'Please enter your email.';
+    }
+    if (empty($password)) {
+        $errors['password'] = 'Please enter your password.';
+    }
+
+    if (!empty($errors)) {
+        $_SESSION['errors'] = $errors;
         $_SESSION['form_data'] = ['email' => $email, 'user_type' => $user_type];
         header('Location: login.php');
         exit();

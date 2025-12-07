@@ -16,6 +16,7 @@ $hasError = isset($_SESSION['error']);
 $error_message = $_SESSION['error'] ?? '';
 $hasSuccess = isset($_SESSION['success']);
 $success_message = $_SESSION['success'] ?? '';
+$fieldErrors = $_SESSION['errors'] ?? [];
 $form_data = $_SESSION['form_data'] ?? [
     'user_type' => 'freelancer',
     'email' => '',
@@ -31,6 +32,9 @@ if ($hasError) {
 if ($hasSuccess) {
     unset($_SESSION['success']);
 }
+if (isset($_SESSION['errors'])) {
+    unset($_SESSION['errors']);
+}
 if (isset($_SESSION['form_data'])) {
     unset($_SESSION['form_data']);
 }
@@ -43,56 +47,7 @@ if (isset($_SESSION['form_data'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up - WorkSnyc</title>
     <link rel="stylesheet" href="/assets/css/style.css">
-    <style>
-        .role-selection {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 30px;
-            justify-content: center;
-        }
-
-        .role-option {
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-        }
-
-        .role-input {
-            display: none;
-        }
-
-        .role-button {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px 40px;
-            border: 2px solid #e5e7eb;
-            border-radius: 12px;
-            background-color: #ffffff;
-            transition: all 0.3s ease;
-            min-width: 150px;
-            gap: 10px;
-        }
-
-        .role-input:checked+.role-button {
-            border-color: #22c55e;
-            background-color: #f0fde8;
-            box-shadow: 0 4px 15px rgba(34, 197, 94, 0.2);
-        }
-
-        .role-option:hover .role-button {
-            border-color: #16a34a;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        .role-label {
-            font-weight: 600;
-            color: #1f2937;
-            font-size: 16px;
-        }
-    </style>
+    <link rel="stylesheet" href="/assets/css/signup.css">
     <script src="/assets/js/signup.js" defer></script>
 </head>
 
@@ -106,18 +61,21 @@ if (isset($_SESSION['form_data'])) {
             <h2 class="welcome-text">Create Account</h2>
             <p class="subtitle">Sign up to get started</p>
 
+            <?php if ($hasSuccess): ?>
+                <div class="signup-success-modal" id="signupSuccessModal">
+                    <div class="signup-success-content">
+                        <div class="signup-success-title">Account Created</div>
+                        <div class="signup-success-text"><?php echo htmlspecialchars($success_message); ?></div>
+                        <button type="button" class="signup-success-button" onclick="window.location.href='login.php'">Go to Sign In</button>
+                    </div>
+                </div>
+            <?php endif; ?>
+
             <form action="signup_process.php" method="POST" class="login-form">
                 <?php if ($hasError): ?>
                     <div class="error-message">
                         <strong>⚠️ Sign Up Failed</strong><br>
                         <?php echo htmlspecialchars($error_message); ?>
-                    </div>
-                <?php endif; ?>
-
-                <?php if ($hasSuccess): ?>
-                    <div class="success-message">
-                        <strong>✓ Success!</strong><br>
-                        <?php echo htmlspecialchars($success_message); ?>
                     </div>
                 <?php endif; ?>
 
@@ -142,19 +100,31 @@ if (isset($_SESSION['form_data'])) {
                 <div id="freelancer-fields">
                     <div class="form-group">
                         <label for="first_name">First Name</label>
-                        <input type="text" id="first_name" name="first_name" class="form-control<?php echo $hasError ? ' error' : ''; ?>" placeholder="Enter your first name" value="<?php echo htmlspecialchars($form_data['first_name']); ?>">
+                        <input type="text" id="first_name" name="first_name" class="form-control<?php echo isset($fieldErrors['first_name']) ? ' error' : ''; ?>" placeholder="Enter your first name" value="<?php echo htmlspecialchars($form_data['first_name']); ?>">
+                        <?php if (isset($fieldErrors['first_name'])): ?>
+                            <small class="field-error"><?php echo htmlspecialchars($fieldErrors['first_name']); ?></small>
+                        <?php endif; ?>
                     </div>
 
                     <div class="form-group">
                         <label for="last_name">Last Name</label>
-                        <input type="text" id="last_name" name="last_name" class="form-control<?php echo $hasError ? ' error' : ''; ?>" placeholder="Enter your last name" value="<?php echo htmlspecialchars($form_data['last_name']); ?>">
+                        <input type="text" id="last_name" name="last_name" class="form-control<?php echo isset($fieldErrors['last_name']) ? ' error' : ''; ?>" placeholder="Enter your last name" value="<?php echo htmlspecialchars($form_data['last_name']); ?>">
+                        <?php if (isset($fieldErrors['last_name'])): ?>
+                            <small class="field-error"><?php echo htmlspecialchars($fieldErrors['last_name']); ?></small>
+                        <?php endif; ?>
                     </div>
                 </div>
 
                 <div id="client-fields" class="hidden">
                     <div class="form-group">
                         <label for="company_name">Company Name</label>
-                        <input type="text" id="company_name" name="company_name" class="form-control<?php echo $hasError ? ' error' : ''; ?>" placeholder="Enter your company name" value="<?php echo htmlspecialchars($form_data['company_name']); ?>">
+                        <?php
+                        $isClient = $form_data['user_type'] === 'client';
+                        ?>
+                        <input type="text" id="company_name" name="company_name" class="form-control<?php echo ($isClient && isset($fieldErrors['company_name'])) ? ' error' : ''; ?>" placeholder="Enter your company name" value="<?php echo htmlspecialchars($form_data['company_name']); ?>">
+                        <?php if ($isClient && isset($fieldErrors['company_name'])): ?>
+                            <small class="field-error"><?php echo htmlspecialchars($fieldErrors['company_name']); ?></small>
+                        <?php endif; ?>
                     </div>
                 </div>
 
@@ -164,10 +134,13 @@ if (isset($_SESSION['form_data'])) {
                         type="email"
                         id="email"
                         name="email"
-                        class="form-control<?php echo $hasError ? ' error' : ''; ?>"
+                        class="form-control<?php echo isset($fieldErrors['email']) ? ' error' : ''; ?>"
                         placeholder="Enter your email"
                         value="<?php echo htmlspecialchars($form_data['email']); ?>"
                         required>
+                    <?php if (isset($fieldErrors['email'])): ?>
+                        <small class="field-error"><?php echo htmlspecialchars($fieldErrors['email']); ?></small>
+                    <?php endif; ?>
                 </div>
 
                 <div class="form-group">
@@ -177,9 +150,12 @@ if (isset($_SESSION['form_data'])) {
                         type="password"
                         id="password"
                         name="password"
-                        class="form-control<?php echo $hasError ? ' error' : ''; ?>"
+                        class="form-control<?php echo isset($fieldErrors['password']) ? ' error' : ''; ?>"
                         placeholder="Create a password"
                         required>
+                    <?php if (isset($fieldErrors['password'])): ?>
+                        <small class="field-error"><?php echo htmlspecialchars($fieldErrors['password']); ?></small>
+                    <?php endif; ?>
                 </div>
 
                 <div class="form-group">
@@ -188,9 +164,12 @@ if (isset($_SESSION['form_data'])) {
                         type="password"
                         id="confirm_password"
                         name="confirm_password"
-                        class="form-control<?php echo $hasError ? ' error' : ''; ?>"
+                        class="form-control<?php echo isset($fieldErrors['confirm_password']) ? ' error' : ''; ?>"
                         placeholder="Confirm your password"
                         required>
+                    <?php if (isset($fieldErrors['confirm_password'])): ?>
+                        <small class="field-error"><?php echo htmlspecialchars($fieldErrors['confirm_password']); ?></small>
+                    <?php endif; ?>
                 </div>
 
                 <button type="submit" class="btn-signin">Sign up</button>

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 01, 2025 at 01:39 PM
+-- Generation Time: Dec 07, 2025 at 09:10 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 SET
@@ -120,20 +120,20 @@ INSERT INTO
   )
 VALUES
   (
-    47,
+    72,
     1,
     2,
-    '2025-11-30 12:03:34',
+    '2025-12-07 07:49:21',
     NULL,
-    '2025-12-05',
-    '/uploads/agreements/agreement_47.pdf',
-    '2025-11-30 20:03:34',
-    '/uploads/agreements/signature_c2_a47_1764504214.png',
-    '2025-11-30 20:03:42',
-    '2025-12-01 20:03:34',
-    '/uploads/agreements/signature_f1_a47_1764504222.png',
+    '2025-12-12',
+    '/uploads/agreements/agreement_72.pdf',
+    '2025-12-07 15:49:21',
+    '/uploads/agreements/signature_c2_a72_1765093761.png',
+    '2025-12-07 15:53:13',
+    '2025-12-08 15:49:21',
+    '/uploads/agreements/signature_f1_a72_1765093993.png',
     '• The freelancer will deliver the gig-based service as described within 5 day(s).\n• The client will pay RM 50.00 which is held in escrow.\n• Payment will be released upon successful delivery and client approval.\n• The service includes 1 revision(s).\n• Both parties agree to maintain professional conduct throughout the engagement.',
-    'disputed',
+    'ongoing',
     'asdf',
     'Gig-based service: asdf',
     5,
@@ -161,7 +161,9 @@ CREATE TABLE
     `Status` varchar(50) DEFAULT NULL,
     `Address` text DEFAULT NULL,
     `JoinedDate` timestamp NOT NULL DEFAULT current_timestamp(),
-    `isDelete` tinyint (1) DEFAULT 0
+    `isDelete` tinyint (1) DEFAULT 0,
+    `FailedLoginAttempts` int (11) NOT NULL DEFAULT 0,
+    `LastFailedLoginAt` datetime DEFAULT NULL
   ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
 
 --
@@ -179,7 +181,9 @@ INSERT INTO
     `Status`,
     `Address`,
     `JoinedDate`,
-    `isDelete`
+    `isDelete`,
+    `FailedLoginAttempts`,
+    `LastFailedLoginAt`
   )
 VALUES
   (
@@ -193,7 +197,9 @@ VALUES
     'active',
     NULL,
     '2025-11-20 15:15:48',
-    0
+    0,
+    0,
+    NULL
   ),
   (
     2,
@@ -201,12 +207,14 @@ VALUES
     '',
     'genting@gmail.com',
     '$2y$10$D1ON60Z0DruTc8tASwybi.VX6wu0nIPxZURmUDSrFEf6ZWb9c7Gv6',
-    '',
-    NULL,
+    '0185709586',
+    'uploads/profile_pictures/client_2_1764598184.png',
     'active',
-    '',
+    'NO 341, JALAN ZAMRUD 2, BATU LIMA',
     '2025-11-20 15:15:48',
-    0
+    0,
+    0,
+    NULL
   ),
   (
     3,
@@ -219,7 +227,24 @@ VALUES
     'active',
     NULL,
     '2025-11-20 15:15:48',
-    0
+    0,
+    0,
+    NULL
+  ),
+  (
+    4,
+    'Your **257-character** text:  ``` Generating text of a specific character length is a simple task for an AI. I am precisely crafting this response to meet your strict requirement of 257 characters, including all spaces and punctuation. This constraint dem',
+    NULL,
+    'asdfasdf@gmail.com',
+    '$2y$10$WDwb9dBBsmo1nRgvjIR/QO1VtMVBpL4l9D5oLEHZrM.FsuzD31CSC',
+    NULL,
+    NULL,
+    'active',
+    NULL,
+    '2025-12-07 08:06:13',
+    0,
+    0,
+    NULL
   );
 
 -- --------------------------------------------------------
@@ -264,7 +289,7 @@ VALUES
     1,
     'freelancer',
     '2025-11-29 14:36:24',
-    NULL,
+    '2025-12-02 06:26:16',
     'active',
     NULL
   );
@@ -293,40 +318,6 @@ CREATE TABLE
     `ResolvedAt` timestamp NULL DEFAULT NULL COMMENT 'When dispute was resolved',
     `ResolvedByAdminID` int (11) DEFAULT NULL COMMENT 'Admin who resolved dispute'
   ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = 'Tracks disputes filed on agreements';
-
---
--- Dumping data for table `dispute`
---
-INSERT INTO
-  `dispute` (
-    `DisputeID`,
-    `AgreementID`,
-    `InitiatorID`,
-    `InitiatorType`,
-    `ReasonText`,
-    `EvidenceFile`,
-    `Status`,
-    `CreatedAt`,
-    `AdminNotesText`,
-    `ResolutionAction`,
-    `ResolvedAt`,
-    `ResolvedByAdminID`
-  )
-VALUES
-  (
-    9,
-    47,
-    1,
-    'freelancer',
-    'Non-delivery of work\n\n77888',
-    NULL,
-    'resolved',
-    '2025-11-30 12:36:01',
-    'asdf',
-    'refund_client',
-    '2025-11-30 13:48:31',
-    1
-  );
 
 -- --------------------------------------------------------
 --
@@ -908,6 +899,256 @@ VALUES
     'refunded',
     '2025-11-30 12:03:34',
     '2025-11-30 13:48:31'
+  ),
+  (
+    57,
+    48,
+    2,
+    1,
+    6.00,
+    'hold',
+    '2025-12-02 07:38:59',
+    NULL
+  ),
+  (
+    58,
+    49,
+    2,
+    1,
+    6.00,
+    'hold',
+    '2025-12-02 07:42:15',
+    NULL
+  ),
+  (
+    59,
+    50,
+    2,
+    1,
+    6.00,
+    'hold',
+    '2025-12-02 07:49:39',
+    NULL
+  ),
+  (
+    60,
+    51,
+    2,
+    1,
+    6.00,
+    'hold',
+    '2025-12-02 07:55:27',
+    NULL
+  ),
+  (
+    61,
+    52,
+    2,
+    1,
+    50.00,
+    'hold',
+    '2025-12-02 08:00:14',
+    NULL
+  ),
+  (
+    62,
+    53,
+    2,
+    1,
+    6.00,
+    'hold',
+    '2025-12-02 08:09:32',
+    NULL
+  ),
+  (
+    63,
+    54,
+    2,
+    1,
+    50.00,
+    'hold',
+    '2025-12-02 08:11:22',
+    NULL
+  ),
+  (
+    64,
+    55,
+    2,
+    1,
+    50.00,
+    'hold',
+    '2025-12-02 08:17:57',
+    NULL
+  ),
+  (
+    65,
+    56,
+    2,
+    1,
+    50.00,
+    'refunded',
+    '2025-12-02 08:22:12',
+    NULL
+  ),
+  (
+    66,
+    57,
+    2,
+    1,
+    50.00,
+    'hold',
+    '2025-12-02 08:22:42',
+    NULL
+  ),
+  (
+    67,
+    58,
+    2,
+    1,
+    6.00,
+    'hold',
+    '2025-12-02 08:38:21',
+    NULL
+  ),
+  (
+    68,
+    59,
+    2,
+    1,
+    50.00,
+    'hold',
+    '2025-12-02 08:39:44',
+    NULL
+  ),
+  (
+    69,
+    60,
+    2,
+    1,
+    50.00,
+    'hold',
+    '2025-12-02 08:43:42',
+    NULL
+  ),
+  (
+    70,
+    61,
+    2,
+    1,
+    50.00,
+    'hold',
+    '2025-12-02 08:49:44',
+    NULL
+  ),
+  (
+    71,
+    62,
+    2,
+    1,
+    91.00,
+    'hold',
+    '2025-12-02 08:56:36',
+    NULL
+  ),
+  (
+    72,
+    63,
+    2,
+    1,
+    91.00,
+    'hold',
+    '2025-12-02 09:04:00',
+    NULL
+  ),
+  (
+    73,
+    64,
+    2,
+    1,
+    132.00,
+    'hold',
+    '2025-12-02 09:14:08',
+    NULL
+  ),
+  (
+    74,
+    65,
+    2,
+    1,
+    214.00,
+    'hold',
+    '2025-12-02 09:17:49',
+    NULL
+  ),
+  (
+    75,
+    66,
+    2,
+    1,
+    50.00,
+    'released',
+    '2025-12-02 09:26:30',
+    '2025-12-02 13:33:44'
+  ),
+  (
+    76,
+    67,
+    2,
+    1,
+    173.00,
+    'hold',
+    '2025-12-02 09:32:18',
+    NULL
+  ),
+  (
+    77,
+    68,
+    2,
+    1,
+    1.00,
+    'hold',
+    '2025-12-02 13:21:19',
+    NULL
+  ),
+  (
+    78,
+    69,
+    2,
+    1,
+    5.00,
+    'hold',
+    '2025-12-02 13:24:38',
+    NULL
+  ),
+  (
+    79,
+    70,
+    2,
+    1,
+    12.00,
+    'released',
+    '2025-12-02 13:28:17',
+    '2025-12-02 13:29:41'
+  ),
+  (
+    80,
+    71,
+    2,
+    1,
+    2.00,
+    'released',
+    '2025-12-02 13:34:23',
+    '2025-12-02 13:35:00'
+  ),
+  (
+    81,
+    72,
+    2,
+    1,
+    50.00,
+    'hold',
+    '2025-12-07 07:49:21',
+    NULL
   );
 
 -- --------------------------------------------------------
@@ -932,7 +1173,9 @@ CREATE TABLE
     `Rating` decimal(3, 2) DEFAULT NULL,
     `TotalEarned` decimal(10, 2) DEFAULT NULL,
     `JoinedDate` timestamp NOT NULL DEFAULT current_timestamp(),
-    `isDelete` tinyint (1) DEFAULT 0
+    `isDelete` tinyint (1) DEFAULT 0,
+    `FailedLoginAttempts` int (11) NOT NULL DEFAULT 0,
+    `LastFailedLoginAt` datetime DEFAULT NULL
   ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
 
 --
@@ -956,7 +1199,9 @@ INSERT INTO
     `Rating`,
     `TotalEarned`,
     `JoinedDate`,
-    `isDelete`
+    `isDelete`,
+    `FailedLoginAttempts`,
+    `LastFailedLoginAt`
   )
 VALUES
   (
@@ -976,7 +1221,9 @@ VALUES
     NULL,
     0.00,
     '2025-11-20 15:15:48',
-    0
+    0,
+    0,
+    NULL
   ),
   (
     2,
@@ -986,7 +1233,7 @@ VALUES
     '$2y$10$E/ktmWMUMTAD2uieh9uJ0eib0JfBZpGpzGG83b8/8JbNUH1httt2q',
     NULL,
     NULL,
-    'active',
+    'suspended',
     NULL,
     NULL,
     NULL,
@@ -995,7 +1242,9 @@ VALUES
     NULL,
     0.00,
     '2025-11-20 15:15:48',
-    0
+    0,
+    0,
+    NULL
   ),
   (
     3,
@@ -1014,26 +1263,9 @@ VALUES
     NULL,
     NULL,
     '2025-11-20 15:15:48',
-    0
-  ),
-  (
-    4,
-    'John',
-    'Lee',
-    'john@gmail.com',
-    '$2y$10$9yQ0dOnB/3KlF50FluBsceeKYovo88cNqPR.BHPn8jfMh67Un4UgC',
-    '0185709586',
-    NULL,
-    'active',
-    'NO 341, JALAN ZAMRUD 2, BATU LIMA',
-    '3 Year experience in web developement',
-    '',
-    'https://linked.in',
-    'Professional Web Developer',
-    NULL,
-    NULL,
-    '2025-11-20 15:15:48',
-    0
+    0,
+    0,
+    NULL
   );
 
 -- --------------------------------------------------------
@@ -1056,8 +1288,7 @@ VALUES
   (1, 1, 'Intermediate'),
   (1, 2, 'Intermediate'),
   (1, 3, 'Intermediate'),
-  (1, 4, 'Intermediate'),
-  (4, 3, 'Intermediate');
+  (1, 4, 'Intermediate');
 
 -- --------------------------------------------------------
 --
@@ -1179,6 +1410,28 @@ VALUES
     'active',
     '2025-11-27 20:10:40',
     NULL
+  ),
+  (
+    4,
+    1,
+    'WEB DESIGN',
+    'graphic-design',
+    'brand-style-guide',
+    'df,a',
+    'WEB DESIGN',
+    6,
+    5,
+    3,
+    0,
+    12,
+    3,
+    '/images/gig_media/gig-img-692e975a782c62.47083938.png',
+    NULL,
+    NULL,
+    NULL,
+    'active',
+    '2025-12-02 15:38:04',
+    NULL
   );
 
 -- --------------------------------------------------------
@@ -1198,111 +1451,6 @@ CREATE TABLE
     `PostDate` date DEFAULT NULL
   ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
 
---
--- Dumping data for table `job`
---
-INSERT INTO
-  `job` (
-    `JobID`,
-    `ClientID`,
-    `Title`,
-    `Description`,
-    `Budget`,
-    `DeliveryTime`,
-    `Deadline`,
-    `Status`,
-    `PostDate`
-  )
-VALUES
-  (
-    13,
-    2,
-    'Hello',
-    'asdf',
-    1.00,
-    3,
-    '2025-11-29',
-    'processing',
-    '2025-11-26'
-  ),
-  (
-    14,
-    1,
-    'dsfasdf',
-    'asdf',
-    12.00,
-    5,
-    '2025-11-29',
-    'processing',
-    '2025-11-27'
-  ),
-  (
-    15,
-    1,
-    'hhh',
-    'hhh',
-    1.00,
-    6,
-    '2025-11-29',
-    'processing',
-    '2025-11-27'
-  ),
-  (
-    16,
-    1,
-    'dfg',
-    'asdf',
-    12.00,
-    32,
-    '2025-11-28',
-    'processing',
-    '2025-11-27'
-  ),
-  (
-    17,
-    1,
-    'asdf',
-    'asdf',
-    1.00,
-    21,
-    '2025-11-29',
-    'processing',
-    '2025-11-27'
-  ),
-  (
-    18,
-    1,
-    'asdf',
-    'asdf',
-    1.00,
-    3,
-    '2025-11-29',
-    '',
-    '2025-11-27'
-  ),
-  (
-    19,
-    2,
-    'Google',
-    'gdhf',
-    1.00,
-    3,
-    '2025-12-20',
-    'available',
-    '2025-11-30'
-  ),
-  (
-    20,
-    2,
-    '12',
-    'asdf',
-    1.00,
-    1,
-    '2025-12-06',
-    'available',
-    '2025-11-30'
-  );
-
 -- --------------------------------------------------------
 --
 -- Table structure for table `job_application`
@@ -1319,111 +1467,6 @@ CREATE TABLE
     `AppliedAt` timestamp NOT NULL DEFAULT current_timestamp(),
     `UpdatedAt` timestamp NULL DEFAULT NULL ON UPDATE current_timestamp()
   ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
-
---
--- Dumping data for table `job_application`
---
-INSERT INTO
-  `job_application` (
-    `ApplicationID`,
-    `JobID`,
-    `FreelancerID`,
-    `CoverLetter`,
-    `ProposedBudget`,
-    `EstimatedDuration`,
-    `Status`,
-    `AppliedAt`,
-    `UpdatedAt`
-  )
-VALUES
-  (
-    18,
-    13,
-    3,
-    NULL,
-    NULL,
-    NULL,
-    'accepted',
-    '2025-11-26 13:17:36',
-    '2025-11-26 13:39:26'
-  ),
-  (
-    19,
-    14,
-    1,
-    NULL,
-    NULL,
-    NULL,
-    'accepted',
-    '2025-11-27 03:56:26',
-    '2025-11-27 03:58:55'
-  ),
-  (
-    20,
-    15,
-    1,
-    NULL,
-    NULL,
-    NULL,
-    'accepted',
-    '2025-11-27 10:47:36',
-    '2025-11-27 10:48:50'
-  ),
-  (
-    21,
-    16,
-    1,
-    NULL,
-    NULL,
-    NULL,
-    'accepted',
-    '2025-11-27 10:54:48',
-    '2025-11-27 10:55:01'
-  ),
-  (
-    22,
-    17,
-    1,
-    NULL,
-    NULL,
-    NULL,
-    'accepted',
-    '2025-11-27 11:40:41',
-    '2025-11-27 11:40:58'
-  ),
-  (
-    23,
-    18,
-    1,
-    NULL,
-    NULL,
-    NULL,
-    'accepted',
-    '2025-11-27 14:12:39',
-    '2025-11-27 14:12:54'
-  ),
-  (
-    24,
-    19,
-    1,
-    NULL,
-    NULL,
-    NULL,
-    'pending',
-    '2025-11-30 07:47:42',
-    NULL
-  ),
-  (
-    25,
-    20,
-    1,
-    NULL,
-    NULL,
-    NULL,
-    'pending',
-    '2025-11-30 07:50:45',
-    NULL
-  );
 
 -- --------------------------------------------------------
 --
@@ -1502,69 +1545,223 @@ INSERT INTO
   )
 VALUES
   (
-    62,
+    87,
     39,
     'f1',
     'c2',
     'New gig order: \"asdf\" for RM 50.00. Please review and sign the agreement to confirm.',
-    '/uploads/agreements/gig_agreement_45_1764426984.pdf',
+    '/uploads/agreements/gig_agreement_59_1764664784.pdf',
     'application/pdf',
-    '2025-11-29 22:36:24',
+    '2025-12-02 16:39:44',
     'unread'
   ),
   (
-    63,
+    88,
     39,
     'c2',
     'f1',
     'Agreement signed successfully! The agreement \"asdf\" has been signed and is now active.',
-    '/uploads/agreements/agreement_45.pdf',
+    '/uploads/agreements/agreement_59.pdf',
     'application/pdf',
-    '2025-11-29 22:36:38',
+    '2025-12-02 16:39:55',
     'unread'
   ),
   (
-    64,
+    89,
     39,
     'f1',
     'c2',
     'New gig order: \"asdf\" for RM 50.00. Please review and sign the agreement to confirm.',
-    '/uploads/agreements/gig_agreement_46_1764493057.pdf',
+    '/uploads/agreements/gig_agreement_60_1764665022.pdf',
     'application/pdf',
-    '2025-11-30 16:57:37',
+    '2025-12-02 16:43:42',
     'unread'
   ),
   (
-    65,
-    39,
-    'c2',
-    'f1',
-    'Agreement signed successfully! The agreement \"asdf\" has been signed and is now active.',
-    '/uploads/agreements/agreement_46.pdf',
-    'application/pdf',
-    '2025-11-30 16:57:44',
-    'unread'
-  ),
-  (
-    66,
+    90,
     39,
     'f1',
     'c2',
     'New gig order: \"asdf\" for RM 50.00. Please review and sign the agreement to confirm.',
-    '/uploads/agreements/gig_agreement_47_1764504214.pdf',
+    '/uploads/agreements/gig_agreement_61_1764665384.pdf',
     'application/pdf',
-    '2025-11-30 20:03:34',
+    '2025-12-02 16:49:44',
     'unread'
   ),
   (
-    67,
+    91,
+    39,
+    'f1',
+    'c2',
+    'New gig order: \"asdf\" for RM 91.00. Please review and sign the agreement to confirm.',
+    '/uploads/agreements/gig_agreement_62_1764665796.pdf',
+    'application/pdf',
+    '2025-12-02 16:56:36',
+    'unread'
+  ),
+  (
+    92,
+    39,
+    'f1',
+    'c2',
+    'New gig order: \"asdf\" for RM 91.00. Please review and sign the agreement to confirm.',
+    '/uploads/agreements/gig_agreement_63_1764666240.pdf',
+    'application/pdf',
+    '2025-12-02 17:04:00',
+    'unread'
+  ),
+  (
+    93,
+    39,
+    'f1',
+    'c2',
+    'New gig order: \"asdf\" for RM 132.00. Please review and sign the agreement to confirm.',
+    '/uploads/agreements/gig_agreement_64_1764666848.pdf',
+    'application/pdf',
+    '2025-12-02 17:14:08',
+    'unread'
+  ),
+  (
+    94,
+    39,
+    'f1',
+    'c2',
+    'New gig order: \"asdf\" for RM 214.00. Please review and sign the agreement to confirm.',
+    '/uploads/agreements/gig_agreement_65_1764667069.pdf',
+    'application/pdf',
+    '2025-12-02 17:17:49',
+    'unread'
+  ),
+  (
+    95,
     39,
     'c2',
     'f1',
     'Agreement signed successfully! The agreement \"asdf\" has been signed and is now active.',
-    '/uploads/agreements/agreement_47.pdf',
+    '/uploads/agreements/agreement_65.pdf',
     'application/pdf',
-    '2025-11-30 20:03:42',
+    '2025-12-02 17:20:27',
+    'unread'
+  ),
+  (
+    96,
+    39,
+    'f1',
+    'c2',
+    'New gig order: \"asdf\" for RM 50.00. Please review and sign the agreement to confirm.',
+    '/uploads/agreements/gig_agreement_66_1764667590.pdf',
+    'application/pdf',
+    '2025-12-02 17:26:30',
+    'unread'
+  ),
+  (
+    97,
+    39,
+    'c2',
+    'f1',
+    'Agreement signed successfully! The agreement \"asdf\" has been signed and is now active.',
+    '/uploads/agreements/agreement_66.pdf',
+    'application/pdf',
+    '2025-12-02 17:26:44',
+    'unread'
+  ),
+  (
+    98,
+    39,
+    'f1',
+    'c2',
+    'New gig order: \"asdf\" for RM 173.00. Please review and sign the agreement to confirm.',
+    '/uploads/agreements/gig_agreement_67_1764667938.pdf',
+    'application/pdf',
+    '2025-12-02 17:32:18',
+    'unread'
+  ),
+  (
+    99,
+    39,
+    'f1',
+    'c2',
+    'I have signed the agreement for the project \"Google\". Please review and sign to proceed. The agreement is attached below.\n\n',
+    '/uploads/agreements/agreement_26_1764681679.pdf',
+    'application/pdf',
+    '2025-12-02 21:21:20',
+    'to_accept'
+  ),
+  (
+    100,
+    39,
+    'f1',
+    'c2',
+    'I have signed the agreement for the project \"55\". Please review and sign to proceed. The agreement is attached below.\n\n',
+    '/uploads/agreements/agreement_27_1764681878.pdf',
+    'application/pdf',
+    '2025-12-02 21:24:38',
+    'to_accept'
+  ),
+  (
+    101,
+    39,
+    'f1',
+    'c2',
+    'I have signed the agreement for the project \"jieyang\". Please review and sign to proceed. The agreement is attached below.\n\n',
+    '/uploads/agreements/agreement_28_1764682097.pdf',
+    'application/pdf',
+    '2025-12-02 21:28:17',
+    'to_accept'
+  ),
+  (
+    102,
+    39,
+    'c2',
+    'f1',
+    'Agreement signed successfully! The agreement \"jieyang\" has been signed and is now active.',
+    '/uploads/agreements/agreement_70.pdf',
+    'application/pdf',
+    '2025-12-02 21:28:44',
+    'unread'
+  ),
+  (
+    103,
+    39,
+    'f1',
+    'c2',
+    'I have signed the agreement for the project \"tttt\". Please review and sign to proceed. The agreement is attached below.\n\n',
+    '/uploads/agreements/agreement_29_1764682463.pdf',
+    'application/pdf',
+    '2025-12-02 21:34:23',
+    'to_accept'
+  ),
+  (
+    104,
+    39,
+    'c2',
+    'f1',
+    'Agreement signed successfully! The agreement \"tttt\" has been signed and is now active.',
+    '/uploads/agreements/agreement_71.pdf',
+    'application/pdf',
+    '2025-12-02 21:34:31',
+    'unread'
+  ),
+  (
+    105,
+    39,
+    'f1',
+    'c2',
+    'New gig order: \"asdf\" for RM 50.00. Please review and sign the agreement to confirm.',
+    '/uploads/agreements/gig_agreement_72_1765093761.pdf',
+    'application/pdf',
+    '2025-12-07 15:49:22',
+    'unread'
+  ),
+  (
+    106,
+    39,
+    'c2',
+    'f1',
+    'Agreement signed successfully! The agreement \"asdf\" has been signed and is now active.',
+    '/uploads/agreements/agreement_72.pdf',
+    'application/pdf',
+    '2025-12-07 15:53:13',
     'unread'
   );
 
@@ -1774,6 +1971,314 @@ VALUES
     '2025-11-30 20:03:34',
     0,
     NULL
+  ),
+  (
+    38,
+    1,
+    'freelancer',
+    'New gig order from LEXAS for \'WEB DESIGN\'. Payment of RM 6.00 is held in escrow. Please review and accept the agreement.',
+    'gig_order',
+    48,
+    '2025-12-02 15:39:00',
+    0,
+    NULL
+  ),
+  (
+    39,
+    1,
+    'freelancer',
+    'New gig order from dfsa for \'WEB DESIGN\'. Payment of RM 6.00 is held in escrow. Please review and accept the agreement.',
+    'gig_order',
+    49,
+    '2025-12-02 15:42:15',
+    0,
+    NULL
+  ),
+  (
+    40,
+    1,
+    'freelancer',
+    'New gig order from adf for \'WEB DESIGN\'. Payment of RM 6.00 is held in escrow. Please review and accept the agreement.',
+    'gig_order',
+    50,
+    '2025-12-02 15:49:39',
+    0,
+    NULL
+  ),
+  (
+    41,
+    1,
+    'freelancer',
+    'New gig order from ASD for \'WEB DESIGN\'. Payment of RM 6.00 is held in escrow. Please review and accept the agreement.',
+    'gig_order',
+    51,
+    '2025-12-02 15:55:27',
+    0,
+    NULL
+  ),
+  (
+    42,
+    1,
+    'freelancer',
+    'New gig order from JIMMY CHAN KAH LOK for \'asdf\'. Payment of RM 50.00 is held in escrow. Please review and accept the agreement.',
+    'gig_order',
+    52,
+    '2025-12-02 16:00:14',
+    0,
+    NULL
+  ),
+  (
+    43,
+    1,
+    'freelancer',
+    'New gig order from asdf for \'WEB DESIGN\'. Payment of RM 6.00 is held in escrow. Please review and accept the agreement.',
+    'gig_order',
+    53,
+    '2025-12-02 16:09:33',
+    0,
+    NULL
+  ),
+  (
+    44,
+    1,
+    'freelancer',
+    'New gig order from asdf for \'asdf\'. Payment of RM 50.00 is held in escrow. Please review and accept the agreement.',
+    'gig_order',
+    54,
+    '2025-12-02 16:11:22',
+    0,
+    NULL
+  ),
+  (
+    45,
+    1,
+    'freelancer',
+    'New gig order from sad for \'asdf\'. Payment of RM 50.00 is held in escrow. Please review and accept the agreement.',
+    'gig_order',
+    55,
+    '2025-12-02 16:17:57',
+    0,
+    NULL
+  ),
+  (
+    46,
+    1,
+    'freelancer',
+    'New gig order from adf for \'asdf\'. Payment of RM 50.00 is held in escrow. Please review and accept the agreement.',
+    'gig_order',
+    56,
+    '2025-12-02 16:22:12',
+    0,
+    NULL
+  ),
+  (
+    47,
+    1,
+    'freelancer',
+    'New gig order from asdf for \'asdf\'. Payment of RM 50.00 is held in escrow. Please review and accept the agreement.',
+    'gig_order',
+    57,
+    '2025-12-02 16:22:42',
+    0,
+    NULL
+  ),
+  (
+    48,
+    1,
+    'freelancer',
+    'New gig order from JIMMY CHAN KAH LOK for \'WEB DESIGN\'. Payment of RM 6.00 is held in escrow. Please review and accept the agreement.',
+    'gig_order',
+    58,
+    '2025-12-02 16:38:21',
+    0,
+    NULL
+  ),
+  (
+    49,
+    1,
+    'freelancer',
+    'New gig order from adf for \'asdf\'. Payment of RM 50.00 is held in escrow. Please review and accept the agreement.',
+    'gig_order',
+    59,
+    '2025-12-02 16:39:44',
+    0,
+    NULL
+  ),
+  (
+    50,
+    1,
+    'freelancer',
+    'New gig order from sdf for \'asdf\'. Payment of RM 50.00 is held in escrow. Please review and accept the agreement.',
+    'gig_order',
+    60,
+    '2025-12-02 16:43:42',
+    0,
+    NULL
+  ),
+  (
+    51,
+    1,
+    'freelancer',
+    'New gig order from asd for \'asdf\'. Payment of RM 50.00 is held in escrow. Please review and accept the agreement.',
+    'gig_order',
+    61,
+    '2025-12-02 16:49:44',
+    0,
+    NULL
+  ),
+  (
+    52,
+    1,
+    'freelancer',
+    'New gig order from rtr for \'asdf\'. Payment of RM 91.00 is held in escrow. Please review and accept the agreement.',
+    'gig_order',
+    62,
+    '2025-12-02 16:56:36',
+    0,
+    NULL
+  ),
+  (
+    53,
+    1,
+    'freelancer',
+    'New gig order from sdfg for \'asdf\'. Payment of RM 91.00 is held in escrow. Please review and accept the agreement.',
+    'gig_order',
+    63,
+    '2025-12-02 17:04:00',
+    0,
+    NULL
+  ),
+  (
+    54,
+    1,
+    'freelancer',
+    'New gig order from af for \'asdf\'. Payment of RM 132.00 is held in escrow. Please review and accept the agreement.',
+    'gig_order',
+    64,
+    '2025-12-02 17:14:08',
+    0,
+    NULL
+  ),
+  (
+    55,
+    1,
+    'freelancer',
+    'New gig order from fdf for \'asdf\'. Payment of RM 214.00 is held in escrow. Please review and accept the agreement.',
+    'gig_order',
+    65,
+    '2025-12-02 17:17:49',
+    0,
+    NULL
+  ),
+  (
+    56,
+    1,
+    'freelancer',
+    'New gig order from asd for \'asdf\'. Payment of RM 50.00 is held in escrow. Please review and accept the agreement.',
+    'gig_order',
+    66,
+    '2025-12-02 17:26:30',
+    0,
+    NULL
+  ),
+  (
+    57,
+    1,
+    'freelancer',
+    'New gig order from asdf for \'asdf\'. Payment of RM 173.00 is held in escrow. Please review and accept the agreement.',
+    'gig_order',
+    67,
+    '2025-12-02 17:32:18',
+    0,
+    NULL
+  ),
+  (
+    58,
+    2,
+    'client',
+    'Freelancer has submitted work for \'jieyang\'. Please review the deliverables.',
+    'work_submission',
+    4,
+    '2025-12-02 21:29:17',
+    0,
+    NULL
+  ),
+  (
+    59,
+    1,
+    'freelancer',
+    'Your work for \'jieyang\' has been approved! Payment of RM 12.00 has been released to your wallet.',
+    'work_approval',
+    4,
+    '2025-12-02 21:29:41',
+    0,
+    NULL
+  ),
+  (
+    60,
+    2,
+    'client',
+    'Freelancer has submitted work for \'asdf\'. Please review the deliverables.',
+    'work_submission',
+    5,
+    '2025-12-02 21:30:27',
+    0,
+    NULL
+  ),
+  (
+    61,
+    2,
+    'client',
+    'Freelancer has submitted work for \'asdf\'. Please review the deliverables.',
+    'work_submission',
+    6,
+    '2025-12-02 21:32:52',
+    0,
+    NULL
+  ),
+  (
+    62,
+    1,
+    'freelancer',
+    'Your work for \'asdf\' has been approved! Payment of RM 50.00 has been released to your wallet.',
+    'work_approval',
+    5,
+    '2025-12-02 21:33:44',
+    0,
+    NULL
+  ),
+  (
+    63,
+    2,
+    'client',
+    'Freelancer has submitted work for \'tttt\'. Please review the deliverables.',
+    'work_submission',
+    7,
+    '2025-12-02 21:34:46',
+    0,
+    NULL
+  ),
+  (
+    64,
+    1,
+    'freelancer',
+    'Your work for \'tttt\' has been approved! Payment of RM 2.00 has been released to your wallet.',
+    'work_approval',
+    7,
+    '2025-12-02 21:35:00',
+    0,
+    NULL
+  ),
+  (
+    65,
+    1,
+    'freelancer',
+    'New gig order from asdf for \'asdf\'. Payment of RM 50.00 is held in escrow. Please review and accept the agreement.',
+    'gig_order',
+    72,
+    '2025-12-07 15:49:22',
+    0,
+    NULL
   );
 
 -- --------------------------------------------------------
@@ -1868,8 +2373,8 @@ INSERT INTO
   )
 VALUES
   (1, '3', 0.00, 0.00, '2025-11-23 07:49:41'),
-  (2, '2', 985.00, 1165.00, '2025-11-30 13:48:31'),
-  (3, '1', 1435.00, 1127.00, '2025-11-30 13:41:28'),
+  (2, '2', 778.00, 2308.00, '2025-12-07 07:49:21'),
+  (3, '1', 1499.00, 1127.00, '2025-12-02 13:35:00'),
   (4, '4', 2000.00, 0.00, '2025-11-23 14:34:27'),
   (5, '5', 1500.00, 0.00, '2025-11-23 14:40:21');
 
@@ -2239,6 +2744,336 @@ VALUES
     'Dispute refund for agreement #47: asdf',
     'dispute_refund_47',
     '2025-11-30 13:48:31'
+  ),
+  (
+    115,
+    2,
+    'payment',
+    6.00,
+    'completed',
+    'Payment for gig \'WEB DESIGN\' - Funds locked in escrow (Agreement #48)',
+    'escrow_57',
+    '2025-12-02 07:38:59'
+  ),
+  (
+    116,
+    2,
+    'payment',
+    6.00,
+    'completed',
+    'Payment for gig \'WEB DESIGN\' - Funds locked in escrow (Agreement #49)',
+    'escrow_58',
+    '2025-12-02 07:42:15'
+  ),
+  (
+    117,
+    2,
+    'payment',
+    6.00,
+    'completed',
+    'Payment for gig \'WEB DESIGN\' - Funds locked in escrow (Agreement #50)',
+    'escrow_59',
+    '2025-12-02 07:49:39'
+  ),
+  (
+    118,
+    2,
+    'payment',
+    6.00,
+    'completed',
+    'Payment for gig \'WEB DESIGN\' - Funds locked in escrow (Agreement #51)',
+    'escrow_60',
+    '2025-12-02 07:55:27'
+  ),
+  (
+    119,
+    2,
+    'payment',
+    50.00,
+    'completed',
+    'Payment for gig \'asdf\' - Funds locked in escrow (Agreement #52)',
+    'escrow_61',
+    '2025-12-02 08:00:14'
+  ),
+  (
+    120,
+    2,
+    'payment',
+    6.00,
+    'completed',
+    'Payment for gig \'WEB DESIGN\' - Funds locked in escrow (Agreement #53)',
+    'escrow_62',
+    '2025-12-02 08:09:32'
+  ),
+  (
+    121,
+    2,
+    'payment',
+    50.00,
+    'completed',
+    'Payment for gig \'asdf\' - Funds locked in escrow (Agreement #54)',
+    'escrow_63',
+    '2025-12-02 08:11:22'
+  ),
+  (
+    122,
+    2,
+    'payment',
+    50.00,
+    'completed',
+    'Payment for gig \'asdf\' - Funds locked in escrow (Agreement #55)',
+    'escrow_64',
+    '2025-12-02 08:17:57'
+  ),
+  (
+    123,
+    2,
+    'payment',
+    50.00,
+    'completed',
+    'Payment for gig \'asdf\' - Funds locked in escrow (Agreement #56)',
+    'escrow_65',
+    '2025-12-02 08:22:12'
+  ),
+  (
+    124,
+    2,
+    'payment',
+    50.00,
+    'completed',
+    'Payment for gig \'asdf\' - Funds locked in escrow (Agreement #57)',
+    'escrow_66',
+    '2025-12-02 08:22:42'
+  ),
+  (
+    125,
+    2,
+    'refund',
+    50.00,
+    'completed',
+    'Refund - Agreement declined: asdf (Agreement #56)',
+    'escrow_refund_65',
+    '2025-12-02 08:34:50'
+  ),
+  (
+    126,
+    2,
+    'payment',
+    6.00,
+    'completed',
+    'Payment for gig \'WEB DESIGN\' - Funds locked in escrow (Agreement #58)',
+    'escrow_67',
+    '2025-12-02 08:38:21'
+  ),
+  (
+    127,
+    2,
+    'payment',
+    50.00,
+    'completed',
+    'Payment for gig \'asdf\' - Funds locked in escrow (Agreement #59)',
+    'escrow_68',
+    '2025-12-02 08:39:44'
+  ),
+  (
+    128,
+    2,
+    'payment',
+    50.00,
+    'completed',
+    'Payment for gig \'asdf\' - Funds locked in escrow (Agreement #60)',
+    'escrow_69',
+    '2025-12-02 08:43:42'
+  ),
+  (
+    129,
+    2,
+    'payment',
+    50.00,
+    'completed',
+    'Payment for gig \'asdf\' - Funds locked in escrow (Agreement #61)',
+    'escrow_70',
+    '2025-12-02 08:49:44'
+  ),
+  (
+    130,
+    2,
+    'payment',
+    91.00,
+    'completed',
+    'Payment for gig \'asdf\' - Funds locked in escrow (Agreement #62)',
+    'escrow_71',
+    '2025-12-02 08:56:36'
+  ),
+  (
+    131,
+    2,
+    'payment',
+    91.00,
+    'completed',
+    'Payment for gig \'asdf\' - Funds locked in escrow (Agreement #63)',
+    'escrow_72',
+    '2025-12-02 09:04:00'
+  ),
+  (
+    132,
+    2,
+    'payment',
+    132.00,
+    'completed',
+    'Payment for gig \'asdf\' - Funds locked in escrow (Agreement #64)',
+    'escrow_73',
+    '2025-12-02 09:14:08'
+  ),
+  (
+    133,
+    2,
+    'payment',
+    214.00,
+    'completed',
+    'Payment for gig \'asdf\' - Funds locked in escrow (Agreement #65)',
+    'escrow_74',
+    '2025-12-02 09:17:49'
+  ),
+  (
+    134,
+    2,
+    'payment',
+    50.00,
+    'completed',
+    'Payment for gig \'asdf\' - Funds locked in escrow (Agreement #66)',
+    'escrow_75',
+    '2025-12-02 09:26:30'
+  ),
+  (
+    135,
+    2,
+    'topup',
+    1000.00,
+    'completed',
+    'Wallet Top Up via Stripe',
+    NULL,
+    '2025-12-02 09:27:41'
+  ),
+  (
+    136,
+    2,
+    'payment',
+    173.00,
+    'completed',
+    'Payment for gig \'asdf\' - Funds locked in escrow (Agreement #67)',
+    'escrow_76',
+    '2025-12-02 09:32:18'
+  ),
+  (
+    137,
+    2,
+    'payment',
+    1.00,
+    'completed',
+    'Funds locked in escrow for project: Google (Agreement #68)',
+    'escrow_77',
+    '2025-12-02 13:21:19'
+  ),
+  (
+    138,
+    2,
+    'payment',
+    5.00,
+    'completed',
+    'Funds locked in escrow for project: 55 (Agreement #69)',
+    'escrow_78',
+    '2025-12-02 13:24:38'
+  ),
+  (
+    139,
+    2,
+    'payment',
+    12.00,
+    'completed',
+    'Funds locked in escrow for project: jieyang (Agreement #70)',
+    'escrow_79',
+    '2025-12-02 13:28:17'
+  ),
+  (
+    140,
+    3,
+    '',
+    12.00,
+    'pending',
+    'Payment received for \'jieyang\' (Agreement #70)',
+    NULL,
+    '2025-12-02 13:29:41'
+  ),
+  (
+    141,
+    2,
+    'payment',
+    12.00,
+    'pending',
+    'Payment released for \'jieyang\' (Agreement #70)',
+    NULL,
+    '2025-12-02 13:29:41'
+  ),
+  (
+    142,
+    3,
+    '',
+    50.00,
+    'pending',
+    'Payment received for \'asdf\' (Agreement #66)',
+    NULL,
+    '2025-12-02 13:33:44'
+  ),
+  (
+    143,
+    2,
+    'payment',
+    50.00,
+    'pending',
+    'Payment released for \'asdf\' (Agreement #66)',
+    NULL,
+    '2025-12-02 13:33:44'
+  ),
+  (
+    144,
+    2,
+    'payment',
+    2.00,
+    'completed',
+    'Funds locked in escrow for project: tttt (Agreement #71)',
+    'escrow_80',
+    '2025-12-02 13:34:23'
+  ),
+  (
+    145,
+    3,
+    '',
+    2.00,
+    'pending',
+    'Payment received for \'tttt\' (Agreement #71)',
+    NULL,
+    '2025-12-02 13:35:00'
+  ),
+  (
+    146,
+    2,
+    'payment',
+    2.00,
+    'pending',
+    'Payment released for \'tttt\' (Agreement #71)',
+    NULL,
+    '2025-12-02 13:35:00'
+  ),
+  (
+    147,
+    2,
+    'payment',
+    50.00,
+    'completed',
+    'Payment for gig \'asdf\' - Funds locked in escrow (Agreement #72)',
+    'escrow_81',
+    '2025-12-07 07:49:21'
   );
 
 -- --------------------------------------------------------
@@ -2455,13 +3290,13 @@ AUTO_INCREMENT = 2;
 -- AUTO_INCREMENT for table `agreement`
 --
 ALTER TABLE `agreement` MODIFY `AgreementID` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 48;
+AUTO_INCREMENT = 73;
 
 --
 -- AUTO_INCREMENT for table `client`
 --
 ALTER TABLE `client` MODIFY `ClientID` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 4;
+AUTO_INCREMENT = 5;
 
 --
 -- AUTO_INCREMENT for table `conversation`
@@ -2479,7 +3314,7 @@ AUTO_INCREMENT = 10;
 -- AUTO_INCREMENT for table `escrow`
 --
 ALTER TABLE `escrow` MODIFY `EscrowID` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 57;
+AUTO_INCREMENT = 82;
 
 --
 -- AUTO_INCREMENT for table `freelancer`
@@ -2491,19 +3326,19 @@ AUTO_INCREMENT = 6;
 -- AUTO_INCREMENT for table `gig`
 --
 ALTER TABLE `gig` MODIFY `GigID` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 4;
+AUTO_INCREMENT = 5;
 
 --
 -- AUTO_INCREMENT for table `job`
 --
 ALTER TABLE `job` MODIFY `JobID` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 21;
+AUTO_INCREMENT = 25;
 
 --
 -- AUTO_INCREMENT for table `job_application`
 --
 ALTER TABLE `job_application` MODIFY `ApplicationID` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 26;
+AUTO_INCREMENT = 30;
 
 --
 -- AUTO_INCREMENT for table `job_application_answer`
@@ -2526,7 +3361,7 @@ ALTER TABLE `job_question_option` MODIFY `OptionID` int (11) NOT NULL AUTO_INCRE
 -- AUTO_INCREMENT for table `message`
 --
 ALTER TABLE `message` MODIFY `MessageID` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 68;
+AUTO_INCREMENT = 107;
 
 --
 -- AUTO_INCREMENT for table `message_notification`
@@ -2538,7 +3373,7 @@ AUTO_INCREMENT = 8;
 -- AUTO_INCREMENT for table `notifications`
 --
 ALTER TABLE `notifications` MODIFY `NotificationID` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 38;
+AUTO_INCREMENT = 66;
 
 --
 -- AUTO_INCREMENT for table `password_reset`
@@ -2561,7 +3396,7 @@ AUTO_INCREMENT = 5;
 -- AUTO_INCREMENT for table `submission_files`
 --
 ALTER TABLE `submission_files` MODIFY `FileID` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 4;
+AUTO_INCREMENT = 8;
 
 --
 -- AUTO_INCREMENT for table `wallet`
@@ -2573,13 +3408,13 @@ AUTO_INCREMENT = 6;
 -- AUTO_INCREMENT for table `wallet_transactions`
 --
 ALTER TABLE `wallet_transactions` MODIFY `TransactionID` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 115;
+AUTO_INCREMENT = 148;
 
 --
 -- AUTO_INCREMENT for table `work_submissions`
 --
 ALTER TABLE `work_submissions` MODIFY `SubmissionID` int (11) NOT NULL AUTO_INCREMENT,
-AUTO_INCREMENT = 4;
+AUTO_INCREMENT = 8;
 
 --
 -- Constraints for dumped tables

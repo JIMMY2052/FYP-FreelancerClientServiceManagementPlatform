@@ -18,73 +18,80 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'last_name' => $last_name,
         'company_name' => $company_name
     ];
+    // Field-specific validation errors (lengths match DB schema)
+    $errors = [];
 
-    // Validate input
-    if (empty($user_type) || empty($email) || empty($password) || empty($confirm_password)) {
-        $_SESSION['error'] = 'Please fill in all required fields.';
-        $_SESSION['form_data'] = $form_data;
-        header('Location: signup.php');
-        exit();
+    // user_type (must be freelancer or client)
+    if (empty($user_type)) {
+        $errors['user_type'] = 'Please select a user type.';
+    } elseif (!in_array($user_type, ['freelancer', 'client'])) {
+        $errors['user_type'] = 'Invalid user type.';
     }
 
-    // Validate email format
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $_SESSION['error'] = 'Please enter a valid email address.';
-        $_SESSION['form_data'] = $form_data;
-        header('Location: signup.php');
-        exit();
+    // email (VARCHAR(255))
+    if (empty($email)) {
+        $errors['email'] = 'Please enter your email address.';
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $errors['email'] = 'Please enter a valid email address.';
+    } elseif (strlen($email) > 255) {
+        $errors['email'] = 'Email must not exceed 255 characters.';
     }
 
-    // Validate passwords match
-    if ($password !== $confirm_password) {
-        $_SESSION['error'] = 'Passwords do not match.';
-        $_SESSION['form_data'] = $form_data;
-        header('Location: signup.php');
-        exit();
+    // password (stored as hash in VARCHAR(255), so only minimum & complexity constraints)
+    if (empty($password)) {
+        $errors['password'] = 'Please create a password.';
+    } elseif (strlen($password) < 8) {
+        $errors['password'] = 'Password must be at least 8 characters long.';
+    } elseif (!preg_match('/[!@#$%^&*()_+\-=[\]{};:\'"<>,.?\/()|`~]/', $password)) {
+        $errors['password'] = 'Password must contain at least one special character (!@#$%^&* etc.).';
     }
 
-    // Validate password length (minimum 8 characters)
-    if (strlen($password) < 8) {
-        $_SESSION['error'] = 'Password must be at least 8 characters long.';
-        $_SESSION['form_data'] = $form_data;
-        header('Location: signup.php');
-        exit();
+    // confirm_password
+    if (empty($confirm_password)) {
+        $errors['confirm_password'] = 'Please confirm your password.';
+    } elseif ($password !== $confirm_password) {
+        $errors['confirm_password'] = 'Passwords do not match.';
     }
 
-    // Validate password contains at least one special character
-    if (!preg_match('/[!@#$%^&*()_+\-=\[\]{};:\'\"<>,.?\/()|`~]/', $password)) {
-        $_SESSION['error'] = 'Password must contain at least one special character (!@#$%^&* etc.)';
-        $_SESSION['form_data'] = $form_data;
-        header('Location: signup.php');
-        exit();
-    }
-
-    // Validate user type
-    if (!in_array($user_type, ['freelancer', 'client'])) {
-        $_SESSION['error'] = 'Invalid user type.';
-        $_SESSION['form_data'] = $form_data;
-        header('Location: signup.php');
-        exit();
-    }
-
-    // Validate freelancer-specific fields
+    // freelancer-specific: FirstName, LastName (VARCHAR(100))
     if ($user_type === 'freelancer') {
-        if (empty($first_name) || empty($last_name)) {
-            $_SESSION['error'] = 'First name and last name are required for freelancers.';
-            $_SESSION['form_data'] = $form_data;
-            header('Location: signup.php');
-            exit();
+        if (empty($first_name)) {
+            $errors['first_name'] = 'First name is required for freelancers.';
+        } elseif (strlen($first_name) > 100) {
+            $errors['first_name'] = 'First name must not exceed 100 characters.';
+        }
+
+        if (empty($last_name)) {
+            $errors['last_name'] = 'Last name is required for freelancers.';
+        } elseif (strlen($last_name) > 100) {
+            $errors['last_name'] = 'Last name must not exceed 100 characters.';
         }
     }
 
-    // Validate client-specific fields
+    // client-specific: CompanyName (VARCHAR(255))
     if ($user_type === 'client') {
         if (empty($company_name)) {
-            $_SESSION['error'] = 'Company name is required for clients.';
-            $_SESSION['form_data'] = $form_data;
-            header('Location: signup.php');
-            exit();
+            $errors['company_name'] = 'Company name is required for clients.';
+        } elseif (strlen($company_name) > 255) {
+            $errors['company_name'] = 'Company name must not exceed 255 characters.';
         }
+    }
+
+    if (!empty($errors)) {
+        $_SESSION['errors'] = $errors;
+        $_SESSION['form_data'] = $form_data;
+
+        // Separate banner message per role for clarity
+        if ($user_type === 'freelancer') {
+            $_SESSION['error'] = 'Please correct the highlighted freelancer fields.';
+        } elseif ($user_type === 'client') {
+            $_SESSION['error'] = 'Please correct the highlighted client fields.';
+        } else {
+            $_SESSION['error'] = 'Please correct the highlighted fields.';
+        }
+
+        header('Location: signup.php');
+        exit();
     }
 
     $conn = getDBConnection();
@@ -103,14 +110,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $result = $stmt->get_result();
 
     if ($result->num_rows > 0) {
-        $_SESSION['error'] = 'Email already exists. Please use a different email or sign in.';
+        $_SESSION['errors'] = ['email' => 'Email already exists. Please use a different email or sign in.'];
         $_SESSION['form_data'] = $form_data;
+        $_SESSION['error'] = ($user_type === 'freelancer')
+            ? 'Please correct the highlighted freelancer fields.'
+            : 'Please correct the highlighted client fields.';
         $stmt->close();
         $conn->close();
         header('Location: signup.php');
         exit();
     }
     $stmt->close();
+
+    // For client signups, also ensure CompanyName is unique
+    if ($user_type === 'client' && $company_name !== '') {
+        $stmt = $conn->prepare("SELECT ClientID FROM client WHERE CompanyName = ?");
+        $stmt->bind_param("s", $company_name);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows > 0) {
+            $_SESSION['errors'] = ['company_name' => 'Company name already exists. Please use a different name.'];
+            $_SESSION['form_data'] = $form_data;
+            $_SESSION['error'] = 'Please correct the highlighted client fields.';
+            $stmt->close();
+            $conn->close();
+            header('Location: signup.php');
+            exit();
+        }
+
+        $stmt->close();
+    }
 
     // Hash password
     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
@@ -128,7 +158,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['success'] = 'Account created successfully! You can now sign in.';
         $stmt->close();
         $conn->close();
-        header('Location: login.php');
+        header('Location: signup.php');
         exit();
     } else {
         $_SESSION['error'] = 'Error creating account. Please try again.';
