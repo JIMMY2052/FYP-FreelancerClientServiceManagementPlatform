@@ -96,25 +96,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $conn = getDBConnection();
 
-    // Check if email already exists
-    if ($user_type === 'freelancer') {
-        $table = 'freelancer';
-        $stmt = $conn->prepare("SELECT FreelancerID FROM freelancer WHERE Email = ?");
-    } else {
-        $table = 'client';
-        $stmt = $conn->prepare("SELECT ClientID FROM client WHERE Email = ?");
-    }
-
-    $stmt->bind_param("s", $email);
+    // Check if email already exists in either freelancer or client table
+    $stmt = $conn->prepare("SELECT 'freelancer' AS user_type FROM freelancer WHERE Email = ?
+                            UNION ALL
+                            SELECT 'client' AS user_type FROM client WHERE Email = ?");
+    $stmt->bind_param("ss", $email, $email);
     $stmt->execute();
     $result = $stmt->get_result();
 
     if ($result->num_rows > 0) {
         $_SESSION['errors'] = ['email' => 'Email already exists. Please use a different email or sign in.'];
         $_SESSION['form_data'] = $form_data;
-        $_SESSION['error'] = ($user_type === 'freelancer')
-            ? 'Please correct the highlighted freelancer fields.'
-            : 'Please correct the highlighted client fields.';
         $stmt->close();
         $conn->close();
         header('Location: signup.php');
