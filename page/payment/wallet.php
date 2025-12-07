@@ -583,7 +583,7 @@ $available_balance = $wallet['Balance'] - $reserved_balance;
                 <?php if (count($transactions) > 0): ?>
                     <?php foreach ($transactions as $transaction): ?>
                         <?php 
-                            $isCredit = in_array($transaction['Type'], ['topup', 'refund', 'earning']);
+                            $isCredit = in_array($transaction['Type'], ['topup', 'refund', 'earning', 'credit']);
                             $icon = $isCredit ? 'fa-arrow-down' : 'fa-arrow-up';
                             $typeClass = $isCredit ? 'credit' : 'debit';
                             $sign = $isCredit ? '+' : '-';

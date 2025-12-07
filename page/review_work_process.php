@@ -11,6 +11,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'client') {
 }
 
 require_once 'config.php';
+require_once 'InvoiceGenerator.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: ongoing_projects.php');
@@ -221,7 +222,78 @@ try {
         $stmt->execute();
         $stmt->close();
 
-        $_SESSION['success'] = 'Work approved successfully! Payment has been released to the freelancer.';
+        // 5. Generate E-Invoice
+        try {
+            // Get client and freelancer details
+            $sql = "SELECT c.CompanyName, c.Email as ClientEmail, 
+                           CONCAT(f.FirstName, ' ', f.LastName) as FreelancerName, 
+                           f.Email as FreelancerEmail,
+                           a.ProjectTitle, a.ProjectDetail
+                    FROM agreement a
+                    JOIN client c ON a.ClientID = c.ClientID
+                    JOIN freelancer f ON a.FreelancerID = f.FreelancerID
+                    WHERE a.AgreementID = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param('i', $agreement_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $invoice_data = $result->fetch_assoc();
+            $stmt->close();
+
+            if ($invoice_data) {
+                // Prepare invoice data
+                $invoiceData = [
+                    'agreement_id' => $agreement_id,
+                    'client_name' => $invoice_data['CompanyName'],
+                    'client_email' => $invoice_data['ClientEmail'],
+                    'freelancer_name' => $invoice_data['FreelancerName'],
+                    'freelancer_email' => $invoice_data['FreelancerEmail'],
+                    'project_title' => $invoice_data['ProjectTitle'],
+                    'project_detail' => $invoice_data['ProjectDetail'] ?? '',
+                    'amount' => $payment_amount
+                ];
+
+                // Generate invoice
+                $invoiceGenerator = new InvoiceGenerator();
+                $invoiceFilePath = $invoiceGenerator->generateInvoice($invoiceData);
+                $invoiceNumber = $invoiceGenerator->getInvoiceNumber();
+
+                // Save invoice record to database
+                $sql = "INSERT INTO invoices (InvoiceNumber, AgreementID, ClientID, FreelancerID, Amount, InvoiceDate, InvoiceFilePath, Status, CreatedAt)
+                        VALUES (?, ?, ?, ?, ?, NOW(), ?, 'paid', NOW())";
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param('siiids', $invoiceNumber, $agreement_id, $client_id, $freelancer_id, $payment_amount, $invoiceFilePath);
+                $stmt->execute();
+                $stmt->close();
+
+                // Send invoice notification to both users
+                // Notification for client
+                $client_invoice_msg = "E-Invoice {$invoiceNumber} has been generated for '{$project_title}'. View your invoice in the transaction history.";
+                $sql = "INSERT INTO notifications (UserID, UserType, Message, RelatedType, RelatedID, CreatedAt, IsRead) 
+                        VALUES (?, 'client', ?, 'invoice', ?, NOW(), 0)";
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param('isi', $client_id, $client_invoice_msg, $agreement_id);
+                $stmt->execute();
+                $stmt->close();
+
+                // Notification for freelancer
+                $freelancer_invoice_msg = "E-Invoice {$invoiceNumber} has been generated for '{$project_title}'. View your invoice in the transaction history.";
+                $sql = "INSERT INTO notifications (UserID, UserType, Message, RelatedType, RelatedID, CreatedAt, IsRead) 
+                        VALUES (?, 'freelancer', ?, 'invoice', ?, NOW(), 0)";
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param('isi', $freelancer_id, $freelancer_invoice_msg, $agreement_id);
+                $stmt->execute();
+                $stmt->close();
+
+                error_log("E-Invoice generated successfully: {$invoiceNumber} at {$invoiceFilePath}");
+            }
+        } catch (Exception $invoice_error) {
+            // Log error but don't fail the transaction
+            error_log('Invoice generation error: ' . $invoice_error->getMessage());
+            // Continue with the process even if invoice generation fails
+        }
+
+        $_SESSION['success'] = 'Work approved successfully! Payment has been released to the freelancer. E-Invoice has been generated.';
     } else {
         // ========== REJECT WORK (Request Revision) ==========
 

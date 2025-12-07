@@ -95,6 +95,9 @@ $current_page = basename($_SERVER['PHP_SELF']);
         <a href="/page/activity_history.php" class="nav-item <?php echo ($current_page === 'activity_history.php') ? 'active' : ''; ?>">
             Activity History
         </a>
+        <a href="/page/my_invoices.php" class="nav-item <?php echo ($current_page === 'my_invoices.php') ? 'active' : ''; ?>">
+            My Invoices
+        </a>
         <a href="/page/freelancer_profile.php" class="nav-item <?php echo (in_array($current_page, ['freelancer_profile.php', 'edit_freelancer_profile.php'])) ? 'active' : ''; ?>">
             Profile
         </a>

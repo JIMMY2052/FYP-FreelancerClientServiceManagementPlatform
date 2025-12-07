@@ -572,7 +572,7 @@ $conn->close();
                             <div class="collaborator-info">
                                 <div class="collaborator-avatar">
                                     <?php if (!empty($project['ProfilePicture'])): ?>
-                                        <img src="<?= htmlspecialchars($project['ProfilePicture']) ?>" alt="Profile">
+                                        <img src="/<?= htmlspecialchars($project['ProfilePicture']) ?>" alt="Profile">
                                     <?php else: ?>
                                         <?php
                                         $name = $user_type === 'client' ? $project['FreelancerName'] : $project['ClientName'];
