@@ -560,8 +560,14 @@ class ChatApp {
                 });
             }
 
-            // Scroll to bottom
-            container.scrollTop = container.scrollHeight;
+            // Scroll to bottom only if user is already near bottom
+            if (container) {
+                const distanceFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
+                // If user is within 100px of bottom, keep auto-scrolling
+                if (distanceFromBottom < 100) {
+                    container.scrollTop = container.scrollHeight;
+                }
+            }
         } catch (error) {
             console.error('Error loading messages:', error);
         }

@@ -612,10 +612,7 @@ elseif ($target_client_id && $user_type === 'freelancer') {
                         if (conversationItem) {
                             clearInterval(autoLoadInterval);
                             conversationItem.click();
-                            conversationItem.scrollIntoView({
-                                behavior: 'smooth',
-                                block: 'center'
-                            });
+                            // Auto-load target conversation without scrolling the page
                             console.log('Auto-loaded conversation with user ID:', targetUserId);
                         } else if (attempts >= maxAttempts) {
                             clearInterval(autoLoadInterval);
