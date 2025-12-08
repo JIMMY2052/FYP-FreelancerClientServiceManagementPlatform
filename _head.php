@@ -12,7 +12,6 @@ require_once __DIR__ . '/page/config.php';
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="/assets/js/app.js"></script>
     <link rel="stylesheet" href="/assets/css/app.css">
-    <link rel="stylesheet" href="/assets/css/freelancer.css">
     <link rel="stylesheet" href="/assets/css/client.css">
     <script>
         // Global handler to prevent +, -, and e characters in numeric inputs
@@ -49,27 +48,31 @@ require_once __DIR__ . '/page/config.php';
         if (typeof MutationObserver !== 'undefined') {
             const observer = new MutationObserver(function(mutations) {
                 mutations.forEach(function(mutation) {
-                    mutation.addedNodes.forEach(function(node) {
-                        if (node.nodeType === 1) { // Element node
-                            // Check if the added node itself is a numeric input
-                            if (node.tagName === 'INPUT' && node.type === 'number') {
-                                restrictNumericInput(node);
+                    if (mutation.addedNodes && mutation.addedNodes.length > 0) {
+                        mutation.addedNodes.forEach(function(node) {
+                            if (node.nodeType === 1) { // Element node
+                                // Check if the added node itself is a numeric input
+                                if (node.tagName === 'INPUT' && node.type === 'number') {
+                                    restrictNumericInput(node);
+                                }
+                                // Check for numeric inputs within the added node
+                                if (node.querySelectorAll) {
+                                    const numericInputs = node.querySelectorAll('input[type="number"]');
+                                    numericInputs.forEach(restrictNumericInput);
+                                }
                             }
-                            // Check for numeric inputs within the added node
-                            if (node.querySelectorAll) {
-                                const numericInputs = node.querySelectorAll('input[type="number"]');
-                                numericInputs.forEach(restrictNumericInput);
-                            }
-                        }
-                    });
+                        });
+                    }
                 });
             });
 
-            // Start observing the document body for added nodes
-            observer.observe(document.body, {
-                childList: true,
-                subtree: true
-            });
+            // Start observing after DOM is ready
+            if (document.body) {
+                observer.observe(document.body, {
+                    childList: true,
+                    subtree: true
+                });
+            }
         }
     </script>
 </head>

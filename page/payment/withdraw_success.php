@@ -87,7 +87,7 @@ $_title = 'Withdrawal Request - WorkSnyc Platform';
         .amount {
             font-size: 2.5rem;
             font-weight: 700;
-            color: #3b82f6;
+            color: #22c55e;
             margin: 20px 0;
         }
 

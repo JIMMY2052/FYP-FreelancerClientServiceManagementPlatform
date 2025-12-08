@@ -87,8 +87,18 @@ while ($row = $skills_result->fetch_assoc()) {
 }
 $stmt->close();
 
-// Get total earned from Freelancer table
-$total_earned = $freelancer['TotalEarned'] ?? 0.00;
+// Calculate total earned from completed work (credit type transactions only)
+$stmt = $conn->prepare("
+    SELECT COALESCE(SUM(wt.Amount), 0) as TotalEarned
+    FROM wallet_transactions wt
+    INNER JOIN wallet w ON wt.WalletID = w.WalletID
+    WHERE w.UserID = ? AND wt.Type = 'debit'
+");
+$stmt->bind_param("i", $freelancer_id);
+$stmt->execute();
+$result = $stmt->get_result();
+$total_earned = $result->fetch_assoc()['TotalEarned'];
+$stmt->close();
 
 // Get gigs created by this freelancer
 $stmt = $conn->prepare("
@@ -112,6 +122,15 @@ while ($row = $gigs_result->fetch_assoc()) {
     $gigs[] = $row;
 }
 $stmt->close();
+
+// Count only active gigs
+$stmt = $conn->prepare("SELECT COUNT(*) as ActiveGigCount FROM gig WHERE FreelancerID = ? AND Status = 'active'");
+$stmt->bind_param("i", $freelancer_id);
+$stmt->execute();
+$result = $stmt->get_result();
+$active_gig_count = $result->fetch_assoc()['ActiveGigCount'];
+$stmt->close();
+
 $conn->close();
 ?>
 <!DOCTYPE html>
@@ -229,7 +248,7 @@ $conn->close();
                         <div class="stat-label">Total Earned</div>
                     </div>
                     <div class="stat-box">
-                        <div class="stat-value"><?php echo count($gigs); ?></div>
+                        <div class="stat-value"><?php echo $active_gig_count; ?></div>
                         <div class="stat-label">Active Gigs</div>
                     </div>
                 </div>

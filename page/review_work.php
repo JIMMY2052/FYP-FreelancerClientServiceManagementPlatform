@@ -469,6 +469,137 @@ $conn->close();
             flex-direction: column;
         }
     }
+
+    /* Custom Confirmation Modal */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+        backdrop-filter: blur(4px);
+        animation: fadeIn 0.3s ease;
+    }
+
+    .modal-overlay.active {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-content {
+        background: white;
+        border-radius: 16px;
+        padding: 30px;
+        max-width: 500px;
+        width: 90%;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        animation: slideUp 0.3s ease;
+    }
+
+    .modal-icon {
+        font-size: 3rem;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .modal-title {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #2c3e50;
+        text-align: center;
+        margin-bottom: 15px;
+    }
+
+    .modal-message {
+        font-size: 1rem;
+        color: #666;
+        text-align: center;
+        line-height: 1.6;
+        margin-bottom: 25px;
+    }
+
+    .modal-buttons {
+        display: flex;
+        gap: 12px;
+    }
+
+    .modal-btn {
+        flex: 1;
+        padding: 12px 24px;
+        border-radius: 10px;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+    }
+
+    .modal-btn-confirm {
+        background: #28a745;
+        color: white;
+    }
+
+    .modal-btn-confirm:hover {
+        background: #218838;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    }
+
+    .modal-btn-confirm.reject-action {
+        background: #dc3545;
+    }
+
+    .modal-btn-confirm.reject-action:hover {
+        background: #c82333;
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+    }
+
+    .modal-btn-cancel {
+        background: #f0f1f3;
+        color: #333;
+    }
+
+    .modal-btn-cancel:hover {
+        background: #e0e2e8;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    @keyframes slideUp {
+        from {
+            transform: translateY(30px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    /* Custom Alert Modal */
+    .alert-modal .modal-content {
+        max-width: 400px;
+    }
+
+    .alert-modal .modal-buttons {
+        justify-content: center;
+    }
+
+    .alert-modal .modal-btn {
+        flex: initial;
+        min-width: 120px;
+    }
 </style>
 
 <?php if (isset($_SESSION['error'])): ?>
@@ -691,41 +822,126 @@ $conn->close();
     </div>
 </div>
 
+<!-- Custom Confirmation Modal -->
+<div id="confirmModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-icon" id="modalIcon"></div>
+        <h3 class="modal-title" id="modalTitle"></h3>
+        <p class="modal-message" id="modalMessage"></p>
+        <div class="modal-buttons">
+            <button class="modal-btn modal-btn-cancel" onclick="closeModal()">Cancel</button>
+            <button class="modal-btn modal-btn-confirm" id="confirmBtn" onclick="confirmAction()">Confirm</button>
+        </div>
+    </div>
+</div>
+
+<!-- Custom Alert Modal -->
+<div id="alertModal" class="modal-overlay alert-modal">
+    <div class="modal-content">
+        <div class="modal-icon">⚠️</div>
+        <h3 class="modal-title">Required Information</h3>
+        <p class="modal-message" id="alertMessage"></p>
+        <div class="modal-buttons">
+            <button class="modal-btn modal-btn-confirm" onclick="closeAlertModal()">OK</button>
+        </div>
+    </div>
+</div>
+
 <script>
+    let pendingAction = null;
+
+    function showConfirmModal(title, message, icon, action) {
+        document.getElementById('modalTitle').textContent = title;
+        document.getElementById('modalMessage').textContent = message;
+        document.getElementById('modalIcon').textContent = icon;
+        
+        const confirmBtn = document.getElementById('confirmBtn');
+        if (action === 'reject') {
+            confirmBtn.classList.add('reject-action');
+        } else {
+            confirmBtn.classList.remove('reject-action');
+        }
+        
+        document.getElementById('confirmModal').classList.add('active');
+        pendingAction = action;
+    }
+
+    function closeModal() {
+        document.getElementById('confirmModal').classList.remove('active');
+        pendingAction = null;
+    }
+
+    function confirmAction() {
+        if (pendingAction) {
+            const form = document.getElementById('reviewForm');
+            const actionInput = document.getElementById('reviewAction');
+            actionInput.value = pendingAction;
+            form.submit();
+        }
+        closeModal();
+    }
+
+    function showAlertModal(message) {
+        document.getElementById('alertMessage').textContent = message;
+        document.getElementById('alertModal').classList.add('active');
+    }
+
+    function closeAlertModal() {
+        document.getElementById('alertModal').classList.remove('active');
+    }
+
+    // Close modals when clicking outside
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('modal-overlay')) {
+            closeModal();
+            closeAlertModal();
+        }
+    });
+
+    // Close modals with Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeModal();
+            closeAlertModal();
+        }
+    });
+
     function submitReview(action) {
-        const form = document.getElementById('reviewForm');
-        const actionInput = document.getElementById('reviewAction');
         const reviewNotes = document.getElementById('reviewNotes').value.trim();
         const remainingRevisions = <?= $submission['RemainingRevisions'] ?? 'null' ?>;
         const isUnlimited = (remainingRevisions === null);
 
         if (action === 'reject') {
             if (!isUnlimited && remainingRevisions <= 0) {
-                alert('No revisions remaining. You can only accept the work.');
+                showAlertModal('No revisions remaining. You can only accept the work.');
                 return;
             }
 
             if (!reviewNotes) {
-                alert('Please provide review notes when requesting revisions so the freelancer knows what to improve.');
+                showAlertModal('Please provide review notes when requesting revisions so the freelancer knows what to improve.');
                 document.getElementById('reviewNotes').focus();
                 return;
             }
         }
 
-        let confirmMessage = '';
+        let title = '';
+        let message = '';
+        let icon = '';
+
         if (action === 'approve') {
-            confirmMessage = 'Are you sure you want to accept this work? The payment will be released to the freelancer.';
+            title = 'Accept Work?';
+            message = 'Are you sure you want to accept this work? The payment will be released to the freelancer.';
+            icon = '✅';
         } else {
+            title = 'Request Revision?';
             if (isUnlimited) {
-                confirmMessage = 'Are you sure you want to request revisions? The freelancer will be able to resubmit their work.';
+                message = 'Are you sure you want to request revisions? The freelancer will be able to resubmit their work.';
             } else {
-                confirmMessage = `Are you sure you want to request revisions? You will have ${remainingRevisions - 1} revision(s) remaining after this.`;
+                message = `Are you sure you want to request revisions? You will have ${remainingRevisions - 1} revision(s) remaining after this.`;
             }
+            icon = '🔄';
         }
 
-        if (confirm(confirmMessage)) {
-            actionInput.value = action;
-            form.submit();
-        }
+        showConfirmModal(title, message, icon, action);
     }
 </script>

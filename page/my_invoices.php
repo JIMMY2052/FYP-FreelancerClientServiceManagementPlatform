@@ -13,7 +13,12 @@ $user_id = $_SESSION['user_id'];
 $user_type = $_SESSION['user_type'];
 
 $_title = 'My Invoices';
-include '../_head.php';
+include '../includes/header.php';
+if ($user_type === 'client') {
+    include '../includes/client_sidebar.php';
+} else {
+    include '../includes/freelancer_sidebar.php';
+}
 
 $conn = getDBConnection();
 
@@ -234,6 +239,9 @@ $conn->close();
     }
 </style>
 
+
+<link rel="stylesheet" href="/assets/css/app.css">
+<link rel="stylesheet" href="/assets/css/profile.css">
 <div class="container">
     <div class="page-header">
         <h1>📄 My Invoices</h1>

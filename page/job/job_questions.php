@@ -176,26 +176,44 @@ if (empty($jobTitle) || empty($jobDescription) || empty($jobSalary) || empty($de
 
     .form-group select:hover {
         border-color: rgb(159, 232, 112);
-        background: white;
+        background-color: white;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%232c3e50' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 16px center;
+        background-size: 12px;
         box-shadow: 0 2px 8px rgba(159, 232, 112, 0.2);
     }
 
     .form-group select:focus {
         outline: none;
         border-color: rgb(159, 232, 112);
+        background-color: white;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%232c3e50' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 16px center;
+        background-size: 12px;
         box-shadow: 0 0 0 3px rgba(159, 232, 112, 0.15);
-        background: white;
     }
 
     .form-group select option {
-        padding: 12px;
+        padding: 12px 16px;
         background: white;
         color: #2c3e50;
         font-weight: 500;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        margin: 2px 0;
+        border-radius: 6px;
+    }
+
+    .form-group select option:checked {
+        background: linear-gradient(135deg, rgb(159, 232, 112) 0%, rgb(140, 210, 90) 100%);
+        color: #2c3e50;
+        font-weight: 700;
     }
 
     .form-group select option:hover {
-        background: rgb(159, 232, 112);
+        background: #f0fce8;
     }
 
     .form-group textarea {

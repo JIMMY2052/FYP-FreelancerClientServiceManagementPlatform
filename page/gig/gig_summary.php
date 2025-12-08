@@ -26,9 +26,6 @@ if (!function_exists('getPDOConnection')) {
     }
 }
 
-$_title = 'Create Gig - Publish';
-include '../../_head.php';
-
 $errors = [];
 $successMessage = '';
 $gallerySessionKey = 'gig_gallery';
@@ -126,6 +123,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+$_title = 'Create Gig - Publish';
+include '../../_head.php';
 ?>
 
 <style>
