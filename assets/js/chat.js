@@ -167,30 +167,67 @@ class ChatApp {
     }
 
     handleFileSelect(event) {
-        const files = Array.from(event.target.files);
+        const inputFiles = Array.from(event.target.files || []);
         const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'pdf', 'doc', 'docx'];
 
-        files.forEach(file => {
-            // Validate file size
-            if (file.size > this.maxFileSize) {
+        if (inputFiles.length === 0) {
+            return;
+        }
+
+        // Only allow one file in total for a message
+        if (this.selectedFiles.length > 0) {
+            // Use centered modal if available, else alert
+            const fileWarningModal = document.getElementById('fileWarningModal');
+            const fileWarningText = document.getElementById('fileWarningText');
+            if (fileWarningModal && fileWarningText) {
+                fileWarningText.textContent = 'You have already attached a file. Please send this message before attaching another file.';
+                fileWarningModal.style.display = 'block';
+            } else {
+                alert('You have already attached a file. Please send this message before attaching another file.');
+            }
+            event.target.value = '';
+            return;
+        }
+
+        // Take only the first selected file
+        const file = inputFiles[0];
+
+        // Validate file size
+        if (file.size > this.maxFileSize) {
+            const fileWarningModal = document.getElementById('fileWarningModal');
+            const fileWarningText = document.getElementById('fileWarningText');
+            if (fileWarningModal && fileWarningText) {
+                fileWarningText.textContent = 'The selected file exceeds the 10MB size limit.';
+                fileWarningModal.style.display = 'block';
+            } else {
                 alert(`File ${file.name} is too large. Maximum size is 10MB.`);
-                return;
             }
+            event.target.value = '';
+            return;
+        }
 
-            // Get file extension
-            const fileExt = file.name.split('.').pop().toLowerCase();
+        // Get file extension
+        const fileExt = file.name.split('.').pop().toLowerCase();
 
-            // Validate file type - check both MIME type and extension
-            const mimeValid = this.allowedFileTypes.includes(file.type);
-            const extValid = allowedExtensions.includes(fileExt);
+        // Validate file type - check both MIME type and extension
+        const mimeValid = this.allowedFileTypes.includes(file.type);
+        const extValid = allowedExtensions.includes(fileExt);
 
-            if (!(mimeValid || extValid)) {
+        if (!(mimeValid || extValid)) {
+            const fileWarningModal = document.getElementById('fileWarningModal');
+            const fileWarningText = document.getElementById('fileWarningText');
+            if (fileWarningModal && fileWarningText) {
+                fileWarningText.textContent = 'File type not allowed. Allowed: images (jpg, png, gif), PDF, Word documents.';
+                fileWarningModal.style.display = 'block';
+            } else {
                 alert(`File type not allowed: ${file.type}. Allowed: images (jpg, png, gif), PDF, Word documents.`);
-                return;
             }
+            event.target.value = '';
+            return;
+        }
 
-            this.selectedFiles.push(file);
-        });
+        // Store exactly one file
+        this.selectedFiles = [file];
 
         this.displayFilePreview();
         event.target.value = ''; // Reset input

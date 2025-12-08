@@ -358,13 +358,11 @@ elseif ($target_client_id && $user_type === 'freelancer') {
                             type="file"
                             id="fileInput"
                             class="file-input-hidden"
-                            multiple
                             accept="image/*,.pdf,.doc,.docx">
                         <input
                             type="file"
                             id="photoInput"
                             class="file-input-hidden"
-                            multiple
                             accept="image/*">
                         <textarea
                             id="messageInput"
@@ -393,6 +391,17 @@ elseif ($target_client_id && $user_type === 'freelancer') {
                 </svg>
             </button>
             <img id="modalImage" class="modal-image" src="" alt="Preview">
+        </div>
+    </div>
+
+    <!-- Center Warning Modal for file upload rules -->
+    <div id="fileWarningModal" class="modal file-warning-modal" style="display:none;">
+        <div class="modal-overlay"></div>
+        <div class="modal-content file-warning-content">
+            <div class="file-warning-icon">!</div>
+            <h3 class="file-warning-title">File Upload Notice</h3>
+            <p id="fileWarningText" class="file-warning-text"></p>
+            <button type="button" id="fileWarningClose" class="file-warning-button">OK</button>
         </div>
     </div>
 
@@ -495,6 +504,97 @@ elseif ($target_client_id && $user_type === 'freelancer') {
 
         // Auto-load conversation if coming from "Contact Me" button or "Message" button
         document.addEventListener('DOMContentLoaded', function() {
+            // File upload validation: only one file total per message
+            let hasAttachedFile = false;
+            const fileInput = document.getElementById('fileInput');
+            const photoInput = document.getElementById('photoInput');
+            const filePreview = document.getElementById('filePreview');
+            const sendBtn = document.getElementById('sendBtn');
+            const messageInput = document.getElementById('messageInput');
+            const fileWarningModal = document.getElementById('fileWarningModal');
+            const fileWarningText = document.getElementById('fileWarningText');
+            const fileWarningClose = document.getElementById('fileWarningClose');
+
+            function showFileWarning(message) {
+                if (!fileWarningModal || !fileWarningText) return;
+                fileWarningText.textContent = message;
+                fileWarningModal.style.display = 'block';
+            }
+
+            if (fileWarningClose && fileWarningModal) {
+                fileWarningClose.addEventListener('click', function() {
+                    fileWarningModal.style.display = 'none';
+                });
+                const overlay = fileWarningModal.querySelector('.modal-overlay');
+                if (overlay) {
+                    overlay.addEventListener('click', function() {
+                        fileWarningModal.style.display = 'none';
+                    });
+                }
+            }
+
+            function clearAttachmentState() {
+                hasAttachedFile = false;
+                if (fileInput) fileInput.value = '';
+                if (photoInput) photoInput.value = '';
+                if (filePreview) filePreview.innerHTML = '';
+            }
+
+            if (sendBtn) {
+                sendBtn.addEventListener('click', function() {
+                    // After sending, allow next file
+                    setTimeout(clearAttachmentState, 100);
+                });
+            }
+
+            function handleFileSelection(input, isImageOnly) {
+                if (!input || !input.files) return;
+
+                const file = input.files[0];
+                if (!file) return;
+
+				// If a file is already attached, block second attachment
+				if (hasAttachedFile) {
+					input.value = '';
+					showFileWarning('Only one attachment is allowed per message. Please send this message before adding another file.');
+					return;
+				}
+
+                // Simple client-side size validation (match 10MB server rule)
+                const maxSizeBytes = 10 * 1024 * 1024;
+                if (file.size > maxSizeBytes) {
+                    input.value = '';
+                    showFileWarning('The selected file exceeds the 10MB size limit.');
+                    return;
+                }
+
+                if (filePreview) {
+                    // Always allow only one file preview at a time
+                    filePreview.innerHTML = '';
+                    const item = document.createElement('div');
+                    item.className = 'file-preview-item';
+                    const nameSpan = document.createElement('span');
+                    nameSpan.textContent = file.name;
+                    item.appendChild(nameSpan);
+                    filePreview.appendChild(item);
+                }
+
+                // Mark that this message already has an attachment
+                hasAttachedFile = true;
+            }
+
+            if (fileInput) {
+                fileInput.addEventListener('change', function() {
+                    handleFileSelection(fileInput, false);
+                });
+            }
+
+            if (photoInput) {
+                photoInput.addEventListener('change', function() {
+                    handleFileSelection(photoInput, true);
+                });
+            }
+
             if (window.autoLoadConversation) {
                 const targetUserId = window.targetClientId || window.targetFreelancerId;
 
