@@ -168,15 +168,19 @@ elseif ($target_client_id && $user_type === 'freelancer') {
     <!-- Top Right Navigation -->
     <div class="chat-top-nav">
         <div class="logo-section">
+            <button id="sidebarToggle" class="sidebar-toggle-btn" title="Toggle sidebar">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </button>
             <a href="<?php echo $user_type === 'freelancer' ? '../freelancer_home.php' : '../client_home.php'; ?>">
                 <img src="../images/logo.png" alt="WorkSnyc Logo" class="top-logo">
             </a>
         </div>
         <div class="nav-actions">
-            <svg class="notification-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-            </svg>
+ 
             <div class="profile-dropdown">
                 <div class="profile-avatar" id="profileAvatar" style="width: 36px; height: 36px; border-radius: 50%; background-color: #22c55e; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; cursor: pointer; overflow: hidden; flex-shrink: 0;">
                     <?php

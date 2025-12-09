@@ -29,6 +29,17 @@ class ChatApp {
     }
 
     setupEventListeners() {
+        // Sidebar toggle
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const chatSidebar = document.querySelector('.chat-sidebar');
+        
+        if (sidebarToggle && chatSidebar) {
+            sidebarToggle.addEventListener('click', () => {
+                chatSidebar.classList.toggle('mobile-hidden');
+                sidebarToggle.classList.toggle('active');
+            });
+        }
+
         // Message input
         const messageInput = document.getElementById('messageInput');
         const sendBtn = document.getElementById('sendBtn');

@@ -97,6 +97,11 @@ require_once __DIR__ . '/page/config.php';
             </div>
             <nav class="header-nav">
                 <?php if (isset($_SESSION['user_id']) && isset($_SESSION['user_type'])): ?>
+                    <a href="/page/messages.php" class="message-icon-link" title="Messages">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                    </a>
                     <div class="profile-dropdown">
                         <div class="profile-avatar" style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #16a34a, #15803d); display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; cursor: pointer; overflow: hidden; flex-shrink: 0;">
                             <?php

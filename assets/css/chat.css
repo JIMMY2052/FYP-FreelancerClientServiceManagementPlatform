@@ -1447,3 +1447,48 @@
     transform: translateY(1px);
     box-shadow: 0 2px 8px rgba(26, 179, 148, 0.25);
 }
+
+/* Sidebar Toggle Button */
+.sidebar-toggle-btn {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #333;
+    padding: 8px;
+    margin-right: 12px;
+    border-radius: 6px;
+    transition: background 0.3s ease;
+}
+
+.sidebar-toggle-btn:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.sidebar-toggle-btn.active {
+    background: rgba(26, 179, 148, 0.1);
+    color: #1ab394;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .sidebar-toggle-btn {
+        display: block;
+    }
+
+    .chat-sidebar.mobile-hidden {
+        display: none;
+        position: fixed;
+        left: 0;
+        top: 60px;
+        width: 100%;
+        height: calc(100vh - 60px);
+        background: white;
+        z-index: 999;
+        border-radius: 0;
+    }
+
+    .chat-sidebar.mobile-hidden {
+        display: block;
+    }
+}

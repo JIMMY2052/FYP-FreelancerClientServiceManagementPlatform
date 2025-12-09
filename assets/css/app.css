@@ -139,6 +139,24 @@ body {
     color: #22c55e;
 }
 
+.message-icon-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    color: #6b7280;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    margin-right: 12px;
+}
+
+.message-icon-link:hover {
+    color: #22c55e;
+    background: rgba(34, 197, 95, 0.1);
+}
+
 .profile-dropdown {
     position: relative;
     display: inline-block;
@@ -438,105 +456,105 @@ body {
     .header-container {
         padding: 1rem 1.5rem;
     }
-    
+
     .logo-img {
         height: 40px;
     }
-    
+
     .header-search {
         margin: 0 1rem;
         max-width: 300px;
     }
-    
+
     .search-input {
         padding: 0.625rem 1rem;
         font-size: 0.875rem;
     }
-    
+
     .btn {
         padding: 0.5rem 1.25rem;
         font-size: 0.875rem;
     }
-    
+
     .header-nav {
         gap: 0.75rem;
     }
-    
+
     .hero-section {
         flex-direction: column;
         padding: 3rem 1.5rem;
         gap: 2rem;
     }
-    
+
     .hero-content {
         align-items: center;
         text-align: center;
     }
-    
+
     .post-job-tagline {
         font-size: 2rem;
         text-align: center;
     }
-    
+
     .hero-subtitle {
         font-size: 1.125rem;
         text-align: center;
     }
-    
+
     .hero-img {
         max-width: 100%;
     }
-    
+
     .btn-post-job {
         padding: 1rem 2.5rem;
         font-size: 1.125rem;
     }
-    
+
     .feature-image-wrapper {
         height: 180px;
     }
-    
+
     .step-image-wrapper {
         max-width: 250px;
     }
-    
+
     .step-image {
         height: 180px;
     }
-    
+
     .step-number {
         width: 45px;
         height: 45px;
         font-size: 1.25rem;
     }
-    
+
     .form-container {
         padding: 1.5rem;
     }
-    
+
     .create-job-form p {
         font-size: 1.25rem;
     }
-    
+
     .create-job-form input[type="text"],
     .create-job-form input[type="number"],
     .create-job-form select {
         font-size: 1rem;
         padding: 0.875rem 1rem;
     }
-    
+
     .create-job-form input[type="text"]::placeholder {
         font-size: 1rem;
     }
-    
+
     .form-row {
         flex-direction: column;
     }
-    
+
     .form-buttons {
         flex-direction: column;
     }
-    
+
     .reset-btn,
     .submit-btn {
         font-size: 1rem;
@@ -549,67 +567,67 @@ body {
         padding: 0.875rem 1rem;
         flex-wrap: wrap;
     }
-    
+
     .logo-img {
         height: 35px;
     }
-    
+
     .header-search {
         order: 3;
         width: 100%;
         max-width: 100%;
         margin: 0.75rem 0 0 0;
     }
-    
+
     .search-input {
         padding: 0.625rem 1rem;
         font-size: 0.8125rem;
     }
-    
+
     .btn {
         padding: 0.5rem 1rem;
         font-size: 0.8125rem;
     }
-    
+
     .header-nav {
         gap: 0.5rem;
     }
-    
+
     .post-job-container {
         min-height: 50vh;
         padding: 1.5rem;
     }
-    
+
     .hero-section {
         padding: 2rem 1rem;
         gap: 1.5rem;
     }
-    
+
     .post-job-tagline {
         font-size: 1.75rem;
     }
-    
+
     .hero-subtitle {
         font-size: 1rem;
     }
-    
+
     .btn-post-job {
         padding: 1rem 2rem;
         font-size: 1rem;
     }
-    
+
     .feature-image-wrapper {
         height: 150px;
     }
-    
+
     .step-image-wrapper {
         max-width: 220px;
     }
-    
+
     .step-image {
         height: 150px;
     }
-    
+
     .step-number {
         width: 40px;
         height: 40px;
@@ -617,39 +635,39 @@ body {
         top: 10px;
         right: 10px;
     }
-    
+
     .form-container {
         padding: 1rem;
         min-height: calc(100vh - 80px);
     }
-    
+
     .create-job-form {
         gap: 1.25rem;
     }
-    
+
     .create-job-form p {
         font-size: 1.125rem;
     }
-    
+
     .create-job-form input[type="text"],
     .create-job-form input[type="number"],
     .create-job-form select {
         font-size: 0.9375rem;
         padding: 0.75rem 0.875rem;
     }
-    
+
     .create-job-form input[type="text"]::placeholder {
         font-size: 0.9375rem;
     }
-    
+
     .form-row {
         flex-direction: column;
     }
-    
+
     .form-buttons {
         flex-direction: column;
     }
-    
+
     .reset-btn,
     .submit-btn {
         font-size: 0.9375rem;
@@ -816,7 +834,8 @@ body {
 }
 
 /* Stats Section */
-.stats-section, .quick-stats-section {
+.stats-section,
+.quick-stats-section {
     padding: 4rem 0;
     background-color: rgb(159, 232, 112);
 }
@@ -930,49 +949,49 @@ body {
         font-size: 2rem;
         margin-bottom: 2rem;
     }
-    
+
     .features-section,
     .how-it-works-section,
     .cta-section {
         padding: 3rem 0;
     }
-    
+
     .features-grid {
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
         gap: 1.5rem;
     }
-    
+
     .feature-card {
         padding: 1.5rem;
     }
-    
+
     .steps-container {
         flex-direction: column;
         gap: 2rem;
     }
-    
+
     .stats-grid {
         grid-template-columns: repeat(2, 1fr);
         gap: 1.5rem;
     }
-    
+
     .stat-number {
         font-size: 2.5rem;
     }
-    
+
     .cta-title {
         font-size: 2rem;
     }
-    
+
     .cta-description {
         font-size: 1.125rem;
     }
-    
+
     .cta-buttons {
         flex-direction: column;
         align-items: center;
     }
-    
+
     .btn-cta {
         width: 100%;
         max-width: 300px;
@@ -983,48 +1002,48 @@ body {
     .container {
         padding: 0 1rem;
     }
-    
+
     .section-title {
         font-size: 1.75rem;
         margin-bottom: 1.5rem;
     }
-    
+
     .features-section,
     .how-it-works-section,
     .cta-section {
         padding: 2.5rem 0;
     }
-    
+
     .features-grid {
         grid-template-columns: 1fr;
         gap: 1.25rem;
     }
-    
+
     .feature-card {
         padding: 1.25rem;
     }
-    
+
     .feature-icon {
         font-size: 2.5rem;
     }
-    
+
     .feature-title {
         font-size: 1.25rem;
     }
-    
+
     .stats-grid {
         grid-template-columns: 1fr;
         gap: 1.25rem;
     }
-    
+
     .stat-number {
         font-size: 2rem;
     }
-    
+
     .cta-title {
         font-size: 1.75rem;
     }
-    
+
     .cta-description {
         font-size: 1rem;
     }
@@ -1456,7 +1475,7 @@ body {
         grid-template-columns: 1fr 1fr;
         gap: 2rem;
     }
-    
+
     .footer-section:first-child {
         grid-column: 1 / -1;
     }
@@ -1467,25 +1486,25 @@ body {
         padding: 2.5rem 0 1.25rem;
         margin-top: 3rem;
     }
-    
+
     .footer-container {
         padding: 0 1.5rem;
     }
-    
+
     .footer-content {
         grid-template-columns: 1fr;
         gap: 2rem;
         margin-bottom: 2rem;
     }
-    
+
     .footer-section:first-child {
         grid-column: 1;
     }
-    
+
     .footer-title {
         font-size: 1.25rem;
     }
-    
+
     .footer-heading {
         font-size: 1rem;
     }
@@ -1495,24 +1514,24 @@ body {
     .main-footer {
         padding: 2rem 0 1rem;
     }
-    
+
     .footer-container {
         padding: 0 1rem;
     }
-    
+
     .footer-content {
         gap: 1.5rem;
     }
-    
+
     .social-links {
         gap: 0.75rem;
     }
-    
+
     .social-link {
         width: 36px;
         height: 36px;
     }
-    
+
     .footer-copyright {
         font-size: 0.8125rem;
     }
@@ -1524,20 +1543,20 @@ body {
         flex-direction: column;
         text-align: center;
     }
-    
+
     .hero-title {
         font-size: 2.5rem;
     }
-    
+
     .hero-subtitle {
         font-size: 1.25rem;
     }
-    
+
     .categories-grid {
         grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
         gap: 1.5rem;
     }
-    
+
     .features-grid {
         grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     }
@@ -1547,54 +1566,54 @@ body {
     .home-hero-section {
         padding: 3rem 0;
     }
-    
+
     .hero-title {
         font-size: 2rem;
     }
-    
+
     .hero-subtitle {
         font-size: 1.125rem;
     }
-    
+
     .hero-buttons {
         flex-direction: column;
         width: 100%;
     }
-    
+
     .btn-hero {
         width: 100%;
         text-align: center;
     }
-    
+
     .categories-section,
     .platform-features-section,
     .how-it-works-section {
         padding: 3rem 0;
     }
-    
+
     .section-title {
         font-size: 2rem;
     }
-    
+
     .section-subtitle {
         font-size: 1.125rem;
     }
-    
+
     .categories-grid {
         grid-template-columns: 1fr;
         gap: 1.5rem;
     }
-    
+
     .features-grid {
         grid-template-columns: 1fr;
         gap: 1.5rem;
     }
-    
+
     .steps-container {
         flex-direction: column;
         gap: 2rem;
     }
-    
+
     .step-item {
         min-width: 100%;
     }
@@ -1604,39 +1623,39 @@ body {
     .home-hero-section {
         padding: 2rem 0;
     }
-    
+
     .hero-title {
         font-size: 1.75rem;
     }
-    
+
     .hero-subtitle {
         font-size: 1rem;
     }
-    
+
     .categories-section,
     .platform-features-section,
     .how-it-works-section {
         padding: 2.5rem 0;
     }
-    
+
     .section-title {
         font-size: 1.75rem;
     }
-    
+
     .section-subtitle {
         font-size: 1rem;
     }
-    
+
     .category-card,
     .feature-item {
         padding: 1.5rem;
     }
-    
+
     .category-icon,
     .feature-icon {
         font-size: 2.5rem;
     }
-    
+
     .step-number {
         width: 60px;
         height: 60px;
@@ -2102,19 +2121,19 @@ body {
         gap: 2rem;
         text-align: center;
     }
-    
+
     .freelancer-hero-section .hero-title {
         font-size: 2.5rem;
     }
-    
+
     .freelancer-hero-section .hero-subtitle {
         font-size: 1.25rem;
     }
-    
+
     .opportunities-grid {
         grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     }
-    
+
     .tools-grid {
         grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     }
@@ -2124,57 +2143,57 @@ body {
     .freelancer-hero-section {
         padding: 3rem 0;
     }
-    
+
     .freelancer-hero-section .hero-title {
         font-size: 2rem;
     }
-    
+
     .freelancer-hero-section .hero-subtitle {
         font-size: 1.125rem;
     }
-    
+
     .freelancer-hero-section .hero-buttons {
         flex-direction: column;
         width: 100%;
     }
-    
+
     .freelancer-hero-section .btn-hero {
         width: 100%;
     }
-    
+
     .quick-stats-section .stats-grid {
         grid-template-columns: repeat(2, 1fr);
         gap: 1rem;
     }
-    
+
     .quick-stats-section .stat-card {
         flex-direction: column;
         text-align: center;
         gap: 0.5rem;
     }
-    
+
     .opportunities-section,
     .freelancer-tools-section,
     .recent-activity-section {
         padding: 3rem 0;
     }
-    
+
     .opportunities-section .section-title,
     .freelancer-tools-section .section-title,
     .recent-activity-section .section-title {
         font-size: 2rem;
     }
-    
+
     .opportunities-section .section-subtitle,
     .freelancer-tools-section .section-subtitle {
         font-size: 1.125rem;
     }
-    
+
     .opportunities-grid {
         grid-template-columns: 1fr;
         gap: 1.5rem;
     }
-    
+
     .tools-grid {
         grid-template-columns: 1fr;
         gap: 1.5rem;
@@ -2185,70 +2204,70 @@ body {
     .freelancer-hero-section {
         padding: 2rem 0;
     }
-    
+
     .freelancer-hero-section .hero-title {
         font-size: 1.75rem;
     }
-    
+
     .freelancer-hero-section .hero-subtitle {
         font-size: 1rem;
     }
-    
+
     .quick-stats-section {
         padding: 2rem 0;
     }
-    
+
     .quick-stats-section .stats-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .quick-stats-section .stat-card {
         padding: 1rem;
     }
-    
+
     .quick-stats-section .stat-number {
         font-size: 1.75rem;
     }
-    
+
     .opportunities-section,
     .freelancer-tools-section,
     .recent-activity-section {
         padding: 2.5rem 0;
     }
-    
+
     .opportunities-section .section-title,
     .freelancer-tools-section .section-title,
     .recent-activity-section .section-title {
         font-size: 1.75rem;
     }
-    
+
     .opportunities-section .section-subtitle,
     .freelancer-tools-section .section-subtitle {
         font-size: 1rem;
     }
-    
+
     .opportunity-card,
     .tool-item {
         padding: 1.5rem;
     }
-    
+
     .opportunity-header {
         flex-direction: column;
     }
-    
+
     .opportunity-title {
         font-size: 1.25rem;
     }
-    
+
     .opportunity-budget {
         font-size: 1.125rem;
     }
-    
+
     .activity-item {
         gap: 1rem;
         padding: 1rem;
     }
-    
+
     .activity-icon {
         font-size: 1.5rem;
         width: 40px;
