@@ -344,23 +344,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $pdf->SetTextColor(0, 0, 0); // Black
     $pdf->SetDrawColor(0, 0, 0); // Black
     $pdf->SetLineWidth(0.3);
-    $pdf->Cell(0, 8, 'Gig: ' . $job_title, 0, 1, 'L', true);
+    $pdf->Cell(0, 8, 'Gig Title: ' . $job_title, 0, 1, 'L', true);
     $pdf->Ln(4);
 
 
-    // ===== INTRODUCTORY PARAGRAPH =====
-    $pdf->SetFont('times', '', 10);
-    $pdf->SetTextColor(0, 0, 0); // Black
-    $pdf->SetFillColor(249, 249, 249);
-    $pdf->SetDrawColor(0, 0, 0); // Black
-    $pdf->SetLineWidth(0.3);
-
-    $introText = 'This Services Agreement shall become effective on date (the "Execution Date") and is subject to the terms and conditions stated below between ' . $freelancer_name . ' (the "Service Provider") and ' . $client_name . ' (the "Client"), collectively referred to as the "Parties".';
-
-    // Add border box around intro paragraph
-    $pdf->SetXY(15, $pdf->GetY());
-    $pdf->MultiCell(0, 5, $introText, 'LRB', 'L', true);
-    $pdf->Ln(6);
 
     // ===== SCOPE OF WORK SECTION =====
     $pdf->SetTextColor(0, 0, 0); // Black
