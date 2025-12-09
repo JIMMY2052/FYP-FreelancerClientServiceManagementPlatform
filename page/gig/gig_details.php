@@ -594,8 +594,8 @@ $categoryData = [
         // Contact freelancer
         function contactFreelancer(freelancerId) {
             <?php if (isset($_SESSION['user_id']) && $_SESSION['user_type'] === 'client'): ?>
-                // Redirect to messages with freelancer
-                window.location.href = '../messages.php?freelancer=' + freelancerId;
+                // Redirect to messages with freelancer (parameter name must match messages.php)
+				window.location.href = '../messages.php?freelancer_id=' + freelancerId;
             <?php else: ?>
                 // Redirect to login
                 alert('Please log in as a client to contact this freelancer.');

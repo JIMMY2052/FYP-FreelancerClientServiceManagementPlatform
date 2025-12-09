@@ -652,6 +652,40 @@ elseif ($target_client_id && $user_type === 'freelancer') {
                 });
             }
         });
+
+        // Search conversations input validation
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('chatSearch');
+
+            if (!searchInput) return;
+
+            // Clean as user types
+            searchInput.addEventListener('input', function() {
+                // Remove leading spaces
+                if (this.value.startsWith(' ')) {
+                    this.value = this.value.trimStart();
+                }
+
+                // Limit maximum length
+                const maxLen = 50;
+                if (this.value.length > maxLen) {
+                    this.value = this.value.slice(0, maxLen);
+                }
+            });
+
+            // Trim when leaving the field
+            searchInput.addEventListener('blur', function() {
+                this.value = this.value.trim();
+            });
+
+            // Prevent searches that are only symbols
+            searchInput.addEventListener('change', function() {
+                const alnum = this.value.replace(/[^a-zA-Z0-9\s]/g, '');
+                if (!alnum.trim()) {
+                    this.value = '';
+                }
+            });
+        });
     </script>
 
     <style>
