@@ -316,6 +316,23 @@ class ChatApp {
                 const initials = this.getInitials(chat.name);
                 const time = this.formatTime(chat.lastMessageTime);
 
+                // Process last message preview - show only quote type if it's JSON
+                let messagePreview = chat.lastMessage;
+                try {
+                    const parsedMsg = JSON.parse(chat.lastMessage);
+                    if (parsedMsg && typeof parsedMsg === 'object' && parsedMsg.type) {
+                        if (parsedMsg.type === 'job_quote') {
+                            messagePreview = '💼 Project Quote';
+                        } else if (parsedMsg.type === 'gig_quote') {
+                            messagePreview = '✨ Gig Quote';
+                        } else if (parsedMsg.type === 'agreement') {
+                            messagePreview = '📋 Agreement';
+                        }
+                    }
+                } catch (e) {
+                    // Not JSON, use as-is
+                }
+
                 // Create avatar HTML - with profile picture if available
                 let avatarHTML = `<div class="chat-item-avatar">${initials}</div>`;
                 if (chat.profilePicture) {
@@ -333,7 +350,7 @@ class ChatApp {
                     ${avatarHTML}
                     <div class="chat-item-content">
                         <h3 class="chat-item-name">${this.escapeHtml(chat.name)}</h3>
-                        <p class="chat-item-preview">${this.escapeHtml(chat.lastMessage)}</p>
+                        <p class="chat-item-preview">${messagePreview}</p>
                     </div>
                     <div class="chat-item-time">${time}</div>
                 `;
@@ -509,7 +526,7 @@ class ChatApp {
                                         <div class="gig-quote-card-body">
                                             <p><strong>Gig:</strong> ${this.escapeHtml(parsedContent.gig_title || '')}</p>
                                             <p><strong>Price:</strong> ${this.escapeHtml(parsedContent.gig_price || '')}</p>
-                                            <p><strong>Delivery:</strong> ${this.escapeHtml(parsedContent.delivery_time || '')}</p>
+                                            <p><strong>Delivery Time:</strong> ${this.escapeHtml(parsedContent.delivery_time || '')}</p>
                                             <p><strong>Description:</strong><br>${this.escapeHtml(parsedContent.description || '')}</p>
                                         </div>
                                     </div>
@@ -747,9 +764,8 @@ class ChatApp {
                 this.selectedFiles = [];
                 this.displayFilePreview();
 
-                // Hard reload page so latest JS rendering runs (ensures
-                // special JSON messages like job quotes display correctly)
-                window.location.reload();
+                // Reload messages instead of full page reload to preserve scroll position
+                await this.loadMessages();
             } else {
                 const errorMsg = result.error || 'Unknown error';
                 console.error('[sendMessage] Server error:', errorMsg);

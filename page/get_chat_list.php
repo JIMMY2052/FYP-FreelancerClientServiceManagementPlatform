@@ -131,11 +131,28 @@ if ($user_type === 'freelancer') {
 
 $conn->close();
 
-// Truncate and sanitize
+// Process message previews - show only quote type if it's JSON
 foreach ($chats as &$chat) {
-    if (strlen($chat['lastMessage']) > 50) {
-        $chat['lastMessage'] = substr($chat['lastMessage'], 0, 50) . '...';
+    $messageText = $chat['lastMessage'];
+    
+    // Try to parse as JSON
+    $decoded = json_decode($messageText, true);
+    if ($decoded && isset($decoded['type'])) {
+        if ($decoded['type'] === 'job_quote') {
+            $messageText = '💼 Project Quote';
+        } elseif ($decoded['type'] === 'gig_quote') {
+            $messageText = '✨ Gig Quote';
+        } elseif ($decoded['type'] === 'agreement') {
+            $messageText = '📋 Agreement';
+        }
+    } else {
+        // Not JSON, truncate if needed
+        if (strlen($messageText) > 50) {
+            $messageText = substr($messageText, 0, 50) . '...';
+        }
     }
+    
+    $chat['lastMessage'] = $messageText;
 }
 
 echo json_encode($chats);
