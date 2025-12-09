@@ -17,7 +17,10 @@ if (isset($_POST['freelancer_id'])) {
 }
 if (isset($_POST['job_id'])) {
     $_SESSION['target_job_id'] = (int) $_POST['job_id'];
-    // Reset any previous dismissal when a fresh job is targeted
+    unset($_SESSION['quote_dismissed']);
+}
+if (isset($_POST['gig_id'])) {
+    $_SESSION['target_gig_id'] = (int) $_POST['gig_id'];
     unset($_SESSION['quote_dismissed']);
 }
 

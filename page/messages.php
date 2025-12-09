@@ -14,17 +14,20 @@ $user_id = $_SESSION['user_id'];
 $user_type = $_SESSION['user_type'];
 $user_email = $_SESSION['email'] ?? '';
 
-// Check if client_id / freelancer_id / job_id is passed via URL or stored in session (from POST entry)
+// Check if client_id / freelancer_id / job_id / gig_id is passed via URL or stored in session (from POST entry)
 $target_client_id = isset($_GET['client_id']) ? intval($_GET['client_id']) : ($_SESSION['target_client_id'] ?? null);
 $target_freelancer_id = isset($_GET['freelancer_id']) ? intval($_GET['freelancer_id']) : ($_SESSION['target_freelancer_id'] ?? null);
 $target_job_id = isset($_GET['job_id']) ? intval($_GET['job_id']) : ($_SESSION['target_job_id'] ?? null);
+$target_gig_id = isset($_GET['gig_id']) ? intval($_GET['gig_id']) : ($_SESSION['target_gig_id'] ?? null);
 $job_quote = null;
+$gig_quote = null;
 $show_quote = false; // Only show quote for the specific client conversation
 
 // If the user has already closed or sent the quote in this session,
 // do not show it again (these flags are set from frontend).
 if (isset($_SESSION['quote_dismissed']) && $_SESSION['quote_dismissed'] === true) {
     $target_job_id = null;
+    $target_gig_id = null;
 }
 
 // If a freelancer_id is provided and user is a client, create/open conversation with that freelancer
@@ -57,6 +60,28 @@ if ($target_freelancer_id && $user_type === 'client') {
     }
 
     $stmt->close();
+
+    // If coming from a gig, remember it in session so freelancer side can later see quote
+    if ($target_gig_id) {
+        $_SESSION['target_gig_id'] = $target_gig_id;
+    }
+
+     if ($target_gig_id) {
+        // If gig_id is provided (client contacted freelancer from gig), fetch gig details
+        $gig_sql = "SELECT GigID, Title, Description, Price, DeliveryTime FROM gig WHERE GigID = ?";
+        $gig_stmt = $conn->prepare($gig_sql);
+        $gig_stmt->bind_param('i', $target_gig_id);
+        $gig_stmt->execute();
+        $gig_result = $gig_stmt->get_result();
+        if ($gig_result->num_rows > 0) {
+            $gig_quote = $gig_result->fetch_assoc();
+            $show_quote = true; // Show quote when coming from a gig contact
+        } else {
+            error_log("Gig not found: GigID = " . $target_gig_id);
+        }
+        $gig_stmt->close();
+    }
+
     $conn->close();
 
     // Store the target conversation ID in session
@@ -104,7 +129,9 @@ elseif ($target_client_id && $user_type === 'freelancer') {
             $show_quote = true; // Show quote only when coming from Contact Me with a job
         }
         $job_stmt->close();
-    }
+    } 
+    
+
 
     $stmt->close();
     $conn->close();
@@ -113,10 +140,15 @@ elseif ($target_client_id && $user_type === 'freelancer') {
     $_SESSION['target_conversation_id'] = $conversation_id;
     $_SESSION['target_client_id'] = $target_client_id;
     $_SESSION['target_quote_client_id'] = $target_client_id; // Track which client this quote is for
-    if ($target_job_id) {
-        $_SESSION['target_job_id'] = $target_job_id;
+    if ($target_job_id || $target_gig_id) {
+        if ($target_job_id) {
+            $_SESSION['target_job_id'] = $target_job_id;
+        }
+        if ($target_gig_id) {
+            $_SESSION['target_gig_id'] = $target_gig_id;
+        }
         $_SESSION['target_job_quote'] = $job_quote;
-        // Reset dismissal flag when coming in with a fresh job quote
+        // Reset dismissal flag when coming in with a fresh quote context
         unset($_SESSION['quote_dismissed']);
     }
 }
@@ -281,7 +313,7 @@ elseif ($target_client_id && $user_type === 'freelancer') {
             </div>
 
             <!-- Job Quote Display (if coming from Contact Me with specific job) -->
-            <?php if ($show_quote && $job_quote): ?>
+            <?php if ($show_quote && $job_quote && $target_job_id): ?>
                 <div class="job-quote-container">
                     <div class="job-quote-header">
                         <h3 class="job-quote-title">Project Quote</h3>
@@ -299,7 +331,7 @@ elseif ($target_client_id && $user_type === 'freelancer') {
                         </div>
                         <div class="job-quote-item">
                             <span class="job-quote-label">Budget:</span>
-                            <span class="job-quote-value job-quote-budget">$<?php echo number_format($job_quote['Budget'], 2); ?></span>
+                            <span class="job-quote-value job-quote-budget">RM<?php echo number_format($job_quote['Budget'], 2); ?></span>
                         </div>
                         <div class="job-quote-item">
                             <span class="job-quote-label">Deadline:</span>
@@ -311,6 +343,42 @@ elseif ($target_client_id && $user_type === 'freelancer') {
                         </div>
                         <div class="job-quote-actions">
                             <button class="job-quote-btn job-quote-send" id="sendJobQuoteBtn" type="button">Send Quote</button>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <!-- Gig Quote Display (if client contacted freelancer from a gig) -->
+            <?php if ($target_gig_id && $target_gig_id ): ?>
+                <div class="job-quote-container">
+                    <div class="job-quote-header">
+                        <h3 class="job-quote-title">Gig Quote</h3>
+                        <button class="job-quote-close" id="jobQuoteClose" type="button">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="job-quote-content">
+                        <div class="job-quote-item">
+                            <span class="job-quote-label">Gig Title:</span>
+                            <span class="job-quote-value"><?php echo htmlspecialchars($gig_quote['Title']); ?></span>
+                        </div>
+                        <div class="job-quote-item">
+                            <span class="job-quote-label">Gig Price:</span>
+                            <span class="job-quote-value job-quote-budget">RM<?php echo number_format($gig_quote['Price'], 2); ?></span>
+                        </div>
+                        <div class="job-quote-item">
+                            <span class="job-quote-label">Delivery Time:</span>
+                            <span class="job-quote-value"><?php echo htmlspecialchars($gig_quote['DeliveryTime']); ?> days</span>
+                        </div>
+                        <div class="job-quote-description">
+                            <span class="job-quote-label">Description:</span>
+                            <p class="job-quote-text"><?php echo nl2br(htmlspecialchars(mb_strimwidth($gig_quote['Description'], 0, 150, '...'))); ?></p>
+                        </div>
+                        <div class="job-quote-actions">
+                            <button class="job-quote-btn job-quote-send" id="sendGigQuoteBtn" type="button">Send Quote</button>
                         </div>
                     </div>
                 </div>

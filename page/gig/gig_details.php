@@ -309,7 +309,7 @@ $categoryData = [
                         <i class="fas fa-shopping-cart"></i>
                         Order Now
                     </button>
-                    <button class="contact-btn" onclick="contactFreelancer(<?= $gig['FreelancerID'] ?>)">
+                    <button class="contact-btn" onclick="contactFreelancer(<?= $gig['FreelancerID'] ?>, <?= $gig['GigID'] ?>)">
                         <i class="fas fa-comment-dots"></i>
                         Contact Me
                     </button>
@@ -591,11 +591,30 @@ $categoryData = [
             thumbnail.classList.add('active');
         }
 
-        // Contact freelancer
-        function contactFreelancer(freelancerId) {
+        // Contact freelancer (from gig) and open chat with quote card
+        function contactFreelancer(freelancerId, gigId) {
             <?php if (isset($_SESSION['user_id']) && $_SESSION['user_type'] === 'client'): ?>
-                // Redirect to messages with freelancer (parameter name must match messages.php)
-				window.location.href = '../messages.php?freelancer_id=' + freelancerId;
+                // Submit POST form to messages_entry.php so IDs are stored in session
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '../messages_entry.php';
+
+                const freelancerInput = document.createElement('input');
+                freelancerInput.type = 'hidden';
+                freelancerInput.name = 'freelancer_id';
+                freelancerInput.value = freelancerId;
+                form.appendChild(freelancerInput);
+
+                if (gigId) {
+                    const gigInput = document.createElement('input');
+                    gigInput.type = 'hidden';
+                    gigInput.name = 'gig_id';
+                    gigInput.value = gigId;
+                    form.appendChild(gigInput);
+                }
+
+                document.body.appendChild(form);
+                form.submit();
             <?php else: ?>
                 // Redirect to login
                 alert('Please log in as a client to contact this freelancer.');

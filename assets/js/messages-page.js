@@ -4,6 +4,7 @@
 document.addEventListener('DOMContentLoaded', function () {
     const jobQuoteClose = document.getElementById('jobQuoteClose');
     const sendJobQuoteBtn = document.getElementById('sendJobQuoteBtn');
+    const sendGigQuoteBtn = document.getElementById('sendGigQuoteBtn');
     const jobQuoteContainer = document.querySelector('.job-quote-container');
 
     if (jobQuoteClose) {
@@ -18,6 +19,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // Handle Job Quote Send
     if (sendJobQuoteBtn) {
         sendJobQuoteBtn.addEventListener('click', function () {
             if (!window.chatApp || !window.chatApp.currentChat) {
@@ -51,6 +53,50 @@ document.addEventListener('DOMContentLoaded', function () {
             // After sending, hide the quote panel so it doesn't appear again
             if (jobQuoteContainer) {
                 jobQuoteContainer.style.display = 'none';
+            }
+
+            // Inform server this quote has been used/dismissed for this session
+            fetch('../page/messages_quote_dismiss.php', { method: 'POST', credentials: 'same-origin' })
+                .catch(() => { });
+        });
+    }
+
+    // Handle Gig Quote Send (similar to job but with different structure)
+    if (sendGigQuoteBtn) {
+        sendGigQuoteBtn.addEventListener('click', function () {
+            if (!window.chatApp || !window.chatApp.currentChat) {
+                alert('Please select a conversation first');
+                return;
+            }
+
+            // Get gig quote details from the gig quote container
+            const gigQuoteContainer = document.querySelectorAll('.job-quote-container')[document.querySelectorAll('.job-quote-container').length - 1]; // Get last container (gig quote)
+            const titleEl = gigQuoteContainer.querySelector('.job-quote-item .job-quote-value');
+            const priceEl = gigQuoteContainer.querySelector('.job-quote-budget');
+            const deliveryEl = gigQuoteContainer.querySelector('.job-quote-item:nth-child(3) .job-quote-value');
+            const descEl = gigQuoteContainer.querySelector('.job-quote-text');
+
+            const quotePayload = {
+                type: 'gig_quote',
+                gig_title: titleEl ? titleEl.textContent.trim() : '',
+                gig_price: priceEl ? priceEl.textContent.trim() : '',
+                delivery_time: deliveryEl ? deliveryEl.textContent.trim() : '',
+                description: descEl ? descEl.textContent.trim() : ''
+            };
+
+            const messageInput = document.getElementById('messageInput');
+            if (messageInput) {
+                messageInput.value = JSON.stringify(quotePayload);
+            }
+
+            // Trigger normal send flow
+            if (window.chatApp && typeof window.chatApp.sendMessage === 'function') {
+                window.chatApp.sendMessage();
+            }
+
+            // After sending, hide the gig quote panel
+            if (gigQuoteContainer) {
+                gigQuoteContainer.style.display = 'none';
             }
 
             // Inform server this quote has been used/dismissed for this session

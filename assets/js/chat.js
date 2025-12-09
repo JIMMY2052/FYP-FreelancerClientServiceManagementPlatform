@@ -501,6 +501,19 @@ class ChatApp {
                                         </div>
                                     </div>
                                 `;
+                            } else if (parsedContent && parsedContent.type === 'gig_quote') {
+                                // Render gig quote card
+                                contentHTML += `
+                                    <div class="message-content gig-quote-card">
+                                        <div class="gig-quote-card-header">✨ Gig Quote</div>
+                                        <div class="gig-quote-card-body">
+                                            <p><strong>Gig:</strong> ${this.escapeHtml(parsedContent.gig_title || '')}</p>
+                                            <p><strong>Price:</strong> ${this.escapeHtml(parsedContent.gig_price || '')}</p>
+                                            <p><strong>Delivery:</strong> ${this.escapeHtml(parsedContent.delivery_time || '')}</p>
+                                            <p><strong>Description:</strong><br>${this.escapeHtml(parsedContent.description || '')}</p>
+                                        </div>
+                                    </div>
+                                `;
                             } else {
                                 // Regular message
                                 contentHTML += `<div class="message-content">${this.escapeHtml(msg.content)}</div>`;
@@ -566,6 +579,19 @@ class ChatApp {
                                             <p><strong>Project:</strong> ${this.escapeHtml(parsedContent.project_title || '')}</p>
                                             <p><strong>Budget:</strong> ${this.escapeHtml(parsedContent.budget || '')}</p>
                                             <p><strong>Deadline:</strong> ${this.escapeHtml(parsedContent.deadline || '')}</p>
+                                            <p><strong>Description:</strong><br>${this.escapeHtml(parsedContent.description || '')}</p>
+                                        </div>
+                                    </div>
+                                `;
+                            } else if (parsedContent && parsedContent.type === 'gig_quote') {
+                                // Render gig quote card
+                                contentHTML += `
+                                    <div class="message-content gig-quote-card">
+                                        <div class="gig-quote-card-header">✨ Gig Quote</div>
+                                        <div class="gig-quote-card-body">
+                                            <p><strong>Gig:</strong> ${this.escapeHtml(parsedContent.gig_title || '')}</p>
+                                            <p><strong>Price:</strong> ${this.escapeHtml(parsedContent.gig_price || '')}</p>
+                                            <p><strong>Delivery:</strong> ${this.escapeHtml(parsedContent.delivery_time || '')}</p>
                                             <p><strong>Description:</strong><br>${this.escapeHtml(parsedContent.description || '')}</p>
                                         </div>
                                     </div>
