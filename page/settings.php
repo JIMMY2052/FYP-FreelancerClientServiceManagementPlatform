@@ -115,7 +115,8 @@ $conn->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Settings - WorkSync</title>
+    <title>Settings - WorkSnyc</title>
+    <link rel="icon" type="image/png" href="/images/tabLogo.png">
     <link rel="stylesheet" href="../assets/css/settings.css">
 </head>
 

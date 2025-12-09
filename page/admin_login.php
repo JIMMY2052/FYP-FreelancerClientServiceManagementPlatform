@@ -13,7 +13,8 @@ if (isset($_SESSION['admin_id'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Sign In - WorkSnyc</title>
+    <title>Admin Login - WorkSnyc</title>
+    <link rel="icon" type="image/png" href="/images/tabLogo.png">
     <link rel="stylesheet" href="../assets/css/style.css">
 </head>
 

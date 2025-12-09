@@ -28,7 +28,8 @@ $conn->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - WorkSnyc</title>
+    <title>Client Dashboard - WorkSnyc</title>
+    <link rel="icon" type="image/png" href="/images/tabLogo.png">
     <link rel="stylesheet" href="/assets/css/style.css">
     <link rel="stylesheet" href="/assets/css/dashboard.css">
     <link rel="stylesheet" href="/assets/css/profile.css">

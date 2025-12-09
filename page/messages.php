@@ -159,7 +159,8 @@ elseif ($target_client_id && $user_type === 'freelancer') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Messages - WorkSync</title>
+    <title>Messages - WorkSnyc</title>
+    <link rel="icon" type="image/png" href="/images/tabLogo.png">
     <link rel="stylesheet" href="../assets/css/style.css">
     <link rel="stylesheet" href="../assets/css/chat.css">
 </head>
