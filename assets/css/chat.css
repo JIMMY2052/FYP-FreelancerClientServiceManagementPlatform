@@ -1,3 +1,168 @@
+/* Job Quote Styling (moved from messages.php inline styles) */
+.job-quote-container {
+    background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+    border-left: 4px solid #1ab394;
+    margin: 0;
+    padding: 20px;
+    border-radius: 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Job quote card inside messages */
+.job-quote-card {
+    background: #f5f7fa;
+    border-radius: 12px;
+    padding: 12px 14px;
+    border-left: 4px solid #1ab394;
+}
+
+.job-quote-card-header {
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 8px;
+}
+
+.job-quote-card-body p {
+    margin: 2px 0;
+    font-size: 0.9rem;
+    color: #4b5563;
+}
+
+.job-quote-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.job-quote-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+.job-quote-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #999;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.3s ease;
+}
+
+.job-quote-close:hover {
+    color: #333;
+}
+
+.job-quote-content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.job-quote-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.9rem;
+}
+
+.job-quote-label {
+    font-weight: 600;
+    color: #555;
+    min-width: 110px;
+}
+
+.job-quote-value {
+    color: #2c3e50;
+    flex: 1;
+}
+
+.job-quote-budget {
+    background: rgb(159, 232, 112);
+    color: #333;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-weight: 700;
+    display: inline-block;
+    width: fit-content;
+}
+
+.job-quote-description {
+    margin-top: 8px;
+    padding: 12px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+.job-quote-description .job-quote-label {
+    display: block;
+    margin-bottom: 8px;
+}
+
+.job-quote-text {
+    margin: 0;
+    color: #666;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.job-quote-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.job-quote-btn {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.job-quote-send {
+    background: #1ab394;
+    color: white;
+    flex: 1;
+}
+
+.job-quote-send:hover {
+    background: #158a74;
+    box-shadow: 0 2px 8px rgba(26, 179, 148, 0.3);
+}
+
+.job-quote-send:active {
+    transform: scale(0.98);
+}
+
+@media (max-width: 768px) {
+    .job-quote-container {
+        padding: 15px;
+    }
+
+    .job-quote-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+    }
+
+    .job-quote-label {
+        min-width: auto;
+    }
+}
+
 /* Professional Chat Interface - Modern Design */
 
 :root {

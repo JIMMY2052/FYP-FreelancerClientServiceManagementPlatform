@@ -14,12 +14,18 @@ $user_id = $_SESSION['user_id'];
 $user_type = $_SESSION['user_type'];
 $user_email = $_SESSION['email'] ?? '';
 
-// Check if client_id is passed (from Contact Me button) or freelancer_id (from my_applications)
-$target_client_id = isset($_GET['client_id']) ? intval($_GET['client_id']) : null;
-$target_freelancer_id = isset($_GET['freelancer_id']) ? intval($_GET['freelancer_id']) : null;
-$target_job_id = isset($_GET['job_id']) ? intval($_GET['job_id']) : null;
+// Check if client_id / freelancer_id / job_id is passed via URL or stored in session (from POST entry)
+$target_client_id = isset($_GET['client_id']) ? intval($_GET['client_id']) : ($_SESSION['target_client_id'] ?? null);
+$target_freelancer_id = isset($_GET['freelancer_id']) ? intval($_GET['freelancer_id']) : ($_SESSION['target_freelancer_id'] ?? null);
+$target_job_id = isset($_GET['job_id']) ? intval($_GET['job_id']) : ($_SESSION['target_job_id'] ?? null);
 $job_quote = null;
 $show_quote = false; // Only show quote for the specific client conversation
+
+// If the user has already closed or sent the quote in this session,
+// do not show it again (these flags are set from frontend).
+if (isset($_SESSION['quote_dismissed']) && $_SESSION['quote_dismissed'] === true) {
+    $target_job_id = null;
+}
 
 // If a freelancer_id is provided and user is a client, create/open conversation with that freelancer
 if ($target_freelancer_id && $user_type === 'client') {
@@ -110,6 +116,8 @@ elseif ($target_client_id && $user_type === 'freelancer') {
     if ($target_job_id) {
         $_SESSION['target_job_id'] = $target_job_id;
         $_SESSION['target_job_quote'] = $job_quote;
+        // Reset dismissal flag when coming in with a fresh job quote
+        unset($_SESSION['quote_dismissed']);
     }
 }
 ?>
@@ -302,7 +310,7 @@ elseif ($target_client_id && $user_type === 'freelancer') {
                             <p class="job-quote-text"><?php echo nl2br(htmlspecialchars(mb_strimwidth($job_quote['Description'], 0, 150, '...'))); ?></p>
                         </div>
                         <div class="job-quote-actions">
-                            <button class="job-quote-btn job-quote-send" id="sendJobQuoteBtn" type="button">Send Quote to Client</button>
+                            <button class="job-quote-btn job-quote-send" id="sendJobQuoteBtn" type="button">Send Quote</button>
                         </div>
                     </div>
                 </div>
@@ -435,406 +443,8 @@ elseif ($target_client_id && $user_type === 'freelancer') {
     </script>
 
     <script src="../assets/js/chat.js"></script>
+    <script src="../assets/js/messages-page.js"></script>
 
-    <script>
-        // Job Quote functionality - only show for specific client
-        document.addEventListener('DOMContentLoaded', function() {
-            const jobQuoteClose = document.getElementById('jobQuoteClose');
-            const sendJobQuoteBtn = document.getElementById('sendJobQuoteBtn');
-            const jobQuoteContainer = document.querySelector('.job-quote-container');
-
-            if (jobQuoteClose) {
-                jobQuoteClose.addEventListener('click', function() {
-                    if (jobQuoteContainer) {
-                        jobQuoteContainer.style.display = 'none';
-                    }
-                });
-            }
-
-            if (sendJobQuoteBtn) {
-                sendJobQuoteBtn.addEventListener('click', function() {
-                    const jobTitle = document.querySelector('.job-quote-title');
-                    const jobBudget = document.querySelector('.job-quote-budget');
-
-                    if (window.chatApp && window.chatApp.currentChat) {
-                        const messageInput = document.getElementById('messageInput');
-                        const quoteMessage = `I am interested in your project: "${jobTitle ? jobTitle.parentElement.parentElement.querySelector('.job-quote-value:nth-child(2)').textContent : 'Project'}". I would like to discuss more about this opportunity.`;
-                        messageInput.value = quoteMessage;
-                        messageInput.focus();
-                        messageInput.style.height = 'auto';
-                        messageInput.style.height = Math.min(messageInput.scrollHeight, 100) + 'px';
-                    } else {
-                        alert('Please select a conversation first');
-                    }
-                });
-            }
-
-            // Monitor conversation changes and hide quote if switching to different client
-            if (window.showJobQuote && jobQuoteContainer) {
-                // Store original visibility method
-                const originalShowQuote = function() {
-                    if (window.chatApp && window.chatApp.currentOtherId === window.quoteClientId) {
-                        jobQuoteContainer.style.display = 'block';
-                    } else {
-                        jobQuoteContainer.style.display = 'none';
-                    }
-                };
-
-                // Check visibility whenever chat is selected
-                const observer = new MutationObserver(function() {
-                    if (window.chatApp && window.chatApp.currentOtherId !== undefined) {
-                        originalShowQuote();
-                    }
-                });
-
-                // Listen to header name changes (indicates conversation switch)
-                const headerName = document.getElementById('headerName');
-                if (headerName) {
-                    observer.observe(headerName, {
-                        childList: true,
-                        subtree: true,
-                        characterData: true
-                    });
-                }
-
-                // Initial check
-                originalShowQuote();
-            }
-        });
-
-        // Auto-load conversation if coming from "Contact Me" button or "Message" button
-        document.addEventListener('DOMContentLoaded', function() {
-            // File upload validation: only one file total per message
-            let hasAttachedFile = false;
-            const fileInput = document.getElementById('fileInput');
-            const photoInput = document.getElementById('photoInput');
-            const filePreview = document.getElementById('filePreview');
-            const sendBtn = document.getElementById('sendBtn');
-            const messageInput = document.getElementById('messageInput');
-            const fileWarningModal = document.getElementById('fileWarningModal');
-            const fileWarningText = document.getElementById('fileWarningText');
-            const fileWarningClose = document.getElementById('fileWarningClose');
-
-            function showFileWarning(message) {
-                if (!fileWarningModal || !fileWarningText) return;
-                fileWarningText.textContent = message;
-                fileWarningModal.style.display = 'block';
-            }
-
-            if (fileWarningClose && fileWarningModal) {
-                fileWarningClose.addEventListener('click', function() {
-                    fileWarningModal.style.display = 'none';
-                });
-                const overlay = fileWarningModal.querySelector('.modal-overlay');
-                if (overlay) {
-                    overlay.addEventListener('click', function() {
-                        fileWarningModal.style.display = 'none';
-                    });
-                }
-            }
-
-            function clearAttachmentState() {
-                hasAttachedFile = false;
-                if (fileInput) fileInput.value = '';
-                if (photoInput) photoInput.value = '';
-                if (filePreview) filePreview.innerHTML = '';
-            }
-
-            if (sendBtn) {
-                sendBtn.addEventListener('click', function() {
-                    // After sending, allow next file
-                    setTimeout(clearAttachmentState, 100);
-                });
-            }
-
-            function handleFileSelection(input, isImageOnly) {
-                if (!input || !input.files) return;
-
-                const file = input.files[0];
-                if (!file) return;
-
-				// If a file is already attached, block second attachment
-				if (hasAttachedFile) {
-					input.value = '';
-					showFileWarning('Only one attachment is allowed per message. Please send this message before adding another file.');
-					return;
-				}
-
-                // Simple client-side size validation (match 10MB server rule)
-                const maxSizeBytes = 10 * 1024 * 1024;
-                if (file.size > maxSizeBytes) {
-                    input.value = '';
-                    showFileWarning('The selected file exceeds the 10MB size limit.');
-                    return;
-                }
-
-                if (filePreview) {
-                    // Always allow only one file preview at a time
-                    filePreview.innerHTML = '';
-                    const item = document.createElement('div');
-                    item.className = 'file-preview-item';
-                    const nameSpan = document.createElement('span');
-                    nameSpan.textContent = file.name;
-                    item.appendChild(nameSpan);
-                    filePreview.appendChild(item);
-                }
-
-                // Mark that this message already has an attachment
-                hasAttachedFile = true;
-            }
-
-            if (fileInput) {
-                fileInput.addEventListener('change', function() {
-                    handleFileSelection(fileInput, false);
-                });
-            }
-
-            if (photoInput) {
-                photoInput.addEventListener('change', function() {
-                    handleFileSelection(photoInput, true);
-                });
-            }
-
-            if (window.autoLoadConversation) {
-                const targetUserId = window.targetClientId || window.targetFreelancerId;
-
-                if (targetUserId) {
-                    // Wait for chat list to load, then find and click the target conversation
-                    const maxAttempts = 20; // Try for up to 10 seconds (20 * 500ms)
-                    let attempts = 0;
-
-                    const autoLoadInterval = setInterval(function() {
-                        attempts++;
-
-                        // Try to find by user ID (more reliable)
-                        const conversationItem = document.querySelector(`[data-user-id="${targetUserId}"]`);
-
-                        if (conversationItem) {
-                            clearInterval(autoLoadInterval);
-                            conversationItem.click();
-                            // Auto-load target conversation without scrolling the page
-                            console.log('Auto-loaded conversation with user ID:', targetUserId);
-                        } else if (attempts >= maxAttempts) {
-                            clearInterval(autoLoadInterval);
-                            console.log('Could not find conversation with user ID:', targetUserId);
-                        }
-                    }, 500);
-                }
-            }
-        });
-
-        // View Profile functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            const viewProfileBtn = document.getElementById('viewProfileBtn');
-
-            if (viewProfileBtn) {
-                viewProfileBtn.addEventListener('click', function() {
-                    // Get the current chat's other user info from window chatApp
-                    if (window.chatApp && window.chatApp.currentChat) {
-                        const currentUserType = window.currentUserData.type;
-                        const chatOtherUserId = window.chatApp.currentOtherId;
-                        const chatOtherUserType = window.chatApp.currentOtherType;
-
-                        if (chatOtherUserId && chatOtherUserType) {
-                            if (currentUserType === 'freelancer' && chatOtherUserType === 'client') {
-                                // Freelancer viewing client profile
-                                window.location.href = 'view_client_profile.php?id=' + chatOtherUserId + '&source=messages';
-                            } else if (currentUserType === 'client' && chatOtherUserType === 'freelancer') {
-                                // Client viewing freelancer profile
-                                window.location.href = 'view_freelancer_profile.php?id=' + chatOtherUserId + '&source=messages';
-                            }
-                        } else {
-                            alert('Please select a conversation first');
-                        }
-                    } else {
-                        alert('Please select a conversation first');
-                    }
-                });
-            }
-        });
-
-        // Search conversations input validation
-        document.addEventListener('DOMContentLoaded', function() {
-            const searchInput = document.getElementById('chatSearch');
-
-            if (!searchInput) return;
-
-            // Clean as user types
-            searchInput.addEventListener('input', function() {
-                // Remove leading spaces
-                if (this.value.startsWith(' ')) {
-                    this.value = this.value.trimStart();
-                }
-
-                // Limit maximum length
-                const maxLen = 50;
-                if (this.value.length > maxLen) {
-                    this.value = this.value.slice(0, maxLen);
-                }
-            });
-
-            // Trim when leaving the field
-            searchInput.addEventListener('blur', function() {
-                this.value = this.value.trim();
-            });
-
-            // Prevent searches that are only symbols
-            searchInput.addEventListener('change', function() {
-                const alnum = this.value.replace(/[^a-zA-Z0-9\s]/g, '');
-                if (!alnum.trim()) {
-                    this.value = '';
-                }
-            });
-        });
-    </script>
-
-    <style>
-        /* Job Quote Styling */
-        .job-quote-container {
-            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
-            border-left: 4px solid #1ab394;
-            margin: 0;
-            padding: 20px;
-            border-radius: 0;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
-
-        .job-quote-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-        }
-
-        .job-quote-title {
-            margin: 0;
-            font-size: 1rem;
-            font-weight: 700;
-            color: #2c3e50;
-        }
-
-        .job-quote-close {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: #999;
-            padding: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: color 0.3s ease;
-        }
-
-        .job-quote-close:hover {
-            color: #333;
-        }
-
-        .job-quote-content {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .job-quote-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 0.9rem;
-        }
-
-        .job-quote-label {
-            font-weight: 600;
-            color: #555;
-            min-width: 110px;
-        }
-
-        .job-quote-value {
-            color: #2c3e50;
-            flex: 1;
-        }
-
-        .job-quote-budget {
-            background: rgb(159, 232, 112);
-            color: #333;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-weight: 700;
-            display: inline-block;
-            width: fit-content;
-        }
-
-        .job-quote-description {
-            margin-top: 8px;
-            padding: 12px;
-            background: white;
-            border-radius: 8px;
-            border: 1px solid #ddd;
-        }
-
-        .job-quote-description .job-quote-label {
-            display: block;
-            margin-bottom: 8px;
-        }
-
-        .job-quote-text {
-            margin: 0;
-            color: #666;
-            font-size: 0.9rem;
-            line-height: 1.5;
-        }
-
-        .job-quote-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid rgba(0, 0, 0, 0.1);
-        }
-
-        .job-quote-btn {
-            padding: 10px 16px;
-            border: none;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .job-quote-send {
-            background: #1ab394;
-            color: white;
-            flex: 1;
-        }
-
-        .job-quote-send:hover {
-            background: #158a74;
-            box-shadow: 0 2px 8px rgba(26, 179, 148, 0.3);
-        }
-
-        .job-quote-send:active {
-            transform: scale(0.98);
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .job-quote-container {
-                padding: 15px;
-            }
-
-            .job-quote-item {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 6px;
-            }
-
-            .job-quote-label {
-                min-width: auto;
-            }
-        }
-    </style>
 </body>
 
 </html>

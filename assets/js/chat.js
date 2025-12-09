@@ -463,7 +463,7 @@ class ChatApp {
                     if (msg.content || msg.attachmentPath) {
                         contentHTML = '<div class="message-bubble">';
                         if (msg.content) {
-                            // Check if content is JSON (agreement message)
+                            // Check if content is JSON (agreement message or job quote)
                             let parsedContent = null;
                             try {
                                 parsedContent = JSON.parse(msg.content);
@@ -486,6 +486,19 @@ class ChatApp {
                                             <button type="submit" class="btn-agreement-download">📥 Download PDF</button>
                                         </form>
                                         <a href="/page/agreement_view.php?agreement_id=${parsedContent.agreement_id}" class="btn-agreement-view">👁️ View Details</a>
+                                    </div>
+                                `;
+                            } else if (parsedContent && parsedContent.type === 'job_quote') {
+                                // Render job quote card
+                                contentHTML += `
+                                    <div class="message-content job-quote-card">
+                                        <div class="job-quote-card-header">💼 Project Quote</div>
+                                        <div class="job-quote-card-body">
+                                            <p><strong>Project:</strong> ${this.escapeHtml(parsedContent.project_title || '')}</p>
+                                            <p><strong>Budget:</strong> ${this.escapeHtml(parsedContent.budget || '')}</p>
+                                            <p><strong>Deadline:</strong> ${this.escapeHtml(parsedContent.deadline || '')}</p>
+                                            <p><strong>Description:</strong><br>${this.escapeHtml(parsedContent.description || '')}</p>
+                                        </div>
                                     </div>
                                 `;
                             } else {
@@ -519,7 +532,7 @@ class ChatApp {
                     if (msg.content || msg.attachmentPath) {
                         contentHTML = '<div class="message-bubble">';
                         if (msg.content) {
-                            // Check if content is JSON (agreement message)
+                            // Check if content is JSON (agreement message or job quote)
                             let parsedContent = null;
                             try {
                                 parsedContent = JSON.parse(msg.content);
@@ -542,6 +555,19 @@ class ChatApp {
                                             <button type="submit" class="btn-agreement-download">📥 Download PDF</button>
                                         </form>
                                         <a href="/page/agreement_view.php?agreement_id=${parsedContent.agreement_id}" class="btn-agreement-view">👁️ View Details</a>
+                                    </div>
+                                `;
+                            } else if (parsedContent && parsedContent.type === 'job_quote') {
+                                // Render job quote card
+                                contentHTML += `
+                                    <div class="message-content job-quote-card">
+                                        <div class="job-quote-card-header">💼 Project Quote</div>
+                                        <div class="job-quote-card-body">
+                                            <p><strong>Project:</strong> ${this.escapeHtml(parsedContent.project_title || '')}</p>
+                                            <p><strong>Budget:</strong> ${this.escapeHtml(parsedContent.budget || '')}</p>
+                                            <p><strong>Deadline:</strong> ${this.escapeHtml(parsedContent.deadline || '')}</p>
+                                            <p><strong>Description:</strong><br>${this.escapeHtml(parsedContent.description || '')}</p>
+                                        </div>
                                     </div>
                                 `;
                             } else {
@@ -695,11 +721,9 @@ class ChatApp {
                 this.selectedFiles = [];
                 this.displayFilePreview();
 
-                // Reload messages
-                await this.loadMessages();
-
-                // Reload chat list
-                await this.loadChatList();
+                // Hard reload page so latest JS rendering runs (ensures
+                // special JSON messages like job quotes display correctly)
+                window.location.reload();
             } else {
                 const errorMsg = result.error || 'Unknown error';
                 console.error('[sendMessage] Server error:', errorMsg);

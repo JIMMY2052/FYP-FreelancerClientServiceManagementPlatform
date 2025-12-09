@@ -455,10 +455,14 @@ try {
                         <i class="fas fa-paper-plane"></i>
                         Apply Now
                     </a>
-                    <a href="../messages.php?client_id=<?= $job['ClientID'] ?>&job_id=<?= $job['JobID'] ?>" class="contact-btn">
-                        <i class="fas fa-comment-dots"></i>
-                        Contact Client
-                    </a>
+                    <form action="../messages_entry.php" method="POST" style="margin:0;">
+                        <input type="hidden" name="client_id" value="<?= $job['ClientID'] ?>">
+                        <input type="hidden" name="job_id" value="<?= $job['JobID'] ?>">
+                        <button type="submit" class="contact-btn">
+                            <i class="fas fa-comment-dots"></i>
+                            Contact Client
+                        </button>
+                    </form>
                 </div>
 
                 <!-- Client Card -->
