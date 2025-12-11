@@ -1,9 +1,22 @@
 <?php
 session_start();
 
+// Prevent caching of this page
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Cache-Control: post-check=0, pre-check=0', false);
+header('Pragma: no-cache');
+header('Expires: Sat, 26 Jul 1997 05:00:00 GMT');
+
 // Check if user is logged in
 if (!isset($_SESSION['user_id']) || !in_array($_SESSION['user_type'], ['client', 'freelancer'])) {
     header('Location: ../login.php');
+    exit();
+}
+
+// Only allow POST requests - prevent direct access via URL or back button
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    $_SESSION['error'] = 'Invalid access. Please use the top-up form.';
+    header('Location: wallet.php');
     exit();
 }
 
@@ -13,6 +26,10 @@ if (!isset($_POST['amount']) || empty($_POST['amount'])) {
     header('Location: wallet.php');
     exit();
 }
+
+// Generate one-time token for this checkout session
+$_SESSION['checkout_token'] = bin2hex(random_bytes(32));
+$_SESSION['checkout_time'] = time();
 
 $amount = floatval($_POST['amount']);
 $return_to = isset($_POST['return_to']) ? $_POST['return_to'] : (isset($_GET['return_to']) ? $_GET['return_to'] : 'wallet');

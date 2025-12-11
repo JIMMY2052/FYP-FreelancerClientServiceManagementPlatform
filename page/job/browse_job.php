@@ -25,16 +25,14 @@ $min_budget = isset($_GET['min_budget']) && $_GET['min_budget'] !== '' ? floatva
 $max_budget = isset($_GET['max_budget']) && $_GET['max_budget'] !== '' ? floatval($_GET['max_budget']) : null;
 $sort = $_GET['sort'] ?? 'newest';
 
-// build query - only show available jobs that the freelancer hasn't applied to
+// build query - show all available jobs
 $sql = "SELECT j.JobID, j.ClientID, j.Title, j.Description, j.Budget, j.Deadline, j.Status, j.PostDate,
-               c.CompanyName, c.ProfilePicture
+               c.CompanyName, c.ProfilePicture,
+               (SELECT COUNT(*) FROM job_application WHERE JobID = j.JobID AND FreelancerID = ?) as HasApplied
         FROM job j
         INNER JOIN client c ON j.ClientID = c.ClientID
         WHERE j.Status = 'available'
-        AND j.PostDate <= NOW()
-        AND j.JobID NOT IN (
-            SELECT JobID FROM job_application WHERE FreelancerID = ?
-        )";
+        AND j.PostDate <= NOW()";
 
 $params = [];
 $types = '';
@@ -64,31 +62,31 @@ if ($max_budget !== null) {
 if ($sort === 'highest') {
     $sql .= " ORDER BY Budget DESC, PostDate DESC";
 } else { // newest (default)
-    // limit
-    $sql .= " LIMIT 100";
-
-    // Prepare params array with freelancerID as first parameter
-    $allParams = [$freelancerID];
-    $allTypes = 'i';
-
-    // Add filter params
-    foreach ($params as $param) {
-        $allParams[] = $param;
-    }
-    $allTypes .= $types;
-
-    $stmt = $conn->prepare($sql);
-    // bind dynamically
-    $bind_names = [$allTypes];
-    for ($i = 0; $i < count($allParams); $i++) {
-        $bind_name = 'bind' . $i;
-        $$bind_name = $allParams[$i];
-        $bind_names[] = &$$bind_name;
-    }
-    call_user_func_array([$stmt, 'bind_param'], $bind_names);
-    $stmt->execute();
-    call_user_func_array([$stmt, 'bind_param'], $bind_names);
+    $sql .= " ORDER BY PostDate DESC";
 }
+
+// limit
+$sql .= " LIMIT 100";
+
+// Prepare params array with freelancerID as first parameter
+$allParams = [$freelancerID];
+$allTypes = 'i';
+
+// Add filter params
+foreach ($params as $param) {
+    $allParams[] = $param;
+}
+$allTypes .= $types;
+
+$stmt = $conn->prepare($sql);
+// bind dynamically
+$bind_names = [$allTypes];
+for ($i = 0; $i < count($allParams); $i++) {
+    $bind_name = 'bind' . $i;
+    $$bind_name = $allParams[$i];
+    $bind_names[] = &$$bind_name;
+}
+call_user_func_array([$stmt, 'bind_param'], $bind_names);
 $stmt->execute();
 $result = $stmt->get_result();
 $jobs = $result->fetch_all(MYSQLI_ASSOC);
@@ -162,7 +160,11 @@ $jobs = $result->fetch_all(MYSQLI_ASSOC);
 
                     <div class="project-actions">
                         <a href="job_details.php?id=<?php echo $job['JobID']; ?>" class="btn-small">View Details</a>
-                        <a href="answer_questions.php?job_id=<?php echo $job['JobID']; ?>" class="btn-small">Apply</a>
+                        <?php if ($job['HasApplied'] > 0): ?>
+                            <span class="btn-applied">Applied</span>
+                        <?php else: ?>
+                            <a href="answer_questions.php?job_id=<?php echo $job['JobID']; ?>" class="btn-small">Apply</a>
+                        <?php endif; ?>
                     </div>
                 </div>
             <?php endforeach; ?>
@@ -449,6 +451,19 @@ $jobs = $result->fetch_all(MYSQLI_ASSOC);
 
     .project-actions .btn-contact:hover {
         background: #158a74;
+    }
+
+    .btn-applied {
+        flex: 1;
+        text-align: center;
+        padding: 11px 16px;
+        border-radius: 16px;
+        background: #6c757d;
+        color: white;
+        font-weight: 600;
+        cursor: default;
+        box-sizing: border-box;
+        display: inline-block;
     }
 
     /* No Projects Found */

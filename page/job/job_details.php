@@ -45,13 +45,17 @@ $pdo = getPDOConnection();
 try {
     $sql = "SELECT j.*, 
                    c.ClientID, c.CompanyName, c.Email as ClientEmail, 
-                   c.ProfilePicture, c.Description as ClientDescription
+                   c.ProfilePicture, c.Description as ClientDescription,
+                   (SELECT COUNT(*) FROM job_application WHERE JobID = j.JobID AND FreelancerID = :freelancerID) as HasApplied
             FROM job j
             INNER JOIN client c ON j.ClientID = c.ClientID
             WHERE j.JobID = :jobID AND j.Status = 'available'";
 
     $stmt = $pdo->prepare($sql);
-    $stmt->execute([':jobID' => $jobID]);
+    $stmt->execute([
+        ':jobID' => $jobID,
+        ':freelancerID' => $_SESSION['user_id']
+    ]);
     $job = $stmt->fetch();
 
     if (!$job) {
@@ -257,6 +261,28 @@ try {
             transform: translateY(-2px);
         }
 
+        .btn-applied {
+            width: 100%;
+            padding: 14px 20px;
+            background: #e9ecef;
+            color: #6c757d;
+            border: 2px solid #dee2e6;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: not-allowed;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            pointer-events: none;
+        }
+
+        .btn-applied i {
+            color: #28a745;
+        }
+
         /* Client Card */
         .client-card {
             background: white;
@@ -451,10 +477,17 @@ try {
                     <div class="budget-amount">
                         RM<?= number_format($job['Budget'], 2) ?>
                     </div>
-                    <a href="answer_questions.php?job_id=<?= $job['JobID'] ?>" class="apply-btn">
-                        <i class="fas fa-paper-plane"></i>
-                        Apply Now
-                    </a>
+                    <?php if ($job['HasApplied'] > 0): ?>
+                        <span class="btn-applied">
+                            <i class="fas fa-check-circle"></i>
+                            Applied
+                        </span>
+                    <?php else: ?>
+                        <a href="answer_questions.php?job_id=<?= $job['JobID'] ?>" class="apply-btn">
+                            <i class="fas fa-paper-plane"></i>
+                            Apply Now
+                        </a>
+                    <?php endif; ?>
                     <form action="../messages_entry.php" method="POST" style="margin:0;">
                         <input type="hidden" name="client_id" value="<?= $job['ClientID'] ?>">
                         <input type="hidden" name="job_id" value="<?= $job['JobID'] ?>">

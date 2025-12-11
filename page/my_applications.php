@@ -82,11 +82,11 @@ try {
     $clientJobs = [];
 }
 
-// Build query for applications
+// Build query for applications grouped by job
 $sql = "SELECT 
             ja.ApplicationID, ja.JobID, ja.FreelancerID, ja.CoverLetter, 
             ja.ProposedBudget, ja.EstimatedDuration, ja.Status, ja.AppliedAt,
-            j.Title as JobTitle, j.Budget as JobBudget, j.Deadline,
+            j.Title as JobTitle, j.Budget as JobBudget, j.Deadline, j.PostDate,
             f.FirstName, f.LastName, f.Email as FreelancerEmail, 
             f.ProfilePicture, f.Bio, f.Rating, f.TotalEarned
         FROM job_application ja
@@ -107,7 +107,7 @@ if ($statusFilter && in_array($statusFilter, ['pending', 'accepted', 'rejected',
     $params[':status'] = $statusFilter;
 }
 
-$sql .= " ORDER BY ja.ApplicationID DESC";
+$sql .= " ORDER BY j.PostDate DESC, ja.AppliedAt DESC";
 
 // Debug: Log the SQL query and parameters
 error_log('[my_applications] SQL: ' . $sql);
@@ -152,14 +152,28 @@ foreach ($applications as &$app) {
     }
 }
 
+// Group applications by JobID
+$groupedApplications = [];
+foreach ($applications as $app) {
+    $jobId = $app['JobID'];
+    if (!isset($groupedApplications[$jobId])) {
+        $groupedApplications[$jobId] = [
+            'JobID' => $app['JobID'],
+            'JobTitle' => $app['JobTitle'],
+            'JobBudget' => $app['JobBudget'],
+            'Deadline' => $app['Deadline'],
+            'PostDate' => $app['PostDate'],
+            'applications' => []
+        ];
+    }
+    $groupedApplications[$jobId]['applications'][] = $app;
+}
+
 ?>
 
 <div class="container">
     <div class="page-header">
         <h1>Job Applications</h1>
-        <a href="my_jobs.php" class="btn-secondary">
-            <i class="fas fa-briefcase"></i> My Jobs
-        </a>
     </div>
 
     <!-- Filters -->
@@ -197,10 +211,10 @@ foreach ($applications as &$app) {
 
     <!-- Results Count -->
     <p class="results-count">
-        <?= count($applications) ?> application(s) found
+        <?= count($groupedApplications) ?> job(s) with <?= count($applications) ?> application(s) found
     </p>
 
-    <?php if (empty($applications)): ?>
+    <?php if (empty($groupedApplications)): ?>
         <div class="no-applications">
             <i class="fas fa-inbox"></i>
             <p>No applications found.</p>
@@ -208,127 +222,153 @@ foreach ($applications as &$app) {
         </div>
     <?php else: ?>
         <div class="applications-list">
-            <?php foreach ($applications as $app): ?>
-                <div class="application-card">
-                    <div class="application-header">
-                        <div class="freelancer-info">
-                            <div class="freelancer-avatar">
-                                <?php if (!empty($app['ProfilePicture'])): ?>
-                                    <img src="/<?= htmlspecialchars($app['ProfilePicture']) ?>"
-                                        alt="<?= htmlspecialchars($app['FirstName']) ?>">
-                                <?php else: ?>
-                                    <div class="avatar-placeholder">
-                                        <?= strtoupper(substr($app['FirstName'], 0, 1) . substr($app['LastName'], 0, 1)) ?>
-                                    </div>
-                                <?php endif; ?>
-                            </div>
-                            <div class="freelancer-details">
-                                <h3 class="freelancer-name">
-                                    <?= htmlspecialchars($app['FirstName'] . ' ' . $app['LastName']) ?>
-                                    <small style="font-size: 0.7rem; color: #999; font-weight: normal;">(App #<?= $app['ApplicationID'] ?>)</small>
-                                </h3>
-                                <p class="freelancer-email"><?= htmlspecialchars($app['FreelancerEmail']) ?></p>
-                                <div class="freelancer-stats">
-                                    <span class="stat-item">
-                                        <i class="fas fa-star"></i>
-                                        <span style="color: rgb(159, 232, 112); font-weight: 700;"><?= $app['Rating'] ? number_format($app['Rating'], 1) : 'N/A' ?></span>
-                                    </span>
-                                </div>
+            <?php foreach ($groupedApplications as $jobGroup): ?>
+                <div class="job-group-card">
+                    <!-- Job Header -->
+                    <div class="job-group-header">
+                        <div class="job-info">
+                            <h2 class="job-title">
+                                <i class="fas fa-briefcase"></i>
+                                <?= htmlspecialchars($jobGroup['JobTitle']) ?>
+                            </h2>
+                            <div class="job-meta">
+                                <span class="meta-item">
+                                    <i class="fas fa-dollar-sign"></i>
+                                    Budget: RM <?= number_format($jobGroup['JobBudget'], 2) ?>
+                                </span>
+                                <span class="meta-item">
+                                    <i class="fas fa-calendar"></i>
+                                    Deadline: <?= date('M d, Y', strtotime($jobGroup['Deadline'])) ?>
+                                </span>
+                                <span class="meta-item">
+                                    <i class="fas fa-users"></i>
+                                    <?= count($jobGroup['applications']) ?> Applicant(s)
+                                </span>
                             </div>
                         </div>
-                        <span class="application-status status-<?= strtolower($app['Status']) ?>">
-                            <?= ucfirst($app['Status']) ?>
-                        </span>
                     </div>
 
-                    <div class="application-body">
-                        <div class="job-reference">
-                            <h4>
-                                <i class="fas fa-briefcase"></i>
-                                Applied for: <?= htmlspecialchars($app['JobTitle']) ?>
-                            </h4>
-                            <div class="job-meta">
-                                <span>Budget: RM <?= number_format($app['JobBudget'], 2) ?></span>
-                                <span>•</span>
-                                <span>Deadline: <?= date('M d, Y', strtotime($app['Deadline'])) ?></span>
-                            </div>
-                        </div>
-
-                        <?php if (!empty($app['CoverLetter'])): ?>
-                            <div class="section">
-                                <h5>Cover Letter</h5>
-                                <p class="cover-letter"><?= nl2br(htmlspecialchars($app['CoverLetter'])) ?></p>
-                            </div>
-                        <?php endif; ?>
-
-                        <div class="proposal-details">
-                            <?php if (!empty($app['ProposedBudget'])): ?>
-                                <div class="detail-item">
-                                    <span class="label">Proposed Budget:</span>
-                                    <span class="value">RM <?= number_format($app['ProposedBudget'], 2) ?></span>
-                                </div>
-                            <?php endif; ?>
-
-                            <?php if (!empty($app['EstimatedDuration'])): ?>
-                                <div class="detail-item">
-                                    <span class="label">Estimated Duration:</span>
-                                    <span class="value"><?= htmlspecialchars($app['EstimatedDuration']) ?></span>
-                                </div>
-                            <?php endif; ?>
-
-                            <div class="detail-item">
-                                <span class="label">Applied On:</span>
-                                <span class="value"><?= date('M d, Y H:i', strtotime($app['AppliedAt'])) ?></span>
-                            </div>
-                        </div>
-
-                        <?php if (!empty($app['answers'])): ?>
-                            <div class="section">
-                                <h5>
-                                    <i class="fas fa-question-circle"></i>
-                                    Screening Questions Answers
-                                </h5>
-                                <div class="answers-list">
-                                    <?php foreach ($app['answers'] as $index => $answer): ?>
-                                        <div class="answer-item">
-                                            <div class="question-text">
-                                                <strong>Q<?= $index + 1 ?>:</strong> <?= htmlspecialchars($answer['QuestionText']) ?>
-                                            </div>
-                                            <div class="answer-text">
-                                                <i class="fas fa-check-circle"></i>
-                                                <?php if ($answer['QuestionType'] === 'yes_no'): ?>
-                                                    <strong><?= ucfirst($answer['AnswerText']) ?></strong>
-                                                <?php else: ?>
-                                                    <?= htmlspecialchars($answer['OptionText']) ?>
-                                                <?php endif; ?>
+                    <!-- Freelancers List -->
+                    <div class="freelancers-list">
+                        <?php foreach ($jobGroup['applications'] as $app): ?>
+                            <div class="freelancer-application">
+                                <div class="freelancer-main">
+                                    <div class="freelancer-info">
+                                        <div class="freelancer-avatar">
+                                            <?php if (!empty($app['ProfilePicture'])): ?>
+                                                <img src="/<?= htmlspecialchars($app['ProfilePicture']) ?>"
+                                                    alt="<?= htmlspecialchars($app['FirstName']) ?>">
+                                            <?php else: ?>
+                                                <div class="avatar-placeholder">
+                                                    <?= strtoupper(substr($app['FirstName'], 0, 1) . substr($app['LastName'], 0, 1)) ?>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                        <div class="freelancer-details">
+                                            <h3 class="freelancer-name">
+                                                <a href="view_freelancer_profile.php?id=<?= $app['FreelancerID'] ?>" class="freelancer-name-link">
+                                                    <?= htmlspecialchars($app['FirstName'] . ' ' . $app['LastName']) ?>
+                                                </a>
+                                            </h3>
+                                            <p class="freelancer-email"><?= htmlspecialchars($app['FreelancerEmail']) ?></p>
+                                            <div class="freelancer-stats">
+                                                <span class="stat-item">
+                                                    <i class="fas fa-star"></i>
+                                                    <?= $app['Rating'] ? number_format($app['Rating'], 1) : 'N/A' ?>
+                                                </span>
+                                                <span class="stat-item">
+                                                    <i class="fas fa-clock"></i>
+                                                    Applied: <?= date('M d, Y', strtotime($app['AppliedAt'])) ?>
+                                                </span>
                                             </div>
                                         </div>
-                                    <?php endforeach; ?>
+                                    </div>
+                                    <div class="application-status-actions">
+                                        <span class="application-status status-<?= strtolower($app['Status']) ?>">
+                                            <?= ucfirst($app['Status']) ?>
+                                        </span>
+                                        <?php if ($app['Status'] === 'pending'): ?>
+                                            <div class="action-buttons">
+                                                <button class="btn-small btn-success" 
+                                                    onclick="showAcceptConfirmation(<?= $app['ApplicationID'] ?>, <?= $jobGroup['JobBudget'] ?>, '<?= htmlspecialchars(addslashes($jobGroup['JobTitle'])) ?>', <?= $app['JobID'] ?>)">
+                                                    <i class="fas fa-check"></i> Accept
+                                                </button>
+                                                <button class="btn-small btn-danger" 
+                                                    onclick="updateApplicationStatus(<?= $app['ApplicationID'] ?>, 'rejected')">
+                                                    <i class="fas fa-times"></i> Reject
+                                                </button>
+                                            </div>
+                                        <?php elseif ($app['Status'] === 'accepted'): ?>
+                                            <span class="acceptance-note">
+                                                <i class="fas fa-check-circle"></i> Accepted
+                                            </span>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+
+                                <!-- Expandable Details -->
+                                <div class="freelancer-expandable">
+                                    <button class="expand-toggle" onclick="toggleDetails(this)">
+                                        <i class="fas fa-chevron-down"></i> Show Details
+                                    </button>
+                                    <div class="freelancer-details-content" style="display: none;">
+                                        <?php if (!empty($app['CoverLetter'])): ?>
+                                            <div class="detail-section">
+                                                <h5><i class="fas fa-envelope"></i> Cover Letter</h5>
+                                                <p class="cover-letter"><?= nl2br(htmlspecialchars($app['CoverLetter'])) ?></p>
+                                            </div>
+                                        <?php endif; ?>
+
+                                        <div class="proposal-details">
+                                            <?php if (!empty($app['ProposedBudget'])): ?>
+                                                <div class="detail-item">
+                                                    <span class="label">Proposed Budget:</span>
+                                                    <span class="value">RM <?= number_format($app['ProposedBudget'], 2) ?></span>
+                                                </div>
+                                            <?php endif; ?>
+
+                                            <?php if (!empty($app['EstimatedDuration'])): ?>
+                                                <div class="detail-item">
+                                                    <span class="label">Estimated Duration:</span>
+                                                    <span class="value"><?= htmlspecialchars($app['EstimatedDuration']) ?></span>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+
+                                        <?php if (!empty($app['answers'])): ?>
+                                            <div class="detail-section">
+                                                <h5><i class="fas fa-question-circle"></i> Screening Questions</h5>
+                                                <div class="answers-list">
+                                                    <?php foreach ($app['answers'] as $index => $answer): ?>
+                                                        <div class="answer-item">
+                                                            <div class="question-text">
+                                                                <strong>Q<?= $index + 1 ?>:</strong> <?= htmlspecialchars($answer['QuestionText']) ?>
+                                                            </div>
+                                                            <div class="answer-text">
+                                                                <?php if ($answer['QuestionType'] === 'yes_no'): ?>
+                                                                    <strong><?= ucfirst($answer['AnswerText']) ?></strong>
+                                                                <?php else: ?>
+                                                                    <?= htmlspecialchars($answer['OptionText']) ?>
+                                                                <?php endif; ?>
+                                                            </div>
+                                                        </div>
+                                                    <?php endforeach; ?>
+                                                </div>
+                                            </div>
+                                        <?php endif; ?>
+
+                                        <div class="detail-actions">
+                                            <a href="view_freelancer_profile.php?id=<?= $app['FreelancerID'] ?>" class="btn-small">
+                                                <i class="fas fa-user"></i> View Profile
+                                            </a>
+                                            <a href="messages.php?freelancer_id=<?= $app['FreelancerID'] ?>&job_id=<?= $app['JobID'] ?>" class="btn-small">
+                                                <i class="fas fa-comment"></i> Message
+                                            </a>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        <?php endif; ?>
-                    </div>
-
-                    <div class="application-footer">
-                        <a href="view_freelancer_profile.php?id=<?= $app['FreelancerID'] ?>" class="btn-small">
-                            <i class="fas fa-user"></i> View Profile
-                        </a>
-                        <a href="messages.php?freelancer_id=<?= $app['FreelancerID'] ?>&job_id=<?= $app['JobID'] ?>" class="btn-small">
-                            <i class="fas fa-comment"></i> Message
-                        </a>
-
-                        <?php if ($app['Status'] === 'pending'): ?>
-                            <button class="btn-small btn-success" onclick="showAcceptConfirmation(<?= $app['ApplicationID'] ?>, <?= $app['JobBudget'] ?>, '<?= htmlspecialchars($app['JobTitle']) ?>')">
-                                <i class="fas fa-check"></i> Accept
-                            </button>
-                            <button class="btn-small btn-danger" onclick="updateApplicationStatus(<?= $app['ApplicationID'] ?>, 'rejected')">
-                                <i class="fas fa-times"></i> Reject
-                            </button>
-                        <?php elseif ($app['Status'] === 'accepted'): ?>
-                            <span class="acceptance-note">
-                                <i class="fas fa-check-circle"></i> Application accepted - Agreement in progress
-                            </span>
-                        <?php endif; ?>
+                        <?php endforeach; ?>
                     </div>
                 </div>
             <?php endforeach; ?>
@@ -394,6 +434,33 @@ foreach ($applications as &$app) {
                 <button class="btn-modal-secondary" onclick="closeInsufficientBalanceModal()">Cancel</button>
                 <button class="btn-modal-primary" onclick="goToTopUp()" style="background: #28a745;">
                     <i class="fas fa-wallet"></i> Top Up Wallet
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reject Confirmation Modal -->
+    <div id="rejectConfirmationModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Reject Application</h2>
+                <button class="modal-close" onclick="closeRejectConfirmation()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="text-align: center; padding: 20px 0;">
+                    <i class="fas fa-exclamation-circle" style="font-size: 4rem; color: #dc3545; margin-bottom: 20px;"></i>
+                    <p style="font-size: 1.1rem; color: #2c3e50; margin-bottom: 15px;">
+                        Are you sure you want to reject this application?
+                    </p>
+                    <p style="font-size: 0.9rem; color: #666;">
+                        This action cannot be undone. The freelancer will be notified of the rejection.
+                    </p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-modal-secondary" onclick="closeRejectConfirmation()">Cancel</button>
+                <button class="btn-modal-primary" onclick="confirmReject()" style="background: #dc3545;">
+                    <i class="fas fa-times"></i> Reject Application
                 </button>
             </div>
         </div>
@@ -638,10 +705,11 @@ foreach ($applications as &$app) {
     .applications-list {
         display: flex;
         flex-direction: column;
-        gap: 20px;
+        gap: 25px;
     }
 
-    .application-card {
+    /* Job Group Card */
+    .job-group-card {
         background: white;
         border-radius: 16px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
@@ -649,23 +717,90 @@ foreach ($applications as &$app) {
         overflow: hidden;
     }
 
-    .application-card:hover {
+    .job-group-card:hover {
         box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
     }
 
-    .application-header {
+    .job-group-header {
+        padding: 25px;
+        background: linear-gradient(135deg, #f8fafc 0%, #e9ecef 100%);
+        border-bottom: 2px solid rgb(159, 232, 112);
+    }
+
+    .job-info {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .job-title {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .job-title i {
+        color: rgb(159, 232, 112);
+    }
+
+    .job-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        font-size: 0.9rem;
+        color: #666;
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .meta-item i {
+        color: rgb(159, 232, 112);
+    }
+
+    /* Freelancers List */
+    .freelancers-list {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .freelancer-application {
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .freelancer-application:last-child {
+        border-bottom: none;
+    }
+
+    .freelancer-main {
         display: flex;
         justify-content: space-between;
         align-items: center;
         padding: 20px 25px;
+        background: white;
+        transition: background 0.3s ease;
+    }
+
+    .freelancer-application:hover .freelancer-main {
         background: #f8fafc;
-        border-bottom: 1px solid #e9ecef;
     }
 
     .freelancer-info {
         display: flex;
         gap: 15px;
         align-items: center;
+        flex: 1;
+    }
+
+    .freelancer-avatar {
+        flex-shrink: 0;
     }
 
     .freelancer-avatar img,
@@ -686,11 +821,29 @@ foreach ($applications as &$app) {
         font-size: 1.2rem;
     }
 
+    .freelancer-details {
+        flex: 1;
+    }
+
     .freelancer-name {
         font-size: 1.1rem;
         font-weight: 700;
         color: #2c3e50;
         margin: 0 0 4px 0;
+    }
+
+    .freelancer-name-link {
+        color: #2c3e50;
+        text-decoration: none;
+        transition: color 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .freelancer-name-link:hover {
+        color: rgb(159, 232, 112);
+        text-decoration: underline;
     }
 
     .freelancer-email {
@@ -706,9 +859,26 @@ foreach ($applications as &$app) {
         color: #555;
     }
 
+    .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
     .stat-item i {
         color: rgb(159, 232, 112);
-        margin-right: 4px;
+    }
+
+    .application-status-actions {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 10px;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 8px;
     }
 
     .application-status {
@@ -739,44 +909,66 @@ foreach ($applications as &$app) {
         color: #383d41;
     }
 
-    .application-body {
-        padding: 25px;
-    }
-
-    .job-reference {
-        padding: 15px;
-        background: #f8fafc;
-        border-radius: 12px;
-        margin-bottom: 20px;
-    }
-
-    .job-reference h4 {
-        font-size: 1rem;
-        font-weight: 700;
-        color: #2c3e50;
-        margin: 0 0 8px 0;
+    .acceptance-note {
+        font-size: 0.85rem;
+        color: #155724;
+        font-weight: 600;
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 6px;
     }
 
-    .job-reference h4 i {
-        color: rgb(159, 232, 112);
+    /* Expandable Details */
+    .freelancer-expandable {
+        padding: 0 25px 15px 25px;
     }
 
-    .job-meta {
-        font-size: 0.85rem;
-        color: #666;
+    .expand-toggle {
+        width: 100%;
+        padding: 12px 16px;
+        background: #f8fafc;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #2c3e50;
+        cursor: pointer;
+        transition: all 0.3s ease;
         display: flex;
+        align-items: center;
+        justify-content: center;
         gap: 8px;
     }
 
-    .section {
+    .expand-toggle:hover {
+        background: #e9ecef;
+    }
+
+    .expand-toggle i {
+        transition: transform 0.3s ease;
+    }
+
+    .expand-toggle.expanded i {
+        transform: rotate(180deg);
+    }
+
+    .freelancer-details-content {
+        margin-top: 15px;
+        padding: 20px;
+        background: #f8fafc;
+        border-radius: 12px;
+    }
+
+    .detail-section {
         margin-bottom: 20px;
     }
 
-    .section h5 {
-        font-size: 0.9rem;
+    .detail-section:last-child {
+        margin-bottom: 0;
+    }
+
+    .detail-section h5 {
+        font-size: 0.95rem;
         font-weight: 700;
         color: #2c3e50;
         margin: 0 0 12px 0;
@@ -785,7 +977,7 @@ foreach ($applications as &$app) {
         gap: 8px;
     }
 
-    .section h5 i {
+    .detail-section h5 i {
         color: rgb(159, 232, 112);
     }
 
@@ -794,6 +986,9 @@ foreach ($applications as &$app) {
         line-height: 1.7;
         font-size: 0.95rem;
         margin: 0;
+        padding: 15px;
+        background: white;
+        border-radius: 8px;
     }
 
     .proposal-details {
@@ -801,9 +996,9 @@ foreach ($applications as &$app) {
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
         gap: 15px;
         padding: 15px;
-        background: #f8fafc;
-        border-radius: 12px;
-        margin-bottom: 20px;
+        background: white;
+        border-radius: 8px;
+        margin-bottom: 15px;
     }
 
     .detail-item {
@@ -828,41 +1023,35 @@ foreach ($applications as &$app) {
     .answers-list {
         display: flex;
         flex-direction: column;
-        gap: 12px;
+        gap: 10px;
     }
 
     .answer-item {
-        padding: 15px;
-        background: #f8fafc;
-        border-radius: 12px;
-        border-left: 4px solid rgb(159, 232, 112);
+        padding: 12px 15px;
+        background: white;
+        border-radius: 8px;
+        border-left: 3px solid rgb(159, 232, 112);
     }
 
     .question-text {
         color: #2c3e50;
         font-size: 0.9rem;
-        margin-bottom: 8px;
+        margin-bottom: 6px;
+        font-weight: 600;
     }
 
     .answer-text {
         color: #555;
-        font-size: 0.95rem;
-        display: flex;
-        align-items: center;
-        gap: 8px;
+        font-size: 0.9rem;
+        padding-left: 10px;
     }
 
-    .answer-text i {
-        color: rgb(159, 232, 112);
-    }
-
-    .application-footer {
+    .detail-actions {
         display: flex;
         gap: 10px;
-        padding: 15px 25px;
-        background: #f8fafc;
+        margin-top: 15px;
+        padding-top: 15px;
         border-top: 1px solid #e9ecef;
-        flex-wrap: wrap;
     }
 
     .btn-small {
@@ -1130,12 +1319,38 @@ foreach ($applications as &$app) {
 </style>
 
 <script>
+    let pendingRejection = null;
+    let pendingAcceptanceData = null;
+
+    function toggleDetails(button) {
+        const content = button.nextElementSibling;
+        const icon = button.querySelector('i');
+        
+        if (content.style.display === 'none') {
+            content.style.display = 'block';
+            button.classList.add('expanded');
+            button.innerHTML = '<i class="fas fa-chevron-up"></i> Hide Details';
+        } else {
+            content.style.display = 'none';
+            button.classList.remove('expanded');
+            button.innerHTML = '<i class="fas fa-chevron-down"></i> Show Details';
+        }
+    }
+
     function updateApplicationStatus(applicationId, newStatus) {
-        if (!confirm(`Are you sure you want to ${newStatus} this application?`)) {
+        if (newStatus === 'rejected') {
+            // Show reject confirmation modal
+            pendingRejection = { applicationId, newStatus };
+            document.getElementById('rejectConfirmationModal').style.display = 'flex';
             return;
         }
 
-        // TODO: Implement AJAX call to update application status
+        // For other statuses, proceed directly
+        processStatusUpdate(applicationId, newStatus);
+    }
+
+    function processStatusUpdate(applicationId, newStatus) {
+        // Implement AJAX call to update application status
         fetch('update_application_status.php', {
                 method: 'POST',
                 headers: {
@@ -1157,10 +1372,23 @@ foreach ($applications as &$app) {
             });
     }
 
+    function closeRejectConfirmation() {
+        document.getElementById('rejectConfirmationModal').style.display = 'none';
+        pendingRejection = null;
+    }
+
+    function confirmReject() {
+        if (pendingRejection) {
+            const { applicationId, newStatus } = pendingRejection;
+            closeRejectConfirmation();
+            processStatusUpdate(applicationId, newStatus);
+        }
+    }
+
     // Acceptance confirmation modal functions
     const clientBalance = <?= $clientBalance ?>;
 
-    function showAcceptConfirmation(applicationId, jobBudget, jobTitle) {
+    function showAcceptConfirmation(applicationId, jobBudget, jobTitle, jobId) {
         // Check if client has sufficient balance
         if (clientBalance < jobBudget) {
             // Show insufficient balance modal
@@ -1168,11 +1396,12 @@ foreach ($applications as &$app) {
             return;
         }
 
-        // Store the data
+        // Store the data including jobId for rejecting other applications
         pendingAcceptanceData = {
             applicationId: applicationId,
             jobBudget: jobBudget,
-            jobTitle: jobTitle
+            jobTitle: jobTitle,
+            jobId: jobId
         };
 
         document.getElementById('modalJobBudget').textContent = 'RM ' + parseFloat(jobBudget).toLocaleString('en-MY', {
@@ -1236,9 +1465,14 @@ foreach ($applications as &$app) {
 
     // Close modal when clicking outside
     document.addEventListener('click', function(e) {
-        const modal = document.getElementById('acceptConfirmationModal');
-        if (e.target === modal) {
+        const acceptModal = document.getElementById('acceptConfirmationModal');
+        const rejectModal = document.getElementById('rejectConfirmationModal');
+        
+        if (e.target === acceptModal) {
             closeAcceptConfirmation();
+        }
+        if (e.target === rejectModal) {
+            closeRejectConfirmation();
         }
     });
 </script>

@@ -518,10 +518,6 @@ $conn->close();
 
     <div class="main-content">
         <div class="page-container">
-            <a href="<?= $user_type === 'client' ? 'client_dashboard.php' : 'freelancer_dashboard.php' ?>" class="back-link">
-                ← Back to Dashboard
-            </a>
-
             <div class="page-header">
                 <h1>Ongoing Projects</h1>
                 <p>Track and manage your active collaborations</p>

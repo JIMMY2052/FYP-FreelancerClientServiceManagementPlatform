@@ -900,15 +900,14 @@ $categoryData = [
             return;
         }
 
-        // Check if already exists
-        if (tags.includes(tagText)) {
-            alert('This tag already exists!');
+        // Check limit first - silently prevent adding more tags
+        if (tags.length >= MAX_TAGS) {
             return;
         }
 
-        // Check limit
-        if (tags.length >= MAX_TAGS) {
-            alert(`Maximum ${MAX_TAGS} tags allowed!`);
+        // Check if already exists - only show alert if under the limit
+        if (tags.includes(tagText)) {
+            alert('This tag already exists!');
             return;
         }
 

@@ -22,6 +22,20 @@ if (!$jobID) {
     exit();
 }
 
+// Generate access token if not exists (first time access)
+if (!isset($_SESSION['apply_page_token_' . $jobID])) {
+    $_SESSION['apply_page_token_' . $jobID] = bin2hex(random_bytes(32));
+    $_SESSION['apply_page_time_' . $jobID] = time();
+}
+
+// Check if application was already submitted (prevent back button after submission)
+if (isset($_SESSION['application_submitted_' . $jobID])) {
+    unset($_SESSION['application_submitted_' . $jobID]);
+    $_SESSION['info'] = 'You have already submitted your application for this job.';
+    header('Location: job_details.php?id=' . $jobID);
+    exit();
+}
+
 if (!function_exists('getPDOConnection')) {
     function getPDOConnection(): PDO
     {
@@ -699,6 +713,26 @@ try {
             questionCard.style.borderColor = '#e9ecef';
         });
     });
+    
+    // Prevent back navigation after form submission
+    let formSubmitted = false;
+    document.getElementById('applicationForm').addEventListener('submit', function() {
+        formSubmitted = true;
+    });
+    
+    // Clear history entry on page load to prevent back button
+    if (window.history && window.history.pushState) {
+        window.history.pushState('forward', null, window.location.href);
+        window.onpopstate = function() {
+            if (formSubmitted) {
+                // If form was submitted, redirect to browse jobs
+                window.location.href = 'browse_job.php';
+            } else {
+                // Otherwise, allow back to job details
+                window.history.forward();
+            }
+        };
+    }
 </script>
 
 <?php

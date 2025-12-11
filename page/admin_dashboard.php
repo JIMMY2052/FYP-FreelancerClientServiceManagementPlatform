@@ -813,5 +813,6 @@ $conn->close();
                 max-height: 95vh;
             }
         }
+    </style>
 
-        </body></html>
+    </body></html>

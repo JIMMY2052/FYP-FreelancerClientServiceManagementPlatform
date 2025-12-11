@@ -21,11 +21,11 @@ include '../../_head.php';
 
 <div class="form-container">
     <form method="POST" action="saveJob.php" class="create-job-form">
-        <p>Job Title</p>
+        <p>Project Title</p>
         <input type="text" value="<?php echo htmlspecialchars($jobTitle); ?>" disabled>
         <input type="hidden" name="title" value="<?php echo htmlspecialchars($jobTitle); ?>">
 
-        <p>Job Description</p>
+        <p>Project Description</p>
         <input type="text" value="<?php echo htmlspecialchars($jobDescription); ?>" disabled>
         <input type="hidden" name="description" value="<?php echo htmlspecialchars($jobDescription); ?>">
 
@@ -41,7 +41,7 @@ include '../../_head.php';
         <input type="text" value="<?php echo htmlspecialchars($postDate); ?>" disabled>
         <input type="hidden" name="postDate" value="<?php echo htmlspecialchars($postDate); ?>">
 
-        <p>Deadline</p>
+        <p>Expiry Date</p>
         <input type="text" value="<?php echo htmlspecialchars($deliveryPeriod); ?>" disabled>
         <input type="hidden" name="deadline" value="<?php echo htmlspecialchars($deliveryPeriod); ?>">
 

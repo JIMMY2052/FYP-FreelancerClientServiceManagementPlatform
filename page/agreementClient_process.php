@@ -235,6 +235,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     $update_app_stmt->close();
 
+    // Reject all other pending applications for the same job
+    $reject_others_sql = "UPDATE job_application 
+                          SET Status = 'rejected', UpdatedAt = NOW() 
+                          WHERE JobID = ? 
+                          AND ApplicationID != ? 
+                          AND Status = 'pending'";
+    $reject_others_stmt = $conn->prepare($reject_others_sql);
+    $reject_others_stmt->bind_param('ii', $job_id, $application_id);
+    
+    if ($reject_others_stmt->execute()) {
+        $rejected_count = $reject_others_stmt->affected_rows;
+        error_log("Automatically rejected $rejected_count other pending applications for job #$job_id");
+    } else {
+        error_log("Failed to reject other applications: " . $reject_others_stmt->error);
+    }
+    $reject_others_stmt->close();
+
     // Update job status to 'processing' when agreement is created and funds are locked
     $update_job_sql = "UPDATE job SET Status = 'processing' WHERE JobID = ?";
     $update_job_stmt = $conn->prepare($update_job_sql);

@@ -165,7 +165,7 @@ $years_experience = $now->diff($member_since)->y + 1;
 
     <div class="profile-breadcrumb">
         <div class="breadcrumb-container">
-            <a href="<?= isset($_GET['source']) && $_GET['source'] === 'messages' ? 'messages.php' : 'gig/browse_gigs.php' ?>"><i class="fas fa-arrow-left"></i> Back</a>
+            <a href="javascript:history.back()"><i class="fas fa-arrow-left"></i> Back</a>
         </div>
     </div>
 
@@ -217,6 +217,21 @@ $years_experience = $now->diff($member_since)->y + 1;
                 <?php if (!empty($freelancer['Bio'])): ?>
                     <p class="profile-bio"><?= htmlspecialchars($freelancer['Bio']) ?></p>
                 <?php endif; ?>
+
+                <div class="profile-contact-quick">
+                    <?php if (!empty($freelancer['Address'])): ?>
+                        <div class="quick-contact-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span><?= htmlspecialchars($freelancer['Address']) ?></span>
+                        </div>
+                    <?php endif; ?>
+                    <?php if (!empty($freelancer['PhoneNo'])): ?>
+                        <div class="quick-contact-item">
+                            <i class="fas fa-phone"></i>
+                            <span><?= htmlspecialchars($freelancer['PhoneNo']) ?></span>
+                        </div>
+                    <?php endif; ?>
+                </div>
 
                 <div class="profile-stats-row">
                     <div class="stat-box">

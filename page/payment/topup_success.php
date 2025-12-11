@@ -1,5 +1,12 @@
 <?php
 session_start();
+
+// Prevent caching of this page
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Cache-Control: post-check=0, pre-check=0', false);
+header('Pragma: no-cache');
+header('Expires: Sat, 26 Jul 1997 05:00:00 GMT');
+
 require_once '../config.php';
 require_once '../../vendor/autoload.php';
 
@@ -24,6 +31,13 @@ try {
     }
 
     $session_id = $_GET['session_id'];
+    
+    // Check if this payment was already processed (prevent back button reprocessing)
+    if (isset($_SESSION['processed_session_' . $session_id])) {
+        // Already processed, redirect to wallet
+        header('Location: wallet.php');
+        exit();
+    }
 
     // Retrieve the session from Stripe
     $session = \Stripe\Checkout\Session::retrieve($session_id);
@@ -84,6 +98,15 @@ try {
             // Commit transaction
             $conn->commit();
             $success = true;
+            
+            // Mark this session as processed to prevent back button reprocessing
+            $_SESSION['processed_session_' . $session_id] = true;
+            
+            // Clear checkout token
+            if (isset($_SESSION['checkout_token'])) {
+                unset($_SESSION['checkout_token']);
+                unset($_SESSION['checkout_time']);
+            }
 
             // Clear session variables
             unset($_SESSION['topup_amount']);
@@ -271,5 +294,28 @@ $_title = 'Payment Success - WorkSnyc Platform';
             <a href="wallet.php" class="btn-wallet">Try Again</a>
         <?php endif; ?>
     </div>
+    
+    <script>
+        // Prevent back navigation to payment processing page
+        if (window.history && window.history.pushState) {
+            // Replace current history state
+            window.history.pushState(null, null, window.location.href);
+            
+            // Listen for back button
+            window.onpopstate = function() {
+                // Push state again to prevent going back
+                window.history.pushState(null, null, window.location.href);
+                // Optionally redirect to wallet
+                window.location.href = 'wallet.php';
+            };
+        }
+        
+        // Disable browser cache for this page
+        window.onpageshow = function(event) {
+            if (event.persisted) {
+                window.location.reload();
+            }
+        };
+    </script>
 </body>
 </html>

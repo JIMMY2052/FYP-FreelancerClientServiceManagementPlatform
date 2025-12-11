@@ -20,6 +20,12 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 // Get form data
 $jobID = isset($_POST['job_id']) ? intval($_POST['job_id']) : 0;
+
+// Clear the access token to prevent resubmission via back button
+if (isset($_SESSION['apply_page_token_' . $jobID])) {
+    unset($_SESSION['apply_page_token_' . $jobID]);
+    unset($_SESSION['apply_page_time_' . $jobID]);
+}
 $freelancerID = $_SESSION['user_id'];
 $coverLetter = null;
 $proposedBudget = null;
@@ -188,6 +194,9 @@ try {
 
     // Set success message
     $_SESSION['success'] = 'Your application has been submitted successfully!';
+    
+    // Set flag to indicate successful submission (for back button protection)
+    $_SESSION['application_submitted_' . $jobID] = true;
 
     // Redirect to job details or applications page
     header("Location: job_details.php?job_id=$jobID");

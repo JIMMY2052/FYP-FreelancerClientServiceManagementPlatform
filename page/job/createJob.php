@@ -7,12 +7,11 @@ include '../../_head.php';
 
 <div class="form-container">
     <form action="job_questions.php" method="post" name="create-job-form" class="create-job-form">
-        <p>Job Title</p>
-        <input type="text" id="jobTitle" name="jobTitle" placeholder="Enter a job title" required>
+        <p>Project Title</p>
+        <input type="text" id="jobTitle" name="jobTitle" placeholder="Enter a project title" required>
 
-        <p>Job Description</p>
-        <input type="text" id="jobDescription" name="jobDescription" placeholder="Enter a description about the job" required>
-
+        <p>Project Description</p>
+        <input type="text" id="jobDescription" name="jobDescription" placeholder="Enter a description about the project" required>
         <p>Salary</p>
         <input type="number" id="jobSalary" name="jobSalary" placeholder="Enter salary" min="0" step="1" pattern="[0-9]+(\.[0-9]{1,2})?" required>
 
@@ -30,7 +29,7 @@ include '../../_head.php';
             <input type="date" id="postDate" name="postDate">
         </div>
 
-        <p>Deadline</p>
+        <p>Expiry Date</p>
         <input type="date" id="deliveryPeriod" name="deliveryPeriod" required>
 
         <div class="form-buttons">
