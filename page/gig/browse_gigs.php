@@ -827,8 +827,8 @@ document.addEventListener('DOMContentLoaded', function() {
     <!-- Search and Filter Form -->
     <form method="get" class="search-filters">
         <input type="text" name="q" value="<?php echo htmlspecialchars($searchQuery); ?>" placeholder="Search by gig title or freelancer name..." class="filter-input">
-        <input type="number" name="min_price" value="<?php echo ($minPrice !== null) ? htmlspecialchars($minPrice) : ''; ?>" placeholder="Min price (MYR)" class="filter-input" step="1">
-        <input type="number" name="max_price" value="<?php echo ($maxPrice !== null) ? htmlspecialchars($maxPrice) : ''; ?>" placeholder="Max price (MYR)" class="filter-input" step="1">
+        <input type="number" name="min_price" value="<?php echo ($minPrice !== null) ? htmlspecialchars($minPrice) : ''; ?>" placeholder="Min price (RM)" class="filter-input" step="0.01">
+        <input type="number" name="max_price" value="<?php echo ($maxPrice !== null) ? htmlspecialchars($maxPrice) : ''; ?>" placeholder="Max price (RM)" class="filter-input" step="0.01">
         <select name="sort" class="filter-select">
             <option value="newest" <?php if ($sortBy === 'newest') echo 'selected'; ?>>Newest</option>
             <option value="price_low" <?php if ($sortBy === 'price_low') echo 'selected'; ?>>Price: Low to High</option>
@@ -957,7 +957,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     <div class="gig-footer">
                         <div class="gig-price">
-                            MYR <?php echo number_format($gig['Price'], 0); ?>
+                            RM <?php echo number_format($gig['Price'], 0); ?>
                         </div>
                         <a href="/page/gig/gig_details.php?id=<?php echo intval($gig['GigID']); ?>" class="gig-view-btn">View Details</a>
                     </div>

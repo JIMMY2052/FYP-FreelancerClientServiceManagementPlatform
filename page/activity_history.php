@@ -210,6 +210,58 @@ usort($activities, function ($a, $b) {
             flex-wrap: wrap;
         }
 
+        .date-filter {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .date-filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .date-filter-group label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .date-filter-group input {
+            padding: 8px 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .date-filter-group input:focus {
+            outline: none;
+            border-color: #1ab394;
+        }
+
+        .job-application-filter {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            margin-bottom: 25px;
+        }
+
+        .filter-section-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 12px;
+        }
+
         .filter-btn {
             padding: 10px 20px;
             border: 2px solid #e9ecef;
@@ -458,6 +510,19 @@ usort($activities, function ($a, $b) {
             .activity-amount {
                 margin-top: 10px;
             }
+
+            .date-filter {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .date-filter-group {
+                width: 100%;
+            }
+
+            .date-filter-group input {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -501,6 +566,30 @@ usort($activities, function ($a, $b) {
                     <button class="filter-btn" onclick="filterActivities('wallet_transaction')">Wallet</button>
                 </div>
 
+                <?php if ($user_type === 'freelancer'): ?>
+                <div class="job-application-filter" id="jobApplicationFilter" style="display: none;">
+                    <div class="filter-section-title">Application Status:</div>
+                    <div class="filter-tabs">
+                        <button class="filter-btn filter-app-status active" onclick="filterApplicationStatus('all')" data-status="all">All</button>
+                        <button class="filter-btn filter-app-status" onclick="filterApplicationStatus('pending')" data-status="pending">Pending</button>
+                        <button class="filter-btn filter-app-status" onclick="filterApplicationStatus('accepted')" data-status="accepted">Accepted</button>
+                        <button class="filter-btn filter-app-status" onclick="filterApplicationStatus('rejected')" data-status="rejected">Rejected</button>
+                    </div>
+                </div>
+                <?php endif; ?>
+
+                <div class="date-filter">
+                    <div class="date-filter-group">
+                        <label for="from-date">From Date:</label>
+                        <input type="date" id="from-date" onchange="applyDateFilter()">
+                    </div>
+                    <div class="date-filter-group">
+                        <label for="to-date">To Date:</label>
+                        <input type="date" id="to-date" onchange="applyDateFilter()">
+                    </div>
+                    <button class="filter-btn" onclick="clearDateFilter()">Clear Date Filter</button>
+                </div>
+
                 <?php if (empty($activities)): ?>
                     <div class="empty-state">
                         <div class="empty-icon">📋</div>
@@ -510,7 +599,7 @@ usort($activities, function ($a, $b) {
                 <?php else: ?>
                     <div class="history-timeline">
                         <?php foreach ($activities as $activity): ?>
-                            <div class="timeline-item" data-type="<?= $activity['type'] ?>">
+                            <div class="timeline-item" data-type="<?= $activity['type'] ?>" data-date="<?= date('Y-m-d', strtotime($activity['date'])) ?>">
                                 <div class="timeline-icon <?= str_replace('_', '-', $activity['type']) ?>">
                                     <?php
                                     $icons = [
@@ -560,22 +649,91 @@ usort($activities, function ($a, $b) {
         </div>
 
         <script>
+            let currentTypeFilter = 'all';
+            let currentApplicationStatusFilter = 'all';
+
             function filterActivities(type) {
                 const items = document.querySelectorAll('.timeline-item');
-                const buttons = document.querySelectorAll('.filter-btn');
+                const buttons = document.querySelectorAll('.filter-btn:not(.filter-app-status)');
+                const jobAppFilter = document.getElementById('jobApplicationFilter');
 
                 // Update active button
                 buttons.forEach(btn => btn.classList.remove('active'));
                 event.target.classList.add('active');
 
-                // Filter items
+                // Show/hide job application status filter
+                if (type === 'job_application') {
+                    if (jobAppFilter) jobAppFilter.style.display = 'block';
+                } else {
+                    if (jobAppFilter) jobAppFilter.style.display = 'none';
+                    currentApplicationStatusFilter = 'all';
+                }
+
+                currentTypeFilter = type;
+                applyAllFilters();
+            }
+
+            function filterApplicationStatus(status) {
+                const buttons = document.querySelectorAll('.filter-app-status');
+                
+                // Update active button
+                buttons.forEach(btn => btn.classList.remove('active'));
+                event.target.classList.add('active');
+                
+                currentApplicationStatusFilter = status;
+                applyAllFilters();
+            }
+
+            function applyDateFilter() {
+                applyAllFilters();
+            }
+
+            function applyAllFilters() {
+                const items = document.querySelectorAll('.timeline-item');
+                const fromDate = document.getElementById('from-date').value;
+                const toDate = document.getElementById('to-date').value;
+
                 items.forEach(item => {
-                    if (type === 'all' || item.dataset.type === type) {
-                        item.style.display = 'block';
-                    } else {
-                        item.style.display = 'none';
+                    const itemType = item.dataset.type;
+                    let show = true;
+
+                    // Check type filter
+                    if (currentTypeFilter !== 'all' && itemType !== currentTypeFilter) {
+                        show = false;
                     }
+
+                    // Check application status filter (only if viewing job applications)
+                    if (show && currentTypeFilter === 'job_application' && currentApplicationStatusFilter !== 'all') {
+                        const statusElement = item.querySelector('.activity-status');
+                        const itemStatus = statusElement?.textContent.toLowerCase().trim();
+                        if (itemStatus !== currentApplicationStatusFilter) {
+                            show = false;
+                        }
+                    }
+
+                    // Check date filter
+                    if (show && (fromDate || toDate)) {
+                        const itemDateStr = item.dataset.date; // Format: YYYY-MM-DD
+                        
+                        if (itemDateStr) {
+                            if (fromDate && itemDateStr < fromDate) {
+                                show = false;
+                            }
+                            
+                            if (toDate && itemDateStr > toDate) {
+                                show = false;
+                            }
+                        }
+                    }
+
+                    item.style.display = show ? 'block' : 'none';
                 });
+            }
+
+            function clearDateFilter() {
+                document.getElementById('from-date').value = '';
+                document.getElementById('to-date').value = '';
+                applyAllFilters();
             }
         </script>
     </div>

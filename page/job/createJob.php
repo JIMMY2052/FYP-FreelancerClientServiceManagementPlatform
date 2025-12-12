@@ -12,8 +12,8 @@ include '../../_head.php';
 
         <p>Project Description</p>
         <input type="text" id="jobDescription" name="jobDescription" placeholder="Enter a description about the project" required>
-        <p>Salary</p>
-        <input type="number" id="jobSalary" name="jobSalary" placeholder="Enter salary" min="0" step="1" pattern="[0-9]+(\.[0-9]{1,2})?" required>
+        <p>Salary (RM)</p>
+        <input type="number" id="jobSalary" name="jobSalary" placeholder="Enter salary in RM" min="0" step="0.01" required>
 
         <p>Delivery Time (Days)</p>
         <input type="number" id="deliveryTime" name="deliveryTime" placeholder="Enter delivery time in days" min="1" step="1" required>

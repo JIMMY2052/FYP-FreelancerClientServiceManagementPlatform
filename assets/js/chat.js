@@ -516,6 +516,37 @@ class ChatApp {
                                         <a href="/page/agreement_view.php?agreement_id=${parsedContent.agreement_id}" class="btn-agreement-view">👁️ View Details</a>
                                     </div>
                                 `;
+                            } else if (parsedContent && parsedContent.type === 'application_rejection') {
+                                // Render application rejection form
+                                contentHTML += `
+                                    <div class="message-content rejection-message">
+                                        <div class="rejection-header">❌ Application Rejected</div>
+                                        <div class="rejection-details">
+                                            <p><strong>Job Title:</strong> ${this.escapeHtml(parsedContent.job_title || '')}</p>
+                                            <div class="rejection-reason-box">
+                                                <strong>Feedback from Client:</strong>
+                                                <p class="rejection-reason">${this.escapeHtml(parsedContent.rejection_reason || 'No feedback provided').replace(/\n/g, '<br>')}</p>
+                                            </div>
+                                            <p class="rejection-date"><em>Rejected: ${this.escapeHtml(parsedContent.rejected_at || '')}</em></p>
+                                        </div>
+                                    </div>
+                                `;
+                            } else if (parsedContent && parsedContent.type === 'application_accepted') {
+                                // Render application acceptance message
+                                contentHTML += `
+                                    <div class="message-content acceptance-message">
+                                        <div class="acceptance-header">✅ Application Accepted</div>
+                                        <div class="acceptance-details">
+                                            <div class="acceptance-item">
+                                                <span class="acceptance-label">Job:</span>
+                                                <span class="acceptance-value">${this.escapeHtml(parsedContent.job_title || '')}</span>
+                                            </div>
+                                            <div class="acceptance-meta">
+                                                <span class="acceptance-timestamp">Accepted: ${this.escapeHtml(parsedContent.accepted_at || '')}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
                             } else if (parsedContent && parsedContent.type === 'job_quote') {
                                 // Render job quote card
                                 contentHTML += `
@@ -596,6 +627,37 @@ class ChatApp {
                                             <button type="submit" class="btn-agreement-download">📥 Download PDF</button>
                                         </form>
                                         <a href="/page/agreement_view.php?agreement_id=${parsedContent.agreement_id}" class="btn-agreement-view">👁️ View Details</a>
+                                    </div>
+                                `;
+                            } else if (parsedContent && parsedContent.type === 'application_rejection') {
+                                // Render application rejection form
+                                contentHTML += `
+                                    <div class="message-content rejection-message">
+                                        <div class="rejection-header">❌ Application Rejected</div>
+                                        <div class="rejection-details">
+                                            <p><strong>Job Title:</strong> ${this.escapeHtml(parsedContent.job_title || '')}</p>
+                                            <div class="rejection-reason-box">
+                                                <strong>Feedback from Client:</strong>
+                                                <p class="rejection-reason">${this.escapeHtml(parsedContent.rejection_reason || 'No feedback provided').replace(/\n/g, '<br>')}</p>
+                                            </div>
+                                            <p class="rejection-date"><em>Rejected: ${this.escapeHtml(parsedContent.rejected_at || '')}</em></p>
+                                        </div>
+                                    </div>
+                                `;
+                            } else if (parsedContent && parsedContent.type === 'application_accepted') {
+                                // Render application acceptance message
+                                contentHTML += `
+                                    <div class="message-content acceptance-message">
+                                        <div class="acceptance-header">✅ Application Accepted</div>
+                                        <div class="acceptance-details">
+                                            <div class="acceptance-item">
+                                                <span class="acceptance-label">Job:</span>
+                                                <span class="acceptance-value">${this.escapeHtml(parsedContent.job_title || '')}</span>
+                                            </div>
+                                            <div class="acceptance-meta">
+                                                <span class="acceptance-timestamp">Accepted: ${this.escapeHtml(parsedContent.accepted_at || '')}</span>
+                                            </div>
+                                        </div>
                                     </div>
                                 `;
                             } else if (parsedContent && parsedContent.type === 'job_quote') {

@@ -29,8 +29,8 @@ include '../../_head.php';
         <input type="text" value="<?php echo htmlspecialchars($jobDescription); ?>" disabled>
         <input type="hidden" name="description" value="<?php echo htmlspecialchars($jobDescription); ?>">
 
-        <p>Salary</p>
-        <input type="text" value="<?php echo htmlspecialchars($jobSalary); ?>" disabled>
+        <p>Salary (RM)</p>
+        <input type="text" value="RM <?php echo htmlspecialchars(number_format($jobSalary, 2)); ?>" disabled>
         <input type="hidden" name="budget" value="<?php echo htmlspecialchars($jobSalary); ?>">
 
         <p>Delivery Time (Days)</p>

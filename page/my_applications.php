@@ -441,20 +441,34 @@ foreach ($applications as $app) {
 
     <!-- Reject Confirmation Modal -->
     <div id="rejectConfirmationModal" class="modal-overlay" style="display: none;">
-        <div class="modal-content">
+        <div class="modal-content" style="max-width: 600px;">
             <div class="modal-header">
                 <h2>Reject Application</h2>
                 <button class="modal-close" onclick="closeRejectConfirmation()">&times;</button>
             </div>
             <div class="modal-body">
-                <div style="text-align: center; padding: 20px 0;">
-                    <i class="fas fa-exclamation-circle" style="font-size: 4rem; color: #dc3545; margin-bottom: 20px;"></i>
-                    <p style="font-size: 1.1rem; color: #2c3e50; margin-bottom: 15px;">
+                <div style="padding: 20px 0;">
+                    <i class="fas fa-exclamation-circle" style="font-size: 3rem; color: #dc3545; margin-bottom: 20px; display: block; text-align: center;"></i>
+                    <p style="font-size: 1.1rem; color: #2c3e50; margin-bottom: 15px; text-align: center;">
                         Are you sure you want to reject this application?
                     </p>
-                    <p style="font-size: 0.9rem; color: #666;">
-                        This action cannot be undone. The freelancer will be notified of the rejection.
+                    <p style="font-size: 0.9rem; color: #666; text-align: center; margin-bottom: 25px;">
+                        The freelancer will be notified with your feedback.
                     </p>
+                    
+                    <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border-left: 4px solid #dc3545;">
+                        <label style="display: block; font-size: 0.9rem; font-weight: 700; color: #2c3e50; margin-bottom: 10px;">
+                            <i class="fas fa-comment-alt"></i> Rejection Reason (Optional)
+                        </label>
+                        <textarea id="rejectionReason" 
+                            placeholder="Share constructive feedback with the freelancer about why their application wasn't selected. This will help them improve their future applications."
+                            style="width: 100%; padding: 12px; border: 1.5px solid #e9ecef; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 0.9rem; resize: vertical; min-height: 120px; transition: all 0.3s ease;"
+                            onfocus="this.style.borderColor='rgb(159, 232, 112)'; this.style.boxShadow='0 0 0 3px rgba(159, 232, 112, 0.1)';"
+                            onblur="this.style.borderColor='#e9ecef'; this.style.boxShadow='none';"></textarea>
+                        <p style="font-size: 0.75rem; color: #999; margin-top: 8px;">
+                            <i class="fas fa-info-circle"></i> The freelancer will receive this message once you reject the application.
+                        </p>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -1316,6 +1330,19 @@ foreach ($applications as $app) {
     .btn-modal-secondary:hover {
         background: #ddd;
     }
+
+    /* Rejection Reason Textarea */
+    #rejectionReason {
+        font-family: 'Inter', sans-serif;
+    }
+
+    #rejectionReason::placeholder {
+        color: #bbb;
+    }
+
+    #rejectionReason:focus {
+        outline: none;
+    }
 </style>
 
 <script>
@@ -1342,6 +1369,7 @@ foreach ($applications as $app) {
             // Show reject confirmation modal
             pendingRejection = { applicationId, newStatus };
             document.getElementById('rejectConfirmationModal').style.display = 'flex';
+            document.getElementById('rejectionReason').value = ''; // Clear previous input
             return;
         }
 
@@ -1349,21 +1377,30 @@ foreach ($applications as $app) {
         processStatusUpdate(applicationId, newStatus);
     }
 
-    function processStatusUpdate(applicationId, newStatus) {
+    function processStatusUpdate(applicationId, newStatus, rejectionReason = null) {
+        // Build form data
+        const formData = new URLSearchParams();
+        formData.append('application_id', applicationId);
+        formData.append('status', newStatus);
+        
+        if (rejectionReason) {
+            formData.append('rejection_reason', rejectionReason);
+        }
+
         // Implement AJAX call to update application status
         fetch('update_application_status.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
-                body: `application_id=${applicationId}&status=${newStatus}`
+                body: formData.toString()
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
                     location.reload();
                 } else {
-                    alert('Error updating application status');
+                    alert('Error: ' + (data.message || 'Could not update application status'));
                 }
             })
             .catch(error => {
@@ -1380,8 +1417,9 @@ foreach ($applications as $app) {
     function confirmReject() {
         if (pendingRejection) {
             const { applicationId, newStatus } = pendingRejection;
+            const rejectionReason = document.getElementById('rejectionReason').value.trim();
             closeRejectConfirmation();
-            processStatusUpdate(applicationId, newStatus);
+            processStatusUpdate(applicationId, newStatus, rejectionReason);
         }
     }
 

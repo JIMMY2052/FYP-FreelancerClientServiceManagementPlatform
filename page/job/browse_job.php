@@ -148,7 +148,7 @@ $jobs = $result->fetch_all(MYSQLI_ASSOC);
 
                     <div class="project-header">
                         <h3 class="project-title"><?php echo htmlspecialchars($job['Title']); ?></h3>
-                        <span class="project-budget">$<?php echo number_format($job['Budget'], 2); ?></span>
+                        <span class="project-budget">RM <?php echo number_format($job['Budget'], 2); ?></span>
                     </div>
 
                     <p class="project-description"><?php echo nl2br(htmlspecialchars(mb_strimwidth($job['Description'], 0, 300, '...'))); ?></p>

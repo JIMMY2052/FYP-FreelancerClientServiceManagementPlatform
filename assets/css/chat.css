@@ -1369,6 +1369,127 @@
     background-color: #f0fde8;
 }
 
+/* Application Rejection Message Styling */
+.rejection-message {
+    padding: 16px;
+    border-radius: 8px;
+}
+
+.rejection-header {
+    font-size: 14px;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #ffffff;
+}
+
+.rejection-details {
+    margin-bottom: 12px;
+    font-size: 13px;
+    color: #ffffff;
+}
+
+.rejection-item {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.rejection-label {
+    font-weight: 600;
+    color: #ffffff;
+    min-width: 80px;
+}
+
+.rejection-value {
+    color: #ffffff;
+    flex: 1;
+    word-break: break-word;
+}
+
+.rejection-feedback-section {
+    margin-bottom: 16px;
+    padding-top: 12px;
+}
+
+.rejection-feedback-label {
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.rejection-feedback-content {
+    color: #ffffff;
+    font-style: italic;
+    padding: 8px 0;
+    white-space: pre-wrap;
+    word-break: break-word;
+    line-height: 1.5;
+}
+
+.rejection-meta {
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid #ffffff;
+}
+
+.rejection-timestamp {
+    color: #e5e7eb;
+    font-size: 12px;
+}
+
+/* Application Acceptance Message Styling */
+.acceptance-message {
+    padding: 16px;
+    border-radius: 8px;
+}
+
+.acceptance-header {
+    font-size: 14px;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #ffffff;
+}
+
+.acceptance-details {
+    margin-bottom: 12px;
+    font-size: 13px;
+    color: #ffffff;
+}
+
+.acceptance-item {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.acceptance-label {
+    font-weight: 600;
+    color: #ffffff;
+    min-width: 80px;
+}
+
+.acceptance-value {
+    color: #ffffff;
+    flex: 1;
+    word-break: break-word;
+}
+
+.acceptance-meta {
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid #ffffff;
+}
+
+.acceptance-timestamp {
+    color: #e5e7eb;
+    font-size: 12px;
+}
+
 /* File upload warning modal */
 /* File upload warning modal - center of screen */
 .file-warning-modal {

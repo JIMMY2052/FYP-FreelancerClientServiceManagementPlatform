@@ -424,15 +424,15 @@ include '../../_head.php';
                 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="price">Price (MYR) *</label>
-                        <input type="number" id="price" name="price" placeholder="e.g., 50" min="5" step="1" required>
+                        <label for="price">Price (RM) *</label>
+                        <input type="number" id="price" name="price" placeholder="e.g., 50" min="5" step="0.01" required>
                         <div class="form-description">Enter whole numbers only (minimum MYR 5)</div>
                     </div>
                 </div>
 
                 <div class="price-range-display">
                     <div class="price-range-text">
-                        Gig Price: <span id="displayPrice">MYR 0</span>
+                        Gig Price: <span id="displayPrice">RM 0</span>
                     </div>
                 </div>
             </div>
@@ -466,8 +466,8 @@ include '../../_head.php';
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="rushDeliveryPrice">Rush Delivery Price (MYR)</label>
-                        <input type="number" id="rushDeliveryPrice" name="rushDeliveryPrice" placeholder="e.g., 20" min="0" step="1">
+                        <label for="rushDeliveryPrice">Rush Delivery Price (RM)</label>
+                        <input type="number" id="rushDeliveryPrice" name="rushDeliveryPrice" placeholder="e.g., 20" min="0" step="0.01">
                         <div class="form-description">Additional cost for rush delivery (whole numbers only)</div>
                     </div>
                 </div>
@@ -493,8 +493,8 @@ include '../../_head.php';
                     </div>
 
                     <div class="form-group">
-                        <label for="additionalRevisionPrice">Price per Additional Revision (MYR)</label>
-                        <input type="number" id="additionalRevisionPrice" name="additionalRevisionPrice" placeholder="e.g., 10" min="0" step="1">
+                        <label for="additionalRevisionPrice">Price per Additional Revision (RM)</label>
+                        <input type="number" id="additionalRevisionPrice" name="additionalRevisionPrice" placeholder="e.g., 10" min="0" step="0.01">
                         <div class="form-description">Optional, whole numbers only</div>
                     </div>
                 </div>
@@ -507,7 +507,7 @@ include '../../_head.php';
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; font-size: 0.95rem;">
                         <div>
                             <strong>Gig Price:</strong><br>
-                            <span id="summaryPrice">MYR 0</span>
+                            <span id="summaryPrice">RM 0</span>
                         </div>
                         <div>
                             <strong>Delivery Time:</strong><br>
@@ -654,7 +654,7 @@ include '../../_head.php';
         const additionalRevisionPrice = parseInt(document.getElementById('additionalRevisionPrice').value, 10) || 0;
 
         // Update price display
-        document.getElementById('displayPrice').textContent = 'MYR ' + price;
+        document.getElementById('displayPrice').textContent = 'RM ' + price;
 
         // Update summary
         document.getElementById('summaryPrice').textContent = `MYR ${price}`;
