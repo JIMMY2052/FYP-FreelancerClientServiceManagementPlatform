@@ -241,21 +241,26 @@ elseif ($target_client_id && $user_type === 'freelancer') {
                     ?>
                 </div>
                 <div class="dropdown-menu">
-                    <a href="edit_profile.php" class="dropdown-item">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
-                        </svg>
-                        Edit Profile
-                    </a>
-                    <a href="logout.php" class="dropdown-item">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                            <polyline points="16 17 21 12 16 7"></polyline>
-                            <line x1="21" y1="12" x2="9" y2="12"></line>
-                        </svg>
-                        Logout
-                    </a>
-                </div>
+                            <?php if ($_SESSION['user_type'] === 'freelancer'): ?>
+                                <a href="/page/freelancer_profile.php" class="dropdown-item">View Profile</a>
+                                <a href="/page/ongoing_projects.php" class="dropdown-item">Ongoing Projects</a>
+                                <a href="/page/agreementListing.php" class="dropdown-item">Manage Agreement</a>
+                                <a href="/page/payment/wallet.php" class="dropdown-item">Wallet</a>
+                                <a href="/page/activity_history.php" class="dropdown-item">Activity History</a>
+                                <a href="/page/my_invoices.php" class="dropdown-item">My Invoices</a>
+                                <a href="/page/settings.php" class="dropdown-item">Settings</a>
+                            <?php else: ?>
+                                <a href="/page/client_profile.php" class="dropdown-item">View Profile</a>
+                                <a href="/page/ongoing_projects.php" class="dropdown-item">Ongoing Projects</a>
+                                <a href="/page/agreementListing.php" class="dropdown-item">Manage Agreement</a>
+                                <a href="/page/my_applications.php" class="dropdown-item">My Applications</a>
+                                <a href="/page/payment/wallet.php" class="dropdown-item">Wallet</a>
+                                <a href="/page/activity_history.php" class="dropdown-item">Activity History</a>
+                                <a href="/page/my_invoices.php" class="dropdown-item">My Invoices</a>
+                                <a href="/page/settings.php" class="dropdown-item">Settings</a>
+                            <?php endif; ?>
+                            <a href="/page/logout.php" class="dropdown-item">Logout</a>
+                        </div>
             </div>
         </div>
     </div>
