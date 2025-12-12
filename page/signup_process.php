@@ -114,9 +114,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     $stmt->close();
 
-    // For client signups, also ensure CompanyName is unique
-    if ($user_type === 'client' && $company_name !== '') {
-        $stmt = $conn->prepare("SELECT ClientID FROM client WHERE CompanyName = ?");
+    // For client signups, also ensure CompanyName is unique (case-insensitive)
+    if ($user_type === 'client') {
+        $stmt = $conn->prepare("SELECT ClientID FROM client WHERE LOWER(CompanyName) = LOWER(?)");
         $stmt->bind_param("s", $company_name);
         $stmt->execute();
         $result = $stmt->get_result();

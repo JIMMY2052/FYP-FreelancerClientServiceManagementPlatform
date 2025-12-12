@@ -122,7 +122,7 @@ if (isset($_SESSION['form_data'])) {
                         <?php
                         $isClient = $form_data['user_type'] === 'client';
                         ?>
-                        <input type="text" id="company_name" name="company_name" class="form-control<?php echo ($isClient && isset($fieldErrors['company_name'])) ? ' error' : ''; ?>" placeholder="Enter your company name" value="<?php echo htmlspecialchars($form_data['company_name']); ?>">
+                        <input type="text" id="company_name" name="company_name" class="form-control<?php echo ($isClient && isset($fieldErrors['company_name'])) ? ' error' : ''; ?>" placeholder="Enter your company name" value="<?php echo htmlspecialchars($form_data['company_name']); ?>" required>
                         <?php if ($isClient && isset($fieldErrors['company_name'])): ?>
                             <small class="field-error"><?php echo htmlspecialchars($fieldErrors['company_name']); ?></small>
                         <?php endif; ?>
