@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $user_type = $_POST['user_type'] ?? '';
     $status = $_POST['status'] ?? 'active';
 
-    if (!empty($user_id) && in_array($user_type, ['freelancer', 'client']) && in_array($status, ['active', 'inactive'])) {
+    if (!empty($user_id) && in_array($user_type, ['freelancer', 'client']) && in_array($status, ['active', 'inactive', 'blocked'])) {
         $table = $user_type === 'freelancer' ? 'freelancer' : 'client';
         $id_column = $user_type === 'freelancer' ? 'FreelancerID' : 'ClientID';
 
@@ -90,6 +90,20 @@ while ($row = $inactive_count_result->fetch_assoc()) {
         $inactive_user_counts['client'] += $row['count'];
     }
     $inactive_user_counts['all'] += $row['count'];
+}
+
+// Count blocked users
+$blocked_count_sql = "SELECT 'freelancer' as type, COUNT(*) as count FROM freelancer WHERE isDelete = 0 AND Status = 'blocked' UNION ALL SELECT 'client' as type, COUNT(*) as count FROM client WHERE isDelete = 0 AND Status = 'blocked'";
+$blocked_count_result = $conn->query($blocked_count_sql);
+$blocked_user_counts = ['all' => 0, 'freelancer' => 0, 'client' => 0];
+
+while ($row = $blocked_count_result->fetch_assoc()) {
+    if ($row['type'] === 'freelancer') {
+        $blocked_user_counts['freelancer'] += $row['count'];
+    } elseif ($row['type'] === 'client') {
+        $blocked_user_counts['client'] += $row['count'];
+    }
+    $blocked_user_counts['all'] += $row['count'];
 }
 
 // Build freelancer query
@@ -730,18 +744,21 @@ $conn->close();
                     <a href="?type=all&status=inactive<?php echo !empty($search_query) ? '&search=' . htmlspecialchars($search_query) : ''; ?>" style="padding: 12px 20px; text-decoration: none; font-size: 14px; font-weight: 600; color: <?php echo $filter_status === 'inactive' ? '#ef4444' : '#7f8c8d'; ?>; border-bottom: 3px solid <?php echo $filter_status === 'inactive' ? '#ef4444' : 'transparent'; ?>; transition: all 0.3s ease;">
                         Inactive <span style="background: #e9ecef; color: #2c3e50; border-radius: 12px; padding: 2px 8px; margin-left: 6px; font-size: 12px; font-weight: 700;"><?php echo $inactive_user_counts['all']; ?></span>
                     </a>
+                    <a href="?type=all&status=blocked<?php echo !empty($search_query) ? '&search=' . htmlspecialchars($search_query) : ''; ?>" style="padding: 12px 20px; text-decoration: none; font-size: 14px; font-weight: 600; color: <?php echo $filter_status === 'blocked' ? '#f59e0b' : '#7f8c8d'; ?>; border-bottom: 3px solid <?php echo $filter_status === 'blocked' ? '#f59e0b' : 'transparent'; ?>; transition: all 0.3s ease;">
+                        Blocked <span style="background: #e9ecef; color: #2c3e50; border-radius: 12px; padding: 2px 8px; margin-left: 6px; font-size: 12px; font-weight: 700;"><?php echo $blocked_user_counts['all']; ?></span>
+                    </a>
                 </div>
 
                 <!-- Filter Type Tabs -->
                 <div style="display: flex; gap: 15px; margin: 30px 0; border-bottom: 2px solid #e5e7eb; padding-bottom: 0;">
                     <a href="?type=all&status=<?php echo htmlspecialchars($filter_status); ?><?php echo !empty($search_query) ? '&search=' . htmlspecialchars($search_query) : ''; ?>" style="padding: 12px 20px; text-decoration: none; font-size: 14px; font-weight: 600; color: <?php echo $filter_type === 'all' ? '#22c55e' : '#7f8c8d'; ?>; border-bottom: 3px solid <?php echo $filter_type === 'all' ? '#22c55e' : 'transparent'; ?>; transition: all 0.3s ease;">
-                        All <span style="background: #e9ecef; color: #2c3e50; border-radius: 12px; padding: 2px 8px; margin-left: 6px; font-size: 12px; font-weight: 700;"><?php echo $filter_type === 'all' ? ($filter_status === 'active' ? $user_counts['all'] : $inactive_user_counts['all']) : 0; ?></span>
+                        All <span style="background: #e9ecef; color: #2c3e50; border-radius: 12px; padding: 2px 8px; margin-left: 6px; font-size: 12px; font-weight: 700;"><?php echo $filter_type === 'all' ? ($filter_status === 'active' ? $user_counts['all'] : ($filter_status === 'inactive' ? $inactive_user_counts['all'] : $blocked_user_counts['all'])) : 0; ?></span>
                     </a>
                     <a href="?type=freelancer&status=<?php echo htmlspecialchars($filter_status); ?><?php echo !empty($search_query) ? '&search=' . htmlspecialchars($search_query) : ''; ?>" style="padding: 12px 20px; text-decoration: none; font-size: 14px; font-weight: 600; color: <?php echo $filter_type === 'freelancer' ? '#22c55e' : '#7f8c8d'; ?>; border-bottom: 3px solid <?php echo $filter_type === 'freelancer' ? '#22c55e' : 'transparent'; ?>; transition: all 0.3s ease;">
-                        Freelancer <span style="background: #e9ecef; color: #2c3e50; border-radius: 12px; padding: 2px 8px; margin-left: 6px; font-size: 12px; font-weight: 700;"><?php echo $filter_status === 'active' ? $user_counts['freelancer'] : $inactive_user_counts['freelancer']; ?></span>
+                        Freelancer <span style="background: #e9ecef; color: #2c3e50; border-radius: 12px; padding: 2px 8px; margin-left: 6px; font-size: 12px; font-weight: 700;"><?php echo $filter_status === 'active' ? $user_counts['freelancer'] : ($filter_status === 'inactive' ? $inactive_user_counts['freelancer'] : $blocked_user_counts['freelancer']); ?></span>
                     </a>
                     <a href="?type=client&status=<?php echo htmlspecialchars($filter_status); ?><?php echo !empty($search_query) ? '&search=' . htmlspecialchars($search_query) : ''; ?>" style="padding: 12px 20px; text-decoration: none; font-size: 14px; font-weight: 600; color: <?php echo $filter_type === 'client' ? '#22c55e' : '#7f8c8d'; ?>; border-bottom: 3px solid <?php echo $filter_type === 'client' ? '#22c55e' : 'transparent'; ?>; transition: all 0.3s ease;">
-                        Client <span style="background: #e9ecef; color: #2c3e50; border-radius: 12px; padding: 2px 8px; margin-left: 6px; font-size: 12px; font-weight: 700;"><?php echo $filter_status === 'active' ? $user_counts['client'] : $inactive_user_counts['client']; ?></span>
+                        Client <span style="background: #e9ecef; color: #2c3e50; border-radius: 12px; padding: 2px 8px; margin-left: 6px; font-size: 12px; font-weight: 700;"><?php echo $filter_status === 'active' ? $user_counts['client'] : ($filter_status === 'inactive' ? $inactive_user_counts['client'] : $blocked_user_counts['client']); ?></span>
                     </a>
                 </div>
 
@@ -787,6 +804,7 @@ $conn->close();
                                                 <select name="status" class="form-control" onchange="this.form.submit();">
                                                     <option value="active" <?php echo ($user['Status'] ?? '') === 'active' ? 'selected' : ''; ?>>Active</option>
                                                     <option value="inactive" <?php echo ($user['Status'] ?? '') === 'inactive' ? 'selected' : ''; ?>>Inactive</option>
+                                                    <option value="blocked" <?php echo ($user['Status'] ?? '') === 'blocked' ? 'selected' : ''; ?>>Blocked</option>
                                                 </select>
                                             </form>
                                         </td>

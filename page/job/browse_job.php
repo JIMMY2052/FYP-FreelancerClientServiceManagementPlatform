@@ -99,7 +99,7 @@ $jobs = $result->fetch_all(MYSQLI_ASSOC);
     </div>
 
     <form method="get" class="search-filters" id="searchForm">
-        <input type="text" name="q" value="<?php echo htmlspecialchars($q); ?>" placeholder="Search by job title or client name..." class="filter-input">
+        <input type="text" name="q" value="<?php echo htmlspecialchars($q); ?>" placeholder="Search by project title or client name..." class="filter-input">
         <input type="number" name="min_budget" value="<?php echo ($min_budget !== null) ? htmlspecialchars($min_budget) : ''; ?>" placeholder="Min budget" class="filter-input">
         <input type="number" name="max_budget" value="<?php echo ($max_budget !== null) ? htmlspecialchars($max_budget) : ''; ?>" placeholder="Max budget" class="filter-input">
         <select name="sort" class="filter-select">

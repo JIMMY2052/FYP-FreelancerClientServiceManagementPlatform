@@ -56,6 +56,13 @@ function handleSendOTP()
 
     $stmt->close();
 
+    // Check if email was found in either table
+    if (!$user) {
+        $_SESSION['error'] = 'Email not registered. Please check if you have an account with this email address.';
+        header('Location: forgot_password.php?step=email');
+        exit();
+    }
+
     // Generate OTP
     $otp = generateOTP();
     $expiryTime = date('Y-m-d H:i:s', strtotime('+15 minutes'));

@@ -89,37 +89,37 @@ include '_head.php';
                 <div class="category-icon">🎨</div>
                 <h3 class="category-title">Graphic & Design</h3>
                 <p class="category-description">Logo design, branding, UI/UX projects</p>
-                <a href="/page/browse_projects.php?category=design" class="category-link">Browse Projects →</a>
+                <a href="/page/job/browse_job.php" class="category-link">Browse Projects →</a>
             </div>
             <div class="category-card">
                 <div class="category-icon">💻</div>
                 <h3 class="category-title">Programming & Tech</h3>
                 <p class="category-description">Web development, mobile apps, software</p>
-                <a href="/page/browse_projects.php?category=tech" class="category-link">Browse Projects →</a>
+                <a href="/page/job/browse_job.php" class="category-link">Browse Projects →</a>
             </div>
             <div class="category-card">
                 <div class="category-icon">📝</div>
                 <h3 class="category-title">Writing & Translation</h3>
                 <p class="category-description">Content writing, copywriting, translation</p>
-                <a href="/page/browse_projects.php?category=writing" class="category-link">Browse Projects →</a>
+                <a href="/page/job/browse_job.php" class="category-link">Browse Projects →</a>
             </div>
             <div class="category-card">
                 <div class="category-icon">📱</div>
                 <h3 class="category-title">Digital Marketing</h3>
                 <p class="category-description">SEO, social media, email marketing</p>
-                <a href="/page/browse_projects.php?category=marketing" class="category-link">Browse Projects →</a>
+                <a href="/page/job/browse_job.php" class="category-link">Browse Projects →</a>
             </div>
             <div class="category-card">
                 <div class="category-icon">📹</div>
                 <h3 class="category-title">Video & Animation</h3>
                 <p class="category-description">Video editing, animation, VFX projects</p>
-                <a href="/page/browse_projects.php?category=video" class="category-link">Browse Projects →</a>
+                <a href="/page/job/browse_job.php" class="category-link">Browse Projects →</a>
             </div>
             <div class="category-card">
                 <div class="category-icon">🎵</div>
                 <h3 class="category-title">Music & Audio</h3>
                 <p class="category-description">Music production, voice-over, audio editing</p>
-                <a href="/page/browse_projects.php?category=audio" class="category-link">Browse Projects →</a>
+                <a href="/page/job/browse_job.php" class="category-link">Browse Projects →</a>
             </div>
         </div>
     </div>

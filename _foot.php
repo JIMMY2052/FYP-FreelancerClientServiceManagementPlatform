@@ -31,7 +31,7 @@
                     <h4 class="footer-heading">Quick Links</h4>
                     <ul class="footer-links">
                         <li><a href="/index.php">Home</a></li>
-                        <li><a href="/job/create/createJob.php">Post a Job</a></li>
+                        <li><a href="/job/create/createJob.php">Post a Project</a></li>
                         <li><a href="/page/signup.php">Become a Freelancer</a></li>
                         <li><a href="#">Browse Services</a></li>
                     </ul>

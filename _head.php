@@ -175,11 +175,24 @@ require_once __DIR__ . '/page/config.php';
                         <div class="dropdown-menu">
                             <?php if ($_SESSION['user_type'] === 'freelancer'): ?>
                                 <a href="/page/freelancer_profile.php" class="dropdown-item">View Profile</a>
+                                <a href="/page/ongoing_projects.php" class="dropdown-item">Ongoing Projects</a>
+                                <a href="/page/agreementListing.php" class="dropdown-item">Manage Agreement</a>
+                                <a href="/page/payment/wallet.php" class="dropdown-item">Wallet</a>
+                                <a href="/page/messages.php" class="dropdown-item">Messages</a>
+                                <a href="/page/activity_history.php" class="dropdown-item">Activity History</a>
+                                <a href="/page/my_invoices.php" class="dropdown-item">My Invoices</a>
+                                <a href="/page/settings.php" class="dropdown-item">Settings</a>
                             <?php else: ?>
                                 <a href="/page/client_profile.php" class="dropdown-item">View Profile</a>
+                                <a href="/page/ongoing_projects.php" class="dropdown-item">Ongoing Projects</a>
+                                <a href="/page/agreementListing.php" class="dropdown-item">Manage Agreement</a>
+                                <a href="/page/my_applications.php" class="dropdown-item">My Applications</a>
+                                <a href="/page/payment/wallet.php" class="dropdown-item">Wallet</a>
+                                <a href="/page/messages.php" class="dropdown-item">Messages</a>
+                                <a href="/page/activity_history.php" class="dropdown-item">Activity History</a>
+                                <a href="/page/my_invoices.php" class="dropdown-item">My Invoices</a>
+                                <a href="/page/settings.php" class="dropdown-item">Settings</a>
                             <?php endif; ?>
-                            <a href="/page/agreementListing.php" class="dropdown-item">Manage Agreement</a>
-                            <a href="/page/payment/wallet.php" class="dropdown-item">Wallet</a>
                             <a href="/page/logout.php" class="dropdown-item">Logout</a>
                         </div>
                     </div>
